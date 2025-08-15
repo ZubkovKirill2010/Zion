@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using Zion.Text;
 
 namespace Zion
 {
@@ -160,6 +161,42 @@ namespace Zion
             }
 
             return String.Length - 1;
+        }
+
+        public static int GetEndOfBracketsExpression(string String, int Start = 0)
+        {
+            ArgumentNullException.ThrowIfNullOrEmpty(String);
+            if (!Start.IsClamp(0, String.Length - 1))
+            {
+                throw new ArgumentOutOfRangeException($"Start(={Start}) < 0 or >= String.Length(={String.Length})");
+            }
+
+            Dictionary<char, char> Brackets = Text.Text.Brackets;
+            Stack<char> Stack = new Stack<char>(String.Length / 2 + 1);
+            char Current = '\0';
+
+            for (int i = Start; i < String.Length; i++)
+            {
+                Current = String[i];
+
+                if (Brackets.TryGetValue(Current, out char Bracket))
+                {
+                    Stack.Push(Bracket);
+                }
+                else if (Current.IsClosingBracket(out char ClosingBracket))
+                {
+                    if (Stack.Count <= 0 || ClosingBracket != Stack.Pop())
+                    {
+                        throw new Exception("String has an incorrect bracket arrangement");
+                    }
+                }
+
+                if (Stack.Count == 0)
+                {
+                    return i;
+                }
+            }
+            return -1;
         }
     }
 }

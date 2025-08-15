@@ -2,8 +2,9 @@
 
 namespace Zion
 {
-    public static class Parser
+    public static partial class Parser
     {
+        #region BaseTypes
         public static int ToInt32(this string String)
         {
             return int.Parse(Normalize(String));
@@ -54,6 +55,41 @@ namespace Zion
 
             Value = false;
             return false;
+        }
+
+        #endregion
+
+        #region ZionTypes
+        //public static Vector2 ToVector2(this string String)
+        //{
+
+        //}
+        //public static Vector2Int ToVector2Int(this string String)
+        //{
+
+        //}
+        //public static Vector3 ToVector3(this string String)
+        //{
+
+        //}
+        //public static Vector3Int ToVector3Int(this string String)
+        //{
+
+        //}
+
+        //public static Color ToColor(this string String)
+        //{
+
+        //}
+        #endregion
+
+        private static bool IsDigit(char Char)
+        {
+            return char.IsDigit(Char) || Char == '_';
+        }
+        private static bool IsDigitOrComma(char Char)
+        {
+            return char.IsDigit(Char) || Char == '_' || Char == '-' || Char == ',';
         }
 
 

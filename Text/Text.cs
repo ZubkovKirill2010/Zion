@@ -2,7 +2,7 @@
 {
     public static partial class Text
     {
-        private static readonly Dictionary<char, char> Brackets = new Dictionary<char, char>()
+        internal static readonly Dictionary<char, char> Brackets = new Dictionary<char, char>()
         {
             { '(', ')' },
             { '[', ']' },
@@ -286,7 +286,7 @@
         }
 
 
-        private static bool IsClosingBracket(this char Char, out char Bracket)
+        internal static bool IsClosingBracket(this char Char, out char Bracket)
         {
             foreach (KeyValuePair<char, char> Pair in Brackets)
             {

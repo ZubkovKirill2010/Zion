@@ -1,4 +1,6 @@
-﻿namespace Zion.MathExpressions
+﻿using System.Runtime.Intrinsics.X86;
+
+namespace Zion.MathExpressions
 {
     public struct Fraction : IExpression, IBinaryObject<Fraction>
     {
@@ -22,33 +24,6 @@
         {
             this.Divisible = Divisible;
             this.Divider = Divider;
-        }
-
-        public override string ToString()
-        {
-            return $"{Divisible}/{Divider}";
-        }
-
-
-        public Fraction GetValue()
-        {
-            return this;
-        }
-
-
-        public double ToDouble()
-        {
-            return Divisible / Divider;
-        }
-
-        public Fraction Reverse()
-        {
-            return new Fraction(Divider, Divisible);
-        }
-
-        public static explicit operator double(Fraction Fraction)
-        {
-            return Fraction.ToDouble();
         }
 
         public static Fraction operator +(Fraction A, Fraction B)
@@ -110,6 +85,40 @@
         public static Fraction operator /(Fraction A, Fraction B)
         {
             return new Fraction(A.Divisible * B.Divider, A.Divider * B.Divisible);
+        }
+
+        public static explicit operator double(Fraction Fraction)
+            => Fraction.ToDouble();
+
+        public static explicit operator float(Fraction Fraction)
+            => Fraction.ToFloat();
+
+        public static explicit operator int(Fraction Fraction)
+            => Fraction.ToInt();
+
+        public static explicit operator decimal(Fraction Fraction)
+            => Fraction.ToDecimal();
+
+
+        public override string ToString()
+        {
+            return $"{Divisible}/{Divider}";
+        }
+
+        public Fraction GetValue()
+        {
+            return this;
+        }
+
+
+        public double ToDouble() => Divisible / Divider;
+        public float ToFloat() => (float)ToDouble();
+        public decimal ToDecimal() => (decimal)Divisible / (decimal)Divider;
+        public int ToInt(RoundMode Mode = RoundMode.Round) => ToDouble().RoundToInt(Mode);
+
+        public Fraction Reverse()
+        {
+            return new Fraction(Divider, Divisible);
         }
 
 
