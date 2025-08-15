@@ -1,6 +1,4 @@
-﻿using System.Runtime.Intrinsics.X86;
-
-namespace Zion.MathExpressions
+﻿namespace Zion.MathExpressions
 {
     public struct Fraction : IExpression, IBinaryObject<Fraction>
     {

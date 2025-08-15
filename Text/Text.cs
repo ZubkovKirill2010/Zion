@@ -205,6 +205,14 @@
             return Count;
         }
 
+        public static void SkipSpaces(this string String, ref int Index)
+        {
+            Skip(String, ref Index, char.IsWhiteSpace);
+        }
+        public static int SkipSpaces(this string String, int Start)
+        {
+            return Skip(String, Start, char.IsWhiteSpace);
+        }
 
         public static void Skip(this string String, ref int Index, Predicate<char> Condition)
         {
@@ -215,23 +223,23 @@
                 Index++;
             }
         }
-        public static int Skip(this string String, Predicate<char> Condition)
-        {
-            ArgumentNullException.ThrowIfNull(String);
-
-            int Index = 0;
-            while (Index < String.Length && Condition(String[Index]))
-            {
-                Index++;
-            }
-            return Index;
-        }
         public static int Skip(this string String, int Start, Predicate<char> Condition)
         {
             ArgumentNullException.ThrowIfNull(String);
 
             int Index = Start;
             while (Index < String.Length && Condition(String[Index]))
+            {
+                Index++;
+            }
+            return Index;
+        }
+        public static int Skip(this string String, int Start, params IEnumerable<char> SkipChars)
+        {
+            ArgumentNullException.ThrowIfNull(String);
+
+            int Index = Start;
+            while (Index < String.Length && SkipChars.Contains(String[Index]))
             {
                 Index++;
             }
