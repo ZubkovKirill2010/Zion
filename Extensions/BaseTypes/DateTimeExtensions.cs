@@ -20,6 +20,13 @@
             new MonthInfo("December", 31)
         ];
 
+        /// <summary>
+        /// Gets month information by index.
+        /// </summary>
+        /// <param name="Index">The month index (1-12).</param>
+        /// <param name="LeapYear">Whether to account for leap year for February.</param>
+        /// <returns>Month information including name and day count.</returns>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown when index is out of range.</exception>
         public static MonthInfo GetMonthInfo(int Index, bool LeapYear = false)
         {
             if (!Index.IsClamp(1, 12))
@@ -35,11 +42,21 @@
             return _Months[Index - 1];
         }
 
+        /// <summary>
+        /// Gets month information from a DateTime object.
+        /// </summary>
+        /// <param name="Date">The DateTime object to examine.</param>
+        /// <param name="LeapYear">Whether to account for leap year for February.</param>
+        /// <returns>Month information including name and day count.</returns>
         public static MonthInfo GetMonthInfo(this DateTime Date, bool LeapYear = false)
         {
             return GetMonthInfo(Date.Month, LeapYear);
         }
 
+        /// <summary>
+        /// Gets the current date as a DateOnly object.
+        /// </summary>
+        /// <returns>Current date in DateOnly format.</returns>
         public static DateOnly GetNow()
         {
             DateTime Now = DateTime.Today;

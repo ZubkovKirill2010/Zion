@@ -2,6 +2,17 @@
 {
     public static class BinaryReaderExtensions
     {
+        public static T Read<T>(this BinaryReader Reader) where T : IBinaryObject<T>
+        {
+            return T.Read(Reader);
+        }
+
+        public static T Read<T, I>(this BinaryReader Reader, Func<BinaryReader, I> Read) where T : IBinaryGeneric<T, I>
+        {
+            return T.Read(Reader, Read);
+        }
+
+
         public static T[] ReadArray<T>(this BinaryReader Reader) where T : IBinaryObject<T>
         {
             return ReadArray(Reader, T.Read, Reader.ReadInt32());
@@ -36,17 +47,6 @@
                 Result.Add(Read(Reader));
             }
             return Result;
-        }
-
-
-        public static T Read<T>(this BinaryReader Reader) where T : IBinaryObject<T>
-        {
-            return T.Read(Reader);
-        }
-
-        public static T Read<T, I>(this BinaryReader Reader, Func<BinaryReader, I> Read) where T : IBinaryGeneric<T, I>
-        {
-            return T.Read(Reader, Read);
         }
 
 

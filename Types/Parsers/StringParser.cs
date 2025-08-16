@@ -171,7 +171,7 @@ namespace Zion
                 throw new ArgumentOutOfRangeException($"Start(={Start}) < 0 or >= String.Length(={String.Length})");
             }
 
-            Dictionary<char, char> Brackets = Text.Text.Brackets;
+            IDictionary<char, char> Brackets = Text.Text.Brackets;
             Stack<char> Stack = new Stack<char>(String.Length / 2 + 1);
             char Current = '\0';
 

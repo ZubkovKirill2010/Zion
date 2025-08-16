@@ -1,13 +1,18 @@
-﻿namespace Zion.Text
+﻿using System.Collections.ObjectModel;
+
+namespace Zion.Text
 {
     public static partial class Text
     {
-        internal static readonly Dictionary<char, char> Brackets = new Dictionary<char, char>()
-        {
-            { '(', ')' },
-            { '[', ']' },
-            { '{', '}' }
-        };
+        public static readonly ReadOnlyDictionary<char, char> Brackets = new ReadOnlyDictionary<char, char>
+        (
+            new Dictionary<char, char>()
+            {
+                { '(', ')' },
+                { '[', ']' },
+                { '{', '}' }
+            }
+        );
 
 
         #region Edit
@@ -159,7 +164,7 @@
         {
             return CheckBrackets(String, Brackets);
         }
-        public static bool CheckBrackets(this string String, Dictionary<char, char> Brackets)
+        public static bool CheckBrackets(this string String, IDictionary<char, char> Brackets)
         {
             if (string.IsNullOrEmpty(String) || Brackets.Count == 0)
             {

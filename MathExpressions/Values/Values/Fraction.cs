@@ -2,9 +2,9 @@
 {
     public struct Fraction : IExpression, IBinaryObject<Fraction>
     {
-        public static readonly Fraction _Zero = new Fraction(0);
-        public static readonly Fraction _One = new Fraction(1);
-        public static readonly Fraction _Pi = new Fraction(Math.PI);
+        public static readonly Fraction Zero = new Fraction(0);
+        public static readonly Fraction One = new Fraction(1);
+        public static readonly Fraction Pi = new Fraction(Math.PI);
 
         public double Divisible, Divider;
 
@@ -78,6 +78,11 @@
 
         public static Fraction operator *(Fraction A, Fraction B)
         {
+            if (A.Divisible == B.Divider && A.Divider == B.Divisible)
+            {
+                return One;
+            }
+
             return new Fraction(A.Divisible * B.Divisible, A.Divider * B.Divider);
         }
         public static Fraction operator /(Fraction A, Fraction B)

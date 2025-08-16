@@ -2,6 +2,6 @@
 {
     public interface IExpression
     {
-        abstract Fraction GetValue();
+        public abstract Fraction GetValue();
     }
 }
