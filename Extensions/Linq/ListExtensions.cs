@@ -51,6 +51,27 @@
         }
 
         /// <summary>
+        /// Creates a new array with elements in reverse order compared to the original list.
+        /// </summary>
+        /// <typeparam name="T">The type of elements in the list.</typeparam>
+        /// <param name="List">The source list.</param>
+        /// <returns>A new array containing elements in reversed order.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="List"/> is null.</exception>
+        public static T[] ToReversedArray<T>(this IList<T> List)
+        {
+            T[] Result = new T[List.Count];
+
+            int Start = 0;
+            int End = List.Count - 1;
+
+            while (End >= 0)
+            {
+                Result[Start++] = List[End--];
+            }
+            return Result;
+        }
+
+        /// <summary>
         /// Removes elements at the specified indexes from the list efficiently (preserves order).
         /// </summary>
         /// <typeparam name="T">The type of elements in the list.</typeparam>
@@ -103,27 +124,6 @@
             }
 
             List.RemoveRange(WritePosition, List.Count - WritePosition);
-        }
-
-        /// <summary>
-        /// Creates a new array with elements in reverse order compared to the original list.
-        /// </summary>
-        /// <typeparam name="T">The type of elements in the list.</typeparam>
-        /// <param name="List">The source list.</param>
-        /// <returns>A new array containing elements in reversed order.</returns>
-        /// <exception cref="ArgumentNullException">Thrown if <paramref name="List"/> is null.</exception>
-        public static T[] ToReversedArray<T>(this IList<T> List)
-        {
-            T[] Result = new T[List.Count];
-
-            int Start = 0;
-            int End = List.Count - 1;
-
-            while (End >= 0)
-            {
-                Result[Start++] = List[End--];
-            }
-            return Result;
         }
     }
 }

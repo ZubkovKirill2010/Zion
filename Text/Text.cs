@@ -18,10 +18,7 @@ namespace Zion.Text
         #region Edit
         public static string RemoveChars(this string? String, Predicate<char> Condition)
         {
-            if (string.IsNullOrEmpty(String))
-            {
-                return string.Empty;
-            }
+            ArgumentNullException.ThrowIfNullOrEmpty(String);
 
             List<char> Result = new List<char>(String.Length);
 
@@ -76,10 +73,7 @@ namespace Zion.Text
 
         public static string Capitalize(this string String)
         {
-            if (string.IsNullOrEmpty(String))
-            {
-                return string.Empty;
-            }
+            ArgumentNullException.ThrowIfNullOrEmpty(String);
 
             char[] Result = String.ToCharArray();
 
@@ -90,6 +84,46 @@ namespace Zion.Text
             }
 
             return new string(Result);
+        }
+
+        public static string[] SplitIntoLines(this string String)
+        {
+            ArgumentNullException.ThrowIfNull(String);
+            if (String.Length == 0)
+            {
+                return Array.Empty<string>();
+            }
+
+            return String.Split(Environment.NewLine, StringSplitOptions.None).TrimEmptyLines();
+        }
+
+        public static string[] TrimEmptyLines(this string[] StringArray)
+        {
+            ArgumentNullException.ThrowIfNull(StringArray);
+            if (StringArray.Length == 0)
+            {
+                return StringArray;
+            }
+
+            int Start = 0;
+            int End = StringArray.Length - 1;
+
+            while (Start <= End && string.IsNullOrWhiteSpace(StringArray[Start]))
+            {
+                Start++;
+            }
+
+            while (End >= Start && string.IsNullOrWhiteSpace(StringArray[End]))
+            {
+                End--;
+            }
+
+            if (Start > End)
+            {
+                return Array.Empty<string>();
+            }
+
+            return StringArray[Start..(End + 1)];
         }
 
         #endregion
@@ -103,7 +137,7 @@ namespace Zion.Text
             {
                 throw new ArgumentException($"Index(={Index}) >= String.Length(={String.Length})");
             }
-            if (String.Length - Index >= Target.Length)
+            if (String.Length - Index < Target.Length)
             {
                 return false;
             }
@@ -194,6 +228,25 @@ namespace Zion.Text
         }
 
         #endregion
+
+        public static int GetLevel(this string String)
+        {
+            int Level = 0;
+
+            foreach (char Char in String)
+            {
+                if (Char == '\t')
+                {
+                    Level++;
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            return Level;
+        }
 
 
         public static int CountOf(this string String, char Target)
