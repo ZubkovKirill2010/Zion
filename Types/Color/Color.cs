@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using Zion.Text;
 using Zion.Vectors;
 
 namespace Zion

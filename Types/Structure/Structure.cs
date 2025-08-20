@@ -1,6 +1,4 @@
-﻿using Zion.Text;
-
-namespace Zion
+﻿namespace Zion
 {
     public static class Structure
     {

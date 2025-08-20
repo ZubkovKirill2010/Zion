@@ -1,8 +1,9 @@
 ﻿using System.Collections.ObjectModel;
+using System.Text;
 
-namespace Zion.Text
+namespace Zion
 {
-    public static partial class Text
+    public static class Text
     {
         public static readonly ReadOnlyDictionary<char, char> Brackets = new ReadOnlyDictionary<char, char>
         (
@@ -126,6 +127,89 @@ namespace Zion.Text
             return StringArray[Start..(End + 1)];
         }
 
+        public static string Centering(this string String, int TotalLength, char PaddingChar = ' ')
+        {
+            ArgumentNullException.ThrowIfNull(String);
+            if (TotalLength <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(TotalLength), $"TotalLength(={TotalLength}) <= 0");
+            }
+
+            if (String.Length >= TotalLength)
+            {
+                return String;
+            }
+
+            int LeftPadding = TotalLength / String.Length;
+            int RightPadding = TotalLength - LeftPadding - String.Length;
+
+            return new StringBuilder(TotalLength)
+                .Append(PaddingChar, LeftPadding)
+                .Append(String)
+                .Append(PaddingChar, RightPadding)
+                .ToString();
+        }
+
+        public static string Truncate(this string String, int TotalLength)
+        {
+            ArgumentNullException.ThrowIfNull(String);
+            if (TotalLength <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(TotalLength), $"TotalLength(={TotalLength}) <= 0");
+            }
+
+            return String.Length <= TotalLength ? String : String[..(TotalLength - 3)] + "...";
+        }
+
+        #endregion
+
+        #region Prefix & Suffix
+
+        public static string RemovePrefix(this string String, string Prefix)
+        {
+            ArgumentNullException.ThrowIfNull(String);
+            ArgumentNullException.ThrowIfNull(Prefix);
+
+            if (String.Length == 0 || String.Length < Prefix.Length)
+            {
+                return String;
+            }
+
+            return String.StartsWith(Prefix) ? String[Prefix.Length..] : String;
+        }
+        public static string RemoveSuffix(this string String, string Suffix)
+        {
+            ArgumentNullException.ThrowIfNull(String);
+            ArgumentNullException.ThrowIfNull(Suffix);
+
+            return String.EndsWith(Suffix) ? String[Suffix.Length..] : String;
+        }
+
+        public static string EnsurePrefix(this string String, string Prefix)
+        {
+            ArgumentNullException.ThrowIfNull(String);
+            ArgumentNullException.ThrowIfNull(Prefix);
+
+            if (Prefix.Length == 0)
+            {
+                return String;
+            }
+
+            return String.StartsWith(Prefix) ? String : Prefix + String;
+        }
+        public static string EnsureSuffix(this string String, string Suffix)
+        {
+            ArgumentNullException.ThrowIfNull(String);
+            ArgumentNullException.ThrowIfNull(Suffix);
+
+            if (Suffix.Length == 0)
+            {
+                return String;
+            }
+
+            return String.EndsWith(Suffix) ? String : String + Suffix;
+        }
+
         #endregion
 
         #region Predicate
@@ -229,6 +313,174 @@ namespace Zion.Text
 
         #endregion
 
+        #region Programming
+        public static bool IsIdentifier(this string String)
+        {
+            ArgumentNullException.ThrowIfNull(String);
+
+            if (String.Length == 0 ||
+                char.IsNumber(String[0])
+               )
+            {
+                return false;
+            }
+
+            for (int i = 1; i < String.Length; i++)
+            {
+                char Char = String[i];
+
+                if (!(Char.IsEnglish() || Char == '_' || char.IsDigit(Char)))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public static string[] SplitIdentifier(this string String)
+        {
+            if (string.IsNullOrEmpty(String))
+            {
+                return Array.Empty<string>();
+            }
+
+            List<string> Result = new List<string>();
+            StringBuilder CurrentWord = new StringBuilder();
+            bool? LastWasUpper = null;
+            bool LastWasDigit = false;
+
+
+            void AddWord()
+            {
+                if (CurrentWord.Length > 0)
+                {
+                    Result.Add(CurrentWord.ToString());
+                    CurrentWord.Clear();
+                }
+            }
+
+
+            for (int i = 0; i < String.Length; i++)
+            {
+                char Char = String[i];
+
+                if (Char == '_' || Char == ' ' || Char == '-')
+                {
+                    AddWord();
+                    LastWasUpper = null;
+                    LastWasDigit = false;
+                    continue;
+                }
+
+                if (char.IsDigit(Char))
+                {
+                    if (!LastWasDigit && CurrentWord.Length > 0)
+                    {
+                        AddWord();
+                    }
+                    CurrentWord.Append(Char);
+                    LastWasDigit = true;
+                    LastWasUpper = false;
+                    continue;
+                }
+
+                if (char.IsUpper(Char))
+                {
+                    if (CurrentWord.Length > 0 && LastWasUpper == false)
+                    {
+                        AddWord();
+                    }
+                    else if (CurrentWord.Length > 0 && LastWasUpper == true &&
+                            i < String.Length - 1 && char.IsLower(String[i + 1]))
+                    {
+                        AddWord();
+                    }
+
+                    CurrentWord.Append(char.ToLower(Char));
+                    LastWasUpper = true;
+                    LastWasDigit = false;
+                }
+                else
+                {
+                    CurrentWord.Append(Char);
+                    LastWasUpper = false;
+                    LastWasDigit = false;
+                }
+            }
+
+            AddWord();
+
+            return Result.ToArray();
+        }
+
+
+        public static string ToPascalCase(this string[] StringArray, bool Underlining = false)
+        {
+            ArgumentNullException.ThrowIfNull(StringArray);
+            if (StringArray.Length == 0)
+            {
+                return string.Empty;
+            }
+
+            StringBuilder Builder = new StringBuilder(StringArray.Summarize(String => String.Length) + (Underlining ? 1 : 0));
+
+            foreach (string Word in StringArray)
+            {
+                Builder.Append(Word.Capitalize());
+            }
+
+            string Result = Builder.ToString();
+            return Underlining ? '_' + Result : Result;
+        }
+
+        public static string ToCamelCase(this string[] StringArray, bool Underlining = false)
+        {
+            ArgumentNullException.ThrowIfNull(StringArray);
+            if (StringArray.Length == 0)
+            {
+                return string.Empty;
+            }
+
+            StringBuilder Builder = new StringBuilder(StringArray.Summarize(String => String.Length) + (Underlining ? 1 : 0));
+
+            Builder.Append(StringArray[0].ToLower());
+            for (int i = 1; i < StringArray.Length; i++)
+            {
+                Builder.Append(StringArray[i].Capitalize());
+            }
+
+            string Result = Builder.ToString();
+            return Underlining ? '_' + Result : Result;
+        }
+
+        public static string ToSnakeCase(this string[] StringArray, bool Underlining = false)
+        {
+            ArgumentNullException.ThrowIfNull(StringArray);
+            if (StringArray.Length == 0)
+            {
+                return string.Empty;
+            }
+
+            string Result = string.Join('_', StringArray.ConvertAll(String => String.ToLower()));
+            return Underlining ? '_' + Result : Result;
+        }
+
+        public static string ToKebabCase(this string[] StringArray, bool Underlining = false)
+        {
+            ArgumentNullException.ThrowIfNull(StringArray);
+            if (StringArray.Length == 0)
+            {
+                return string.Empty;
+            }
+
+            string Result = string.Join('-', StringArray.ConvertAll(String => String.ToLower()));
+            return Underlining ? '_' + Result : Result;
+        }
+
+        #endregion
+
+        #region Indexes
         public static int GetLevel(this string String)
         {
             int Level = 0;
@@ -248,7 +500,6 @@ namespace Zion.Text
             return Level;
         }
 
-
         public static int CountOf(this string String, char Target)
         {
             int Count = 0;
@@ -262,6 +513,10 @@ namespace Zion.Text
             }
             return Count;
         }
+
+        #endregion
+
+        #region Skipping
 
         public static void SkipSpaces(this string String, ref int Index)
         {
@@ -304,6 +559,8 @@ namespace Zion.Text
             return Index;
         }
 
+        #endregion
+
         public static string GetExpression(this string String, int Start, out int End)
         {
             int OpenBrackets = 0;
@@ -334,6 +591,12 @@ namespace Zion.Text
         {
             if (Lines is null || Lines.Count == 0)
             {
+                yield break;
+            }
+
+            if (Lines.Count == 1)
+            {
+                foreach (char Char in Lines.First()) { yield return Char; }
                 yield break;
             }
 

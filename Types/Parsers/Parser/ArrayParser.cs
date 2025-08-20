@@ -1,5 +1,4 @@
 ﻿using Zion.MathExpressions;
-using Zion.Text;
 
 namespace Zion
 {
@@ -118,7 +117,7 @@ namespace Zion
                 }
 
                 Index = String.Skip(',');
-            }   
+            }
 
             return Result.ToArray();
         }

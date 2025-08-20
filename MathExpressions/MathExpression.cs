@@ -9,7 +9,7 @@
 
         public static bool TrySolve(string String, out Fraction Value)
         {
-            if (new MathExpressionParser(String).TryParse(out var Result))
+            if (new MathExpressionParser(String).TryParse(out IExpression? Result))
             {
                 Value = Result.GetValue();
                 return true;

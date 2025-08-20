@@ -1,6 +1,4 @@
-﻿using Zion.Text;
-
-namespace Zion
+﻿namespace Zion
 {
     public abstract class Parser<T>
     {

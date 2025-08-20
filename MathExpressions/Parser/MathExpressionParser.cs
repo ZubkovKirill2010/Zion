@@ -1,6 +1,4 @@
-﻿using Zion.Text;
-
-namespace Zion.MathExpressions
+﻿namespace Zion.MathExpressions
 {
     public sealed class MathExpressionParser : StreamingParser<IExpression>
     {

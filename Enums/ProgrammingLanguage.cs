@@ -23,7 +23,7 @@
         CSS = 65536,
         Bash = 131072,
         PowerShell = 262144,
-        
+
         R = 524288,
         Assembly = 1048576,
         Lua = 2097152,

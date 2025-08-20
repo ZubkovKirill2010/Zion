@@ -1,7 +1,4 @@
-﻿using Zion.Text;
-using Zion.Vectors;
-
-namespace Zion
+﻿namespace Zion
 {
     public static partial class Parser
     {
