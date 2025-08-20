@@ -42,6 +42,26 @@
             return (Value & 1) == 0;
         }
 
+        public static bool IsPrime(this int Value)
+        {
+            if (Value <= 1) { return false; }
+            if (Value == 2) { return true; }
+            if (IsEven(Value)) { return false; }
+
+            int MaxValue = (int)Math.Sqrt(Value);
+
+            for (int i = 3; i <= MaxValue; i += 2)
+            {
+                if (Value % i == 0)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+
         /// <summary>
         /// Gets the state of a specific bit in the unsigned integer.
         /// </summary>
@@ -80,6 +100,25 @@
         public static bool IsEven(this uint Value)
         {
             return (Value & 1) == 0;
+        }
+
+        public static bool IsPrime(this uint Value)
+        {
+            if (Value <= 1) { return false; }
+            if (Value == 2) { return true; }
+            if (IsEven(Value)) { return false; }
+
+            uint MaxValue = (uint)Math.Sqrt(Value);
+
+            for (uint i = 3; i <= MaxValue; i += 2)
+            {
+                if (Value % i == 0)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 }

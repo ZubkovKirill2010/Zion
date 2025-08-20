@@ -42,6 +42,26 @@
             return (Value & 1) == 0;
         }
 
+        public static bool IsPrime(this long Value)
+        {
+            if (Value <= 1) { return false; }
+            if (Value == 2) { return true; }
+            if (IsEven(Value)) { return false; }
+
+            long MaxValue = (long)Math.Sqrt(Value);
+
+            for (long i = 3; i <= MaxValue; i += 2)
+            {
+                if (Value % i == 0)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+
         /// <summary>
         /// Gets the state of a specific bit in the unsigned long integer.
         /// </summary>
@@ -80,6 +100,25 @@
         public static bool IsEven(this ulong Value)
         {
             return (Value & 1) == 0;
+        }
+
+        public static bool IsPrime(this ulong Value)
+        {
+            if (Value <= 1) { return false; }
+            if (Value == 2) { return true; }
+            if (IsEven(Value)) { return false; }
+
+            ulong MaxValue = (ulong)Math.Sqrt(Value);
+
+            for (ulong i = 3; i <= MaxValue; i += 2)
+            {
+                if (Value % i == 0)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 }
