@@ -210,6 +210,40 @@ namespace Zion
             return String.EndsWith(Suffix) ? String : String + Suffix;
         }
 
+        public static string GetCommonStart(this IEnumerable<string> Strings)
+        {
+            ArgumentNullException.ThrowIfNull(Strings);
+            if (Enumerable.Any(Strings, String => String is null))
+            {
+                throw new ArgumentNullException("StringArray[`] is null");
+            }
+            if (Strings.IsEmpty())
+            {
+                return string.Empty;
+            }
+
+            int End = Strings.Select(String => String.Length).Min();
+
+            if (End == 0)
+            {
+                return string.Empty;
+            }
+
+            string First = Strings.First();
+
+            for (int i = 0; i < End; i++)
+            {
+                char Char = First[i];
+
+                if (Strings.Any(String => String[i] != Char))
+                {
+                    return First[..i];
+                }
+            }
+
+            return First[..End];
+        }
+
         #endregion
 
         #region Predicate

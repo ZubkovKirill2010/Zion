@@ -98,5 +98,20 @@
             }
             return Result;
         }
+
+        public static T[] Where<T>(this ICollection<T> Collection, Predicate<T> Condition)
+        {
+            List<T> Result = new List<T>(Collection.Count);
+
+            foreach (T? Item in Collection)
+            {
+                if (Condition(Item))
+                {
+                    Result.Add(Item);
+                }
+            }
+
+            return Result.ToArray(); ;
+        }
     }
 }

@@ -146,5 +146,14 @@
                 }
             }
         }
+
+        public static bool IsEmpty<T>(this IEnumerable<T> Enumerable)
+        {
+            foreach (T Item in Enumerable)
+            {
+                return false;
+            }
+            return true;
+        }
     }
 }
