@@ -345,6 +345,29 @@ namespace Zion
             return true;
         }
 
+        public static bool TrueFor(this string String, int Start, int End, Predicate<char> Condition)
+        {
+            ArgumentNullException.ThrowIfNull(String);
+            if (Start < 0)
+            {
+                throw new ArgumentOutOfRangeException($"Start(={Start}) < 0");
+            }
+            if (End > String.Length)
+            {
+                throw new ArgumentOutOfRangeException($"End(={End}) >= String.Length(={String.Length})");
+            }
+
+            for (int i = Start; i < End; i++)
+            {
+                if (!Condition(String[i]))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         #endregion
 
         #region Programming

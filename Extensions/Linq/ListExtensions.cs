@@ -1,4 +1,6 @@
-﻿namespace Zion
+﻿using System.Runtime.CompilerServices;
+
+namespace Zion
 {
     public static class ListExtensions
     {
@@ -124,6 +126,29 @@
             }
 
             List.RemoveRange(WritePosition, List.Count - WritePosition);
+        }
+
+        public static bool TrueFor<T>(this IList<T> List, int Start, int End, Predicate<T> Condition)
+        {
+            ArgumentNullException.ThrowIfNull(List);
+            if (Start < 0)
+            {
+                throw new ArgumentOutOfRangeException($"Start(={Start}) < 0");
+            }
+            if (End > List.Count)
+            {
+                throw new ArgumentOutOfRangeException($"End(={End}) >= List.Count(={List.Count})");
+            }
+
+            for (int i = Start; i < End; i++)
+            {
+                if (!Condition(List[i]))
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 }
