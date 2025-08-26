@@ -29,7 +29,7 @@ namespace Zion.MathExpressions
 
         public Fraction GetValue()
         {
-            Fraction Result = Fraction._Zero;
+            Fraction Result = Fraction.Zero;
 
             foreach (IExpression Member in Members)
             {

@@ -1,5 +1,4 @@
 ﻿using Zion.MathExpressions;
-using Zion.Text;
 
 namespace Zion
 {
@@ -79,5 +78,48 @@ namespace Zion
 
         public static decimal[] ToDecimalArray(this string String)
             => ToArray(String, NormalizeToFloat, Fraction => Fraction.ToDecimal(), decimal.Parse);
+
+
+        public static string[] ToStringArray(this string String)
+        {
+            if (string.IsNullOrWhiteSpace(String) || String.Length <= 2)
+            {
+                return Array.Empty<string>();
+            }
+            if (!String.StartsWith('[') || !String.EndsWith(']'))
+            {
+                throw new FormatException("Array must have the format \"[Value1, Value2, ..., ValueN]\"");
+            }
+
+            List<string> Result = new List<string>();
+            int Index = 1;
+            int Start = 0;
+
+            while (Index < String.Length)
+            {
+                Index = String.SkipSpaces(Index);
+
+                if (String[Index] != '"')
+                {
+                    throw new FormatException($"The string should start with '\"' (Element index={Result.Count})");
+                }
+
+                Start = Index + 1;
+                Index = StringParser.GetEndOfExpression(String, Index);
+
+                Result.Add(StringParser.Parse(String[Start..Index]));
+
+                Index = String.SkipSpaces(Index);
+
+                if (Index >= String.Length || String[Index] == ']')
+                {
+                    break;
+                }
+
+                Index = String.Skip(',');
+            }
+
+            return Result.ToArray();
+        }
     }
 }

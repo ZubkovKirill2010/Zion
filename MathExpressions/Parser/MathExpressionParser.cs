@@ -1,6 +1,4 @@
-﻿using Zion.Text;
-
-namespace Zion.MathExpressions
+﻿namespace Zion.MathExpressions
 {
     public sealed class MathExpressionParser : StreamingParser<IExpression>
     {
@@ -11,7 +9,7 @@ namespace Zion.MathExpressions
             { "cos" , new MathFunctionSample(Fraction.Cos, true)                       },
             { "tg"  , new MathFunctionSample(Fraction.Tg, true)                        },
             { "ctg" , new MathFunctionSample(Fraction.Ctg, true)                       },
-            { "pi"  , new MathFunctionSample((Fraction Value) => Fraction._Pi, false)  }
+            { "pi"  , new MathFunctionSample((Fraction Value) => Fraction.Pi, false)  }
         };
 
         private readonly Amount Result;
@@ -177,7 +175,7 @@ namespace Zion.MathExpressions
                         String.GetExpression(Index, out Index), Functions
                     ).Parse()
                     ?? throw new Exception($"{Function}.Content parsing error")
-                    : Fraction._Zero;
+                    : Fraction.Zero;
 
                 return new MathFunction(Function, Content);
             }

@@ -79,6 +79,67 @@ namespace Zion
         }
 
 
+        public static Color Parse(string String)
+        {
+            ArgumentNullException.ThrowIfNullOrEmpty(String);
+
+            if (String.StartsWith('#') && String.Length == 7)
+            {
+                if (String.Length == 3)
+                {
+                    return new Color
+                    (
+                        HexToByte(String[1..3], "RGB")
+                    );
+                }
+
+                if (String.Length == 7)
+                {
+                    byte R = HexToByte(String[1..3], 'R');
+                    byte G = HexToByte(String[3..5], 'G');
+                    byte B = HexToByte(String[5..7], 'B');
+
+                    return new Color(R, G, B);
+                }
+            }
+
+            byte[] Result = new byte[3];
+
+            int Start = 0;
+            int Index = 0;
+
+            try
+            {
+                for (int i = 0; i < 3; i++)
+                {
+                    Index = String.Skip(Index, Char => !char.IsDigit(Char));
+                    Start = Index;
+                    Index = String.Skip(Index, char.IsDigit);
+
+                    Result[i] = byte.Parse(String[Start..Index]);
+                }
+            }
+            catch
+            {
+                throw new FormatException($"Couldn't convert String(=\"{String}\") to Color");
+            }
+            return new Color(Result[0], Result[1], Result[2]);
+        }
+        public static bool TryParse(string String, out Color Color)
+        {
+            try
+            {
+                Color = Parse(String);
+                return true;
+            }
+            catch
+            {
+                Color = default;
+                return false;
+            }
+        }
+
+
         public void Write(BinaryWriter Writer)
         {
             Writer.Write(R);
@@ -109,6 +170,19 @@ namespace Zion
         public readonly Color GetOpposite()
         {
             return new Color((byte)(byte.MaxValue - R), (byte)(byte.MaxValue - G), (byte)(byte.MaxValue - B));
+        }
+
+
+        private static byte HexToByte(string String, object Identifier)
+        {
+            try
+            {
+                return Convert.ToByte(String, 16);
+            }
+            catch
+            {
+                throw new FormatException($"Incorrect hex format(={String}) of ({Identifier})");
+            }
         }
     }
 }

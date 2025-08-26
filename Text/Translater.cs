@@ -1,4 +1,4 @@
-﻿namespace Zion.Text
+﻿namespace Zion
 {
     public static class Translater
     {
