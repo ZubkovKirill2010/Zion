@@ -127,19 +127,5 @@ namespace Zion
 
             List.RemoveRange(WritePosition, List.Count - WritePosition);
         }
-
-        public static T[] ToReversedArray<T>(this IList<T> List)
-        {
-            T[] Result = new T[List.Count];
-
-            int Start = 0;
-            int End = List.Count - 1;
-
-            while (End >= 0)
-            {
-                Result[Start++] = List[End--];
-            }
-            return Result;
-        }
     }
 }
