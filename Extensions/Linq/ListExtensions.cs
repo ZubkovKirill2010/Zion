@@ -127,5 +127,35 @@ namespace Zion
 
             List.RemoveRange(WritePosition, List.Count - WritePosition);
         }
+
+        /// <summary>
+        /// Generates a sequence that goes forward through the collection and then backward.
+        /// For example: [1, 2, 3] -> 1, 2, 3, 2, 1
+        /// </summary>
+        /// <typeparam name="T">The type of elements in the collection</typeparam>
+        /// <param name="List">The source collection</param>
+        /// <returns>An oscillating sequence of elements</returns>
+        /// <exception cref="ArgumentNullException">Thrown when the input collection is null</exception>
+        public static IEnumerable<T> Oscillate<T>(this IList<T> List)
+        {
+            ArgumentNullException.ThrowIfNull(List);
+
+            if (List.Count == 0)
+            {
+                yield break;
+            }
+
+            int End = List.Count - 1;
+
+            for (int i = 0; i < End; i++)
+            {
+                yield return List[i];
+            }
+            for (int j = End; j >= 0; j--)
+            {
+                yield return List[j];
+            }
+        }
+
     }
 }
