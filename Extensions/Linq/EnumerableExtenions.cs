@@ -147,6 +147,26 @@
             }
         }
 
+        /// <summary>
+        /// Generates an infinite sequence by repeating the source collection indefinitely (lazy evaluation).
+        /// </summary>
+        /// <typeparam name="T">The type of elements in the collection.</typeparam>
+        /// <param name="Enumerable">The source collection to repeat.</param>
+        /// <returns>An infinite repeating sequence of the source elements.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="Enumerable"/> is null.</exception>
+        public static IEnumerable<T> Repeat<T>(this IEnumerable<T> Enumerable)
+        {
+            ArgumentNullException.ThrowIfNull(Enumerable);
+
+            while (true)
+            {
+                foreach (T Item in Enumerable)
+                {
+                    yield return Item;
+                }
+            }
+        }
+
         public static bool IsEmpty<T>(this IEnumerable<T> Enumerable)
         {
             foreach (T Item in Enumerable)

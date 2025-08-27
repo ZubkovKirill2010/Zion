@@ -454,7 +454,7 @@ namespace Zion
                         AddWord();
                     }
 
-                    CurrentWord.Append(char.ToLower(Char));
+                    CurrentWord.Append(Char);
                     LastWasUpper = true;
                     LastWasDigit = false;
                 }
@@ -472,17 +472,37 @@ namespace Zion
         }
 
 
-        public static string ToPascalCase(this string[] StringArray, bool Underlining = false)
+        public static string ToCamelCase(this IList<string> Strings, bool Underlining = false)
         {
-            ArgumentNullException.ThrowIfNull(StringArray);
-            if (StringArray.Length == 0)
+            ArgumentNullException.ThrowIfNull(Strings);
+            if (Strings.Count == 0)
             {
                 return string.Empty;
             }
 
-            StringBuilder Builder = new StringBuilder(StringArray.Summarize(String => String.Length) + (Underlining ? 1 : 0));
+            StringBuilder Builder = new StringBuilder(Strings.Summarize(String => String.Length) + (Underlining ? 1 : 0));
 
-            foreach (string Word in StringArray)
+            Builder.Append(Strings[0].ToLower());
+            for (int i = 1; i < Strings.Count; i++)
+            {
+                Builder.Append(Strings[i].Capitalize());
+            }
+
+            string Result = Builder.ToString();
+            return Underlining ? '_' + Result : Result;
+        }
+
+        public static string ToPascalCase(this ICollection<string> Strings, bool Underlining = false)
+        {
+            ArgumentNullException.ThrowIfNull(Strings);
+            if (Strings.Count == 0)
+            {
+                return string.Empty;
+            }
+
+            StringBuilder Builder = new StringBuilder(Strings.Summarize(String => String.Length) + (Underlining ? 1 : 0));
+
+            foreach (string Word in Strings)
             {
                 Builder.Append(Word.Capitalize());
             }
@@ -491,47 +511,27 @@ namespace Zion
             return Underlining ? '_' + Result : Result;
         }
 
-        public static string ToCamelCase(this string[] StringArray, bool Underlining = false)
+        public static string ToSnakeCase(this ICollection<string> Strings, bool Underlining = false)
         {
-            ArgumentNullException.ThrowIfNull(StringArray);
-            if (StringArray.Length == 0)
+            ArgumentNullException.ThrowIfNull(Strings);
+            if (Strings.Count == 0)
             {
                 return string.Empty;
             }
 
-            StringBuilder Builder = new StringBuilder(StringArray.Summarize(String => String.Length) + (Underlining ? 1 : 0));
-
-            Builder.Append(StringArray[0].ToLower());
-            for (int i = 1; i < StringArray.Length; i++)
-            {
-                Builder.Append(StringArray[i].Capitalize());
-            }
-
-            string Result = Builder.ToString();
+            string Result = string.Join('_', Strings.Select(String => String.ToLower()));
             return Underlining ? '_' + Result : Result;
         }
 
-        public static string ToSnakeCase(this string[] StringArray, bool Underlining = false)
+        public static string ToKebabCase(this ICollection<string> Strings, bool Underlining = false)
         {
-            ArgumentNullException.ThrowIfNull(StringArray);
-            if (StringArray.Length == 0)
+            ArgumentNullException.ThrowIfNull(Strings);
+            if (Strings.Count == 0)
             {
                 return string.Empty;
             }
 
-            string Result = string.Join('_', StringArray.ConvertAll(String => String.ToLower()));
-            return Underlining ? '_' + Result : Result;
-        }
-
-        public static string ToKebabCase(this string[] StringArray, bool Underlining = false)
-        {
-            ArgumentNullException.ThrowIfNull(StringArray);
-            if (StringArray.Length == 0)
-            {
-                return string.Empty;
-            }
-
-            string Result = string.Join('-', StringArray.ConvertAll(String => String.ToLower()));
+            string Result = string.Join('-', Strings.Select(String => String.ToLower()));
             return Underlining ? '_' + Result : Result;
         }
 
@@ -569,6 +569,29 @@ namespace Zion
                 }
             }
             return Count;
+        }
+
+        public static string JoinTrimEnd(this IList<string> Array, string Seporator)
+        {
+            ArgumentNullException.ThrowIfNull(Array);
+            ArgumentNullException.ThrowIfNull(Seporator);
+
+            int End = Array.EndIndexOf(s => !string.IsNullOrWhiteSpace(s));
+            if (End == -1)
+            {
+                return string.Empty;
+            }
+
+            var Builder = new StringBuilder(Array.Summarize(s => s.Length, End + 1) + (Seporator.Length * End));
+
+            Builder.Append(Array[0]);
+            for (int i = 1; i <= End; i++)
+            {
+                Builder.Append(Seporator);
+                Builder.Append(Array[i]);
+            }
+
+            return Builder.ToString();
         }
 
         #endregion

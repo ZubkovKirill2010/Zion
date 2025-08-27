@@ -1,6 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-
-namespace Zion
+﻿namespace Zion
 {
     public static class ListExtensions
     {
@@ -157,5 +155,60 @@ namespace Zion
             }
         }
 
+        /// <summary>
+        /// Searches for the last element that matches the condition and returns its index.
+        /// </summary>
+        /// <typeparam name="T">The type of elements in the list</typeparam>
+        /// <param name="List">The list to search</param>
+        /// <param name="Condition">The condition to test each element</param>
+        /// <returns>The index of the last matching element, or -1 if not found</returns>
+        /// <exception cref="ArgumentNullException">Thrown when list or condition is null</exception>
+        public static int EndIndexOf<T>(this IList<T> List, Predicate<T> Condition)
+        {
+            ArgumentNullException.ThrowIfNull(List);
+            ArgumentNullException.ThrowIfNull(Condition);
+
+            for (int i = List.Count - 1; i >= 0; i--)
+            {
+                if (Condition(List[i]))
+                {
+                    return i;
+                }
+            }
+
+            return -1;
+        }
+
+        public static int IndexOf<T>(this IList<T> List, Predicate<T> Condition)
+        {
+            ArgumentNullException.ThrowIfNull(List);
+            ArgumentNullException.ThrowIfNull(Condition);
+
+            for (int i = 0; i < List.Count; i++)
+            {
+                if (Condition(List[i]))
+                {
+                    return i;
+                }
+            }
+
+            return -1;
+        }
+
+
+        public static int Summarize<T>(this IList<T> List, Func<T, int> GetLength, int End)
+        {
+            if (!End.IsClamp(0, List.Count - 1))
+            {
+                throw new ArgumentOutOfRangeException(nameof(End) ,$"End(={End}) < 0 or >= List.Count(={List.Count})");
+            }
+
+            int Count = 0;
+            for (int i = 0; i < End; i++)
+            {
+                Count += GetLength(List[i]);
+            }
+            return Count;
+        }
     }
 }

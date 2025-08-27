@@ -2,7 +2,7 @@
 {
     public static class Accessor
     {
-        public static T Set<T>(ref T Target, T Value)
+        public static T Set<T>(out T Target, T Value)
         {
             Target = Value;
             return Target;

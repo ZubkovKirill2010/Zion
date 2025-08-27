@@ -107,7 +107,7 @@ namespace Zion
             Structure<I> Result = new Structure<I>
             (
                 Read(Reader),
-                new List<Structure<I>>(Accessor.Set(ref Count, Reader.ReadInt32())),
+                new List<Structure<I>>(Accessor.Set(out Count, Reader.ReadInt32())),
                 Parent
             );
 
