@@ -14,7 +14,22 @@
         /// <summary>
         /// Deserializes the object from binary stream.
         /// </summary>
-        static abstract T Read(BinaryReader Reader);
+        abstract static T Read(BinaryReader Reader);
+
+
+        void Save(string FilePath)
+        {
+            using FileStream Stream = new FileStream(FilePath, FileMode.Create);
+            using BinaryWriter Writer = new BinaryWriter(Stream);
+            Write(Writer);
+        }
+
+        static T Load(string FilePath)
+        {
+            using FileStream Stream = new FileStream(FilePath, FileMode.Open);
+            using BinaryReader Reader = new BinaryReader(Stream);
+            return T.Read(Reader);
+        }
     }
 
     /// <summary>
@@ -30,6 +45,21 @@
         /// <summary>
         /// Deserializes the object using custom reader for inner type.
         /// </summary>
-        static abstract T Read(BinaryReader Reader, Func<BinaryReader, I> ReadObject);
+        abstract static T Read(BinaryReader Reader, Func<BinaryReader, I> ReadObject);
+
+
+        void Save(string FilePath, Action<BinaryWriter, I> WriteObject)
+        {
+            using FileStream Stream = new FileStream(FilePath, FileMode.Create);
+            using BinaryWriter Writer = new BinaryWriter(Stream);
+            Write(Writer, WriteObject);
+        }
+
+        static T Load(string FilePath, Func<BinaryReader, I> ReadObject)
+        {
+            using FileStream Stream = new FileStream(FilePath, FileMode.Open);
+            using BinaryReader Reader = new BinaryReader(Stream);
+            return T.Read(Reader, ReadObject);
+        }
     }
 }

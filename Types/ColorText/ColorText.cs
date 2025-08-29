@@ -30,6 +30,15 @@ namespace Zion
             return $"\u001b[38;2;{Color.R};{Color.G};{Color.B}m{Text}\u001b[0m";
         }
 
+        public static string GetText(string Text, Color Color)
+        {
+            return $"\u001b[38;2;{Color.R};{Color.G};{Color.B}m{Text}\u001b[0m";
+        }
+        public static string GetText(string Text, byte R, byte G, byte B)
+        {
+            return $"\u001b[38;2;{R};{G};{B}m{Text}\u001b[0m";
+        }
+
         public static string Clear(string String)
         {
             int Start = 0;

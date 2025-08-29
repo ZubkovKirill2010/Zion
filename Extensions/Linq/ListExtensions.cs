@@ -200,7 +200,7 @@
         {
             if (!End.IsClamp(0, List.Count - 1))
             {
-                throw new ArgumentOutOfRangeException(nameof(End) ,$"End(={End}) < 0 or >= List.Count(={List.Count})");
+                throw new ArgumentOutOfRangeException(nameof(End), $"End(={End}) < 0 or >= List.Count(={List.Count})");
             }
 
             int Count = 0;

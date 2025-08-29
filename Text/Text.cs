@@ -582,7 +582,7 @@ namespace Zion
                 return string.Empty;
             }
 
-            var Builder = new StringBuilder(Array.Summarize(s => s.Length, End + 1) + (Seporator.Length * End));
+            StringBuilder Builder = new StringBuilder(Array.Summarize(s => s.Length, End + 1) + (Seporator.Length * End));
 
             Builder.Append(Array[0]);
             for (int i = 1; i <= End; i++)

@@ -41,5 +41,20 @@
 
             return Result;
         }
+
+        public static R[] ConvertAll<T, R>(this ICollection<T> Collection, Converter<T, R> Converter)
+        {
+            ArgumentNullException.ThrowIfNull(Collection);
+            ArgumentNullException.ThrowIfNull(Converter);
+
+            R[] Result = new R[Collection.Count];
+            int Index = 0;
+
+            foreach (T Item in Collection)
+            {
+                Result[Index++] = Converter(Item);
+            }
+            return Result;
+        }
     }
 }

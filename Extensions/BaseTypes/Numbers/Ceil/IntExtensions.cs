@@ -61,6 +61,13 @@
             return true;
         }
 
+        public static bool IsInRange<T>(this int Value, ICollection<T> Collection)
+        {
+            ArgumentNullException.ThrowIfNull(Collection);
+
+            return Value >= 0 && Value < Collection.Count;
+        }
+
 
         /// <summary>
         /// Gets the state of a specific bit in the unsigned integer.

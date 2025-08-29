@@ -121,11 +121,9 @@ namespace Zion
 
         public void SaveIn(string FilePath, Action<BinaryWriter, T> Write)
         {
-            using (FileStream Stream = new FileStream(FilePath, FileMode.Create))
-            using (BinaryWriter Writer = new BinaryWriter(Stream))
-            {
-                this.Write(Writer, Write);
-            }
+            using FileStream Stream = new FileStream(FilePath, FileMode.Create);
+            using BinaryWriter Writer = new BinaryWriter(Stream);
+            this.Write(Writer, Write);
         }
         public static Structure<I> Read<I>(string FilePath, Func<BinaryReader, I> Read)
         {
@@ -134,11 +132,9 @@ namespace Zion
                 throw new FileNotFoundException($"File \"{FilePath}\" not exists");
             }
 
-            using (FileStream Stream = new FileStream(FilePath, FileMode.Open))
-            using (BinaryReader Reader = new BinaryReader(Stream))
-            {
-                return Read<I>(Reader, Read, null);
-            }
+            using FileStream Stream = new FileStream(FilePath, FileMode.Open);
+            using BinaryReader Reader = new BinaryReader(Stream);
+            return Read<I>(Reader, Read, null);
         }
 
 

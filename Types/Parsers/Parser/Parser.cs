@@ -29,28 +29,21 @@
             return double.TryParse(NormalizeToFloat(String), out Value);
         }
 
-        public static bool ToBoolean(this string String)
+
+        public static bool ToEnum<T>(this string String, out T? EnumValue) where T : Enum
         {
-            return String.Minimize() switch
+            foreach (object? Value in Enum.GetValues(typeof(T)))
             {
-                "true" => true,
-                "false" => false,
-                _ => throw new Exception($"Couldn't convert \"{String}\" to Boolean")
-            };
-        }
-        public static bool ToBoolean(this string String, out bool Value)
-        {
-            switch (String.Minimize())
-            {
-                case "true":
-                    Value = true;
+                string EnumString = Value.ToString();
+
+                if (string.Compare(String, EnumString, StringComparison.OrdinalIgnoreCase) == 0)
+                {
+                    EnumValue = (T)Value;
                     return true;
-                case "false":
-                    Value = false;
-                    return true;
+                }
             }
 
-            Value = false;
+            EnumValue = default;
             return false;
         }
 
