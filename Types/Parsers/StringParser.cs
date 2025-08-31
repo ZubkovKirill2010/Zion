@@ -132,6 +132,7 @@ namespace Zion
 
         /// <summary>
         /// Returns the index of the closing quotation mark
+        /// If there is no closing quotation mark in the string, returns -1
         /// </summary>
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="ArgumentOutOfRangeException"></exception>
@@ -140,7 +141,6 @@ namespace Zion
             ArgumentNullException.ThrowIfNullOrWhiteSpace(String);
             if (Start < 0 || Start >= String.Length)
             {
-                throw new Exception();
                 throw new ArgumentOutOfRangeException($"Start(={Start}) out of range [0-{String.Length}]");
             }
             if (String[Start] == '"')
@@ -159,7 +159,7 @@ namespace Zion
                 Index++;
             }
 
-            return String.Length - 1;
+            return -1;
         }
 
         public static int GetEndOfBracketsExpression(string String, int Start = 0)

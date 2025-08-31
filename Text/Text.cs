@@ -247,7 +247,7 @@ namespace Zion
         #endregion
 
         #region Predicate
-        public static bool Begins(this string String, int Index, string Target)
+        public static bool Begins(this string String, int Index, string Target, bool IgnoreCase = false)
         {
             ArgumentNullException.ThrowIfNull(String);
 
@@ -260,13 +260,27 @@ namespace Zion
                 return false;
             }
 
-            for (int i = 0; i < Target.Length; i++)
+            if (IgnoreCase)
             {
-                if (String[Index + i] != Target[i])
+                for (int i = 0; i < Target.Length; i++)
                 {
-                    return false;
+                    if (char.ToLower(String[Index + i]) != char.ToLower(Target[i]))
+                    {
+                        return false;
+                    }
                 }
             }
+            else
+            {
+                for (int i = 0; i < Target.Length; i++)
+                {
+                    if (String[Index + i] != Target[i])
+                    {
+                        return false;
+                    }
+                }
+            }
+                
             return true;
         }
         public static bool Exists(this string String, string Target, out int StartIndex)
@@ -366,6 +380,15 @@ namespace Zion
             }
 
             return true;
+        }
+
+        public static bool IsOpenBracket(this char Char)
+        {
+            return Brackets.ContainsKey(Char);
+        }
+        public static bool IsOpenBracket(this char Char, out char ClosingBracket)
+        {
+            return Brackets.TryGetValue(Char, out ClosingBracket);
         }
 
         #endregion
