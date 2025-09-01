@@ -3,7 +3,7 @@
 namespace Zion
 {
     [Serializable]
-    public struct ColorText
+    public struct ColorText : IColorText
     {
         public static readonly ColorText Empty = new ColorText(string.Empty, new Color(0));
 
@@ -29,6 +29,8 @@ namespace Zion
             VisualLength = Length;
             return $"\u001b[38;2;{Color.R};{Color.G};{Color.B}m{Text}\u001b[0m";
         }
+
+        public string ToColorString() => ToString();
 
         public static string GetText(string Text, Color Color)
         {

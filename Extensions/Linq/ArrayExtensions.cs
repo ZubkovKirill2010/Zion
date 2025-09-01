@@ -12,10 +12,7 @@
         /// <exception cref="NullReferenceException">Thrown when the source array is null.</exception>
         public static T[] Add<T>(this T[] Array, T Value)
         {
-            if (Array is null)
-            {
-                throw new NullReferenceException("Array is null");
-            }
+            ArgumentNullException.ThrowIfNull(Array);
 
             T[] NewArray = new T[Array.Length + 1];
             for (int i = 0; i < Array.Length; i++)
@@ -38,13 +35,11 @@
         /// <exception cref="ArgumentOutOfRangeException">Thrown when the index is out of bounds.</exception>
         public static T[] Insert<T>(this T[] Array, int Index, T Value)
         {
-            if (Array is null)
+            ArgumentNullException.ThrowIfNull(Array);
+
+            if (!Index.IsInRange(Array))
             {
-                throw new ArgumentNullException(nameof(Array));
-            }
-            if (Index < 0 || Index > Array.Length)
-            {
-                throw new ArgumentOutOfRangeException(nameof(Index), "Index must be within array bounds");
+                throw new ArgumentOutOfRangeException($"Index out of array, Index = {Index}, Array.Length = {Array.Length}");
             }
 
             T[] NewArray = new T[Array.Length + 1];
@@ -65,11 +60,9 @@
         /// <exception cref="ArgumentOutOfRangeException">Thrown when the index is out of bounds.</exception>
         public static T[] RemoveAt<T>(this T[] Array, int Index)
         {
-            if (Array is null)
-            {
-                throw new NullReferenceException("Array is null");
-            }
-            if (Index < 0 || Index >= Array.Length)
+            ArgumentNullException.ThrowIfNull(Array);
+
+            if (!Index.IsInRange(Array))
             {
                 throw new ArgumentOutOfRangeException($"Index out of array, Index = {Index}, Array.Length = {Array.Length}");
             }
@@ -112,6 +105,18 @@
             }
 
             return Result.ToArray(); ;
+        }
+
+        public static (int, T)[] Index<T>(this T[] Array, int StartIndex = 0)
+        {
+            (int, T)[] Result = new (int, T)[Array.Length];
+
+            for (int i = 0; i < Array.Length; i++)
+            {
+                int Index = i;
+                Result[i] = (Index, Array[i]);
+            }
+            return Result;
         }
     }
 }

@@ -25,6 +25,15 @@
             return Target;
         }
 
+        public static T SetIfNotNull<T>(ref T Target, T? Value)
+        {
+            if (Value is not null)
+            {
+                Target = Value;
+            }
+            return Target;
+        }
+
         public static T Out<T>(T Target, out T Value)
         {
             Value = Target;

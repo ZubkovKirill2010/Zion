@@ -27,6 +27,7 @@ namespace Zion
 
         public int Count => Childs.Count;
         public bool IsRoot => Parent is null;
+        public bool IsEmpty => Childs.Count == 0;
         public bool IsReadOnly => ((ICollection<Structure<T>>)Childs).IsReadOnly;
 
 
@@ -244,6 +245,57 @@ namespace Zion
             {
                 Child.InvokeForAll(Action, Level + 1);
             }
+        }
+
+        public Structure<T> AddIf(T Item, bool Condition)
+        {
+            if (Condition)
+            {
+                Add(Item);
+            }
+            return this;
+        }
+        public Structure<T> AddIf(Structure<T> Item, bool Condition)
+        {
+            if (Condition)
+            {
+                Add(Item);
+            }
+            return this;
+        }
+
+        public Structure<T> AddIf(T Item, Predicate<T> Condition)
+        {
+            if (Condition(Item))
+            {
+                Add(Item);
+            }
+            return this;
+        }
+        public Structure<T> AddIf(Structure<T> Item, Predicate<Structure<T>> Condition)
+        {
+            if (Condition(Item))
+            {
+                Add(Item);
+            }
+            return this;
+        }
+
+        public Structure<T> AddWhere(Predicate<T> Condition, params T[] Items)
+        {
+            foreach (T Item in Items.Where(Condition))
+            {
+                Add(Item);
+            }
+            return this;
+        }
+        public Structure<T> AddWhere(Predicate<Structure<T>> Condition, params Structure<T>[] Items)
+        {
+            foreach (Structure<T> Item in Items.Where(Condition))
+            {
+                Add(Item);
+            }
+            return this;
         }
 
         public void Add(T Item)

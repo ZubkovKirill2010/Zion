@@ -38,5 +38,19 @@ namespace Zion
         {
             return Value.CompareTo(Min) >= 0 && Value.CompareTo(Max) <= 0;
         }
+
+        public static string ToColorString(this object Object)
+        {
+            return Object is IColorText Colorable ? Object?.ToColorString() ?? "null" : ToNotNullString(Object);
+        }
+
+        public static string ToNotNullString(this object Object)
+        {
+            return ToNotNullString(Object, "null");
+        }
+        public static string ToNotNullString(this object Object, string Nullable)
+        {
+            return Object?.ToString() ?? string.Empty;
+        }
     }
 }

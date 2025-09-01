@@ -2,6 +2,9 @@
 {
     public static class Structure
     {
+        public static bool IsEmpty<T>(Structure<T> Structure) => Structure.IsEmpty;
+        public static bool IsNotEmpty<T>(Structure<T> Structure) => !Structure.IsEmpty;
+
         public static Structure<string> Parse(string Text, char OffsetChar = '\t')
         {
             return Parse(Text, Item => Item, OffsetChar);
