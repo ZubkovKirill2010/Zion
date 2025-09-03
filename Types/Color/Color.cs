@@ -29,6 +29,7 @@ namespace Zion
         public static readonly Color Magenta = new Color(255, 0, 255);
         public static readonly Color Yellow = new Color(255, 255, 0);
         public static readonly Color Orange = new Color(247, 102, 3);
+        public static readonly Color Violet = new Color(144, 40, 241);
 
 
         public Color(byte Value)
@@ -71,7 +72,7 @@ namespace Zion
 
         public override readonly string ToString()
         {
-            return $"({R}; {G}; {B})";
+            return $"({R}, {G}, {B})";
         }
         public override bool Equals([NotNullWhen(true)] object? Object)
         {

@@ -4,7 +4,13 @@ namespace Zion.Vectors
 {
     public struct Vector2Byte
     {
-        private const int Filter = 0b00000000_00000000_00000000_00000111;
+        public static readonly Vector2Byte Zero = new Vector2Byte(0, 0);
+        public static readonly Vector2Byte Up = new Vector2Byte(0, 1);
+        public static readonly Vector2Byte Right = new Vector2Byte(1, 0);
+        public static readonly Vector2Byte Down = new Vector2Byte(0, -1);
+        public static readonly Vector2Byte Left = new Vector2Byte(-1, 0);
+        public static readonly Vector2Byte OneOne = new Vector2Byte(1);
+
         public const int MinValue = -3;
         public const int MaxValue = 4;
 
