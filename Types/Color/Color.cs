@@ -157,13 +157,13 @@ namespace Zion
         }
 
 
-        public string ToString16()
+        public string ToHexString()
         {
             string Format = "X2";
             return $"#{R.ToString(Format)}{G.ToString(Format)}{B.ToString(Format)}";
         }
 
-        public readonly float GetBrightness()
+        public readonly float GetBrightness()//Range 0 - 255
         {
             return R * 0.2126f + G * 0.7152f + B * 0.0722f;
         }

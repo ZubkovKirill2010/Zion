@@ -10,6 +10,7 @@ namespace Zion.Vectors
         public static readonly Vector2Int Right = new Vector2Int(1, 0);
         public static readonly Vector2Int Down = new Vector2Int(0, -1);
         public static readonly Vector2Int Left = new Vector2Int(-1, 0);
+        public static readonly Vector2Int OneOne = new Vector2Int(1);
 
         public int x, y;
 
@@ -57,6 +58,19 @@ namespace Zion.Vectors
             return new Vector2Int(A.x / VectorB.x, A.y / VectorB.y);
         }
 
+        public static Vector2Int operator --(Vector2Int Vector)
+        {
+            Vector.x--;
+            Vector.y--;
+            return Vector;
+        }
+        public static Vector2Int operator ++(Vector2Int Vector)
+        {
+            Vector.x++;
+            Vector.y++;
+            return Vector;
+        }
+
         public static Vector2Int operator +(Vector2Int A, Vector2Int B) => new Vector2Int(A.x + B.x, A.y + B.y);
         public static Vector2Int operator -(Vector2Int A, Vector2Int B) => new Vector2Int(A.x - B.x, A.y - B.y);
         public static Vector2Int operator *(Vector2Int A, int B) => new Vector2Int(A.x * B, A.y * B);
@@ -65,10 +79,10 @@ namespace Zion.Vectors
         public static bool operator ==(Vector2Int A, Vector2Int B) => A.x == B.x && A.y == B.y;
         public static bool operator !=(Vector2Int A, Vector2Int B) => A.x != B.x || A.y != B.y;
 
-        public static bool operator <(Vector2Int A, Vector2Int B) => A.x < B.x || A.y < B.y;
-        public static bool operator >(Vector2Int A, Vector2Int B) => A.x > B.x || A.y > B.y;
-        public static bool operator <=(Vector2Int A, Vector2Int B) => A.x <= B.x || A.y <= B.y;
-        public static bool operator >=(Vector2Int A, Vector2Int B) => A.x >= B.x || A.y >= B.y;
+        public static bool operator <(Vector2Int A, Vector2Int B) => A.x < B.x && A.y < B.y;
+        public static bool operator >(Vector2Int A, Vector2Int B) => A.x > B.x && A.y > B.y;
+        public static bool operator <=(Vector2Int A, Vector2Int B) => A.x <= B.x && A.y <= B.y;
+        public static bool operator >=(Vector2Int A, Vector2Int B) => A.x >= B.x && A.y >= B.y;
 
         public static explicit operator Vector2(Vector2Int Vector) => new Vector2(Vector.x, Vector.y);
 
@@ -143,8 +157,8 @@ namespace Zion.Vectors
         }
         public static Vector2Int GetRandomVector(Vector2Int Min, Vector2Int Max, Random Random)
         {
-            int x = Random.Next(Min.x, Max.x + 1);
-            int y = Random.Next(Min.y, Max.y + 1);
+            int x = Random.Next(Min.x, Max.x);
+            int y = Random.Next(Min.y, Max.y);
             return new Vector2Int(x, y);
         }
 

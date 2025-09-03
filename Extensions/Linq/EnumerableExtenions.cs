@@ -2,23 +2,84 @@
 {
     public static class EnumerableExtensions
     {
+        public static int Summarize(this IEnumerable<int> Enumerable) => Enumerable.Summarize(i => i);
+        public static double Summarize(this IEnumerable<double> Enumerable) => Enumerable.Summarize(d => d);
+
+        public static int Average(this IEnumerable<int> Enumerable) => Enumerable.Average(i => i);
+        public static float Average(this IEnumerable<float> Enumerable) => Enumerable.Average(i => i);
+        public static double Average(this IEnumerable<double> Enumerable) => Enumerable.Average(i => i);
+
+
         /// <summary>
         /// Summarizes elements by applying a length function to each item and summing the results.
         /// </summary>
         /// <typeparam name="T">The type of elements in the collection.</typeparam>
-        /// <param name="Array">The source collection.</param>
+        /// <param name="Enumerable">The source collection.</param>
         /// <param name="GetLength">A function that extracts a length value from each element.</param>
         /// <returns>The total sum of lengths computed from all elements.</returns>
-        /// <exception cref="ArgumentNullException">Thrown if <paramref name="Array"/> or <paramref name="GetLength"/> is null.</exception>
-        public static int Summarize<T>(this IEnumerable<T> Array, Func<T, int> GetLength)
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="Enumerable"/> or <paramref name="GetLength"/> is null.</exception>
+        public static int Summarize<T>(this IEnumerable<T> Enumerable, Func<T, int> GetLength)
         {
             int Count = 0;
-            foreach (T Item in Array)
+            foreach (T Item in Enumerable)
             {
                 Count += GetLength(Item);
             }
             return Count;
         }
+
+        public static double Summarize<T>(this IEnumerable<T> Enumerable, Func<T, double> GetLength)
+        {
+            double Count = 0;
+            foreach (T Item in Enumerable)
+            {
+                Count += GetLength(Item);
+            }
+            return Count;
+        }
+
+
+        public static int Average<T>(this IEnumerable<T> Enumerable, Func<T, int> ToInt)
+        {
+            int Result = 0;
+            int Count = 0;
+
+            foreach (T Item in Enumerable)
+            {
+                Result += ToInt(Item);
+                Count++;
+            }
+
+            return Result / Count;
+        }
+        public static float Average<T>(this IEnumerable<T> Enumerable, Func<T, float> ToInt)
+        {
+            float Result = 0;
+            int Count = 0;
+
+            foreach (T Item in Enumerable)
+            {
+                Result += ToInt(Item);
+                Count++;
+            }
+
+            return Result / Count;
+        }
+
+        public static double Average<T>(this IEnumerable<T> Enumerable, Func<T, double> ToInt)
+        {
+            double Result = 0;
+            int Count = 0;
+
+            foreach (T Item in Enumerable)
+            {
+                Result += ToInt(Item);
+                Count++;
+            }
+
+            return Result / Count;
+        }
+
 
         /// <summary>
         /// Determines whether all elements satisfy a condition.

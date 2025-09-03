@@ -90,6 +90,19 @@ namespace Zion.Vectors
             return new Vector2(VectorA.x / VectorA.x, B.y / B.y);
         }
 
+        public static Vector2 operator --(Vector2 Vector)
+        {
+            Vector.x--;
+            Vector.y--;
+            return Vector;
+        }
+        public static Vector2 operator ++(Vector2 Vector)
+        {
+            Vector.x++;
+            Vector.y++;
+            return Vector;
+        }
+
 
         public static Vector2 operator +(Vector2 A, Vector2 B) => new Vector2(A.x + B.x, A.y + B.y);
         public static Vector2 operator -(Vector2 A, Vector2 B) => new Vector2(A.x - B.x, A.y - B.y);
@@ -105,20 +118,20 @@ namespace Zion.Vectors
         public static bool operator ==(Vector2Int A, Vector2 B) => A.x == B.x && A.y == B.y;
         public static bool operator !=(Vector2Int A, Vector2 B) => A.x == B.x && A.y == B.y;
 
-        public static bool operator <(Vector2 A, Vector2 B) => A.x < B.x || A.y < B.y;
-        public static bool operator >(Vector2 A, Vector2 B) => A.x > B.x || A.y > B.y;
-        public static bool operator <=(Vector2 A, Vector2 B) => A.x <= B.x || A.y <= B.y;
-        public static bool operator >=(Vector2 A, Vector2 B) => A.x >= B.x || A.y >= B.y;
+        public static bool operator <(Vector2 A, Vector2 B) => A.x < B.x && A.y < B.y;
+        public static bool operator >(Vector2 A, Vector2 B) => A.x > B.x && A.y > B.y;
+        public static bool operator <=(Vector2 A, Vector2 B) => A.x <= B.x && A.y <= B.y;
+        public static bool operator >=(Vector2 A, Vector2 B) => A.x >= B.x && A.y >= B.y;
 
-        public static bool operator <(Vector2 A, Vector2Int B) => A.x < B.x || A.y < B.y;
-        public static bool operator >(Vector2 A, Vector2Int B) => A.x > B.x || A.y > B.y;
-        public static bool operator <=(Vector2 A, Vector2Int B) => A.x <= B.x || A.y <= B.y;
-        public static bool operator >=(Vector2 A, Vector2Int B) => A.x >= B.x || A.y >= B.y;
+        public static bool operator <(Vector2 A, Vector2Int B) => A.x < B.x && A.y < B.y;
+        public static bool operator >(Vector2 A, Vector2Int B) => A.x > B.x && A.y > B.y;
+        public static bool operator <=(Vector2 A, Vector2Int B) => A.x <= B.x && A.y <= B.y;
+        public static bool operator >=(Vector2 A, Vector2Int B) => A.x >= B.x && A.y >= B.y;
 
-        public static bool operator <(Vector2Int A, Vector2 B) => A.x < B.x || A.y < B.y;
-        public static bool operator >(Vector2Int A, Vector2 B) => A.x > B.x || A.y > B.y;
-        public static bool operator <=(Vector2Int A, Vector2 B) => A.x <= B.x || A.y <= B.y;
-        public static bool operator >=(Vector2Int A, Vector2 B) => A.x >= B.x || A.y >= B.y;
+        public static bool operator <(Vector2Int A, Vector2 B) => A.x < B.x && A.y < B.y;
+        public static bool operator >(Vector2Int A, Vector2 B) => A.x > B.x && A.y > B.y;
+        public static bool operator <=(Vector2Int A, Vector2 B) => A.x <= B.x && A.y <= B.y;
+        public static bool operator >=(Vector2Int A, Vector2 B) => A.x >= B.x && A.y >= B.y;
 
         public static explicit operator Vector2Int(Vector2 Vector) => new Vector2Int((int)Vector.x, (int)Vector.y);
 

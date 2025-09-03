@@ -23,7 +23,7 @@
         }
 
         public string ToColorString() => ToString();
-        
+
 
         public void Write(BinaryWriter Writer)
         {

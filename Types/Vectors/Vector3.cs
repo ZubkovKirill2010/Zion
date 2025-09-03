@@ -38,6 +38,21 @@ namespace Zion.Vectors
             this.z = z;
         }
 
+        public static Vector3 operator --(Vector3 Vector)
+        {
+            Vector.x--;
+            Vector.y--;
+            Vector.z--;
+            return Vector;
+        }
+        public static Vector3 operator ++(Vector3 Vector)
+        {
+            Vector.x++;
+            Vector.y++;
+            Vector.z++;
+            return Vector;
+        }
+
         public static Vector3 operator +(Vector3 A, Vector3 B)
         {
             return new Vector3(A.x + B.x, A.y + B.y, A.z + B.z);
@@ -84,11 +99,11 @@ namespace Zion.Vectors
 
         public static bool operator <=(Vector3 A, Vector3 B)
         {
-            return A.x <= B.x || A.y <= B.y || A.z <= B.z;
+            return A.x <= B.x && A.y <= B.y && A.z <= B.z;
         }
         public static bool operator >=(Vector3 A, Vector3 B)
         {
-            return A.x >= B.x || A.y >= B.y || A.y <= B.y;
+            return A.x >= B.x && A.y >= B.y && A.y <= B.y;
         }
 
 

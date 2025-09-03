@@ -161,6 +161,58 @@ namespace Zion
             return String.Length <= TotalLength ? String : String[..(TotalLength - 3)] + "...";
         }
 
+        public static string[] Chunk(this string String, int ChunkLength)
+        {
+            if (string.IsNullOrEmpty(String) || ChunkLength <= 0)
+            {
+                return Array.Empty<string>();
+            }
+
+            string[] Chunks = new string[(int)Math.Ceiling(String.Length / (double)ChunkLength)];
+
+            int End = Chunks.Length - 1;
+            int ChunkIndex = 0;
+            int Index = 0;
+
+            while (ChunkIndex < End)
+            {
+                int EndIndex = Index + ChunkLength;
+                Chunks[ChunkIndex] = String.Substring(Index, ChunkLength);
+                Index = EndIndex;
+                ChunkIndex++;
+            }
+
+            Chunks[End] = String.Substring(Index);
+
+            return Chunks;
+        }
+
+        public static string[] ChunkFromRight(this string String, int ChunkLength)
+        {
+            if (string.IsNullOrEmpty(String) || ChunkLength <= 0)
+            {
+                return Array.Empty<string>();
+            }
+
+            string[] Chunks = new string[(String.Length + ChunkLength - 1) / ChunkLength];
+
+            int End = Chunks.Length - 1;
+            int ChunkIndex = End;
+            int Index = String.Length;
+
+            while (ChunkIndex > 0)
+            {
+                int StartIndex = Index - ChunkLength;
+                Chunks[ChunkIndex] = String.Substring(StartIndex, ChunkLength);
+                Index = StartIndex;
+                ChunkIndex--;
+            }
+
+            Chunks[0] = String.Substring(0, Index);
+
+            return Chunks;
+        }
+
         #endregion
 
         #region Prefix & Suffix
@@ -280,7 +332,7 @@ namespace Zion
                     }
                 }
             }
-                
+
             return true;
         }
         public static bool Exists(this string String, string Target, out int StartIndex)

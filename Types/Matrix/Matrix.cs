@@ -56,6 +56,15 @@ namespace Zion
             return x >= 0 && y >= 0 && x < Size.x && y < Size.y;
         }
 
+        public bool IsEdge(Vector2Int Position)
+        {
+            return IsEdge(Position.x, Position.y);
+        }
+        public bool IsEdge(int x, int y)
+        {
+            return x == 0 || x == Size.x - 1 && y == 0 || y == Size.y - 1;
+        }
+
         public Matrix<T> Clone()
         {
             Matrix<T> Result = new Matrix<T>(Size);

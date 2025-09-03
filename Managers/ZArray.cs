@@ -23,5 +23,21 @@
 
             return Result;
         }
+
+        public static void Repeat(Action Action, int Count)
+        {
+            for (int i = 0; i < Count; i++)
+            {
+                Action();
+            }
+        }
+        public static void Repeat(Action<int> Action, int Count)
+        {
+            for (int i = 0; i < Count; i++)
+            {
+                int Index = i;
+                Action(Index);
+            }
+        }
     }
 }

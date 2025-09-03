@@ -55,6 +55,21 @@ namespace Zion.Vectors
             return new Vector3Int(A.x / B, A.y / B, A.z / B);
         }
 
+        public static Vector3Int operator --(Vector3Int Vector)
+        {
+            Vector.x--;
+            Vector.y--;
+            Vector.z--;
+            return Vector;
+        }
+        public static Vector3Int operator ++(Vector3Int Vector)
+        {
+            Vector.x++;
+            Vector.y++;
+            Vector.z++;
+            return Vector;
+        }
+
         public static bool operator ==(Vector3Int A, Vector3Int B)
         {
             return A.x == B.x && A.y == B.y && A.z == B.z;
@@ -65,11 +80,11 @@ namespace Zion.Vectors
         }
         public static bool operator <=(Vector3Int A, Vector3Int B)
         {
-            return A.x <= B.x || A.y <= B.y || A.z <= B.z;
+            return A.x <= B.x && A.y <= B.y && A.z <= B.z;
         }
         public static bool operator >=(Vector3Int A, Vector3Int B)
         {
-            return A.x >= B.x || A.y >= B.y || A.y <= B.y;
+            return A.x >= B.x && A.y >= B.y && A.y <= B.y;
         }
 
         public override string ToString() => $"[{x}, {y}, {z}]";

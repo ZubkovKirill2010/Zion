@@ -2,6 +2,6 @@
 {
     public interface IColorText
     {
-        public abstract string ToColorString();
+        abstract string ToColorString();
     }
 }
