@@ -27,6 +27,7 @@ namespace Zion
             }
         }
 
+
         public bool this[int Index]
         {
             get
@@ -39,6 +40,30 @@ namespace Zion
                 int ByteIndex = Index / 8;
                 Data[ByteIndex].SetBit(Index - ByteIndex, value);
             }
+        }
+
+
+        public static implicit operator bool[](BitArray BitArray)
+        {
+            bool[] Array = new bool[BitArray.Length];
+            
+            for (int i = 0; i < Array.Length; i++)
+            {
+                Array[i] = BitArray[i];
+            }
+
+            return Array;
+        }
+        public static implicit operator List<bool>(BitArray BitArray)
+        {
+            List<bool> List = new List<bool>(BitArray.Length);
+
+            foreach (bool Item in BitArray)
+            {
+                List.Add(Item);
+            }
+
+            return List;
         }
 
 

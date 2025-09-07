@@ -39,6 +39,28 @@ namespace Zion
         public T[] this[Range Range] => Data[Range];
 
 
+        public static implicit operator T[](RecordList<T> RecordList)
+        {
+            T[] Array = new T[RecordList.Count];
+            for (int i = 0; i < Array.Length; i++)
+            {
+                Array[i] = RecordList[i];
+            }
+            return Array;
+        }
+        public static implicit operator List<T>(RecordList<T> RecordList)
+        {
+            List<T> List = new List<T>(RecordList.Count);
+            
+            foreach (T Item in RecordList)
+            {
+                List.Add(Item);
+            }
+
+            return List;
+        }
+
+
         public override string ToString()
         {
             return $"[{Data.ToEnumerableString()}]";

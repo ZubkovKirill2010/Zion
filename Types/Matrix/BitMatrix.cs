@@ -2,10 +2,13 @@
 
 namespace Zion
 {
-    public sealed class BitMatrix : IBinaryObject<BitMatrix>
+    public sealed class BitMatrix : IMatrix<bool>, IBinaryObject<BitMatrix>
     {
         private readonly byte[] Data;
-        public readonly Vector2Int Size;
+        public Vector2Int Size { get; }
+
+        public int Width => Size.x;
+        public int Height => Size.y;
 
         public BitMatrix(Vector2Int Size)
         {
@@ -38,6 +41,7 @@ namespace Zion
             }
         }
 
+
         public bool this[int x, int y]
         {
             get
@@ -58,6 +62,23 @@ namespace Zion
         }
 
 
+        public static implicit operator Matrix<bool>(BitMatrix BitMatrix)
+        {
+            var Size = BitMatrix.Size;
+            var Matrix = new Matrix<bool>(Size);
+
+            for (int x = 0; x < Size.x; x++)
+            {
+                for (int y = 0; y < Size.y; y++)
+                {
+                    Matrix[x, y] = BitMatrix[x, y];
+                }
+            }
+
+            return Matrix;
+        }
+
+
         public bool IsInside(Vector2Int Position)
         {
             return Position >= Vector2Int.Zero && Position < Size;
@@ -65,6 +86,15 @@ namespace Zion
         public bool IsInside(int x, int y)
         {
             return x >= 0 && y >= 0 && x < Size.x && y < Size.y;
+        }
+
+        public bool IsEdge(Vector2Int Position)
+        {
+            return IsEdge(Position.x, Position.y);
+        }
+        public bool IsEdge(int x, int y)
+        {
+            return x == 0 || x == Size.x - 1 && y == 0 || y == Size.y - 1;
         }
 
         public BitMatrix Clone()

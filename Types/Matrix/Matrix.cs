@@ -3,10 +3,12 @@ using Zion.Vectors;
 
 namespace Zion
 {
-    public class Matrix<T> : IBinaryGeneric<Matrix<T>, T>, IEnumerable<T>
+    public class Matrix<T> : IMatrix<T>, IBinaryGeneric<Matrix<T>, T>, IEnumerable<T>
     {
         private readonly T[,] Data;
-        public readonly Vector2Int Size;
+        public Vector2Int Size { get; }
+        public int Width => Size.x;
+        public int Height => Size.y;
 
 
         public Matrix(Vector2Int Size)
