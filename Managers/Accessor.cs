@@ -52,5 +52,28 @@
             A = B;
             B = Temp;
         }
+
+
+        public static T AddAndReturn<T, I>(T Collection, I Item) where T : ICollection<I>
+        {
+            Collection.Add(Item);
+            return Collection;
+        }
+        public static T InsertAndReturn<T, I>(T List, int Index, I Item) where T : IList<I>
+        {
+            List.Insert(Index, Item);
+            return List;
+        }
+
+        public static T RemoveAndReturn<T, I>(T List, I Item) where T : ICollection<I>
+        {
+            List.Remove(Item);
+            return List;
+        }
+        public static T RemoveAtAndReturn<T, I>(T List, int Index) where T : IList<I>
+        {
+            List.RemoveAt(Index);
+            return List;
+        }
     }
 }

@@ -236,5 +236,16 @@
             }
             return true;
         }
+
+
+        public static string ToEnumerableString<T>(this IEnumerable<T> Enumerable)
+        {
+            return $"[{string.Join(", ", Enumerable)}]";
+        }
+
+        public static string ToEnumerableString<T>(this IEnumerable<T> Enumerable, Func<T, string> ToString)
+        {
+            return $"[{string.Join(", ", Enumerable.Select(ToString))}]";
+        }
     }
 }

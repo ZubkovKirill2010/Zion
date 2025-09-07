@@ -79,6 +79,12 @@ namespace Zion.Vectors
         public static Vector2Int operator +(Vector2Int A, Vector2Byte B) => new Vector2Int(A.x + B.x, A.y + B.y);
         public static Vector2Int operator -(Vector2Int A, Vector2Byte B) => new Vector2Int(A.x - B.x, A.y - B.y);
 
+        public static Vector2Int operator +(Vector2Int A, HorizontalDirection B) => new Vector2Int(A.x + (int)B, A.y);
+        public static Vector2Int operator -(Vector2Int A, HorizontalDirection B) => new Vector2Int(A.x - (int)B, A.y);
+
+        public static Vector2Int operator +(Vector2Int A, VerticalDirection B) => new Vector2Int(A.x, A.y + (int)B);
+        public static Vector2Int operator -(Vector2Int A, VerticalDirection B) => new Vector2Int(A.x, A.y - (int)B);
+
         public static bool operator ==(Vector2Int A, Vector2Int B) => A.x == B.x && A.y == B.y;
         public static bool operator !=(Vector2Int A, Vector2Int B) => A.x != B.x || A.y != B.y;
 

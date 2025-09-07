@@ -109,6 +109,12 @@ namespace Zion.Vectors
         public static Vector2 operator *(Vector2 A, float B) => new Vector2(A.x * B, A.y * B);
         public static Vector2 operator /(Vector2 A, float B) => new Vector2(A.x / B, A.y / B);
 
+        public static Vector2 operator +(Vector2 A, HorizontalDirection B) => new Vector2(A.x + (int)B, A.y);
+        public static Vector2 operator -(Vector2 A, HorizontalDirection B) => new Vector2(A.x - (int)B, A.y);
+
+        public static Vector2 operator +(Vector2 A, VerticalDirection B) => new Vector2(A.x, A.y + (int)B);
+        public static Vector2 operator -(Vector2 A, VerticalDirection B) => new Vector2(A.x, A.y - (int)B);
+
         public static bool operator ==(Vector2 A, Vector2 B) => A.x == B.x && A.y == B.y;
         public static bool operator !=(Vector2 A, Vector2 B) => A.x != B.x || A.y != B.y;
 

@@ -8,6 +8,7 @@ namespace Zion
         private readonly T[,] Data;
         public readonly Vector2Int Size;
 
+
         public Matrix(Vector2Int Size)
         {
             Data = new T[Size.x, Size.y];
