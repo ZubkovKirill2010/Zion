@@ -2,9 +2,15 @@
 
 namespace Zion
 {
-    public class RecordList<T> : ICollection<T>
+    public enum CompareMode : sbyte
     {
-        private readonly Func<T, T, int> Comparer;
+        MinToMax = 1,
+        MaxToMin = -1
+    }
+
+    public class RecordList<T> : ICollection<T>, IBinaryGeneric<RecordList<T>, T> where T : IComparable<T>
+    {
+        private readonly CompareMode CompareMode;
 
         private readonly T[] Data;
         private int Length;
@@ -13,17 +19,50 @@ namespace Zion
         public int Count       => Length;
         public bool IsReadOnly => false;
 
-        public RecordList(int Capacity, Func<T, T, int> Comparer)
+        public RecordList(int Capacity, CompareMode CompareMode)
         {
-            if (Capacity <= 0)
-            {
-                throw new ArgumentOutOfRangeException($"Capacity(={Capacity}) <= 0)");
-            }
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(Capacity);
 
-            this.Comparer = Comparer;
-
+            this.CompareMode = CompareMode;
             Data = new T[Capacity];
             Length = 0;
+        }
+        private RecordList(T[] Data, int Count, int CompareMode)
+        {
+            this.Data = Data;
+            Length = Count;
+        }
+
+
+        public T this[int Index] => Data[Index];
+        public T this[Index Index] => Data[Index];
+        public T[] this[Range Range] => Data[Range];
+
+
+        public override string ToString()
+        {
+            return $"[{Data.ToEnumerableString()}]";
+        }
+        public override bool Equals(object? Object)
+        {
+            if (Object is null) { return false; }
+            if (Object is RecordList<T> RecordList)
+            {
+                if (RecordList.Count != Count)
+                {
+                    return false;
+                }
+                for (int i = 0; i < Data.Length; i++)
+                {
+                    if (!RecordList.Data[i].Equals(Data[i]))
+                    {
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            return false;
         }
 
 
@@ -62,16 +101,51 @@ namespace Zion
             }
         }
 
-        public bool Contains(T Target)
+        public bool Contains(T Item)
         {
-            foreach (T Item in this)
+            return IndexOf(Item) != -1;
+        }
+
+        public int IndexOf(T Item)
+        {
+            if (Length == 0)
             {
-                if (Item.Equals(Target))
+                return -1;
+            }
+            if (Length == 1 && Item.CompareTo(Data[0]) == 0)
+            {
+                return 0;
+            }
+
+            int Min = 0;
+            int Max = Length - 1;
+
+            while (Min <= Max)
+            {
+                int Target = Min + ((Max - Min) / 2);
+                int Comparing = Item.CompareTo(Data[Target]);
+
+                if (CompareMode == CompareMode.MaxToMin)
                 {
-                    return true;
+                    Comparing *= -1;
+                }
+
+                if (Comparing == 0)
+                {
+                    return Target;
+                }
+
+                if (Comparing < 0)
+                {
+                    Max = Target - 1;
+                }
+                else
+                {
+                    Min = Target + 1;
                 }
             }
-            return false;
+
+            return -1;
         }
 
         public void CopyTo(T[] Array, int ArrayIndex)
@@ -113,6 +187,24 @@ namespace Zion
         }
 
 
+        public void Write(BinaryWriter Writer, Action<BinaryWriter, T> WriteObject)
+        {
+            Writer.Write(Data, WriteObject);
+            Writer.Write(Length);
+            Writer.Write((sbyte)CompareMode);
+        }
+
+        public static RecordList<T> Read(BinaryReader Reader, Func<BinaryReader, T> ReadObject)
+        {
+            return new RecordList<T>
+            (
+                Reader.ReadArray(ReadObject),
+                Reader.ReadInt32(),
+                Reader.ReadSByte()
+            );
+        }
+
+
         private int GetInsertIndex(T Item)
         {
             if (Length == 0)
@@ -126,7 +218,12 @@ namespace Zion
             while (Min <= Max)
             {
                 int Target = Min + ((Max - Min) / 2);
-                int Comparing = Comparer(Item, Data[Target]);
+                int Comparing = Item.CompareTo(Data[Target]);
+
+                if (CompareMode == CompareMode.MaxToMin)
+                {
+                    Comparing *= -1;
+                }
 
                 if (Comparing == 0)
                 {
@@ -137,7 +234,7 @@ namespace Zion
                 {
                     Max = Target - 1;
                 }
-                else //Comparing > 0
+                else
                 {
                     Min = Target + 1;
                 }
