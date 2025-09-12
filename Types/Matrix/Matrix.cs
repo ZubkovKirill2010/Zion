@@ -181,9 +181,9 @@ namespace Zion
 
         public IEnumerator<T> GetEnumerator()
         {
-            for (int x = 0; x < Size.x; x++)
+            for (int x = 0; x < Width; x++)
             {
-                for (int y = 0; y < Size.y; y++)
+                for (int y = 0; y < Height; y++)
                 {
                     yield return this[x, y];
                 }

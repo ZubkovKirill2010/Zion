@@ -8,13 +8,13 @@ namespace Zion
         private readonly IList<TIn> List;
         private readonly TOut?[] Results;
 
-        private readonly int CountField;
+        private readonly int Length;
 
         public ConvertedArray(IList<TIn> List, Converter<TIn, TOut> Converter)
         {
             this.List = List;
             this.Converter = Converter;
-            CountField = List.Count;
+            Length = List.Count;
             Results = new TOut[List.Count];
         }
 
@@ -33,10 +33,20 @@ namespace Zion
             set => throw new NotSupportedException("ConverterArray is read only");
         }
 
+        public static implicit operator TOut[](ConvertedArray<TIn, TOut> ConverterArray)
+        {
+            TOut[] Array = new TOut[ConverterArray.Count];
+            for (int i = 0; i < Array.Length; i++)
+            {
+                Array[i] = ConverterArray[i];
+            }
+            return Array;
+        }
+
         public TIn GetOriginal(int Index) => List[Index];
 
         public bool IsReadOnly => true;
-        public int Count => CountField;
+        public int Count => Length;
 
         public void Add(TOut item)
         {

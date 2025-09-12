@@ -237,6 +237,24 @@
             return true;
         }
 
+        public static T[] ToArray<T>(this IEnumerable<T> Enumerable, int Count)
+        {
+            T[] Array = new T[Count];
+            int Index = 0;
+
+            foreach (T Procedure in Enumerable)
+            {
+                if (Index >= Count)
+                {
+                    throw new ArgumentOutOfRangeException($"Count of Enumerable(={Enumerable.Count()}) >= Count(={Count})");
+                }
+
+                Array[Index++] = Procedure;
+            }
+
+            return Array;
+        }
+
 
         public static string ToEnumerableString<T>(this IEnumerable<T> Enumerable)
         {

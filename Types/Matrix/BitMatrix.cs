@@ -1,4 +1,5 @@
-﻿using Zion.Vectors;
+﻿using System.Collections;
+using Zion.Vectors;
 
 namespace Zion
 {
@@ -192,6 +193,23 @@ namespace Zion
             }
             int BitIndex = Size.x * y + x;
             return (BitIndex / 8, BitIndex % 8);
+        }
+
+
+        public IEnumerator<bool> GetEnumerator()
+        {
+            for (int x = 0; x < Width; x++)
+            {
+                for (int y = 0; y < Height; y++)
+                {
+                    yield return this[x, y];
+                }
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
 
 

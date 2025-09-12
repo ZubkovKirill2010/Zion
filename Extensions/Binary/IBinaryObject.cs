@@ -15,21 +15,6 @@
         /// Deserializes the object from binary stream.
         /// </summary>
         abstract static T Read(BinaryReader Reader);
-
-
-        void Save(string FilePath)
-        {
-            using FileStream Stream = new FileStream(FilePath, FileMode.Create);
-            using BinaryWriter Writer = new BinaryWriter(Stream);
-            Write(Writer);
-        }
-
-        static T Load(string FilePath)
-        {
-            using FileStream Stream = new FileStream(FilePath, FileMode.Open);
-            using BinaryReader Reader = new BinaryReader(Stream);
-            return T.Read(Reader);
-        }
     }
 
     /// <summary>
