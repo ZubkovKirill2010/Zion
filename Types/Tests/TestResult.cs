@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Text;
 
-namespace Zion
+namespace Zion.Diagnostics
 {
     public readonly struct TestResult<TIn, TOut>
     {

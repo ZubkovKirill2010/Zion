@@ -1,4 +1,4 @@
-﻿namespace Zion
+﻿namespace Zion.Diagnostics
 {
     public sealed class Tester<TIn, TOut>
     {
