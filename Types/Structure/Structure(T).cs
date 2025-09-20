@@ -6,7 +6,7 @@ using System.Text.Json.Serialization;
 namespace Zion
 {
     [Serializable]
-    public class Structure<T> : IList<Structure<T>>, IBinaryGeneric<Structure<T>, T>
+    public class Structure<T> : IList<Structure<T>>, IBinaryGeneric<Structure<T>, T>, IColorText
     {
         private static InvalidOperationException IsParentException => new InvalidOperationException("Cannot add a parent structure to its child elements");
 
@@ -78,6 +78,11 @@ namespace Zion
             StringBuilder Result = new StringBuilder();
             BuildTreeString(Result, string.Empty, true);
             return Result.ToString().TrimEnd();
+        }
+
+        public string ToColorString()
+        {
+            return ToColorString(new Color(67, 211, 224));
         }
 
         public string ToColorString(Color LineColor)

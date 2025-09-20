@@ -228,6 +228,11 @@
             }
         }
 
+        public static bool IsNullOrEmpty<T>(this IEnumerable<T> Enumerable)
+        {
+            return Enumerable is null || IsEmpty(Enumerable);
+        }
+
         public static bool IsEmpty<T>(this IEnumerable<T> Enumerable)
         {
             foreach (T Item in Enumerable)
@@ -261,7 +266,7 @@
             return $"[{string.Join(", ", Enumerable)}]";
         }
 
-        public static string ToEnumerableString<T>(this IEnumerable<T> Enumerable, Func<T, string> ToString)
+        public static string ToString<T>(this IEnumerable<T> Enumerable, Func<T, string> ToString)
         {
             return $"[{string.Join(", ", Enumerable.Select(ToString))}]";
         }
