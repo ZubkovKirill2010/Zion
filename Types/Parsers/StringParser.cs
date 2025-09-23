@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Diagnostics;
+using System.Text;
 
 namespace Zion
 {
@@ -32,7 +33,7 @@ namespace Zion
 
             int Start = 0;
             int Index = 0;
-            StringBuilder Builder = new StringBuilder(String.Length + 30);
+            StringBuilder Builder = new StringBuilder(String.Length);
 
             while (Index < String.Length)
             {
@@ -60,7 +61,7 @@ namespace Zion
                                 break;
                             }
                             Start = Index + 1;
-                            Index += 4;
+                            Index += 5;
 
                             Builder.Append
                             (
@@ -68,7 +69,7 @@ namespace Zion
                                 (
                                     Convert.ToInt32
                                     (
-                                        String[Start..Index],
+                                        String[Start..Math.Min(Index, String.Length)],
                                         16
                                     )
                                 )
@@ -90,7 +91,7 @@ namespace Zion
                                 break;
                             }
                             Start = Index + 1;
-                            Index += 2;
+                            Index += 3;
 
                             Builder.Append
                             (
