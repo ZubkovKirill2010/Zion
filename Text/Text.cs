@@ -213,6 +213,30 @@ namespace Zion
             return Chunks;
         }
 
+        public static string ConvertAll(this string String, Func<char, char> Converter)
+        {
+            ArgumentNullException.ThrowIfNull(String);
+            ArgumentNullException.ThrowIfNull(Converter);
+
+            if (String.Length == 0)
+            {
+                return String;
+            }
+
+            return string.Create
+            (
+                String.Length,
+                String,
+                (Span, Original) =>
+                {
+                    for (int i = 0; i < Original.Length; i++)
+                    {
+                        Span[i] = Converter(Original[i]);
+                    }
+                }
+            );
+        }
+
         #endregion
 
         #region Prefix & Suffix

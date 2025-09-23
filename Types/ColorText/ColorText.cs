@@ -30,6 +30,15 @@ namespace Zion
             return $"\u001b[38;2;{Color.R};{Color.G};{Color.B}m{Text}\u001b[0m";
         }
 
+        public string ToUnicode()
+        {
+            return $"\\u001b[38;2;{Color.R};{Color.G};{Color.B}m{Text}\\u001b[0m";
+        }
+        public static string ToUnicode(string Text, Color Color)
+        {
+            return $"\\u001b[38;2;{Color.R};{Color.G};{Color.B}m{Text}\\u001b[0m";
+        }
+
         public string ToColorString() => ToString();
 
         public static string GetText(string Text, Color Color)
@@ -78,6 +87,11 @@ namespace Zion
                 }
             }
             return Builder.ToString();
+        }
+
+        public static bool IsColored(string String)
+        {
+            return String.Contains("\u001b[38;2;");
         }
 
         public static string ConcatToString(params ColorText[] Array)
