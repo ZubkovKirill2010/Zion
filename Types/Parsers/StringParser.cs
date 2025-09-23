@@ -51,7 +51,7 @@ namespace Zion
                     switch (Char)
                     {
                         case 'u':
-                            if (Index + 4 >= String.Length)
+                            if (Index + 5 >= String.Length)
                             {
                                 while (Index < String.Length)
                                 {
@@ -81,7 +81,7 @@ namespace Zion
                             break;
 
                         case 'x':
-                            if (Index + 2 >= String.Length)
+                            if (Index + 3 >= String.Length)
                             {
                                 while (Index < String.Length)
                                 {
