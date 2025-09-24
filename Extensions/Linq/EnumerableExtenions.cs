@@ -52,28 +52,28 @@
 
             return Result / Count;
         }
-        public static float Average<T>(this IEnumerable<T> Enumerable, Func<T, float> ToInt)
+        public static float Average<T>(this IEnumerable<T> Enumerable, Func<T, float> ToFloat)
         {
             float Result = 0;
             int Count = 0;
 
             foreach (T Item in Enumerable)
             {
-                Result += ToInt(Item);
+                Result += ToFloat(Item);
                 Count++;
             }
 
             return Result / Count;
         }
 
-        public static double Average<T>(this IEnumerable<T> Enumerable, Func<T, double> ToInt)
+        public static double Average<T>(this IEnumerable<T> Enumerable, Func<T, double> ToDouble)
         {
             double Result = 0;
             int Count = 0;
 
             foreach (T Item in Enumerable)
             {
-                Result += ToInt(Item);
+                Result += ToDouble(Item);
                 Count++;
             }
 

@@ -1,7 +1,7 @@
-﻿namespace Zion
-{
-    internal sealed class Graph<T>
-    {
+﻿//namespace Zion
+//{
+//    internal sealed class Graph<T>
+//    {
 
-    }
-}
+//    }
+//}

@@ -63,17 +63,20 @@ namespace Zion
                             Start = Index + 1;
                             Index += 5;
 
-                            Builder.Append
-                            (
-                                char.ConvertFromUtf32
+                            string Unicode = String[Start..Index];
+
+                            try
+                            {
+                                Builder.Append
                                 (
-                                    Convert.ToInt32
-                                    (
-                                        String[Start..Math.Min(Index, String.Length)],
-                                        16
-                                    )
-                                )
-                            );
+                                    char.ConvertFromUtf32(Convert.ToInt32(Unicode, 16))
+                                );
+                            }
+                            catch
+                            {
+                                Builder.Append("\\u");
+                                Builder.Append(Unicode);
+                            }
                             break;
 
                         case 'n':
@@ -93,17 +96,20 @@ namespace Zion
                             Start = Index + 1;
                             Index += 3;
 
-                            Builder.Append
-                            (
-                                char.ConvertFromUtf32
+                            string xUnicode = String[Start..Index];
+
+                            try
+                            {
+                                Builder.Append
                                 (
-                                    Convert.ToInt32
-                                    (
-                                        String[Start..Index],
-                                        16
-                                    )
-                                )
-                            );
+                                    char.ConvertFromUtf32(Convert.ToInt32(xUnicode, 16))
+                                );
+                            }
+                            catch
+                            {
+                                Builder.Append("\\x");
+                                Builder.Append(xUnicode);
+                            }
                             break;
 
 
