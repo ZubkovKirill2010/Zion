@@ -1,4 +1,6 @@
-﻿namespace Zion
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace Zion
 {
     public static class ListExtensions
     {
@@ -10,7 +12,7 @@
         /// <returns>
         /// <c>true</c> if the list is null or has no elements; otherwise, <c>false</c>.
         /// </returns>
-        public static bool IsNullOrEmpty<T>(this IList<T>? List)
+        public static bool IsNullOrEmpty<T>([NotNullWhen(false)] this IList<T>? List)
         {
             return List is null || List.Count == 0;
         }

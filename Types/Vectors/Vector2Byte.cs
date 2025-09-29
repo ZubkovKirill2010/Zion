@@ -2,7 +2,7 @@
 
 namespace Zion.Vectors
 {
-    public struct Vector2Byte
+    public struct Vector2Byte : IBinaryObject<Vector2Byte>, IRandomizable<Vector2Byte>
     {
         public static readonly Vector2Byte Zero = new Vector2Byte(0, 0);
         public static readonly Vector2Byte Up = new Vector2Byte(0, 1);
@@ -98,6 +98,21 @@ namespace Zion.Vectors
         {
             return Object is not null && Object is Vector2Byte Vector2Byte ?
                 this == Vector2Byte : false;
+        }
+
+
+        public void Write(BinaryWriter Writer)
+        {
+            Writer.Write(Value);
+        }
+        public static Vector2Byte Read(BinaryReader Reader)
+        {
+            return new Vector2Byte(Reader.ReadByte());
+        }
+
+        public static Vector2Byte GetRandom(Random Random, Vector2Byte Min, Vector2Byte Max)
+        {
+            return new Vector2Byte(Random.Next(Min.x, Max.x), Random.Next(Min.y, Max.y));
         }
 
 

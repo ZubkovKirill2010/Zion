@@ -7,6 +7,11 @@
             Target = Value;
             return Target;
         }
+        public static T SetRef<T>(ref T Target, T Value)
+        {
+            Target = Value;
+            return Target;
+        }
 
         public static T SetIf<T>(ref T Target, T Value, bool Condition)
         {
@@ -34,7 +39,7 @@
             return Target;
         }
 
-        public static T Out<T>(T Target, out T Value)
+        public static T Out<T>(this T Target, out T Value)
         {
             Value = Target;
             return Target;
@@ -54,23 +59,23 @@
         }
 
 
-        public static T AddAndReturn<T, I>(T Collection, I Item) where T : ICollection<I>
+        public static I AddAndReturn<T, I>(this T Collection, I Item) where T : ICollection<I>
         {
             Collection.Add(Item);
-            return Collection;
+            return Item;
         }
-        public static T InsertAndReturn<T, I>(T List, int Index, I Item) where T : IList<I>
+        public static T InsertAndReturn<T, I>(this T List, int Index, I Item) where T : IList<I>
         {
             List.Insert(Index, Item);
             return List;
         }
 
-        public static T RemoveAndReturn<T, I>(T List, I Item) where T : ICollection<I>
+        public static T RemoveAndReturn<T, I>(this T List, I Item) where T : ICollection<I>
         {
             List.Remove(Item);
             return List;
         }
-        public static T RemoveAtAndReturn<T, I>(T List, int Index) where T : IList<I>
+        public static T RemoveAtAndReturn<T, I>(this T List, int Index) where T : IList<I>
         {
             List.RemoveAt(Index);
             return List;

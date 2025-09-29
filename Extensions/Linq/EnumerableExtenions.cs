@@ -1,4 +1,6 @@
-﻿namespace Zion
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace Zion
 {
     public static class EnumerableExtensions
     {
@@ -228,7 +230,8 @@
             }
         }
 
-        public static bool IsNullOrEmpty<T>(this IEnumerable<T> Enumerable)
+        
+        public static bool IsNullOrEmpty<T>([NotNullWhen(false)] this IEnumerable<T> Enumerable)
         {
             return Enumerable is null || IsEmpty(Enumerable);
         }
@@ -258,6 +261,19 @@
             }
 
             return Array;
+        }
+
+        public static IEnumerable<T> NotNullable<T>(this IEnumerable<T?> Enumerable)
+        {
+            ArgumentNullException.ThrowIfNull(Enumerable);
+
+            foreach (T? Item in Enumerable)
+            {
+                if (Item is not null)
+                {
+                    yield return Item;
+                }
+            }
         }
 
 

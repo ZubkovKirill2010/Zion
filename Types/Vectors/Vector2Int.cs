@@ -3,7 +3,7 @@
 namespace Zion.Vectors
 {
     [Serializable]
-    public struct Vector2Int : IBinaryObject<Vector2Int>
+    public struct Vector2Int : IBinaryObject<Vector2Int>, IRandomizable<Vector2Int>
     {
         public static readonly Vector2Int Zero = new Vector2Int(0, 0);
         public static readonly Vector2Int Up = new Vector2Int(0, 1);
@@ -127,6 +127,11 @@ namespace Zion.Vectors
             );
         }
 
+        public static Vector2Int GetRandom(Random Random, Vector2Int Min, Vector2Int Max)
+        {
+            return new Vector2Int(Random.Next(Min.x, Max.x), Random.Next(Min.y, Max.y));
+        }
+
 
         public void MoveUp() => y++;
         public void MoveDown() => y--;
@@ -158,17 +163,6 @@ namespace Zion.Vectors
                 Down,
                 Left
             }.OrderBy(x => Random.Next()).ToArray();
-        }
-
-        public static Vector2Int GetRandomVector(Vector2Int Min, Vector2Int Max)
-        {
-            return GetRandomVector(Min, Max, new Random());
-        }
-        public static Vector2Int GetRandomVector(Vector2Int Min, Vector2Int Max, Random Random)
-        {
-            int x = Random.Next(Min.x, Max.x);
-            int y = Random.Next(Min.y, Max.y);
-            return new Vector2Int(x, y);
         }
 
 
