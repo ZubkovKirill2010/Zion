@@ -211,6 +211,20 @@ namespace Zion.Vectors
             );
         }
 
+        public static Vector2Int Sum(params IEnumerable<Vector2Int> Vectors)
+        {
+            ArgumentNullException.ThrowIfNull(Vectors);
+
+            Vector2Int Result = new Vector2Int();
+
+            foreach (Vector2Int Vector in Vectors)
+            {
+                Result += Vector;
+            }
+
+            return Result;
+        }
+
 
         public static Vector2Int Absolute(Vector2Int Vector)
         {

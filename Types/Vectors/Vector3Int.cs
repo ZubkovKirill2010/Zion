@@ -148,6 +148,20 @@ namespace Zion.Vectors
             );
         }
 
+        public static Vector3Int Sum(params IEnumerable<Vector3Int> Vectors)
+        {
+            ArgumentNullException.ThrowIfNull(Vectors);
+
+            Vector3Int Result = new Vector3Int();
+
+            foreach (Vector3Int Vector in Vectors)
+            {
+                Result += Vector;
+            }
+
+            return Result;
+        }
+
 
         public static Vector3Int Absolute(Vector3Int Vector)
         {

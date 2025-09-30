@@ -229,6 +229,20 @@ namespace Zion.Vectors
             return A + (B - A) * Alpha;
         }
 
+        public static Vector2 Sum(params IEnumerable<Vector2> Vectors)
+        {
+            ArgumentNullException.ThrowIfNull(Vectors);
+
+            Vector2 Result = new Vector2();
+
+            foreach (Vector2 Vector in Vectors)
+            {
+                Result += Vector;
+            }
+
+            return Result;
+        }
+
 
         public static Vector2 Absolute(Vector2 Vector)
         {
