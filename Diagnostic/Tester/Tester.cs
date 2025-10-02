@@ -1,4 +1,6 @@
-﻿namespace Zion.Diagnostics
+﻿using System.Diagnostics;
+
+namespace Zion.Diagnostics
 {
     public sealed class Tester<TIn, TOut>
     {
@@ -12,23 +14,55 @@
             this.Function = Function;
         }
 
-        public TestResult<TIn, TOut>[] Test()
+        public async Task<TestResult<TIn, TOut>[]> RunTest() => await RunTest(TimeSpan.FromSeconds(10));
+        public async Task<TestResult<TIn, TOut>[]> RunTest(TimeSpan MaxTime)
         {
-            return Array.ConvertAll
-            (
-                Tests,
-                Test =>
+            TestResult<TIn, TOut>[] Results = new TestResult<TIn, TOut>[Tests.Length];
+
+            var Options = new ParallelOptions
+            {
+                CancellationToken = CancellationToken.None
+            };
+
+            await Parallel.ForEachAsync(Enumerable.Range(0, Tests.Length), Options, async (i, Token) =>
+            {
+                using CancellationTokenSource TimeoutToken = new CancellationTokenSource(MaxTime);
+                (TIn, TOut) Test = Tests[i];
+                Stopwatch Stopwatch = Stopwatch.StartNew();
+
+                try
                 {
-                    try
+                    var FunctionTask = Task.Run(() => Function(Test.Item1));
+                    var TimeoutTask = Task.Delay(MaxTime, TimeoutToken.Token);
+
+                    var CompletedTask = await Task.WhenAny(FunctionTask, TimeoutTask);
+
+                    if (CompletedTask == FunctionTask)
                     {
-                        return new TestResult<TIn, TOut>(Test.Item1, Test.Item2, Function(Test.Item1));
+                        TOut Result = await FunctionTask;
+                        Stopwatch.Stop();
+                        Results[i] = new TestResult<TIn, TOut>(Test.Item1, Test.Item2, Stopwatch.Elapsed, Result);
                     }
-                    catch (Exception Exception)
+                    else
                     {
-                        return new TestResult<TIn, TOut>(Test.Item1, Test.Item2, Exception);
+                        TimeoutToken.Cancel();
+                        Stopwatch.Stop();
+                        Results[i] = new TestResult<TIn, TOut>(Test.Item1, Test.Item2);
                     }
                 }
-            );
+                catch (OperationCanceledException) when (TimeoutToken.Token.IsCancellationRequested)
+                {
+                    Stopwatch.Stop();
+                    Results[i] = new TestResult<TIn, TOut>(Test.Item1, Test.Item2);
+                }
+                catch (Exception Exception)
+                {
+                    Stopwatch.Stop();
+                    Results[i] = new TestResult<TIn, TOut>(Test.Item1, Test.Item2, Stopwatch.Elapsed, Exception);
+                }
+            });
+
+            return Results;
         }
     }
 }

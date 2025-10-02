@@ -1,4 +1,6 @@
-﻿namespace Zion
+﻿using System.Runtime;
+
+namespace Zion
 {
     public static class DictionaryExtensions
     {
@@ -20,6 +22,16 @@
                 Result.Add(Item.Value, Item.Key);
             }
             return Result;
+        }
+
+        public static TValue GetValue<TKey, TValue>(this IDictionary<TKey, TValue> Dictionary, TKey Key, TValue Default)
+        {
+            return Dictionary.TryGetValue(Key, out TValue? Value) ? Value : Default;
+        }
+
+        public static TOut GetValue<TKey, TValue, TOut>(this IDictionary<TKey, TValue> Dictionary, TKey Key, TOut Default, Func<TValue, TOut> Converter)
+        {
+            return Dictionary.TryGetValue(Key, out TValue? Value) ? Converter(Value) : Default;
         }
     }
 }

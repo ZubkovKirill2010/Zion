@@ -1,27 +1,45 @@
 ﻿using System.Collections;
 using System.Text;
+using System.Xml;
 
 namespace Zion.Diagnostics
 {
+    public enum FunctionResult : byte { Normal, Exception, InfinityCycle }
+
     public readonly struct TestResult<TIn, TOut>
     {
+        public readonly FunctionResult OutType;
+
         public readonly TIn In;
         public readonly TOut? Out;
         public readonly TOut TargetOut;
 
+        public readonly TimeSpan Time;
         public readonly Exception? Exception;
 
-        public TestResult(TIn In, TOut TargetOut, TOut Out)
+        public bool InfinityCycle => OutType == FunctionResult.InfinityCycle;
+
+        public TestResult(TIn In, TOut TargetOut)
         {
+            OutType = FunctionResult.InfinityCycle;
+            this.In = In;
+            this.TargetOut = TargetOut;
+        }
+        public TestResult(TIn In, TOut TargetOut, TimeSpan Time, TOut Out)
+        {
+            OutType = FunctionResult.Normal;
             this.In = In;
             this.TargetOut = TargetOut;
             this.Out = Out;
+            this.Time = Time;
         }
-        public TestResult(TIn In, TOut TargetOut, Exception? Exception)
+        public TestResult(TIn In, TOut TargetOut, TimeSpan Time, Exception? Exception)
         {
+            OutType = FunctionResult.Exception;
             this.In = In;
             this.TargetOut = TargetOut;
             this.Exception = Exception;
+            this.Time = Time;
         }
 
         public override string ToString()
@@ -34,6 +52,15 @@ namespace Zion.Diagnostics
             Builder.AppendLine(Separator);
 
             Builder.AppendLine($"TargetOut:         | {ToString(TargetOut)}");
+            Builder.AppendLine(Separator);
+
+            if (InfinityCycle)
+            {
+                Builder.AppendLine("Result:            | Infinity loop");
+                return Builder.ToString();
+            }
+
+            Builder.AppendLine($"Time:              | {Time.Milliseconds} ms | {Time.Ticks} ticks");
             Builder.AppendLine(Separator);
 
             if (Out is not null)
