@@ -30,6 +30,52 @@ namespace Zion
             return $"\u001b[38;2;{Color.R};{Color.G};{Color.B}m{Text}\u001b[0m";
         }
 
+        public static string GetText(ICollection<char> Chars, Color Color)
+        {
+            ArgumentNullException.ThrowIfNull(Chars);
+
+            int GetLength(byte Value) => Value switch
+            {
+                >= 100 => 3,
+                >= 10 => 2,
+                _ => 1
+            };
+
+            return string.Create(Chars.Count + 14 + Color.Summarize(GetLength), Chars, (Span, List) =>
+            {
+                string g = $"\u001b[38;2;{Color.R};{Color.G};{Color.B}m{Chars}\u001b[0m";
+                int Index = 0;
+
+                Span[Index++] = '\u001b';
+                Span[Index++] = '[';
+                Span[Index++] = '3';
+                Span[Index++] = '8';
+                Span[Index++] = ';';
+                Span[Index++] = '2';
+
+                foreach (byte Color in Color)
+                {
+                    Span[Index++] = ';';
+                    foreach (char Char in Color.ToString())
+                    {
+                        Span[Index++] = Char;
+                    }
+                }
+
+                Span[Index++] = 'm';
+
+                foreach (char Char in List)
+                {
+                    Span[Index++] = Char;
+                }
+
+                Span[Index++] = '\u001b';
+                Span[Index++] = '[';
+                Span[Index++] = '0';
+                Span[Index++] = 'm';
+            });
+        }
+
         public string ToUnicode()
         {
             return $"\\u001b[38;2;{Color.R};{Color.G};{Color.B}m{Text}\\u001b[0m";

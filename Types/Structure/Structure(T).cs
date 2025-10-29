@@ -303,6 +303,53 @@ namespace Zion
             return this;
         }
 
+        public Structure<T>? GetParent(int Level)
+        {
+            if (Level < 0) { return null; }
+            if (Level == 0) { return this; }
+
+            Structure<T> Current = this;
+
+            for (int i = 0; i < Level; i++)
+            {
+                Current = Current.Parent;
+
+                if (Current is null)
+                {
+                    return null;
+                }
+            }
+
+            return Current;
+        }
+        public bool TryGetParent(int Level, out Structure<T>? Parent)
+        {
+            if (Level < 0)
+            {
+                Parent = null;
+                return false;
+            }
+
+            Parent = this;
+
+            if (Level == 0)
+            {
+                return true;
+            }
+
+            for (int i = 0; i < Level; i++)
+            {
+                Parent = Parent.Parent;
+
+                if (Parent is null)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         public void Add(T Item)
         {
             ArgumentNullException.ThrowIfNull(Item);

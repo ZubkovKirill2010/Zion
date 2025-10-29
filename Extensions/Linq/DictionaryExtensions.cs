@@ -1,6 +1,4 @@
-﻿using System.Runtime;
-
-namespace Zion
+﻿namespace Zion
 {
     public static class DictionaryExtensions
     {

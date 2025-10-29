@@ -15,17 +15,17 @@ namespace Zion
         public AsyncAction? Completion { get; init; }
 
         private int _Delay { get; init; } = 1000;
-        public int _DelayToCompletion { get; init; } = 2000;
+        private int _DelayToCompletion { get; init; } = 3000;
 
         public int Delay
         {
             get => _Delay;
-            init => _Delay = Math.Max(_Delay, 0);
+            init => _Delay = Math.Max(value, 0);
         }
         public int DelayToCompletion
         {
             get => _DelayToCompletion;
-            init => _DelayToCompletion = Math.Max(_DelayToCompletion, 0);
+            init => _DelayToCompletion = Math.Max(value, 0);
         }
 
         public int Count => Tasks.Count;

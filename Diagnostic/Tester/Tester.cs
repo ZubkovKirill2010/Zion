@@ -19,7 +19,7 @@ namespace Zion.Diagnostics
         {
             TestResult<TIn, TOut>[] Results = new TestResult<TIn, TOut>[Tests.Length];
 
-            var Options = new ParallelOptions
+            ParallelOptions Options = new ParallelOptions
             {
                 CancellationToken = CancellationToken.None
             };
@@ -32,10 +32,10 @@ namespace Zion.Diagnostics
 
                 try
                 {
-                    var FunctionTask = Task.Run(() => Function(Test.Item1));
-                    var TimeoutTask = Task.Delay(MaxTime, TimeoutToken.Token);
+                    Task<TOut> FunctionTask = Task.Run(() => Function(Test.Item1));
+                    Task TimeoutTask = Task.Delay(MaxTime, TimeoutToken.Token);
 
-                    var CompletedTask = await Task.WhenAny(FunctionTask, TimeoutTask);
+                    Task CompletedTask = await Task.WhenAny(FunctionTask, TimeoutTask);
 
                     if (CompletedTask == FunctionTask)
                     {

@@ -15,8 +15,8 @@ namespace Zion
         private readonly T[] Data;
         private int Length;
 
-        public int Capacity    => Data.Length;
-        public int Count       => Length;
+        public int Capacity => Data.Length;
+        public int Count => Length;
         public bool IsReadOnly => false;
 
         public RecordList(int Capacity, CompareMode CompareMode)
@@ -51,7 +51,7 @@ namespace Zion
         public static implicit operator List<T>(RecordList<T> RecordList)
         {
             List<T> List = new List<T>(RecordList.Count);
-            
+
             foreach (T Item in RecordList)
             {
                 List.Add(Item);

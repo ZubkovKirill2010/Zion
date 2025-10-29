@@ -237,6 +237,41 @@ namespace Zion
             );
         }
 
+        public static string RemoveEmptyLines(this string String)
+        {
+            ArgumentNullException.ThrowIfNull(String);
+
+            StringBuilder Builder = new StringBuilder(String.Length);
+
+            using (StringReader Reader = new StringReader(String))
+            {
+                string? Line;
+
+                while ((Line = Reader.ReadLine()) is not null)
+                {
+                    if (!string.IsNullOrWhiteSpace(Line))
+                    {
+                        Builder.AppendLine(Line);
+                    }
+                }
+            }
+
+            return Builder.ToString();
+        }
+
+        public static string Create(this ICollection<char> Chars)
+        {
+            ArgumentNullException.ThrowIfNull(Chars);
+            return string.Create(Chars.Count, Chars, (Span, List) =>
+            {
+                int Index = 0;
+                foreach (char Char in List)
+                {
+                    Span[Index++] = Char;
+                }
+            });
+        }
+
         #endregion
 
         #region Prefix & Suffix
@@ -465,6 +500,21 @@ namespace Zion
         public static bool IsOpenBracket(this char Char, out char ClosingBracket)
         {
             return Brackets.TryGetValue(Char, out ClosingBracket);
+        }
+
+        public static int IndexOf(this string String, Predicate<char> Condition)
+        {
+            ArgumentNullException.ThrowIfNull(String);
+            ArgumentNullException.ThrowIfNull(Condition);
+
+            for (int i = 0; i < String.Length; i++)
+            {
+                if (Condition(String[i]))
+                {
+                    return i;
+                }
+            }
+            return -1;
         }
 
         #endregion

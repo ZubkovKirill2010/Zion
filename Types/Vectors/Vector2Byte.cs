@@ -62,8 +62,10 @@ namespace Zion.Vectors
         }
         public Vector2Byte(int x, int y)
         {
-            if (!IsInside(x)) { throw new ArgumentOutOfRangeException(nameof(x)); };
-            if (!IsInside(y)) { throw new ArgumentOutOfRangeException(nameof(y)); };
+            if (!IsInside(x)) { throw new ArgumentOutOfRangeException(nameof(x)); }
+            ;
+            if (!IsInside(y)) { throw new ArgumentOutOfRangeException(nameof(y)); }
+            ;
 
             Value = (byte)((ConvertToBits(y) << 4) | ConvertToBits(x));
         }

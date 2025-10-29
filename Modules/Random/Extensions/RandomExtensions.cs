@@ -1,6 +1,4 @@
-﻿using Zion.Vectors;
-
-namespace Zion
+﻿namespace Zion
 {
     public static class RandomExtensions
     {

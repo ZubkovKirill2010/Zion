@@ -4,7 +4,7 @@ namespace Zion.Diagnostics
 {
     public sealed class TestBinaryWriter : BinaryWriter
     {
-        private bool Writing;
+        private readonly bool Writing;
         private StringBuilder Builder = new StringBuilder();
         private Encoding Encoding;
 
@@ -17,7 +17,7 @@ namespace Zion.Diagnostics
         public TestBinaryWriter(bool Writing, Stream Output, Encoding Encoding, bool LeaveOpen)
             : base(Output, Encoding, LeaveOpen)
         {
-            Writing = Writing;
+            this.Writing = Writing;
             this.Encoding = Encoding;
         }
 

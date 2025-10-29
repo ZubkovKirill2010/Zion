@@ -2,6 +2,8 @@
 {
     public sealed class MathExpressionParser : StreamingParser<IExpression>
     {
+        private static readonly Exception ParseException = new Exception("Error in parsing a mathematical expression");
+
         private static readonly Dictionary<string, MathFunctionSample> DefaultFunctions = new()
         {
             { "sqrt", new MathFunctionSample(Fraction.Sqrt, true)                      },
@@ -74,7 +76,7 @@
                 }
                 else
                 {
-                    throw new Exception("Error in parsing a mathematical expression");
+                    throw ParseException;
                 }
             }
 
@@ -112,6 +114,10 @@
                     case '/':
                         ParseProduct(Result, false);
                         break;
+
+                    default:
+                        Index++;
+                        throw new Exception($"Unexpected character: '{String[Index - 1]}' at position {Index - 1}");
                 }
             }
 
@@ -121,6 +127,11 @@
         private void ParseProduct(Product Result, bool IsProduct)
         {
             Index++;
+            if (Index >= String.Length)
+            {
+                throw new Exception("Unexpected end of expression after '*' or '/'");
+            }
+
             if (String[Index] == '-')
             {
                 Result.Add(new Fraction(-1));
@@ -147,6 +158,11 @@
             {
                 Start = Index + 1;
                 Index = String.Skip(Start, (char Char) => Char != '|');
+
+                if (Index >= String.Length || String[Index] != '|')
+                {
+                    throw new Exception("Unclosed absolute value expression");
+                }
 
                 return new MathFunction
                 (
@@ -180,7 +196,7 @@
                 return new MathFunction(Function, Content);
             }
 
-            throw new Exception();
+            throw new Exception($"Unexpected character: '{String[Index]}' at position {Index}");
         }
 
 
@@ -193,7 +209,7 @@
                     return Function.Value;
                 }
             }
-            throw new Exception($"Function not found");
+            throw new Exception($"Function not found at position {Index}");
         }
 
         private bool BeginsFunction(KeyValuePair<string, MathFunctionSample> Function)

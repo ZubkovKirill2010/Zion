@@ -224,6 +224,13 @@ namespace Zion.Vectors
             );
         }
 
+        public static bool CompareDistance(Vector2 A, Vector2 B, float MaxDistance)
+        {
+            float DiferenceX = A.x - B.x;
+            float DiferenceY = A.y - B.y;
+            return DiferenceX * DiferenceX + DiferenceY * DiferenceY <= MaxDistance * MaxDistance;
+        }
+
         public static Vector2 Lerp(Vector2 A, Vector2 B, float Alpha)
         {
             return A + (B - A) * Alpha;

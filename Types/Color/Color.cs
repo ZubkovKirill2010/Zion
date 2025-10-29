@@ -1,10 +1,11 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Collections;
+using System.Diagnostics.CodeAnalysis;
 using Zion.Vectors;
 
 namespace Zion
 {
     [Serializable]
-    public struct Color : IBinaryObject<Color>
+    public struct Color : IBinaryObject<Color>, IEnumerable<byte>
     {
         public byte R { get; set; }
         public byte G { get; set; }
@@ -184,6 +185,18 @@ namespace Zion
             {
                 throw new FormatException($"Incorrect hex format(={String}) of ({Identifier})");
             }
+        }
+
+        public IEnumerator<byte> GetEnumerator()
+        {
+            yield return R;
+            yield return G;
+            yield return B;
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
     }
 }

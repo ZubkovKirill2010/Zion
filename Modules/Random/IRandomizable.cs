@@ -2,6 +2,6 @@
 {
     public interface IRandomizable<T> where T : IRandomizable<T>
     {
-        public static abstract T GetRandom(Random Random, T Min, T Max);
+        abstract static T GetRandom(Random Random, T Min, T Max);
     }
 }

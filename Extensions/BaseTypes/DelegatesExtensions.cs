@@ -1,7 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using System.Security.Cryptography;
-
-namespace Zion
+﻿namespace Zion
 {
     public static class DelegatesExtensions
     {

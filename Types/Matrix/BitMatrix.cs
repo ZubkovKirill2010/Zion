@@ -65,8 +65,8 @@ namespace Zion
 
         public static implicit operator Matrix<bool>(BitMatrix BitMatrix)
         {
-            var Size = BitMatrix.Size;
-            var Matrix = new Matrix<bool>(Size);
+            Vector2Int Size = BitMatrix.Size;
+            Matrix<bool> Matrix = new Matrix<bool>(Size);
 
             for (int x = 0; x < Size.x; x++)
             {

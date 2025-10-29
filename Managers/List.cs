@@ -14,7 +14,7 @@
 
         public static List<TOut> ConvertAll<TIn, TOut>(IList<TIn> List, Func<TIn, TOut> Converter)
         {
-            var Result = new List<TOut>();
+            List<TOut> Result = new List<TOut>();
             foreach (TIn Item in List)
             {
                 Result.Add(Converter(Item));

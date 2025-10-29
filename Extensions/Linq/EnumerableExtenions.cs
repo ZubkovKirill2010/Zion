@@ -230,7 +230,7 @@ namespace Zion
             }
         }
 
-        
+
         public static bool IsNullOrEmpty<T>([NotNullWhen(false)] this IEnumerable<T> Enumerable)
         {
             return Enumerable is null || IsEmpty(Enumerable);

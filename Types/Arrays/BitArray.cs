@@ -2,7 +2,7 @@
 
 namespace Zion
 {
-    public class BitArray : IBinaryObject<BitArray>, IList<bool>
+    public class BitArray : IBinaryObject<BitArray>, IEnumerable<bool>
     {
         private readonly byte[] Data;
 
@@ -46,7 +46,7 @@ namespace Zion
         public static implicit operator bool[](BitArray BitArray)
         {
             bool[] Array = new bool[BitArray.Length];
-            
+
             for (int i = 0; i < Array.Length; i++)
             {
                 Array[i] = BitArray[i];
@@ -94,29 +94,17 @@ namespace Zion
             return -1;
         }
 
-        public void Insert(int ndex, bool Item)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void RemoveAt(int Index)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Add(bool Item)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Clear()
-        {
-            throw new NotImplementedException();
-        }
-
         public bool Contains(bool Item)
         {
-            throw new NotImplementedException();
+            Predicate<byte> Condition = Item ? Byte => Byte != 0 : Byte => Byte == 0;
+            foreach (byte Byte in Data)
+            {
+                if (Condition(Byte))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         public void CopyTo(bool[] Array, int ArrayIndex)
@@ -129,10 +117,6 @@ namespace Zion
             return new BitArray(Data, Length);
         }
 
-        public bool Remove(bool Item)
-        {
-            throw new NotImplementedException();
-        }
 
         public IEnumerator<bool> GetEnumerator()
         {
