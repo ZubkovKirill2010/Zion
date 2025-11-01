@@ -1,11 +1,11 @@
 ﻿namespace Zion.MathExpressions
 {
-    public readonly struct MathFunction : IFraction
+    public readonly struct MathFunction : IMathTerm
     {
-        public readonly IFraction Value;
-        public readonly Func<IFraction, int, Fraction> Function;
+        public readonly IMathTerm Value;
+        public readonly Func<IMathTerm, int, Fraction> Function;
 
-        public MathFunction(IFraction Value, Func<IFraction, int, Fraction> Function)
+        public MathFunction(IMathTerm Value, Func<IMathTerm, int, Fraction> Function)
         {
             this.Value = Value;
             this.Function = Function;

@@ -1,17 +1,17 @@
 ﻿namespace Zion.MathExpressions
 {
-    public readonly struct Inversed : IMathTerm
+    public readonly struct Negative : IMathTerm
     {
         public readonly IMathTerm Value;
 
-        public Inversed(IMathTerm Value)
+        public Negative(IMathTerm Value)
         {
             this.Value = Value;
         }
 
         public Fraction GetValue(int Accuracy)
         {
-            return Value.GetValue(Accuracy).Inversed;
+            return -Value.GetValue(Accuracy);
         }
     }
 }
