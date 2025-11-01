@@ -6,4 +6,10 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="MathExpressions\**" />
+    <EmbeddedResource Remove="MathExpressions\**" />
+    <None Remove="MathExpressions\**" />
+  </ItemGroup>
+
 </Project>

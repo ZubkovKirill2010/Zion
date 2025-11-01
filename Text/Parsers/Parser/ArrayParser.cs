@@ -67,17 +67,17 @@ namespace Zion
             return Result.ToArray();
         }
 
-        public static int[] ToIntArray(this string String)
-            => ToArray(String, Normalize, Fraction => Fraction.ToInt(), int.Parse);
+        //public static int[] ToIntArray(this string String)
+        //    => ToArray(String, Normalize, Fraction => Fraction.ToInt(), int.Parse);
 
-        public static float[] ToFloatArray(this string String)
-            => ToArray(String, NormalizeToFloat, Fraction => Fraction.ToFloat(), float.Parse);
+        //public static float[] ToFloatArray(this string String)
+        //    => ToArray(String, NormalizeFloated, Fraction => Fraction.ToFloat(), float.Parse);
 
-        public static double[] ToDoubleArray(this string String)
-            => ToArray(String, NormalizeToFloat, Fraction => Fraction.ToDouble(), double.Parse);
+        //public static double[] ToDoubleArray(this string String)
+        //    => ToArray(String, NormalizeFloated, Fraction => Fraction.ToDouble(), double.Parse);
 
-        public static decimal[] ToDecimalArray(this string String)
-            => ToArray(String, NormalizeToFloat, Fraction => Fraction.ToDecimal(), decimal.Parse);
+        //public static decimal[] ToDecimalArray(this string String)
+        //    => ToArray(String, NormalizeFloated, Fraction => Fraction.ToDecimal(), decimal.Parse);
 
 
         public static string[] ToStringArray(this string String)

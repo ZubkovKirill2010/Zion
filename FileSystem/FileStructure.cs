@@ -2,13 +2,13 @@
 //{
 //    public static class FileStructure
 //    {
-//        public static void CreateDirectoryStructure(string Root, Structure<string> Structure)
+//        public static void CreateDirectoryStructure(string Sqrt, Structure<string> Structure)
 //        {
-//            ArgumentNullException.ThrowIfNull(Root);
+//            ArgumentNullException.ThrowIfNull(Sqrt);
 //            ArgumentNullException.ThrowIfNull(Structure);
-//            if (!Directory.Exists(Root))
+//            if (!Directory.Exists(Sqrt))
 //            {
-//                throw new DirectoryNotFoundException($"'{Root}' not exists");
+//                throw new DirectoryNotFoundException($"'{Sqrt}' not exists");
 //            }
 
 

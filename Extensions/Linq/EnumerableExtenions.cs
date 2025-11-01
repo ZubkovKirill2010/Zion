@@ -230,6 +230,22 @@ namespace Zion
             }
         }
 
+        public static bool HasAtLeast<T>(this IEnumerable<T> Enumberable, int MinCount)
+        {
+            ArgumentNullException.ThrowIfNull(Enumberable);
+            ArgumentOutOfRangeException.ThrowIfNegative(MinCount);
+
+            int Count = 0;
+            foreach (T Item in Enumberable)
+            {
+                if (++Count >= MinCount)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
 
         public static bool IsNullOrEmpty<T>([NotNullWhen(false)] this IEnumerable<T> Enumerable)
         {
