@@ -1,16 +1,139 @@
-﻿using Function = System.Func<Zion.MathExpressions.IMathTerm, int, Zion.MathExpressions.Fraction>;
-
-namespace Zion.MathExpressions
+﻿namespace Zion.MathExpressions
 {
     public static class MathFunctions
     {
-        public static readonly Function Sqrt
-            = (Value, Accuracy) => Fraction.Sqrt(Value.GetValue(Accuracy), 2, Accuracy);
+        public static IMathTerm Sqrt(MathFunctionHandler Handler)
+        {
+            IMathTerm Value = Handler.ReadMathTerm();
 
-        public static readonly Function Factorial
-            = (Value, Accuracy) => Fraction.Factorial(Value.GetValue(Accuracy));
+            int Degree = 2;
+            if (Handler.ReadInt32(out int NewDegree))
+            {
+                Degree = NewDegree;
+            }
 
-        public static readonly Function DoubleFactorial
-            = (Value, Accuracy) => Fraction.DoubleFactorial(Value.GetValue(Accuracy));
+            return new SimpleFunction
+            (
+                Value,
+                (Value, Accuracy) => Fraction.Sqrt
+                (
+                    Value.GetValue(Accuracy),
+                    Degree,
+                    Accuracy
+                )
+            );
+        }
+
+        public static Fraction Factorial(IMathTerm Value, int Accuracy)
+        {
+            return Fraction.Factorial(Value.GetValue(Accuracy));
+        }
+
+        public static Fraction DoubleFactorial(IMathTerm Value, int Accuracy)
+        {
+            return Fraction.DoubleFactorial(Value.GetValue(Accuracy));
+        }
+
+
+        public static MathFunction Convert(this Func<IMathTerm, Fraction> Function)
+        {
+            return Handler =>
+            {
+                IMathTerm Value = Handler.ReadMathTerm();
+                return new SimpleFunction
+                (
+                    Value,
+                    (Value, Accuracy) => Function(Value)
+                );
+            };
+        }
+
+        public static MathFunction Convert(this Func<IMathTerm, int, Fraction> Function)
+        {
+            return Handler =>
+            {
+                IMathTerm Value = Handler.ReadMathTerm();
+                return new SimpleFunction
+                (
+                    Value,
+                    (Value, Accuracy) => Function(Value, Accuracy)
+                );
+            };
+        }
+
+        public static MathFunction Convert(this Func<Fraction, Fraction> Function)
+        {
+            return Handler =>
+            {
+                IMathTerm Value = Handler.ReadMathTerm();
+                return new SimpleFunction
+                (
+                    Value,
+                    (Value, Accuracy) => Function(Value.GetValue(Accuracy))
+                );
+            };
+        }
+
+
+        public static MathFunction ConvertGrouped(this Func<IList<IMathTerm>, int, Fraction> Function)
+        {
+            return Handler =>
+            {
+                List<IMathTerm> Values = new List<IMathTerm>();
+
+                while (!Handler.Finished)
+                {
+                    Values.Add((Fraction)Handler.ReadInt32());
+                }
+
+                return new GroupFunction(Values, Function);
+            };
+        }
+
+        public static MathFunction ConvertGrouped(this Func<IList<IMathTerm>, Fraction> Function)
+        {
+            return Handler =>
+            {
+                List<IMathTerm> Values = new List<IMathTerm>();
+
+                while (!Handler.Finished)
+                {
+                    Values.Add(Handler.ReadMathTerm());
+                }
+
+                return new GroupFunction(Values, (Values, Accuracy) => Function(Values));
+            };
+        }
+
+
+        public static MathFunction ConvertGrouped(this Func<Fraction[], int, Fraction> Function)
+        {
+            return Handler =>
+            {
+                List<IMathTerm> Values = new List<IMathTerm>();
+
+                while (!Handler.Finished)
+                {
+                    Values.Add((Fraction)Handler.ReadInt32());
+                }
+
+                return new GroupFunction(Values, (Values, Accuracy) => Function(List.Convert(Values, Value => Value.GetValue(Accuracy)), Accuracy));
+            };
+        }
+
+        public static MathFunction ConvertGrouped(this Func<Fraction[], Fraction> Function)
+        {
+            return Handler =>
+            {
+                List<IMathTerm> Values = new List<IMathTerm>();
+
+                while (!Handler.Finished)
+                {
+                    Values.Add(Handler.ReadMathTerm());
+                }
+
+                return new GroupFunction(Values, (Values, Accuracy) => Function(List.Convert(Values, Value => Value.GetValue(Accuracy))));
+            };
+        }
     }
 }

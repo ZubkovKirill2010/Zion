@@ -4,15 +4,23 @@
     {
         public IMathTerm Parse()
         {
-            IMathTerm expression = ParseAdditive();
+            IMathTerm Expression = ParseAdditive();
 
-            if (!Finished)
+            if (!(IsInsideFunction ? (Index < String.Length && (Current is '|' or ')')) : (Index >= String.Length)))
             {
-                Throw($"Unexpected character '{Current}' at position {Index}");
+                Throw(Index, $"Unexpected character '{Current}'");
             }
 
-            return expression;
+            return Expression;
         }
+
+        internal IMathTerm ParseBeforeSeporator(out int End)
+        {
+            IMathTerm Result = Parse();
+            End = Index;
+            return Result;
+        }
+
 
         private IMathTerm ParseAdditive()
         {
@@ -32,6 +40,11 @@
                 else // '-'
                 {
                     Left = new Amount(Left, new Negative(Right));
+                }
+
+                if (IsInsideFunction && !Finished && (Current == '|' || Current == ')'))
+                {
+                    break;
                 }
             }
 
@@ -61,6 +74,11 @@
                 {
                     Left = new Remainder(Left, Right);
                 }
+
+                if (IsInsideFunction && !Finished && (Current == '|' || Current == ')'))
+                {
+                    break;
+                }
             }
 
             return Left;
@@ -75,6 +93,11 @@
                 Index++;
                 IMathTerm Right = ParseExponential();
                 Left = new Exponent(Left, Right);
+
+                if (IsInsideFunction && !Finished && (Current == '|' || Current == ')'))
+                {
+                    break;
+                }
             }
 
             return Left;
@@ -90,11 +113,16 @@
                 if (!Finished && Current == '!')
                 {
                     Index++;
-                    Term = new MathFunction(Term, MathFunctions.DoubleFactorial);
+                    Term = new SimpleFunction(Term, MathFunctions.DoubleFactorial);
                 }
                 else
                 {
-                    Term = new MathFunction(Term, MathFunctions.Factorial);
+                    Term = new SimpleFunction(Term, MathFunctions.Factorial);
+                }
+
+                if (IsInsideFunction && !Finished && (Current == '|' || Current == ')'))
+                {
+                    break;
                 }
             }
 
@@ -127,10 +155,10 @@
             }
             else if (Current == '(')
             {
-                Term = ParseParentheses();
+                Term = ParseBrackets();
             }
             else if (IsLetter(Current))
-            {
+            {   
                 Term = ParseIdentifier();
             }
             else
@@ -153,14 +181,14 @@
 
             if (Index == Start)
             {
-                return InvalidChar();
+                InvalidChar();
             }
 
             string NumberString = String[Start..Index];
             return Fraction.ParseDecimal(NumberString);
         }
 
-        private IMathTerm ParseParentheses()
+        private IMathTerm ParseBrackets()
         {
             if (Current != '(')
             {
@@ -186,12 +214,23 @@
             Index = String.Skip(Index, IsLetter);
             string Identifier = String[Start..Index];
 
-            if (!Finished && Current == '(')//Is function
+            if (!Finished && Current == '(')
             {
-                return ParseFunctionCall(Identifier);
+                if (ExistsFunction(Identifier))
+                {
+                    return ParseFunctionCall(Identifier);
+                }
+                else if (ExistsVariable(Identifier))
+                {
+                    return new Product(Variables[Identifier], ParseBrackets());
+                }
+                else
+                {
+                    return Throw($"Unknown identifier '{Identifier}'");
+                }
             }
 
-            if (Variables is not null && Variables.TryGetValue(Identifier, out Fraction value))
+            if (Variables.TryGetValue(Identifier, out Fraction value))
             {
                 return value;
             }
@@ -199,56 +238,19 @@
             return Throw($"Unknown identifier '{Identifier}'");
         }
 
-        private IMathTerm ParseFunctionCall(string FunctionName)
+        private IMathTerm ParseFunctionCall(string Identifier)
         {
-            if (Current != '(')
+            MathFunctionHandler Handler = GetHandler(Index + 1);
+            IMathTerm Result = Functions[Identifier](Handler);
+            Index = Handler.Index - 1;
+
+            if (Index >= String.Length || Current != ')')
             {
-                return Throw("Expected '(' after function name");
+                Throw($"No closing bracket ')' in function \"{Identifier}\"");
             }
 
             Index++;
-
-            List<IMathTerm> Parameters = new List<IMathTerm>();
-
-            if (Current != ')')
-            {
-                do
-                {
-                    Parameters.Add(ParseAdditive());
-
-                    if (Finished)
-                    {
-                        return Throw("Expected ')' or ','");
-                    }
-
-                    if (Current == ')')
-                    {
-                        break;
-                    }
-
-                    if (Current != ',')
-                    {
-                        return Throw("Expected ','");
-                    }
-
-                    Index++;
-                }
-                while (!Finished);
-            }
-
-            if (Finished || Current != ')')
-            {
-                return Throw("Expected ')'");
-            }
-
-            Index++;
-
-            //if (Functions is not null && Functions.TryGetValue(FunctionName, out var function))
-            //{
-            //    return new MathFunction(Functions[FunctionName], Parameters, function);
-            //}
-
-            return Throw($"Unknown function '{FunctionName}'");
+            return Result;
         }
     }
 }

@@ -13,11 +13,24 @@ namespace Zion.MathExpressions
             { '.', ','}
         };
 
-        public Dictionary<string, Func<Fraction, int, Fraction>> Functions { private get; init; } = new Dictionary<string, Func<Fraction, int, Fraction>>(StringComparer.OrdinalIgnoreCase)
+        public Dictionary<string, MathFunction> Functions { internal get; init; } = new Dictionary<string, MathFunction>(StringComparer.OrdinalIgnoreCase)
         {
-            { "sqrt", (Value, Accuracy) => Fraction.Sqrt(Value, 2, Accuracy) }
+            { "sqrt",    MathFunctions.Sqrt                        },
+            { "abs",     MathFunctions.Convert(Fraction.Absolute)  },
+            { "sign",    MathFunctions.Convert(Fraction.Signature) },
+            { "round",   MathFunctions.Convert(Fraction.Round)     },
+            { "floor",   MathFunctions.Convert(Fraction.Floor)     },
+            { "ceiling", MathFunctions.Convert(Fraction.Ceiling)   },
+            { "trunc",   MathFunctions.Convert(Fraction.Truncate)  },
+
+            { "min",  MathFunctions.ConvertGrouped(Fraction.Min) },
+            { "max",  MathFunctions.ConvertGrouped(Fraction.Max) }, 
+            { "sum",  MathFunctions.ConvertGrouped(Values => Fraction.Sum(Values))     },
+            { "aver", MathFunctions.ConvertGrouped(Values => Fraction.Average(Values)) }
+            
+            //... sin, cos, tan, cot, log  {  ln (_e), log (_10), log(A|B)  }
         };
-        public Dictionary<string, Fraction> Variables { private get; init; } = new Dictionary<string, Fraction>(StringComparer.OrdinalIgnoreCase)
+        public Dictionary<string, Fraction> Variables { internal get; init; } = new Dictionary<string, Fraction>(StringComparer.OrdinalIgnoreCase)
         {
             { "pi", Fraction.Pi },
             { "e", Fraction.E },
@@ -28,7 +41,14 @@ namespace Zion.MathExpressions
         private readonly string String;
         private char Current => String[Index];
         private int Index;
-        private bool Finished => Index >= String.Length;
+        private bool Finished => Index >= String.Length || (IsInsideFunction && Current is '|' or ')');
+
+        public bool IsInsideFunction { private get; init; }
+        public int Accuracy
+        {
+            private get => field;
+            init => field = Math.Max(1, value);
+        } = 14;
 
         public MathExpressionParser(string String)
         {
@@ -38,7 +58,7 @@ namespace Zion.MathExpressions
         {
             this.String = NormalizeString(String, Start, End);
         }
-        private MathExpressionParser(string String, Dictionary<string, Fraction> Variables, Dictionary<string, Func<Fraction, int, Fraction>> Functions)
+        internal MathExpressionParser(string String, Dictionary<string, Fraction> Variables, Dictionary<string, MathFunction> Functions)
         {
             this.String = String;
             this.Variables = Variables;
@@ -110,6 +130,20 @@ namespace Zion.MathExpressions
         private IMathTerm Unfinished()
         {
             throw new ParsingException(String, String.Length - 1, "An unfinished expression");
+        }
+
+        private bool ExistsFunction(string Identifier)
+        {
+            return Functions.ContainsKey(Identifier);
+        }
+        private bool ExistsVariable(string Identifier)
+        {
+            return Variables.ContainsKey(Identifier);
+        }
+
+        private MathFunctionHandler GetHandler(int Start)
+        {
+            return new MathFunctionHandler(this, String, Start);
         }
 
         private static bool IsDigit(char Char) => char.IsDigit(Char) || Char == ',';

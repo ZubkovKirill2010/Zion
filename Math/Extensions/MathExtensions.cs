@@ -2,7 +2,7 @@
 
 namespace Zion.MathExpressions
 {
-    public static class TypesExtensions
+    public static class MathExtensions
     {
         public static Fraction ToFraction(this Int Int)
         {

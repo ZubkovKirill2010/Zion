@@ -1,6 +1,6 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using Microsoft.Win32.SafeHandles;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
-using System.Threading.Channels;
 using Int = System.Numerics.BigInteger;
 
 namespace Zion.MathExpressions
@@ -10,6 +10,7 @@ namespace Zion.MathExpressions
         public static readonly Fraction NaN = new Fraction(0, 0);
         public static readonly Fraction Zero = new Fraction(0);
         public static readonly Fraction One = new Fraction(1);
+        public static readonly Fraction MinusOne = new Fraction(-1);
         public static readonly Fraction Pi = new Fraction(2646693125139304345, 842468587426513207);
         public static readonly Fraction E = new Fraction(325368125, 119696244);
 
@@ -365,7 +366,7 @@ namespace Zion.MathExpressions
             return CeilPartString;
         }
 
-        public string ToStackedString()
+        public string ToStackedString(bool UseUnicodeChars = false)
         {
             if (IsNaN) { return "NaN"; }
             if (IsZero) { return "0"; }
@@ -375,19 +376,21 @@ namespace Zion.MathExpressions
                 return Ceil.ToString();
             }
 
-            Fraction Simple = GetSimple(this);
+            Simplify();
 
-            string DivisibleString = Simple.Divisible.ToString();
-            string DividerString = Simple.Divider.ToString();
-            int TotalLength = int.Max(DivisibleString.Length, DividerString.Length);
+            (Int Ceil, Fraction Fractional) Regular = ToRegular();
 
-            StringBuilder Builder = new StringBuilder(TotalLength * 3 + Environment.NewLine.Length * 2);
+            string CeilString = Regular.Ceil.ToString();
+            string DivisibleString = Regular.Fractional.Divisible.ToString();
+            string DividerString = Regular.Fractional.Divider.ToString();
 
-            Builder.AppendLine(DivisibleString.Centering(TotalLength));
-            Builder.AppendLine(new string('-', TotalLength));
-            Builder.AppendLine(DividerString.Centering(TotalLength));
+            if (UseUnicodeChars)
+            {
+                DivisibleString = Text.ConvertAll(DivisibleString, SpecialChars.ToDegreeDigit);
+                DividerString = Text.ConvertAll(DividerString, SpecialChars.ToIndexDigit);
+            }
 
-            return Builder.ToString();
+            return $"{CeilString}_{DivisibleString}/{DividerString}";
         }
 
 
@@ -679,10 +682,7 @@ namespace Zion.MathExpressions
 
         public (Int, Fraction) ToRegular()
         {
-            if (IsNaN) return (0, NaN);
-
-            Int Ceil = Divisible / Divider;
-            return (Ceil, new Fraction(Divisible - Ceil * Divider, Divider));
+            return IsNaN ? (0, NaN) : (Ceil, new Fraction(Int.Abs(Remainder), Divider));
         }
 
         public void Simplify()
@@ -741,11 +741,18 @@ namespace Zion.MathExpressions
             return Value;
         }
 
-        public static Fraction Abs(Fraction Value)
+        public static Fraction Absolute(Fraction Value)
         {
             if (Value.IsNaN) { return NaN; }
             if (Value.IsPositive) { return Value; }
             return new Fraction(-Value.Divisible, Value.Divider);
+        }
+
+        public static Fraction Signature(Fraction Value)
+        {
+            if (Value.IsNaN)  { return NaN;  }
+            if (Value.IsZero) { return Zero; }
+            return Value.IsPositive ? One : MinusOne;
         }
 
         public static Fraction Round(Fraction Value)
@@ -759,7 +766,7 @@ namespace Zion.MathExpressions
             Int Ceil = Value.Ceil;
             Fraction Remainder = Value.Remainder;
 
-            return Fraction.Abs(Remainder) >= (Value.Divider / 2).ToFraction()
+            return Fraction.Absolute(Remainder) >= (Value.Divider / 2).ToFraction()
                 ? Ceil + (Value.Divisible.Sign >= 0 ? 1 : -1)
                 : Ceil;
         }
@@ -811,28 +818,68 @@ namespace Zion.MathExpressions
             return A < B ? A : B;
         }
 
-        public static Fraction Sum(params IList<Fraction> Members)
+
+        public static Fraction Sum(params IList<Fraction> Values)
         {
-            ArgumentNullException.ThrowIfNull(Members);
-            if (Members.IsNullOrEmpty()) { return Zero; }
-            if (Members.Count == 1) { return Members[0]; }
-            if (Members.Any(m => m.IsNaN)) { return NaN; }
+            ArgumentNullException.ThrowIfNull(Values);
+            if (Values.IsNullOrEmpty()) { return Zero; }
+            if (Values.Count == 1) { return Values[0]; }
+            if (Values.Any(m => m.IsNaN)) { return NaN; }
 
-            Int CommonDivider = Members[0].Divider;
+            Int CommonDivider = Values[0].Divider;
 
-            for (int i = 1; i < Members.Count; i++)
+            for (int i = 1; i < Values.Count; i++)
             {
-                CommonDivider = GetLeastCommonMultiple(CommonDivider, Members[i].Divider);
+                CommonDivider = GetLeastCommonMultiple(CommonDivider, Values[i].Divider);
             }
 
             Int SumDivisibles = 0;
-            foreach (Fraction Member in Members)
+            foreach (Fraction Member in Values)
             {
                 Int Factor = CommonDivider / Member.Divider;
                 SumDivisibles += Member.Divisible * Factor;
             }
 
             return new Fraction(SumDivisibles, CommonDivider).SoftSimplify();
+        }
+
+        public static Fraction Max(params IEnumerable<Fraction> Values)
+        {
+            ArgumentNullException.ThrowIfNull(Values);
+
+            Fraction Result = NaN;
+
+            foreach (Fraction Value in Values)
+            {
+                if ((Result.IsNaN || Value > Result) && Value.IsNaN)
+                {
+                    Result = Value;
+                }
+            }
+
+            return Result;
+        }
+
+        public static Fraction Min(params IEnumerable<Fraction> Values)
+        {
+            ArgumentNullException.ThrowIfNull(Values);
+
+            Fraction Result = NaN;
+
+            foreach (Fraction Value in Values)
+            {
+                if ((Result.IsNaN || Value < Result) && Value.IsNaN)
+                {
+                    Result = Value;
+                }
+            }
+
+            return Result;
+        }
+
+        public static Fraction Average(params IList<Fraction> Values)
+        {
+            return Sum(Values) / Values.Count;
         }
 
 
@@ -878,7 +925,7 @@ namespace Zion.MathExpressions
 
         public static Fraction DoubleFactorial(Fraction Value)
         {
-            if (Value.IsNaN ) { return NaN; }
+            if (Value.IsNaN) { return NaN; }
             if (Value.IsZero || Value.IsOne) { return One; }
             if (Value.Divisible <= 0) { return NaN; }
 
@@ -888,7 +935,7 @@ namespace Zion.MathExpressions
             if (Number <= 20)
             {
                 int Start = Number.IsEven ? 2 : 1;
-                
+
                 for (int i = Start; i <= Number; i += 2)
                 {
                     Result *= i;
@@ -987,7 +1034,7 @@ namespace Zion.MathExpressions
                     StagnationCount = 0;
                 }
 
-                if (Abs(NextApproximation - CurrentApproximation) < new Fraction(1, 1000000))
+                if (Absolute(NextApproximation - CurrentApproximation) < new Fraction(1, 1000000))
                 {
                     NextApproximation.SoftSimplify();
                     return NextApproximation;

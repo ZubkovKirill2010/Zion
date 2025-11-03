@@ -220,7 +220,7 @@ namespace Zion
 
             if (String.Length == 0)
             {
-                return String;
+                return string.Empty;
             }
 
             return string.Create
