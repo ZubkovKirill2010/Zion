@@ -6,7 +6,7 @@
         {
             IMathTerm Expression = ParseAdditive();
 
-            if (!(IsInsideFunction ? (Index < String.Length && (Current is '|' or ')')) : (Index >= String.Length)))
+            if (!Finished)
             {
                 Throw(Index, $"Unexpected character '{Current}'");
             }
@@ -26,26 +26,14 @@
         {
             IMathTerm Left = ParseMultiplicative();
 
-            while (!Finished && (Current == '+' || Current == '-'))
+            while (!Finished && Current is '+' or '-')
             {
                 char Operator = Current;
                 Index++;
 
                 IMathTerm Right = ParseMultiplicative();
 
-                if (Operator == '+')
-                {
-                    Left = new Amount(Left, Right);
-                }
-                else // '-'
-                {
-                    Left = new Amount(Left, new Negative(Right));
-                }
-
-                if (IsInsideFunction && !Finished && (Current == '|' || Current == ')'))
-                {
-                    break;
-                }
+                Left = new Amount(Left, Operator == '+' ? Right : new Negative(Right));
             }
 
             return Left;
@@ -60,9 +48,21 @@
                 char Operator = Current;
                 Index++;
 
+                bool FloorDivision = false;
+                
+                if (Operator == '/' && Current == '/')
+                {
+                    FloorDivision = true;
+                    Index++;
+                }
+
                 IMathTerm Right = ParseExponential();
 
-                if (Operator == '*')
+                if (FloorDivision)
+                {
+                    return new FloorDivision(Left, Right);
+                }
+                else if (Operator == '*')
                 {
                     Left = new Product(Left, Right);
                 }
@@ -70,14 +70,9 @@
                 {
                     Left = new Division(Left, Right);
                 }
-                else // '%'
+                else
                 {
                     Left = new Remainder(Left, Right);
-                }
-
-                if (IsInsideFunction && !Finished && (Current == '|' || Current == ')'))
-                {
-                    break;
                 }
             }
 
@@ -93,11 +88,6 @@
                 Index++;
                 IMathTerm Right = ParseExponential();
                 Left = new Exponent(Left, Right);
-
-                if (IsInsideFunction && !Finished && (Current == '|' || Current == ')'))
-                {
-                    break;
-                }
             }
 
             return Left;
@@ -118,11 +108,6 @@
                 else
                 {
                     Term = new SimpleFunction(Term, MathFunctions.Factorial);
-                }
-
-                if (IsInsideFunction && !Finished && (Current == '|' || Current == ')'))
-                {
-                    break;
                 }
             }
 
@@ -199,7 +184,7 @@
 
             IMathTerm Value = ParseAdditive();
 
-            if (Finished || Current != ')')
+            if (Index >= String.Length || Current != ')')
             {
                 return Throw("Expected ')'");
             }

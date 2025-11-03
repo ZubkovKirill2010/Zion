@@ -32,10 +32,7 @@
             Result = null;
             if (Finished) { return false; }
 
-            MathExpressionParser Parser = new MathExpressionParser(String[Index..], Variables, Functions)
-            {
-                IsInsideFunction = true
-            };
+            MathExpressionParser Parser = new MathExpressionParser(String[Index..], Variables, Functions);
 
             Result = Parser.ParseBeforeSeporator(out int End);
             Index += End;
@@ -73,7 +70,7 @@
             {
                 throw new ParsingException(String, Index, "No closing brackets ')'");
             }
-            if (Current == '|')
+            if (Current is '|' or '\\')
             {
                 Index++;
 

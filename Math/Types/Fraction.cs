@@ -15,7 +15,7 @@ namespace Zion.MathExpressions
         public static readonly Fraction E = new Fraction(325368125, 119696244);
 
         public Int Divisible { get; private set; }
-        public Int Divider { get; private set; }
+        public Int Divider   { get; private set; }
 
         public bool IsNaN => Divider == 0;
         public bool IsPositive => !IsNaN && Int.IsPositive(Divisible);
@@ -24,7 +24,7 @@ namespace Zion.MathExpressions
         public bool IsOne => !IsNaN && Divisible == Divider;
 
         public Int Ceil => Divisible / Divider;
-        public Int Remainder => Divisible % Divider;
+        public Int Remainder => Int.Abs(Divisible % Divider);
 
         public Fraction Inversed => IsNaN || IsZero ? NaN : new Fraction(Divider, Divisible);
 
@@ -334,8 +334,8 @@ namespace Zion.MathExpressions
             }
 
             Int Divider = this.Divider;
-            Int CeilPart = Divisible / Divider;
-            Int Remainder = Int.Abs(Divisible % Divider);
+            Int CeilPart = this.Ceil;
+            Int Remainder = this.Remainder;
 
             string CeilPartString = (IsNegative && CeilPart == 0) ? "-0" : CeilPart.ToString();
 
@@ -390,7 +390,9 @@ namespace Zion.MathExpressions
                 DividerString = Text.ConvertAll(DividerString, SpecialChars.ToIndexDigit);
             }
 
-            return $"{CeilString}_{DivisibleString}/{DividerString}";
+            return CeilString == "0"
+                ? $"{DivisibleString}/{DividerString}"
+                : $"{CeilString}_{DivisibleString}/{DividerString}";
         }
 
 
@@ -741,14 +743,14 @@ namespace Zion.MathExpressions
             return Value;
         }
 
-        public static Fraction Absolute(Fraction Value)
+        public static Fraction Abs(Fraction Value)
         {
             if (Value.IsNaN) { return NaN; }
             if (Value.IsPositive) { return Value; }
             return new Fraction(-Value.Divisible, Value.Divider);
         }
 
-        public static Fraction Signature(Fraction Value)
+        public static Fraction Sign(Fraction Value)
         {
             if (Value.IsNaN)  { return NaN;  }
             if (Value.IsZero) { return Zero; }
@@ -766,7 +768,7 @@ namespace Zion.MathExpressions
             Int Ceil = Value.Ceil;
             Fraction Remainder = Value.Remainder;
 
-            return Fraction.Absolute(Remainder) >= (Value.Divider / 2).ToFraction()
+            return Fraction.Abs(Remainder) >= (Value.Divider / 2).ToFraction()
                 ? Ceil + (Value.Divisible.Sign >= 0 ? 1 : -1)
                 : Ceil;
         }
@@ -1034,7 +1036,7 @@ namespace Zion.MathExpressions
                     StagnationCount = 0;
                 }
 
-                if (Absolute(NextApproximation - CurrentApproximation) < new Fraction(1, 1000000))
+                if (Abs(NextApproximation - CurrentApproximation) < new Fraction(1, 1000000))
                 {
                     NextApproximation.SoftSimplify();
                     return NextApproximation;

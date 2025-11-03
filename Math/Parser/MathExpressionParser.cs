@@ -16,8 +16,8 @@ namespace Zion.MathExpressions
         public Dictionary<string, MathFunction> Functions { internal get; init; } = new Dictionary<string, MathFunction>(StringComparer.OrdinalIgnoreCase)
         {
             { "sqrt",    MathFunctions.Sqrt                        },
-            { "abs",     MathFunctions.Convert(Fraction.Absolute)  },
-            { "sign",    MathFunctions.Convert(Fraction.Signature) },
+            { "abs",     MathFunctions.Convert(Fraction.Abs)  },
+            { "sign",    MathFunctions.Convert(Fraction.Sign) },
             { "round",   MathFunctions.Convert(Fraction.Round)     },
             { "floor",   MathFunctions.Convert(Fraction.Floor)     },
             { "ceiling", MathFunctions.Convert(Fraction.Ceiling)   },
@@ -41,9 +41,8 @@ namespace Zion.MathExpressions
         private readonly string String;
         private char Current => String[Index];
         private int Index;
-        private bool Finished => Index >= String.Length || (IsInsideFunction && Current is '|' or ')');
+        private bool Finished => Index >= String.Length || Current is '|' or '\\' or ')';
 
-        public bool IsInsideFunction { private get; init; }
         public int Accuracy
         {
             private get => field;
