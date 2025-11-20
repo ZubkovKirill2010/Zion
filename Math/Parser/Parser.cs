@@ -43,13 +43,22 @@
         {
             IMathTerm Left = ParseExponential();
 
-            while (!Finished && (Current == '*' || Current == '/' || Current == '%'))
+            while (!Finished && Current is '*' or '/' or '%' or '(')
             {
                 char Operator = Current;
-                Index++;
+
+                if (Operator == '(')
+                {
+                    Left = new Product(Left, ParseBrackets());
+                    continue;
+                }
+                else
+                {
+                    Index++;
+                }
 
                 bool FloorDivision = false;
-                
+
                 if (Operator == '/' && Current == '/')
                 {
                     FloorDivision = true;
@@ -143,7 +152,7 @@
                 Term = ParseBrackets();
             }
             else if (IsLetter(Current))
-            {   
+            {
                 Term = ParseIdentifier();
             }
             else
@@ -225,8 +234,8 @@
 
         private IMathTerm ParseFunctionCall(string Identifier)
         {
-            MathFunctionHandler Handler = GetHandler(Index + 1);
-            IMathTerm Result = Functions[Identifier](Handler);
+            FunctionHandler Handler = GetHandler(Index + 1);
+            IMathTerm Result = Functions[Identifier].Handler(Handler);
             Index = Handler.Index - 1;
 
             if (Index >= String.Length || Current != ')')

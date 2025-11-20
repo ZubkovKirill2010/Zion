@@ -2,7 +2,7 @@
 {
     public static class MathFunctions
     {
-        public static IMathTerm Sqrt(MathFunctionHandler Handler)
+        public static IMathTerm Sqrt(FunctionHandler Handler)
         {
             IMathTerm Value = Handler.ReadMathTerm();
 
@@ -24,6 +24,15 @@
             );
         }
 
+        public static IMathTerm SumRange(FunctionHandler Handler)
+        {
+            return new RangeAmount
+            (
+                Handler.ReadMathTerm(),
+                Handler.ReadMathTerm()
+            );
+        }
+
         public static Fraction Factorial(IMathTerm Value, int Accuracy)
         {
             return Fraction.Factorial(Value.GetValue(Accuracy));
@@ -35,7 +44,7 @@
         }
 
 
-        public static MathFunction Convert(this Func<IMathTerm, Fraction> Function)
+        public static MathFunctionHandler Convert(this Func<IMathTerm, Fraction> Function)
         {
             return Handler =>
             {
@@ -48,7 +57,7 @@
             };
         }
 
-        public static MathFunction Convert(this Func<IMathTerm, int, Fraction> Function)
+        public static MathFunctionHandler Convert(this Func<IMathTerm, int, Fraction> Function)
         {
             return Handler =>
             {
@@ -61,7 +70,7 @@
             };
         }
 
-        public static MathFunction Convert(this Func<Fraction, Fraction> Function)
+        public static MathFunctionHandler Convert(this Func<Fraction, Fraction> Function)
         {
             return Handler =>
             {
@@ -75,7 +84,7 @@
         }
 
 
-        public static MathFunction ConvertGrouped(this Func<IList<IMathTerm>, int, Fraction> Function)
+        public static MathFunctionHandler ConvertGrouped(this Func<IList<IMathTerm>, int, Fraction> Function)
         {
             return Handler =>
             {
@@ -90,7 +99,7 @@
             };
         }
 
-        public static MathFunction ConvertGrouped(this Func<IList<IMathTerm>, Fraction> Function)
+        public static MathFunctionHandler ConvertGrouped(this Func<IList<IMathTerm>, Fraction> Function)
         {
             return Handler =>
             {
@@ -106,7 +115,7 @@
         }
 
 
-        public static MathFunction ConvertGrouped(this Func<Fraction[], int, Fraction> Function)
+        public static MathFunctionHandler ConvertGrouped(this Func<Fraction[], int, Fraction> Function)
         {
             return Handler =>
             {
@@ -121,7 +130,7 @@
             };
         }
 
-        public static MathFunction ConvertGrouped(this Func<Fraction[], Fraction> Function)
+        public static MathFunctionHandler ConvertGrouped(this Func<Fraction[], Fraction> Function)
         {
             return Handler =>
             {

@@ -109,7 +109,18 @@ namespace Zion
 
         public void CopyTo(bool[] Array, int ArrayIndex)
         {
-            throw new NotImplementedException();
+            ArgumentNullException.ThrowIfNull(Array);
+            ArgumentOutOfRangeException.ThrowIfNegative(ArrayIndex);
+
+            if (Array.Length - ArrayIndex < Length)
+            {
+                throw new ArgumentException("Target array too small");
+            }
+
+            for (int i = 0; i < Length; i++)
+            {
+                Array[ArrayIndex + i] = this[i];
+            }
         }
 
         public BitArray Clone()
@@ -122,6 +133,7 @@ namespace Zion
         {
             int ByteIndex = 0;
             int BitIndex = 0;
+
             for (int i = 0; i < Length; i++)
             {
                 yield return Data[ByteIndex].GetBit(BitIndex);
@@ -130,11 +142,8 @@ namespace Zion
 
                 if (BitIndex == 8)
                 {
-                    ByteIndex = 0;
-                }
-                else
-                {
                     ByteIndex++;
+                    BitIndex = 0;
                 }
             }
         }

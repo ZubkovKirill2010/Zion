@@ -17,7 +17,7 @@ namespace Zion
 
 
         #region Edit
-        public static string RemoveChars(this string? String, Predicate<char> Condition)
+        public static string RemoveChars(this string String, Predicate<char> Condition)
         {
             ArgumentNullException.ThrowIfNullOrEmpty(String);
 
@@ -32,20 +32,32 @@ namespace Zion
                 Result.Add(Char);
             }
 
-            return new string(Result.ToArray());
+            return Create(Result);
         }
-        public static string RemoveChars(this string? String, params char[] RemovingChars)
+        public static string RemoveChars(this string String, params IEnumerable<char> RemovingChars)
         {
             return RemoveChars(String, RemovingChars.Contains);
         }
 
-        public static string UnSpace(this string? String)
+        public static string UnSpace(this string String)
         {
             return String.RemoveChars(char.IsWhiteSpace);
         }
-        public static string Minimize(this string? String)
+        public static string Minimize(this string String)
         {
-            return UnSpace(String).ToLower();
+            ArgumentNullException.ThrowIfNullOrEmpty(String);
+
+            List<char> Result = new List<char>(String.Length);
+
+            foreach (char Char in String)
+            {
+                if (!char.IsWhiteSpace(Char))
+                {
+                    Result.Add(char.ToLower(Char));
+                }
+            }
+
+            return Create(Result);
         }
 
         public static string Duplicate(this string String, int Count)
@@ -127,6 +139,7 @@ namespace Zion
             return StringArray[Start..(End + 1)];
         }
 
+
         public static string Centering(this string String, int TotalLength, char PaddingChar = ' ')
         {
             ArgumentNullException.ThrowIfNull(String);
@@ -160,6 +173,7 @@ namespace Zion
 
             return String.Length <= TotalLength ? String : String[..(TotalLength - 3)] + "...";
         }
+
 
         public static string[] Chunk(this string String, int ChunkLength)
         {
@@ -212,6 +226,7 @@ namespace Zion
 
             return Chunks;
         }
+
 
         public static string ConvertAll(this string String, Func<char, char> Converter)
         {
@@ -275,7 +290,6 @@ namespace Zion
         #endregion
 
         #region Prefix & Suffix
-
         public static string RemovePrefix(this string String, string Prefix)
         {
             ArgumentNullException.ThrowIfNull(String);
@@ -745,16 +759,17 @@ namespace Zion
 
         #endregion
 
-        #region Skipping
-
+        #region Parsing
         public static void SkipSpaces(this string String, ref int Index)
         {
             Skip(String, ref Index, char.IsWhiteSpace);
         }
+
         public static int SkipSpaces(this string String, int Start)
         {
             return Skip(String, Start, char.IsWhiteSpace);
         }
+
 
         public static void Skip(this string String, ref int Index, Predicate<char> Condition)
         {
@@ -765,6 +780,7 @@ namespace Zion
                 Index++;
             }
         }
+
         public static int Skip(this string String, int Start, Predicate<char> Condition)
         {
             ArgumentNullException.ThrowIfNull(String);
@@ -776,6 +792,7 @@ namespace Zion
             }
             return Index;
         }
+
         public static int Skip(this string String, int Start, params IEnumerable<char> SkipChars)
         {
             ArgumentNullException.ThrowIfNull(String);
@@ -814,7 +831,6 @@ namespace Zion
             }
             throw new Exception();
         }
-
 
         public static IEnumerable<char> JoinLines(this IList<IEnumerable<char>> Lines)
         {
@@ -855,7 +871,7 @@ namespace Zion
                 }
             }
 
-            Bracket = '\0';
+            Bracket = default;
             return false;
         }
     }

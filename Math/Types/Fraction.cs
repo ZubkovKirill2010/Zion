@@ -1,5 +1,4 @@
-﻿using Microsoft.Win32.SafeHandles;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using Int = System.Numerics.BigInteger;
 
@@ -15,7 +14,7 @@ namespace Zion.MathExpressions
         public static readonly Fraction E = new Fraction(325368125, 119696244);
 
         public Int Divisible { get; private set; }
-        public Int Divider   { get; private set; }
+        public Int Divider { get; private set; }
 
         public bool IsNaN => Divider == 0;
         public bool IsPositive => !IsNaN && Int.IsPositive(Divisible);
@@ -752,55 +751,34 @@ namespace Zion.MathExpressions
 
         public static Fraction Sign(Fraction Value)
         {
-            if (Value.IsNaN)  { return NaN;  }
+            if (Value.IsNaN) { return NaN; }
             if (Value.IsZero) { return Zero; }
             return Value.IsPositive ? One : MinusOne;
+        }
+
+        public static Fraction ToNegative(Fraction Value)
+        {
+            if (Value.IsNaN) { return NaN; }
+            if (Value.IsNegative) { return Value; }
+            return new Fraction(-Value.Divisible, Value.Divider);
         }
 
         public static Fraction Round(Fraction Value)
         {
             if (Value.IsNaN) { return NaN; }
-            if (Value.IsCeil(out Int Number))
-            {
-                return Number.ToFraction();
-            }
-
-            Int Ceil = Value.Ceil;
-            Fraction Remainder = Value.Remainder;
-
-            return Fraction.Abs(Remainder) >= (Value.Divider / 2).ToFraction()
-                ? Ceil + (Value.Divisible.Sign >= 0 ? 1 : -1)
-                : Ceil;
+            return RoundToInt(Value);
         }
 
         public static Fraction Ceiling(Fraction Value)
         {
             if (Value.IsNaN) { return NaN; }
-            if (Value.IsCeil(out Int Number))
-            {
-                return Number.ToFraction();
-            }
-
-            Int Ceil = Value.Ceil;
-
-            return Value.Divisible.Sign >= 0 && Value.Remainder != 0
-                ? Ceil + 1
-                : Ceil;
+            return CeilingToInt(Value);
         }
 
         public static Fraction Floor(Fraction Value)
         {
             if (Value.IsNaN) { return NaN; }
-            if (Value.IsCeil(out Int Number))
-            {
-                return Number.ToFraction();
-            }
-
-            Int Ceil = Value.Ceil;
-
-            return Value.Divisible.Sign < 0 && Value.Remainder != 0
-                ? Ceil - 1
-                : Ceil;
+            return FloorToInt(Value);
         }
 
         public static Fraction Truncate(Fraction Value)
@@ -818,6 +796,31 @@ namespace Zion.MathExpressions
         {
             if (A.IsNaN || B.IsNaN) { return NaN; }
             return A < B ? A : B;
+        }
+
+
+        public static Fraction SumRange(Fraction Min, Fraction Max)
+        {
+            Console.WriteLine($"In: Min = {Min}; Max = {Max}");
+
+            if (Min.IsNaN || Max.IsNaN) { return NaN; }
+            if (Min > Max)
+            {
+                Accessor.Reverse(ref Min, ref Max);
+            }
+
+            Int A = CeilingToInt(Min);
+            Int B = FloorToInt(Max);
+
+            Console.WriteLine(": " + A);
+            Console.WriteLine(": " + B);
+
+            if (Min >= Max)
+            {
+                return Zero;
+            }
+
+            return ((B - A + Int.One) * (A + B)) >> 1;
         }
 
 
@@ -853,7 +856,7 @@ namespace Zion.MathExpressions
 
             foreach (Fraction Value in Values)
             {
-                if ((Result.IsNaN || Value > Result) && Value.IsNaN)
+                if ((Result.IsNaN || Value > Result) && !Value.IsNaN)
                 {
                     Result = Value;
                 }
@@ -870,7 +873,7 @@ namespace Zion.MathExpressions
 
             foreach (Fraction Value in Values)
             {
-                if ((Result.IsNaN || Value < Result) && Value.IsNaN)
+                if ((Result.IsNaN || Value < Result) && !Value.IsNaN)
                 {
                     Result = Value;
                 }
@@ -1048,6 +1051,16 @@ namespace Zion.MathExpressions
 
             CurrentApproximation.SoftSimplify();
             return CurrentApproximation;
+        }
+
+        public static Fraction Sqrt(Fraction Value, Fraction RootDegree, int Accuracy = 14)
+        {
+            if (RootDegree.IsCeil(out Int Degree) && Degree <= int.MaxValue && Degree >= int.MinValue)
+            {
+                return Sqrt(Value, (int)Degree, Accuracy);
+            }
+
+            return Pow(Value, RootDegree.Inversed, Accuracy);
         }
 
 
@@ -1296,6 +1309,44 @@ namespace Zion.MathExpressions
             if (A == 0 || B == 0) { return 0; }
 
             return Int.Abs(A * B) / GetGreatestCommonDivisor(A, B);
+        }
+
+
+        private static Int RoundToInt(Fraction Value)
+        {
+            if (Value.IsCeil(out Int Number))
+            {
+                return Number;
+            }
+
+            Int Ceil = Value.Ceil;
+            Fraction Remainder = Value.Remainder;
+
+            return Abs(Remainder) >= (Value.Divider / 2).ToFraction()
+                ? Ceil + (Value.Divisible.Sign >= 0 ? 1 : -1)
+                : Ceil;
+        }
+
+        private static Int CeilingToInt(Fraction Value)
+        {
+            if (Value.IsCeil(out Int Number)) { return Number; }
+
+            Int Ceil = Value.Ceil;
+
+            return Value.Divisible.Sign >= 0 && !Value.Remainder.IsZero
+                ? Ceil + 1
+                : Ceil;
+        }
+
+        private static Int FloorToInt(Fraction Value)
+        {
+            if (Value.IsCeil(out Int Number)) { return Number; }
+
+            Int Ceil = Value.Ceil;
+
+            return Value.Divisible.Sign < 0 && !Value.Remainder.IsZero
+                ? Ceil - 1
+                : Ceil;
         }
     }
 }

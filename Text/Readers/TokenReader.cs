@@ -100,9 +100,9 @@
 //            return String[Index++];
 //        }
 
-//        public override int Read(char[] Buffer, int Index, int Count)
+//        public override int Read(char[] Buffer, int Index, int Length)
 //        {
-//            return Reader.Read(Buffer, Index, Count);
+//            return Reader.Read(Buffer, Index, Length);
 //        }
 
 //        public override string? ReadLine()
