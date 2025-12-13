@@ -292,6 +292,30 @@ namespace Zion
             }
         }
 
+        public static IEnumerable<T> Limit<T>(this IEnumerable<T> Enumerable, int Count)
+        {
+            ArgumentNullException.ThrowIfNull(Enumerable);
+            ArgumentOutOfRangeException.ThrowIfNegative(Count);
+
+            if (Count == 0)
+            {
+                yield break;
+            }
+
+            int Index = 0;
+
+            foreach (T Value in Enumerable)
+            {
+                if (Index == Count)
+                {
+                    yield break;
+                }
+
+                yield return Value;
+                Index++;
+            }
+        }
+
 
         public static string ToEnumerableString<T>(this IEnumerable<T> Enumerable)
         {
@@ -301,6 +325,20 @@ namespace Zion
         public static string ToString<T>(this IEnumerable<T> Enumerable, Func<T, string> ToString)
         {
             return $"[{string.Join(", ", Enumerable.Select(ToString))}]";
+        }
+
+
+        public static IEnumerable<T> Repeat<T>(this T Value, int Count)
+        {
+            ArgumentOutOfRangeException.ThrowIfNegative(Count);
+            if (Count == 0) { yield break; }
+
+            int Index = 0;
+            while (Index != Count)
+            {
+                yield return Value;
+                Index++;
+            }
         }
     }
 }

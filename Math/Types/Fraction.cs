@@ -801,8 +801,6 @@ namespace Zion.MathExpressions
 
         public static Fraction SumRange(Fraction Min, Fraction Max)
         {
-            Console.WriteLine($"In: Min = {Min}; Max = {Max}");
-
             if (Min.IsNaN || Max.IsNaN) { return NaN; }
             if (Min > Max)
             {
@@ -811,9 +809,6 @@ namespace Zion.MathExpressions
 
             Int A = CeilingToInt(Min);
             Int B = FloorToInt(Max);
-
-            Console.WriteLine(": " + A);
-            Console.WriteLine(": " + B);
 
             if (Min >= Max)
             {
@@ -1003,6 +998,11 @@ namespace Zion.MathExpressions
             if (Value.IsZero) { return Zero; }
             if (Value.IsOne) { return One; }
 
+            if (Value < Zero && RootDegree.IsEven())
+            {
+                return NaN;
+            }
+
             Fraction ExactRoot = TryFindExactRoot(Value, RootDegree);
             if (!ExactRoot.IsNaN)
             {
@@ -1022,7 +1022,8 @@ namespace Zion.MathExpressions
                 }
 
                 Fraction NextApproximation =
-                    (new Fraction(RootDegree - 1) * CurrentApproximation + Value / PowerOfApproximation)
+                    (new Fraction(RootDegree - 1)
+                    * CurrentApproximation + Value / PowerOfApproximation)
                     / new Fraction(RootDegree);
 
                 if (NextApproximation == PreviousApproximation)
@@ -1055,6 +1056,13 @@ namespace Zion.MathExpressions
 
         public static Fraction Sqrt(Fraction Value, Fraction RootDegree, int Accuracy = 14)
         {
+            if (RootDegree.IsNaN || Value.IsNaN) { return NaN; }
+
+            if (Value < Zero && RootDegree.IsCeil(out Int CeilDegree) && CeilDegree.IsEven)
+            {
+                return NaN;
+            }
+
             if (RootDegree.IsCeil(out Int Degree) && Degree <= int.MaxValue && Degree >= int.MinValue)
             {
                 return Sqrt(Value, (int)Degree, Accuracy);

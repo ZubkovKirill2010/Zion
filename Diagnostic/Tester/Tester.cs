@@ -14,8 +14,8 @@ namespace Zion.Diagnostics
             this.Function = Function;
         }
 
-        public async Task<TestResult<TIn, TOut>[]> RunTest() => await RunTest(TimeSpan.FromSeconds(10));
-        public async Task<TestResult<TIn, TOut>[]> RunTest(TimeSpan MaxTime)
+        public async Task<TestResult<TIn, TOut>[]> Run() => await Run(TimeSpan.FromSeconds(10));
+        public async Task<TestResult<TIn, TOut>[]> Run(TimeSpan MaxTime)
         {
             TestResult<TIn, TOut>[] Results = new TestResult<TIn, TOut>[Tests.Length];
 

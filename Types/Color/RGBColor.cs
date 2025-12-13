@@ -5,70 +5,75 @@ using Zion.Vectors;
 namespace Zion
 {
     [Serializable]
-    public struct Color : IBinaryObject<Color>, IEnumerable<byte>
+    public struct RGBColor : IBinaryObject<RGBColor>, IEnumerable<byte>
     {
         public byte R { get; set; }
         public byte G { get; set; }
         public byte B { get; set; }
 
-        public static readonly Color Black = new Color(0);
-        public static readonly Color DarkGray = new Color(128);
-        public static readonly Color Gray = new Color(182);
-        public static readonly Color White = new Color(255);
+        public static readonly RGBColor Black = new RGBColor(0);
+        public static readonly RGBColor DarkGray = new RGBColor(128);
+        public static readonly RGBColor Gray = new RGBColor(182);
+        public static readonly RGBColor White = new RGBColor(255);
 
-        public static readonly Color DarkBlue = new Color(0, 0, 255);
-        public static readonly Color DarkGreen = new Color(85, 177, 85);
-        public static readonly Color DarkCyan = new Color(0, 128, 128);
-        public static readonly Color DarkRed = new Color(128, 0, 0);
-        public static readonly Color DarkMagenta = new Color(128, 0, 128);
-        public static readonly Color DarkYellow = new Color(128, 128, 0);
+        public static readonly RGBColor DarkBlue = new RGBColor(0, 0, 255);
+        public static readonly RGBColor DarkGreen = new RGBColor(85, 177, 85);
+        public static readonly RGBColor DarkCyan = new RGBColor(0, 128, 128);
+        public static readonly RGBColor DarkRed = new RGBColor(128, 0, 0);
+        public static readonly RGBColor DarkMagenta = new RGBColor(128, 0, 128);
+        public static readonly RGBColor DarkYellow = new RGBColor(128, 128, 0);
 
-        public static readonly Color Blue = new Color(41, 161, 221);
-        public static readonly Color Green = new Color(0, 255, 0);
-        public static readonly Color Cyan = new Color(0, 255, 255);
-        public static readonly Color Red = new Color(255, 0, 0);
-        public static readonly Color Magenta = new Color(255, 0, 255);
-        public static readonly Color Yellow = new Color(255, 255, 0);
-        public static readonly Color Orange = new Color(247, 102, 3);
-        public static readonly Color Violet = new Color(144, 40, 241);
+        public static readonly RGBColor Blue = new RGBColor(41, 161, 221);
+        public static readonly RGBColor Green = new RGBColor(0, 255, 0);
+        public static readonly RGBColor Cyan = new RGBColor(0, 255, 255);
+        public static readonly RGBColor Red = new RGBColor(255, 0, 0);
+        public static readonly RGBColor Magenta = new RGBColor(255, 0, 255);
+        public static readonly RGBColor Yellow = new RGBColor(255, 255, 0);
+        public static readonly RGBColor Orange = new RGBColor(247, 102, 3);
+        public static readonly RGBColor Violet = new RGBColor(144, 40, 241);
 
 
-        public Color(byte Value)
+        public RGBColor(byte Value)
         {
             R = Value;
             G = Value;
             B = Value;
         }
-        public Color(byte R, byte G, byte B)
+        public RGBColor(byte R, byte G, byte B)
         {
             this.R = R;
             this.G = G;
             this.B = B;
         }
-        public Color(Vector3Int Color)
+        public RGBColor(Vector3Int Color)
         {
             R = (byte)(Math.Abs(Color.x) % 256);
             G = (byte)(Math.Abs(Color.y) % 256);
             B = (byte)(Math.Abs(Color.z) % 256);
         }
-        public Color(System.Drawing.Color Color)
+        public RGBColor(System.Drawing.Color Color)
         {
             R = Color.R;
             G = Color.G;
             B = Color.B;
         }
 
-        public static bool operator ==(Color A, Color B)
+        public static bool operator ==(RGBColor A, RGBColor B)
         {
             return A.R == B.R && A.G == B.G && A.B == B.B;
         }
-        public static bool operator !=(Color A, Color B)
+        public static bool operator !=(RGBColor A, RGBColor B)
         {
             return A.R != B.R || A.G != B.G || A.B != B.B;
         }
-        public static Color operator *(Color A, float B)
+        public static RGBColor operator *(RGBColor A, float B)
         {
-            return new Color((byte)(A.R * B), (byte)(A.G * B), (byte)(A.B * B));
+            return new RGBColor((byte)(A.R * B), (byte)(A.G * B), (byte)(A.B * B));
+        }
+
+        public static implicit operator System.Drawing.Color(RGBColor Color)
+        {
+            return System.Drawing.Color.FromArgb(Color.R, Color.G, Color.B);
         }
 
         public override readonly string ToString()
@@ -77,11 +82,11 @@ namespace Zion
         }
         public override bool Equals([NotNullWhen(true)] object? Object)
         {
-            return Object is Color Color && this == Color;
+            return Object is RGBColor Color && this == Color;
         }
 
 
-        public static Color Parse(string String)
+        public static RGBColor Parse(string String)
         {
             ArgumentNullException.ThrowIfNullOrEmpty(String);
 
@@ -89,7 +94,7 @@ namespace Zion
             {
                 if (String.Length == 3)
                 {
-                    return new Color
+                    return new RGBColor
                     (
                         HexToByte(String[1..3], "RGB")
                     );
@@ -101,7 +106,7 @@ namespace Zion
                     byte G = HexToByte(String[3..5], 'G');
                     byte B = HexToByte(String[5..7], 'B');
 
-                    return new Color(R, G, B);
+                    return new RGBColor(R, G, B);
                 }
             }
 
@@ -125,9 +130,9 @@ namespace Zion
             {
                 throw new FormatException($"Couldn't convert String(=\"{String}\") to Color");
             }
-            return new Color(Result[0], Result[1], Result[2]);
+            return new RGBColor(Result[0], Result[1], Result[2]);
         }
-        public static bool TryParse(string String, out Color Color)
+        public static bool TryParse(string String, out RGBColor Color)
         {
             try
             {
@@ -148,9 +153,9 @@ namespace Zion
             Writer.Write(G);
             Writer.Write(B);
         }
-        public static Color Read(BinaryReader Reader)
+        public static RGBColor Read(BinaryReader Reader)
         {
-            return new Color
+            return new RGBColor
             (
                 Reader.ReadByte(),
                 Reader.ReadByte(),
@@ -169,9 +174,9 @@ namespace Zion
         {
             return R * 0.2126f + G * 0.7152f + B * 0.0722f;
         }
-        public readonly Color GetOpposite()
+        public readonly RGBColor GetOpposite()
         {
-            return new Color((byte)(byte.MaxValue - R), (byte)(byte.MaxValue - G), (byte)(byte.MaxValue - B));
+            return new RGBColor((byte)(byte.MaxValue - R), (byte)(byte.MaxValue - G), (byte)(byte.MaxValue - B));
         }
 
 

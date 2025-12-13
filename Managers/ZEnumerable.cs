@@ -2,6 +2,41 @@
 {
     public static class ZEnumerable
     {
+        public static IEnumerable<int> Range(int Start, int End)
+        {
+            if (End <= Start) { yield break; }
+
+            int Index = Start;
+
+            while (Index != End)
+            {
+                yield return Index++;
+            }
+        }
+
+        public static IEnumerable<int> Range(int Count)
+        {
+            if (int.IsNegative(Count)) { yield break; }
+
+            int Index = 0;
+
+            while (Index < Count)
+            {
+                yield return Index++;
+            }
+        }
+
+        public static IEnumerable<int> Range<T>(T[] Array)
+        {
+            return Range(Array.Length);
+        }
+
+        public static IEnumerable<int> Range<T>(ICollection<T> Collection)
+        {
+            return Range(Collection.Count);
+        }
+
+
         public static IEnumerable<(T1, T2)> ToPair<T1, T2>(IEnumerable<T1> A, IEnumerable<T2> B)
         {
             ArgumentNullException.ThrowIfNull(A);
@@ -23,6 +58,7 @@
             }
         }
 
+
         public static IEnumerable<T[]> GetAllPermutations<T>(params IList<T> Original)
         {
             ArgumentNullException.ThrowIfNull(Original);
@@ -43,6 +79,7 @@
                 yield return Permutation;
             }
         }
+
 
         private static IEnumerable<T[]> GeneratePermutations<T>(IList<T> Array, int Start)
         {

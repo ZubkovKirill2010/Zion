@@ -487,10 +487,7 @@ namespace Zion
         public static bool TrueFor(this string String, int Start, int End, Predicate<char> Condition)
         {
             ArgumentNullException.ThrowIfNull(String);
-            if (Start < 0)
-            {
-                throw new ArgumentOutOfRangeException($"Start(={Start}) < 0");
-            }
+            ArgumentOutOfRangeException.ThrowIfNegative(Start);
             if (End > String.Length)
             {
                 throw new ArgumentOutOfRangeException($"End(={End}) >= String.Length(={String.Length})");

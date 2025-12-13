@@ -5,14 +5,14 @@ namespace Zion
     [Serializable]
     public struct ColorText : IColorText
     {
-        public static readonly ColorText Empty = new ColorText(string.Empty, new Color(0));
+        public static readonly ColorText Empty = new ColorText(string.Empty, new RGBColor(0));
 
         public string Text;
-        public Color Color;
+        public RGBColor Color;
 
         public int Length => Text.Length;
 
-        public ColorText(object? Text, Color Color)
+        public ColorText(object? Text, RGBColor Color)
         {
             this.Text = (Text ?? string.Empty).ToString() ?? string.Empty;
             this.Color = Color;
@@ -30,7 +30,7 @@ namespace Zion
             return $"\u001b[38;2;{Color.R};{Color.G};{Color.B}m{Text}\u001b[0m";
         }
 
-        public static string GetText(ICollection<char> Chars, Color Color)
+        public static string GetText(ICollection<char> Chars, RGBColor Color)
         {
             ArgumentNullException.ThrowIfNull(Chars);
 
@@ -80,14 +80,14 @@ namespace Zion
         {
             return $"\\u001b[38;2;{Color.R};{Color.G};{Color.B}m{Text}\\u001b[0m";
         }
-        public static string ToUnicode(string Text, Color Color)
+        public static string ToUnicode(string Text, RGBColor Color)
         {
             return $"\\u001b[38;2;{Color.R};{Color.G};{Color.B}m{Text}\\u001b[0m";
         }
 
         public string ToColorString() => ToString();
 
-        public static string GetText(string Text, Color Color)
+        public static string GetText(string Text, RGBColor Color)
         {
             return $"\u001b[38;2;{Color.R};{Color.G};{Color.B}m{Text}\u001b[0m";
         }

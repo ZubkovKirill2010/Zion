@@ -18,8 +18,7 @@ namespace Zion
         public bool IsReadOnly => false;
 
 
-        public GapBuffer()
-            : this(50) { }
+        public GapBuffer() : this(50) { }
         public GapBuffer(int Capacity)
         {
             Buffer = new T[Capacity];
@@ -34,21 +33,16 @@ namespace Zion
         {
             get
             {
-                if (Index < 0 || Index >= Length)
-                {
-                    throw new ArgumentOutOfRangeException(nameof(Index));
-                }
+                ArgumentOutOfRangeException.ThrowIfWithout(Index, Length);
                 return Buffer[GetIndex(Index)];
             }
             set
             {
-                if (Index < 0 || Index >= Length)
-                {
-                    throw new ArgumentOutOfRangeException(nameof(Index));
-                }
+                ArgumentOutOfRangeException.ThrowIfWithout(Index, Length);
                 Buffer[GetIndex(Index)] = value;
             }
         }
+
 
         public void Write(BinaryWriter Writer, Action<BinaryWriter, T> WriteObject)
         {
@@ -71,6 +65,50 @@ namespace Zion
             }
 
             return Buffer;
+        }
+
+
+        public void Add(T Item)
+        {
+            Insert(Length, Item);
+        }
+
+        public void Add(IEnumerable<T> Values, int Count)
+        {
+            EnsureCapacity(Length + Count);
+            MoveGapTo(Length);
+
+            foreach (T Item in Values.Limit(Count))
+            {
+                Buffer[GapStart] = Item;
+                GapStart++;
+                Length++;
+            }
+        }
+
+        public void Insert(int Index, T Item)
+        {
+            ArgumentOutOfRangeException.ThrowIfWithout(Index, Length);
+
+            EnsureCapacity(Length + 1);
+            MoveGapTo(Index);
+
+            Buffer[GapStart] = Item;
+            GapStart++;
+            Length++;
+        }
+
+        public void Insert(int Index, IEnumerable<T> Values, int Count)
+        {
+            EnsureCapacity(Length + Count);
+            MoveGapTo(Index);
+
+            foreach (T Item in Values.Limit(Count))
+            {
+                Buffer[GapStart] = Item;
+                GapStart++;
+                Length++;
+            }
         }
 
         public int IndexOf(T Target)
@@ -120,21 +158,6 @@ namespace Zion
             return Clone;
         }
 
-        public void Insert(int Index, T item)
-        {
-            if (Index < 0 || Index > Length)
-            {
-                throw new ArgumentOutOfRangeException($"Index(={Index}) out of range 0, Count(={Count}");
-            }
-
-            EnsureCapacity(Length + 1);
-            MoveGapTo(Index);
-
-            Buffer[GapStart] = item;
-            GapStart++;
-            Length++;
-        }
-
         public void RemoveAt(int Index)
         {
             if (Index < 0 || Index >= Length)
@@ -152,7 +175,16 @@ namespace Zion
             }
         }
 
-        public void Add(T item) => Insert(Length, item);
+        public bool Remove(T Item)
+        {
+            int Index = IndexOf(Item);
+            if (Index != -1)
+            {
+                RemoveAt(Index);
+                return true;
+            }
+            return false;
+        }
 
         public void Clear()
         {
@@ -166,16 +198,13 @@ namespace Zion
             }
         }
 
-        public bool Remove(T Item)
+
+        public void Resize(int NewCapacity)
         {
-            int Index = IndexOf(Item);
-            if (Index != -1)
-            {
-                RemoveAt(Index);
-                return true;
-            }
-            return false;
+            if (Buffer.Length >= NewCapacity) { return; }
+            EnsureCapacity(NewCapacity);
         }
+
 
         public IEnumerator<T> GetEnumerator()
         {
@@ -198,6 +227,7 @@ namespace Zion
         {
             return GetEnumerator();
         }
+
 
         private int GetIndex(int Index)
         {

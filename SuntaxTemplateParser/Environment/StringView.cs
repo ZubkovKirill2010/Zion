@@ -2,11 +2,15 @@
 
 namespace Zion.STP
 {
-    public sealed class StringView : IEnumerable<char>
+    public sealed class StringView : IList<char>
     {
         private readonly GapBuffer<char> Buffer;
 
         public int Length => Buffer.Count;
+        public int Count => Buffer.Count;
+
+        public bool IsReadOnly => Buffer.IsReadOnly;
+
         public char this[int Index]
         {
             get => Buffer[Index];
@@ -30,9 +34,22 @@ namespace Zion.STP
             Changed?.Invoke(Length);
         }
 
+        public void Add(string String)
+        {
+            int Length = Buffer.Count;
+            Buffer.Add(String);
+            Changed?.Invoke(Length);
+        }
+
         public void Insert(int Index, char Char)
         {
             Buffer.Insert(Index, Char);
+            Changed?.Invoke(Index);
+        }
+
+        public void Insert(int Index, string String)
+        {
+            Buffer.Insert(Index, String);
             Changed?.Invoke(Index);
         }
 
@@ -40,6 +57,31 @@ namespace Zion.STP
         {
             Buffer.RemoveAt(Index);
             Changed?.Invoke(Index);
+        }
+
+        public int IndexOf(char Char)
+        {
+            return Buffer.IndexOf(Char);
+        }
+
+        public void Clear()
+        {
+            Buffer.Clear();
+        }
+
+        public bool Contains(char Item)
+        {
+            return Buffer.Contains(Item);
+        }
+
+        public void CopyTo(char[] Array, int ArrayIndex)
+        {
+            Buffer.CopyTo(Array, ArrayIndex);
+        }
+
+        public bool Remove(char Item)
+        {
+            return Buffer.Remove(Item);
         }
 
 

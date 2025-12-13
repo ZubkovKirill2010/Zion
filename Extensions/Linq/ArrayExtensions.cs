@@ -36,11 +36,7 @@
         public static T[] Insert<T>(this T[] Array, int Index, T Value)
         {
             ArgumentNullException.ThrowIfNull(Array);
-
-            if (!Index.IsInRange(Array))
-            {
-                throw new ArgumentOutOfRangeException($"Index out of array, Index = {Index}, Array.Length = {Array.Length}");
-            }
+            ArgumentOutOfRangeException.ThrowIfWithout(Index, Array);
 
             T[] NewArray = new T[Array.Length + 1];
             System.Array.Copy(Array, 0, NewArray, 0, Index);
@@ -61,11 +57,7 @@
         public static T[] RemoveAt<T>(this T[] Array, int Index)
         {
             ArgumentNullException.ThrowIfNull(Array);
-
-            if (!Index.IsInRange(Array))
-            {
-                throw new ArgumentOutOfRangeException($"Index out of array, Index = {Index}, Array.Length = {Array.Length}");
-            }
+            ArgumentOutOfRangeException.ThrowIfWithout(Index, Array);
 
             T[] NewArray = new T[Array.Length - 1];
             System.Array.Copy(Array, NewArray, Index);

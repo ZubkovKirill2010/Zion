@@ -2,18 +2,18 @@
 {
     public interface ITemplate
     {
-        public bool IsMatch(StringView String, int Start, out Token Block);
+        bool IsMatch(StringView String, int Start, out Block Block);
     }
 
     public interface ITokenTemplate : ITemplate
     {
-        public Color Color { get; }
+        RGBColor Color { get; init; }
     }
 
     public interface IGroupTemplate : ITemplate, IEnumerable<ITemplate>
     {
-        public int Count { get; }
+        int Count { get; }
 
-        public ITemplate this[int Index] { get; }
+        ITemplate this[int Index] { get; }
     }
 }

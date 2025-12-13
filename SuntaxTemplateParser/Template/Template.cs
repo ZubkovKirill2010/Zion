@@ -2,13 +2,13 @@
 
 namespace Zion.STP
 {
-    public readonly struct Template : ITokenTemplate, IEnumerable<ITokenTemplate>
+    public readonly struct Template : IGroupTemplate, IEnumerable<ITemplate>
     {
-        public readonly ITokenTemplate[] Templates;
+        public readonly ITemplate[] Templates;
 
         public int Count => Templates.Length;
 
-        public Template(ITokenTemplate[] Templates)
+        public Template(ITemplate[] Templates)
         {
             ArgumentNullException.ThrowIfNull(Templates);
             if (Templates.Any(Template => Template is null))
@@ -18,15 +18,17 @@ namespace Zion.STP
             this.Templates = Templates;
         }
 
+        public ITemplate this[int Index] => Templates[Index];
 
-        public bool IsMatch(StringView String, int Start, out Token Block)
+
+        public bool IsMatch(StringView String, int Start, out Block Block)
         {
-            Group Group = new Group(String, this);
+            Group Group = new Group(String, 0, this);
             Block = Group;
 
             foreach (ITokenTemplate Template in Templates)
             {
-                if (Template.IsMatch(String, Start, out Token Current))
+                if (Template.IsMatch(String, Start, out Block Current))
                 {
                     Group.Add(Current);
                     Start += Current.Length;
@@ -40,15 +42,15 @@ namespace Zion.STP
             return true;
         }
 
-        public void Add(ITokenTemplate Template)
+        public void Add(ITemplate Template)
         {
             Templates.Add(Template);
         }
 
 
-        public IEnumerator<ITokenTemplate> GetEnumerator()
+        public IEnumerator<ITemplate> GetEnumerator()
         {
-            return ((IEnumerable<ITokenTemplate>)Templates).GetEnumerator();
+            return ((IEnumerable<ITemplate>)Templates).GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()

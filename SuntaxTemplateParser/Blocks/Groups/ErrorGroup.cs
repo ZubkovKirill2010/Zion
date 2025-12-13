@@ -4,5 +4,10 @@
     {
         public ErrorGroup(StringView String, int Length, IGroupTemplate Template)
             : base(String, Length, Template) { }
+
+        public override bool IsValid(int Start)
+        {
+            return Template is null ? true : !base.IsValid(Start);
+        }
     }
 }

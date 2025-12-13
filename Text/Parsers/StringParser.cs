@@ -145,10 +145,8 @@ namespace Zion
         public static int GetEndOfExpression(string String, int Start = 0)
         {
             ArgumentNullException.ThrowIfNullOrWhiteSpace(String);
-            if (Start < 0 || Start >= String.Length)
-            {
-                throw new ArgumentOutOfRangeException($"Start(={Start}) out of range [0-{String.Length}]");
-            }
+            ArgumentOutOfRangeException.ThrowIfWithout(Start, String);
+
             if (String[Start] == '"')
             {
                 return String.Length - 1;
@@ -171,10 +169,7 @@ namespace Zion
         public static int GetEndOfBracketsExpression(string String, int Start = 0)
         {
             ArgumentNullException.ThrowIfNullOrEmpty(String);
-            if (!Start.IsClamp(0, String.Length - 1))
-            {
-                throw new ArgumentOutOfRangeException($"Start(={Start}) < 0 or >= String.Length(={String.Length})");
-            }
+            ArgumentOutOfRangeException.ThrowIfWithout(Start, String);
 
             IDictionary<char, char> Brackets = Text.Brackets;
             Stack<char> Stack = new Stack<char>(String.Length / 2 + 1);

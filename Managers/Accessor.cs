@@ -7,7 +7,7 @@
             Target = Value;
             return Target;
         }
-        public static T SetRef<T>(ref T Target, T Value)
+        public static T SetByRef<T>(ref T Target, T Value)
         {
             Target = Value;
             return Target;
@@ -56,6 +56,14 @@
             Temp = A;
             A = B;
             B = Temp;
+        }
+
+        public static void Sort<T>(ref T Min, ref T Max) where T : IComparable<T>
+        {
+            if (int.IsPositive(Min.CompareTo(Max)))
+            {
+                Reverse(ref Min, ref Max);
+            }
         }
 
 

@@ -23,5 +23,8 @@
 
 
         public abstract bool IsValid(int Start);
+
+        public virtual void OnEnable() { }
+        public virtual void OnDisable() { }
     }
 }

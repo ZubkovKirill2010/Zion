@@ -1,6 +1,4 @@
-﻿using System.Numerics;
-
-namespace Zion.STP
+﻿namespace Zion.STP
 {
     public abstract class Token : Block
     {

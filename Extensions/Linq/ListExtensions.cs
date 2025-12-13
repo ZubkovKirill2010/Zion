@@ -200,10 +200,7 @@ namespace Zion
 
         public static int Summarize<T>(this IList<T> List, Func<T, int> GetLength, int End)
         {
-            if (!End.IsClamp(0, List.Count - 1))
-            {
-                throw new ArgumentOutOfRangeException(nameof(End), $"End(={End}) < 0 or >= List.Count(={List.Count})");
-            }
+            ArgumentOutOfRangeException.ThrowIfWithout(End, List);
 
             int Count = 0;
             for (int i = 0; i < End; i++)

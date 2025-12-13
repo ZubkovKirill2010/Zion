@@ -6,38 +6,55 @@ namespace Zion
     public class Matrix<T> : IMatrix<T>, IBinaryGeneric<Matrix<T>, T>, IEnumerable<T>
     {
         private readonly T[,] Data;
+
         public Vector2Int Size { get; }
+
         public int Width => Size.x;
         public int Height => Size.y;
 
+
+        public Matrix(int Side)
+        {
+            Data = new T[Side, Side];
+            Size = new Vector2Int(Side);
+        }
+        public Matrix(int Side, T Value) : this(Side)
+        {
+            Fill(Value);
+        }
+        public Matrix(int Side, Func<T> GetValue) : this(Side)
+        {
+            Fill(GetValue);
+        }
+
+        public Matrix(int Width, int Height)
+        {
+            Data = new T[Width, Height];
+            Size = new Vector2Int(Width, Height);
+        }
+        public Matrix(int Width, int Height, T Value) : this(Width, Height)
+        {
+            Fill(Value);
+        }
+        public Matrix(int Width, int Height, Func<T> GetValue) : this(Width, Height)
+        {
+            Fill(GetValue);
+        }
 
         public Matrix(Vector2Int Size)
         {
             Data = new T[Size.x, Size.y];
             this.Size = Size;
         }
-        public Matrix(int Width, int Height)
+        public Matrix(Vector2Int Size, T Value) : this(Size)
         {
-            Data = new T[Width, Height];
-            Size = new Vector2Int(Width, Height);
+            Fill(Value);
         }
-        public Matrix(int SizeLength)
+        public Matrix(Vector2Int Size, Func<T> GetValue) : this(Size)
         {
-            Data = new T[SizeLength, SizeLength];
-            Size = new Vector2Int(SizeLength);
+            Fill(GetValue);
         }
-        private Matrix(Vector2Int Size, Func<T> GetValue)
-        {
-            this.Size = Size;
-            Data = new T[Size.x, Size.y];
-            for (int x = 0; x < Size.x; x++)
-            {
-                for (int y = 0; y < Size.y; y++)
-                {
-                    Data[x, y] = GetValue();
-                }
-            }
-        }
+
 
         public virtual T this[int x, int y]
         {
@@ -111,9 +128,28 @@ namespace Zion
             return Result;
         }
 
+        public Matrix<T> Resize(Vector2Int NewSize)
+        {
+            Matrix<T> Result = new Matrix<T>(NewSize);
+
+            foreach (int x in ZEnumerable.Range(0, Math.Min(Width, NewSize.x)))
+            {
+                foreach (int y in ZEnumerable.Range(0, Math.Min(Height, NewSize.y)))
+                {
+                    Result[x, y] = this[x, y];
+                }
+            }
+
+            return Result;
+        }
+
         public void Fill(T Value)
         {
             ForEach(OldValue => Value);
+        }
+        public void Fill(Func<T> Value)
+        {
+            ForEach(OldValue => Value());
         }
         public void FillChessPattern(T A, T B)
         {

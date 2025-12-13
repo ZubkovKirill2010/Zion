@@ -4,14 +4,14 @@
     public struct ColorChar : IColorText, IBinaryObject<ColorChar>
     {
         public char Char;
-        public Color Color;
+        public RGBColor Color;
 
         public ColorChar(char Char)
         {
             this.Char = Char;
-            Color = Color.White;
+            Color = RGBColor.White;
         }
-        public ColorChar(char Char, Color Color)
+        public ColorChar(char Char, RGBColor Color)
         {
             this.Char = Char;
             this.Color = Color;
@@ -35,7 +35,7 @@
             return new ColorChar
             (
                 Reader.ReadChar(),
-                Reader.Read<Color>()
+                Reader.Read<RGBColor>()
             );
         }
     }

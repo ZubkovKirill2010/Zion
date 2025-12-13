@@ -82,10 +82,10 @@ namespace Zion
 
         public string ToColorString()
         {
-            return ToColorString(new Color(67, 211, 224));
+            return ToColorString(new RGBColor(67, 211, 224));
         }
 
-        public string ToColorString(Color LineColor)
+        public string ToColorString(RGBColor LineColor)
         {
             StringBuilder Result = new StringBuilder();
             BuildTreeColorString(Result, string.Empty, true, LineColor);
@@ -166,7 +166,7 @@ namespace Zion
                 Childs[i].BuildTreeString(Builder, Prefix, LastChild);
             }
         }
-        private void BuildTreeColorString(StringBuilder Builder, string Prefix, bool IsLast, Color LineColor)
+        private void BuildTreeColorString(StringBuilder Builder, string Prefix, bool IsLast, RGBColor LineColor)
         {
             Builder.Append(Prefix);
 

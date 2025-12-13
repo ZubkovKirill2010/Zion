@@ -4,6 +4,8 @@
     {
         public readonly ITokenTemplate Template;
 
+        public RGBColor Color { get; init; }
+
         public Optional(ITokenTemplate Template)
         {
             ArgumentNullException.ThrowIfNull(Template);
@@ -11,11 +13,11 @@
         }
 
 
-        public bool IsMatch(StringView String, int Start, out Token Block)
+        public bool IsMatch(StringView String, int Start, out Block Block)
         {
             if (!Template.IsMatch(String, Start, out Block))
             {
-                Block = new EmptyBlock(String);
+                Block = new EmptyBlock(String, this);
             }
             return true;
         }

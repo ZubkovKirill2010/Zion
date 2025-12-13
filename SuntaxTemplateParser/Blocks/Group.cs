@@ -7,6 +7,8 @@ namespace Zion.STP
         protected readonly List<Block> Blocks;
         protected readonly IGroupTemplate Template;
 
+        public virtual int Count => Blocks.Count;
+
         public Group(StringView String, int Length, IGroupTemplate Template)
             : base(String, Length)
         {
@@ -40,7 +42,7 @@ namespace Zion.STP
 
             while (Index < Blocks.Count)
             {
-                if (Template[Index].IsMatch(String, Start, out Token Block) && Blocks[Index].Length == Block.Length)
+                if (Template[Index].IsMatch(String, Start, out Block Block) && Blocks[Index].Length == Block.Length)
                 {
                     Start += Block.Length;
                 }
@@ -56,6 +58,12 @@ namespace Zion.STP
         private void OnLengthChanged(int Additional)
         {
             Length += Additional;
+        }
+
+
+        public static Group GetEmpty(StringView String)
+        {
+            return new Group(String, new EmptyGroupTemplate());
         }
 
 
