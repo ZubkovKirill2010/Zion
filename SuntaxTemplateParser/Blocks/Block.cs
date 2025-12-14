@@ -2,29 +2,11 @@
 {
     public abstract class Block
     {
-        protected readonly StringView String;
+        public event Action Changed;
+        public event Action<int> LengthChanged;
 
-        public event Action<int>? Changed;
-        public int Length
-        {
-            get => field;
-            set
-            {
-                Changed?.Invoke(value - field);
-                field = value;
-            }
-        }
+        public abstract int Length { get; }
 
-        public Block(StringView String, int Length)
-        {
-            this.String = String;
-            this.Length = Length;
-        }
-
-
-        public abstract bool IsValid(int Start);
-
-        public virtual void OnEnable() { }
-        public virtual void OnDisable() { }
+        public abstract bool Check(StringView String, int Start, out int Length);
     }
 }

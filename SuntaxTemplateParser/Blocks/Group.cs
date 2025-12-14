@@ -2,75 +2,16 @@
 
 namespace Zion.STP
 {
-    public class Group : Block, IEnumerable<Block>
+    public abstract class Group : Block, IEnumerable<Block>
     {
-        protected readonly List<Block> Blocks;
-        protected readonly IGroupTemplate Template;
+        public abstract int Count { get; }
 
-        public virtual int Count => Blocks.Count;
-
-        public Group(StringView String, int Length, IGroupTemplate Template)
-            : base(String, Length)
+        public abstract Block this[int Index]
         {
-            this.Template = Template;
-            Blocks = new List<Block>();
+            get;
         }
 
-
-        public Block this[int Index]
-        {
-            get => Blocks[Index];
-            set => Blocks[Index] = value;
-        }
-
-        public void Add(Block Block)
-        {
-            Length += Block.Length;
-            Block.Changed += OnLengthChanged;
-            Blocks.Add(Block);
-        }
-
-
-        public override bool IsValid(int Start)
-        {
-            if (Blocks.Count != Template.Count)
-            {
-                return false;
-            }
-
-            int Index = 0;
-
-            while (Index < Blocks.Count)
-            {
-                if (Template[Index].IsMatch(String, Start, out Block Block) && Blocks[Index].Length == Block.Length)
-                {
-                    Start += Block.Length;
-                }
-                else
-                {
-                    return false;
-                }
-                Index++;
-            }
-            return true;
-        }
-
-        private void OnLengthChanged(int Additional)
-        {
-            Length += Additional;
-        }
-
-
-        public static Group GetEmpty(StringView String)
-        {
-            return new Group(String, new EmptyGroupTemplate());
-        }
-
-
-        public IEnumerator<Block> GetEnumerator()
-        {
-            return Blocks.GetEnumerator();
-        }
+        public abstract IEnumerator<Block> GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator()
         {

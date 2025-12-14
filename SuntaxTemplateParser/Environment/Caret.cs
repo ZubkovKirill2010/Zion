@@ -11,8 +11,8 @@
         public Group CurrentGroup { get; private set; }
         public Block CurrentBlock { get; private set; }
 
-        public int Position       { get; private set; }
-        public int LocalPosition  { get; private set; }
+        public int Position { get; private set; }
+        public int LocalPosition { get; private set; }
 
         public int Group
         {
@@ -90,9 +90,9 @@
                     int Move = Math.Min(LocalPosition, Index - Target);
 
                     LocalPosition -= Move;
-                    Position      -= Move;
-                    Index         -= Move;
-                    Remaining     -= Move;
+                    Position -= Move;
+                    Index -= Move;
+                    Remaining -= Move;
                 }
                 else
                 {
@@ -126,8 +126,8 @@
         private void MoveRight(int Offset)
         {
             int Remaining = Offset;
-            int Index     = Position;
-            int Target    = Index + Offset;
+            int Index = Position;
+            int Target = Index + Offset;
 
             while (Index < Target)
             {
@@ -141,9 +141,9 @@
                     int Move = Math.Min(CurrentBlock.Length - 1 - LocalPosition, Target - Index);
 
                     LocalPosition += Move;
-                    Position      += Move;
-                    Index         += Move;
-                    Remaining     -= Move;
+                    Position += Move;
+                    Index += Move;
+                    Remaining -= Move;
                 }
                 else
                 {
@@ -162,7 +162,7 @@
                     {
                         Stack.Push((CurrentGroup, Block));
                         CurrentGroup = Group;
-                        
+
                         if (Group.Count == 0)
                         {
                             break;

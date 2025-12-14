@@ -14,7 +14,7 @@
             this.String = String;
             Groups = new List<Group>(30)
             {
-                new EmptyGroup(String, 0, null)
+                new BlockGroup(Array.Empty<Block>(), 0)
             };
             Caret = new Caret(String, Groups);
         }
@@ -38,23 +38,13 @@
 
         public void Write(char Char)
         {
-            if (Length == 0)
-            {
-                String.Add(Char);
-                return;
-            }
+            //Ввод в текущую позицию
         }
 
         public void Insert(int Index, char Char)
         {
-            //Caret.Position = Index;
+            Caret.SetPosition(Index);
             Write(Char);
-        }
-
-
-        private bool IsInRange(int Index)
-        {
-            return Index.IsInRange(String);
         }
     }
 }
