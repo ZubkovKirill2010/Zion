@@ -242,7 +242,17 @@
 
         public bool IsEdge()
         {
-            return LocalPosition == 0 || LocalPosition == CurrentBlock.Length - 1;
+            return IsStart() || IsEnd();
+        }
+
+        public bool IsStart()
+        {
+            return LocalPosition == 0;
+        }
+
+        public bool IsEnd()
+        {
+            return LocalPosition == CurrentBlock.Length - 1;
         }
     }
 }

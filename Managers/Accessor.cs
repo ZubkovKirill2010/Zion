@@ -13,7 +13,7 @@
             return Target;
         }
 
-        public static T SetIf<T>(ref T Target, T Value, bool Condition)
+        public static T SetIf<T>(ref T Target, in T Value, in bool Condition)
         {
             if (Condition)
             {
@@ -21,7 +21,7 @@
             }
             return Target;
         }
-        public static T SetIf<T>(ref T Target, T Value, Func<T, bool> Condition)
+        public static T SetIf<T>(ref T Target, in T Value, in Func<T, bool> Condition)
         {
             if (Condition(Target))
             {
@@ -66,16 +66,39 @@
             }
         }
 
+        public static bool Try<T>(bool Condition, Func<T> TrueResult, out T Result)
+        {
+            if (Condition)
+            {
+                Result = TrueResult();
+                return true;
+            }
 
-        public static I AddAndReturn<T, I>(this T Collection, I Item) where T : ICollection<I>
+            Result = default;
+            return false;
+        }
+
+        public static I AddAndReturn<T, I>(this T Collection, in I Item) where T : ICollection<I>
         {
             Collection.Add(Item);
             return Item;
         }
-        public static T InsertAndReturn<T, I>(this T List, int Index, I Item) where T : IList<I>
+        public static T InsertAndReturn<T, I>(this T List, in int Index, in I Item) where T : IList<I>
         {
             List.Insert(Index, Item);
             return List;
+        }
+
+        public static TValue AddAndReturn<D, TKey, TValue>(this D Dictionary, in TKey Key, TValue Value) where D : IDictionary<TKey, TValue>
+        {
+            Dictionary.Add(Key, Value);
+            return Value;
+        }
+        public static TValue RemoveAndReturn<D, TKey, TValue>(this D Dictionary, in TKey Key) where D : IDictionary<TKey, TValue>
+        {
+            TValue Value = Dictionary[Key];
+            Dictionary.Remove(Key);
+            return Value;
         }
 
         public static T RemoveAndReturn<T, I>(this T List, I Item) where T : ICollection<I>

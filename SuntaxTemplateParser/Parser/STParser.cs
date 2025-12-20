@@ -38,7 +38,12 @@
 
         public void Write(char Char)
         {
-            //Ввод в текущую позицию
+            String.Insert(Caret.Position, Char);
+
+            if (Caret.IsStart())
+            {
+
+            }
         }
 
         public void Insert(int Index, char Char)

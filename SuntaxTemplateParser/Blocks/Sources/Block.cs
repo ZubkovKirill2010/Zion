@@ -7,6 +7,8 @@
 
         public abstract int Length { get; }
 
-        public abstract bool Check(StringView String, int Start, out int Length);
+        public abstract bool Check(StringView String, int Start);
+
+        public abstract IEnumerable<ColorChar> Enumerate(StringView String, int Start);
     }
 }

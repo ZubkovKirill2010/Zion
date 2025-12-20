@@ -37,6 +37,13 @@
         }
 
 
+        public static IEnumerable<int> For(int Start, int Count)
+        {
+            int End = Start + Count;
+            return Range(Start, End);
+        }
+
+
         public static IEnumerable<(T1, T2)> ToPair<T1, T2>(IEnumerable<T1> A, IEnumerable<T2> B)
         {
             ArgumentNullException.ThrowIfNull(A);

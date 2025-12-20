@@ -1,37 +1,37 @@
 ﻿namespace Zion.STP
 {
-    public sealed class GroupTemplate : Template
+    public sealed class CollectionTemplate : GroupTemplate
     {
         private readonly Template[] Templates;
 
-        public GroupTemplate(params Template[] Templates)
+        public CollectionTemplate(params Template[] Templates)
         {
             this.Templates = Templates;
         }
 
-        public override bool Read(StringView String, int Start, out Block Block)
+        public override bool Read(StringView String, int Start, out Group Group)
         {
             Template[] Templates = this.Templates;
-            Block[]    Blocks    = new Block[Templates.Length];
+            Block[] Blocks = new Block[Templates.Length];
             int Length = 0;
 
             foreach (int Index in ZEnumerable.Range(Blocks))
             {
                 if (Templates[Index].Read(String, Start, out Block CurrentBlock))
                 {
-                    Start  += CurrentBlock.Length;
+                    Start += CurrentBlock.Length;
                     Length += CurrentBlock.Length;
 
                     Blocks[Index] = CurrentBlock;
                 }
                 else
                 {
-                    Block = null;
+                    Group = null;
                     return false;
                 }
             }
 
-            Block = new BlockGroup(Blocks, Length);
+            Group = new BlockGroup(Blocks, Length);
             return true;
         }
     }

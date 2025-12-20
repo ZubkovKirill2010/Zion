@@ -110,5 +110,17 @@
             }
             return Result;
         }
+
+        public static IEnumerable<T> Range<T>(this T[] Array, int Start, int Count)
+        {
+            ArgumentOutOfRangeException.ThrowIfNegative(Start, nameof(Start));
+            ArgumentOutOfRangeException.ThrowIfNegative(Count, nameof(Count));
+            ArgumentOutOfRangeException.ThrowIf(Start + Count >= Array.Length, nameof(Count));
+
+            foreach (int Index in ZEnumerable.For(Start, Count))
+            {
+                yield return Array[Index];
+            }
+        }
     }
 }

@@ -19,16 +19,13 @@
         public override Block this[int Index] => Blocks[Index];
 
 
-        public override bool Check(StringView String, int Start, out int Length)
+        public override bool Check(StringView String, int Start)
         {
-            Length = 0;
-
             foreach (Block Block in Blocks)
             {
-                if (Block.Check(String, Start, out int BlockLength))
+                if (Block.Check(String, Start))
                 {
-                    Start += BlockLength;
-                    Length += BlockLength;
+                    Start += Block.Length;
                 }
                 else
                 {

@@ -198,6 +198,19 @@ namespace Zion
         }
 
 
+        public static IEnumerable<T> Range<T>(this IList<T> Collection, int Start, int Count)
+        {
+            ArgumentOutOfRangeException.ThrowIfNegative(Start, nameof(Start));
+            ArgumentOutOfRangeException.ThrowIfNegative(Count, nameof(Count));
+            ArgumentOutOfRangeException.ThrowIf(Start + Count >= Collection.Count, nameof(Count));
+
+            foreach (int Index in ZEnumerable.For(Start, Count))
+            {
+                yield return Collection[Index];
+            }
+        }
+
+
         public static int Summarize<T>(this IList<T> List, Func<T, int> GetLength, int End)
         {
             ArgumentOutOfRangeException.ThrowIfWithout(End, List);

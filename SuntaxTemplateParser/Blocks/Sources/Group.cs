@@ -17,5 +17,17 @@ namespace Zion.STP
         {
             return GetEnumerator();
         }
+
+        public override IEnumerable<ColorChar> Enumerate(StringView String, int Start)
+        {
+            foreach (Block Block in this)
+            {
+                foreach (ColorChar Char in Block.Enumerate(String, Start))
+                {
+                    yield return Char;
+                }
+                Start += Block.Length;
+            }
+        }
     }
 }

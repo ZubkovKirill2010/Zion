@@ -5,7 +5,7 @@ namespace Zion
     [Serializable]
     public struct ColorText : IColorText
     {
-        public static readonly ColorText Empty = new ColorText(string.Empty, new RGBColor(0));
+        public static readonly ColorText Empty = new ColorText(string.Empty, default);
 
         public string Text;
         public RGBColor Color;
