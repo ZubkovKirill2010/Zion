@@ -76,6 +76,12 @@ namespace Zion.Vectors
         public static Vector2Int operator *(Vector2Int A, int B) => new Vector2Int(A.x * B, A.y * B);
         public static Vector2Int operator /(Vector2Int A, int B) => new Vector2Int(A.x / B, A.y / B);
 
+        public static Vector2Int operator &(Vector2Int A, Vector2Int B) => new Vector2Int(A.x & B.x, A.y & B.y);
+        public static Vector2Int operator |(Vector2Int A, Vector2Int B) => new Vector2Int(A.x & B.x, A.y & B.y);
+
+        public static Vector2Int operator &(Vector2Int A, int B) => new Vector2Int(A.x & B, A.y & B);
+        public static Vector2Int operator |(Vector2Int A, int B) => new Vector2Int(A.x & B, A.y & B);
+
         public static Vector2Int operator >>(Vector2Int A, int B) => new Vector2Int(A.x >> B, A.y >> B);
         public static Vector2Int operator <<(Vector2Int A, int B) => new Vector2Int(A.x << B, A.y << B);
 
@@ -228,11 +234,23 @@ namespace Zion.Vectors
             return Result;
         }
 
+        
+        public static bool IsNegative(in Vector2Int Value)
+        {
+            return int.IsNegative(Value.x) || int.IsNegative(Value.y);
+        }
 
-        public static Vector2Int Absolute(Vector2Int Vector)
+        public static bool IsPositive(in Vector2Int Value)
+        {
+            return int.IsPositive(Value.x) && int.IsPositive(Value.y);
+        }
+
+
+        public static Vector2Int Abs(Vector2Int Vector)
         {
             return new Vector2Int(Math.Abs(Vector.x), Math.Abs(Vector.y));
         }
+
         public static Vector2Int Clamp(Vector2Int Value, Vector2Int Min, Vector2Int Max)
         {
             return new Vector2Int

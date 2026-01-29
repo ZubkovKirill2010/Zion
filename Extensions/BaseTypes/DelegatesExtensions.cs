@@ -2,12 +2,12 @@
 {
     public static class DelegatesExtensions
     {
-        public static TryParser<T> TryParse<T>(this Converter<string, T?> Parser)
+        public static SafeConverter<string, T> TryParse<T>(this Func<string, T?> Parser)
         {
-            return (string String, out T Value) =>
+            return (in string String, out T Value) =>
             {
                 T? Input = Parser(String);
-                Value = Input ?? default;
+                Value = Input ?? default!;
                 return Input is not null;
             };
         }
@@ -21,7 +21,7 @@
             }
             catch
             {
-                Result = default;
+                Result = default!;
                 return false;
             }
         }
@@ -35,7 +35,7 @@
             }
             catch
             {
-                Result = default;
+                Result = default!;
                 return false;
             }
         }

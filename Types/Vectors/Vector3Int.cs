@@ -163,7 +163,7 @@ namespace Zion.Vectors
         }
 
 
-        public static Vector3Int Absolute(Vector3Int Vector)
+        public static Vector3Int Abs(Vector3Int Vector)
         {
             return new Vector3Int(Math.Abs(Vector.x), Math.Abs(Vector.y), Math.Abs(Vector.z));
         }

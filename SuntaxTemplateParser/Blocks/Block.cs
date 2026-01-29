@@ -2,8 +2,8 @@
 {
     public abstract class Block
     {
-        public event Action Changed;
-        public event Action<int> LengthChanged;
+        public event Action? Changed;
+        public event Action<int>? LengthChanged;
 
         public abstract int Length { get; }
 

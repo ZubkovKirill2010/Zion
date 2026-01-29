@@ -1,6 +1,6 @@
 ﻿namespace Zion.STP
 {
-    public sealed class KeyWordToken : Token
+    public sealed class KeyWordToken : ColoredToken
     {
         private readonly string Key;
         private readonly bool IgnoreCase;

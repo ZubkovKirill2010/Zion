@@ -251,7 +251,7 @@ namespace Zion.Vectors
         }
 
 
-        public static Vector2 Absolute(Vector2 Vector)
+        public static Vector2 Abs(Vector2 Vector)
         {
             return new Vector2(Math.Abs(Vector.x), Math.Abs(Vector.y));
         }

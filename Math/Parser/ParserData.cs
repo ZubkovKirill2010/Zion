@@ -50,7 +50,7 @@
                 (
                     MathFunctions.Convert(Fraction.Abs),
                     Value,
-                    "Absolute value of a number"
+                    "Abs value of a number"
                 )
             },
             {

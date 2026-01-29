@@ -5,11 +5,6 @@
         public override int Length => 0;
         public override bool IsReadOnly => true;
 
-        public EmptyToken()
-        {
-            Color = default;
-        }
-
         public override bool Check(StringView String, int Start)
         {
             return true;
