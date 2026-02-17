@@ -18,7 +18,7 @@ namespace Zion.Vectors
         {
             get
             {
-                float Magnitude = MathF.Sqrt(x * x + y * y);
+                float Magnitude = MathF.Sqrt((x * x) + (y * y));
                 return new Vector2(x / Magnitude, y / Magnitude);
             }
         }
@@ -142,7 +142,7 @@ namespace Zion.Vectors
         public static explicit operator Vector2Int(Vector2 Vector) => new Vector2Int((int)Vector.x, (int)Vector.y);
 
 
-        public override readonly string ToString() => $"[{x}, {y}]";
+        public override readonly string ToString() => $"[{x}; {y}]";
         public override readonly bool Equals([NotNullWhen(true)] object? Object)
         {
             return Object is not null && Object is Vector2 Vector && this == Vector;
@@ -152,8 +152,8 @@ namespace Zion.Vectors
             unchecked
             {
                 int Hash = 17;
-                Hash = Hash * 23 + x.GetHashCode();
-                Hash = Hash * 23 + y.GetHashCode();
+                Hash = (Hash * 23) + x.GetHashCode();
+                Hash = (Hash * 23) + y.GetHashCode();
                 return Hash;
             }
         }
@@ -228,12 +228,12 @@ namespace Zion.Vectors
         {
             float DiferenceX = A.x - B.x;
             float DiferenceY = A.y - B.y;
-            return DiferenceX * DiferenceX + DiferenceY * DiferenceY <= MaxDistance * MaxDistance;
+            return (DiferenceX * DiferenceX) + (DiferenceY * DiferenceY) <= MaxDistance * MaxDistance;
         }
 
         public static Vector2 Lerp(Vector2 A, Vector2 B, float Alpha)
         {
-            return A + (B - A) * Alpha;
+            return A + ((B - A) * Alpha);
         }
 
         public static Vector2 Sum(params IEnumerable<Vector2> Vectors)

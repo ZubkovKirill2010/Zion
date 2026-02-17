@@ -14,8 +14,8 @@
             Length = Array.Length;
         }
 
-        public T   this[int   Index] => Array[Index];
-        public T   this[Index Index] => Array[Index];
+        public T this[int Index] => Array[Index];
+        public T this[Index Index] => Array[Index];
         public T[] this[Range Range] => Array[Range];
     }
 }

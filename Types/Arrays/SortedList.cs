@@ -119,11 +119,11 @@ namespace Zion
             int TotalItems = Items.Sum(collection => collection?.Count ?? 0);
             EnsureCapacity(Length + TotalItems);
 
-            foreach (var Collection in Items)
+            foreach (ICollection<T>? Collection in Items)
             {
                 if (Collection is null) { continue; }
 
-                foreach (var Item in Collection)
+                foreach (T Item in Collection)
                 {
                     int InsertIndex = GetInsertIndex(Item);
                     Insert(Item, InsertIndex);

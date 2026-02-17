@@ -19,7 +19,7 @@ namespace Zion.Vectors
         {
             get
             {
-                float Magnitude = MathF.Sqrt(x * x + y * y + z * z);
+                float Magnitude = MathF.Sqrt((x * x) + (y * y) + (z * z));
                 return new Vector3Int((int)(x / Magnitude), (int)(y / Magnitude), (int)(z / Magnitude));
             }
         }
@@ -87,7 +87,7 @@ namespace Zion.Vectors
             return A.x >= B.x && A.y >= B.y && A.y <= B.y;
         }
 
-        public override string ToString() => $"[{x}, {y}, {z}]";
+        public override string ToString() => $"[{x}; {y}; {z}]";
         public override readonly bool Equals([NotNullWhen(true)] object? Object)
         {
             return Object is not null && Object is Vector3Int Vector && this == Vector;
@@ -97,9 +97,9 @@ namespace Zion.Vectors
             unchecked
             {
                 int hash = 17;
-                hash = hash * 23 + x;
-                hash = hash * 23 + y;
-                hash = hash * 23 + z;
+                hash = (hash * 23) + x;
+                hash = (hash * 23) + y;
+                hash = (hash * 23) + z;
                 return hash;
             }
         }

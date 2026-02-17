@@ -22,14 +22,7 @@
         /// <returns>The modified integer value.</returns>
         public static int SetBit(this int Value, int Index, bool Bit)
         {
-            if (Bit)
-            {
-                return Value | (1 << Index);
-            }
-            else
-            {
-                return Value & ~(1 << Index);
-            }
+            return Bit ? Value | (1 << Index) : Value & ~(1 << Index);
         }
 
         /// <summary>
@@ -89,14 +82,7 @@
         /// <returns>The modified unsigned integer value.</returns>
         public static uint SetBit(this uint Value, int Index, bool Bit)
         {
-            if (Bit)
-            {
-                return Value | (uint)(1 << Index);
-            }
-            else
-            {
-                return (uint)(Value & ~(1 << Index));
-            }
+            return Bit ? Value | (uint)(1 << Index) : (uint)(Value & ~(1 << Index));
         }
 
         /// <summary>

@@ -33,20 +33,29 @@
 
         public static List<T> ReadList<T>(this BinaryReader Reader, int AdditionalCapacity = 0) where T : IBinaryObject<T>
         {
-            return ReadList(Reader, T.Read, Reader.ReadInt32(), AdditionalCapacity);
+            return ReadList(Reader, T.Read, AdditionalCapacity);
         }
         public static List<T> ReadList<T>(this BinaryReader Reader, Func<BinaryReader, T> Read, int AdditionalCapacity = 0)
         {
-            return ReadList<T>(Reader, Read, Reader.ReadInt32(), AdditionalCapacity);
-        }
-        public static List<T> ReadList<T>(this BinaryReader Reader, Func<BinaryReader, T> Read, int Count, int AdditionalCapacity = 0)
-        {
+            int Count = Reader.ReadInt32();
+
             List<T> Result = new List<T>(Count + AdditionalCapacity);
             for (int i = 0; i < Count; i++)
             {
                 Result.Add(Read(Reader));
             }
             return Result;
+        }
+        public static void ReadList<T>(this BinaryReader Reader, List<T> List) where T : IBinaryObject<T>
+        {
+            int Count = Reader.ReadInt32();
+
+            List.EnsureCapacity(List.Count + Count);
+
+            for (int i = 0; i < Count; i++)
+            {
+                List.Add(Reader.Read<T>());
+            }
         }
 
 

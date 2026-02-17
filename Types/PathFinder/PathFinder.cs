@@ -17,12 +17,7 @@ namespace Zion
 
             bool Found = Pave(Info, 0, new Structure<TPoint>(Info.Start), Visited, Results, MaxDistance);
 
-            if (Found && Results.TryTake(out Structure<TPoint> Result))
-            {
-                return ToArray(Result);
-            }
-
-            return Array.Empty<TPoint>();
+            return Found && Results.TryTake(out Structure<TPoint> Result) ? ToArray(Result) : Array.Empty<TPoint>();
         }
 
         public static TPoint[][] PaveMultiple<TPoint>(MultiplePathInfo<TPoint> Info)

@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 
 public class ConcurrentSortedSet<T> : IEnumerable<T> where T : IComparable<T>
 {
@@ -22,7 +21,7 @@ public class ConcurrentSortedSet<T> : IEnumerable<T> where T : IComparable<T>
         Lock.EnterReadLock();
         try
         {
-            foreach (var item in Set)
+            foreach (T item in Set)
             {
                 Action(item);
             }
@@ -38,7 +37,7 @@ public class ConcurrentSortedSet<T> : IEnumerable<T> where T : IComparable<T>
         Lock.EnterReadLock();
         try
         {
-            foreach (var item in Set.GetViewBetween(Min, Max))
+            foreach (T item in Set.GetViewBetween(Min, Max))
             {
                 Action(item);
             }

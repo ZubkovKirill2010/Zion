@@ -2,9 +2,9 @@
 {
     public sealed class STParser
     {
-        private StringView  String;
+        private StringView String;
         private List<Group> Groups;
-        private Template[]  Templates;
+        private Template[] Templates;
 
         public int Length => String.Length;
 

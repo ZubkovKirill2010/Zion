@@ -82,7 +82,7 @@ namespace Zion
         }
         public bool IsEdge(int x, int y)
         {
-            return x == 0 || x == Size.x - 1 && y == 0 || y == Size.y - 1;
+            return x == 0 || (x == Size.x - 1 && y == 0) || y == Size.y - 1;
         }
 
         public Matrix<T> Clone()

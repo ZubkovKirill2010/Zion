@@ -95,7 +95,7 @@ namespace Zion
         }
         public bool IsEdge(int x, int y)
         {
-            return x == 0 || x == Size.x - 1 && y == 0 || y == Size.y - 1;
+            return x == 0 || (x == Size.x - 1 && y == 0) || y == Size.y - 1;
         }
 
         public BitMatrix Clone()
@@ -191,7 +191,7 @@ namespace Zion
             {
                 throw new ArgumentOutOfRangeException($"Position [{x}, {y}] is not inside (size={Size})");
             }
-            int BitIndex = Size.x * y + x;
+            int BitIndex = (Size.x * y) + x;
             return (BitIndex / 8, BitIndex % 8);
         }
 

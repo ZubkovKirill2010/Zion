@@ -26,19 +26,11 @@ namespace Zion
         }
         public static HorizontalDirection Abs(this HorizontalDirection Direction)
         {
-            if (Direction == HorizontalDirection.Left)
-            {
-                return HorizontalDirection.Right;
-            }
-            return Direction;
+            return Direction == HorizontalDirection.Left ? HorizontalDirection.Right : Direction;
         }
         public static VerticalDirection Abs(this VerticalDirection Direction)
         {
-            if (Direction == VerticalDirection.Down)
-            {
-                return VerticalDirection.Up;
-            }
-            return Direction;
+            return Direction == VerticalDirection.Down ? VerticalDirection.Up : Direction;
         }
 
         public static Direction ToDirection(this HorizontalDirection HoriaontalDirection)

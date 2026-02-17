@@ -29,17 +29,9 @@
         /// <exception cref="ArgumentOutOfRangeException">Thrown when index is out of range.</exception>
         public static MonthInfo GetMonthInfo(int Index, bool LeapYear = false)
         {
-            if (!Index.IsClamp(1, 12))
-            {
-                throw new ArgumentOutOfRangeException($"The month index must be between 1 and 12, InputIndex = {Index}");
-            }
-
-            if (LeapYear && Index == 2 && (DateTime.Now.Year & 3) == 0)
-            {
-                return _Months[Index] with { DaysCount = 29 };
-            }
-
-            return _Months[Index - 1];
+            return !Index.IsClamp(1, 12)
+                ? throw new ArgumentOutOfRangeException($"The month index must be between 1 and 12, InputIndex = {Index}")
+                : LeapYear && Index == 2 && (DateTime.Now.Year & 3) == 0 ? (_Months[Index] with { DaysCount = 29 }) : _Months[Index - 1];
         }
 
         /// <summary>

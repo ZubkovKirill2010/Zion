@@ -22,14 +22,7 @@
         /// <returns>The modified short integer value.</returns>
         public static short SetBit(this short Value, int Index, bool Bit)
         {
-            if (Bit)
-            {
-                return (short)(Value | (1 << Index));
-            }
-            else
-            {
-                return (short)(Value & ~(1 << Index));
-            }
+            return Bit ? (short)(Value | (1 << Index)) : (short)(Value & ~(1 << Index));
         }
 
         /// <summary>
@@ -81,14 +74,7 @@
         /// <returns>The modified unsigned short integer value.</returns>
         public static ushort SetBit(this ushort Value, int Index, bool Bit)
         {
-            if (Bit)
-            {
-                return (ushort)(Value | (1 << Index));
-            }
-            else
-            {
-                return (ushort)(Value & ~(1 << Index));
-            }
+            return Bit ? (ushort)(Value | (1 << Index)) : (ushort)(Value & ~(1 << Index));
         }
 
         /// <summary>

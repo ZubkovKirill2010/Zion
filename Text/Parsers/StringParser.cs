@@ -172,7 +172,7 @@ namespace Zion
             ArgumentOutOfRangeException.ThrowIfWithout(Start, String);
 
             IDictionary<char, char> Brackets = Text.Brackets;
-            Stack<char> Stack = new Stack<char>(String.Length / 2 + 1);
+            Stack<char> Stack = new Stack<char>((String.Length / 2) + 1);
             char Current = '\0';
 
             for (int i = Start; i < String.Length; i++)

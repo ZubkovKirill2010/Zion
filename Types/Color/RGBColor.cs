@@ -172,7 +172,7 @@ namespace Zion
 
         public readonly float GetBrightness()//Range 0 - 255
         {
-            return R * 0.2126f + G * 0.7152f + B * 0.0722f;
+            return (R * 0.2126f) + (G * 0.7152f) + (B * 0.0722f);
         }
         public readonly RGBColor GetOpposite()
         {

@@ -22,14 +22,7 @@
         /// <returns>The modified byte value.</returns>
         public static byte SetBit(this byte Value, int Index, bool Bit)
         {
-            if (Bit)
-            {
-                return (byte)(Value | (1 << Index));
-            }
-            else
-            {
-                return (byte)(Value & ~(1 << Index));
-            }
+            return Bit ? (byte)(Value | (1 << Index)) : (byte)(Value & ~(1 << Index));
         }
 
         /// <summary>
@@ -82,14 +75,7 @@
         /// <returns>The modified sbyte value.</returns>
         public static sbyte SetBit(this sbyte Value, int Index, bool Bit)
         {
-            if (Bit)
-            {
-                return (sbyte)(Value | (sbyte)(1 << Index));
-            }
-            else
-            {
-                return (sbyte)(Value & ~(1 << Index));
-            }
+            return Bit ? (sbyte)(Value | (sbyte)(1 << Index)) : (sbyte)(Value & ~(1 << Index));
         }
 
         /// <summary>

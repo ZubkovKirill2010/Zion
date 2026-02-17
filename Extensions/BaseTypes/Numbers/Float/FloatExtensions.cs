@@ -10,7 +10,7 @@
         /// <param name="Alpha">The interpolation factor (0-1).</param>
         /// <returns>The interpolated value between A and B.</returns>
         public static float Lerp(this float A, float B, float Alpha)
-            => A + (B - A) * Alpha;
+            => A + ((B - A) * Alpha);
 
         /// <summary>
         /// Rounds the float value to the nearest integer using specified rounding mode.

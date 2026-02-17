@@ -28,11 +28,9 @@ namespace Zion
             {
                 ArgumentOutOfRangeException.ThrowIf(!IsInside(Position), $"Position {Position} out of range [ [0, 0] - [{int.MaxValue}, {int.MaxValue}] ]");
 
-                if (Chunks.TryGetValue(Position >> ChunkShift, out Matrix<T>? Chunk))
-                {
-                    return Chunk[Position.x & ChunkFilter, Position.y & ChunkFilter];
-                }
-                return Base;
+                return Chunks.TryGetValue(Position >> ChunkShift, out Matrix<T>? Chunk)
+                    ? Chunk[Position.x & ChunkFilter, Position.y & ChunkFilter]
+                    : Base;
             }
             set
             {
@@ -53,11 +51,9 @@ namespace Zion
             {
                 ArgumentOutOfRangeException.ThrowIf(!IsInside(x, y), $"Position [{x}, {y}] out of range [ [0, 0] - [{int.MaxValue}, {int.MaxValue}] ]");
 
-                if (Chunks.TryGetValue(new Vector2Int(x >> ChunkShift, y >> ChunkShift), out Matrix<T>? Chunk))
-                {
-                    return Chunk[x & ChunkFilter, y & ChunkFilter];
-                }
-                return Base;
+                return Chunks.TryGetValue(new Vector2Int(x >> ChunkShift, y >> ChunkShift), out Matrix<T>? Chunk)
+                    ? Chunk[x & ChunkFilter, y & ChunkFilter]
+                    : Base;
             }
             set
             {

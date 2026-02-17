@@ -68,27 +68,24 @@ namespace Zion.MathExpressions
             if (A.Divider % B.Divider == 0)
             {
                 Int Factor = A.Divider / B.Divider;
-                return new Fraction(A.Divisible + B.Divisible * Factor, A.Divider).SoftSimplify();
+                return new Fraction(A.Divisible + (B.Divisible * Factor), A.Divider).SoftSimplify();
             }
 
             if (B.Divider % A.Divider == 0)
             {
                 Int Factor = B.Divider / A.Divider;
-                return new Fraction(A.Divisible * Factor + B.Divisible, B.Divider).SoftSimplify();
+                return new Fraction((A.Divisible * Factor) + B.Divisible, B.Divider).SoftSimplify();
             }
 
             Int NewDivider = A.Divider * B.Divider;
             return new Fraction(
-                A.Divisible * B.Divider + B.Divisible * A.Divider,
+                (A.Divisible * B.Divider) + (B.Divisible * A.Divider),
                 NewDivider
             ).SoftSimplify();
         }
         public static Fraction operator -(Fraction A, Fraction B)
         {
-            if (A.IsNaN || B.IsNaN) return NaN;
-            if (B.IsZero) return A;
-
-            return A + new Fraction(-B.Divisible, B.Divider);
+            return A.IsNaN || B.IsNaN ? NaN : B.IsZero ? A : A + new Fraction(-B.Divisible, B.Divider);
         }
 
         public static Fraction operator *(Fraction A, Fraction B)
@@ -101,43 +98,32 @@ namespace Zion.MathExpressions
             Int Gcd1 = GetGreatestCommonDivisor(A.Divisible, B.Divider);
             Int Gcd2 = GetGreatestCommonDivisor(B.Divisible, A.Divider);
 
-            Int NewDivisible = (A.Divisible / Gcd1) * (B.Divisible / Gcd2);
-            Int NewDivider = (A.Divider / Gcd2) * (B.Divider / Gcd1);
+            Int NewDivisible = A.Divisible / Gcd1 * (B.Divisible / Gcd2);
+            Int NewDivider = A.Divider / Gcd2 * (B.Divider / Gcd1);
 
             return new Fraction(NewDivisible, NewDivider);
         }
         public static Fraction operator /(Fraction A, Fraction B)
         {
-            if (A.IsNaN || B.IsNaN || B.IsZero) return NaN;
-            if (A.IsZero) return Zero;
-            if (B.IsOne) return A;
-
-            return new Fraction(A.Divisible * B.Divider, A.Divider * B.Divisible);
+            return A.IsNaN || B.IsNaN || B.IsZero
+                ? NaN
+                : A.IsZero ? Zero : B.IsOne ? A : new Fraction(A.Divisible * B.Divider, A.Divider * B.Divisible);
         }
 
         public static Fraction operator %(Fraction A, Fraction B)
         {
-            if (A.IsNaN || B.IsNaN || B.IsZero) { return NaN; }
-            if (A.IsZero) { return Zero; }
-            if (B.IsOne) { return Zero; }
-
-            return A - B * Floor(A / B);
+            return A.IsNaN || B.IsNaN || B.IsZero ? NaN : A.IsZero ? Zero : B.IsOne ? Zero : A - (B * Floor(A / B));
         }
 
         public static Fraction operator +(Fraction A, Int B)
         {
-            if (A.IsNaN) return NaN;
-            if (B == 0) return A;
-            if (A.IsZero) return new Fraction(B);
-
-            return new Fraction(A.Divisible + A.Divider * B, A.Divider).SoftSimplify();
+            return A.IsNaN
+                ? NaN
+                : B == 0 ? A : A.IsZero ? new Fraction(B) : new Fraction(A.Divisible + (A.Divider * B), A.Divider).SoftSimplify();
         }
         public static Fraction operator -(Fraction A, Int B)
         {
-            if (A.IsNaN) return NaN;
-            if (B == 0) return A;
-
-            return A + (-B);
+            return A.IsNaN ? NaN : B == 0 ? A : A + (-B);
         }
 
         public static Fraction operator *(Fraction A, Int B)
@@ -169,11 +155,13 @@ namespace Zion.MathExpressions
 
         public static Fraction operator <<(Fraction A, int B)
         {
-            if (A.IsNaN) { return NaN; }
-            if (B == 0) { return A; }
-            if (B < 0) { throw new ArgumentOutOfRangeException($"B(={B}) < 0"); }
-
-            return new Fraction
+            return A.IsNaN
+                ? NaN
+                : B == 0
+                ? A
+                : B < 0
+                ? throw new ArgumentOutOfRangeException($"B(={B}) < 0")
+                : new Fraction
             (
                 A.Divisible << B,
                 A.Divider
@@ -181,11 +169,13 @@ namespace Zion.MathExpressions
         }
         public static Fraction operator >>(Fraction A, int B)
         {
-            if (A.IsNaN) { return NaN; }
-            if (B == 0) { return A; }
-            if (B < 0) { throw new ArgumentOutOfRangeException($"B(={B}) < 0"); }
-
-            return new Fraction
+            return A.IsNaN
+                ? NaN
+                : B == 0
+                ? A
+                : B < 0
+                ? throw new ArgumentOutOfRangeException($"B(={B}) < 0")
+                : new Fraction
             (
                 A.Divisible >> B,
                 A.Divider
@@ -199,10 +189,7 @@ namespace Zion.MathExpressions
 
         public static bool operator ==(Fraction A, Fraction B)
         {
-            if (A.IsNaN || B.IsNaN) return false;
-            if (ReferenceEquals(A, B)) return true;
-
-            return A.Divisible * B.Divider == A.Divider * B.Divisible;
+            return A.IsNaN || B.IsNaN ? false : ReferenceEquals(A, B) ? true : A.Divisible * B.Divider == A.Divider * B.Divisible;
         }
         public static bool operator !=(Fraction A, Fraction B)
         {
@@ -211,68 +198,56 @@ namespace Zion.MathExpressions
 
         public static bool operator <(Fraction A, Fraction B)
         {
-            if (A.IsNaN || B.IsNaN) return false;
-            return A.Divisible * B.Divider < B.Divisible * A.Divider;
+            return A.IsNaN || B.IsNaN ? false : A.Divisible * B.Divider < B.Divisible * A.Divider;
         }
         public static bool operator >(Fraction A, Fraction B)
         {
-            if (A.IsNaN || B.IsNaN) return false;
-            return A.Divisible * B.Divider > B.Divisible * A.Divider;
+            return A.IsNaN || B.IsNaN ? false : A.Divisible * B.Divider > B.Divisible * A.Divider;
         }
 
         public static bool operator <(Fraction A, Int B)
         {
-            if (A.IsNaN) return false;
-            return A.Divisible < B * A.Divider;
+            return A.IsNaN ? false : A.Divisible < B * A.Divider;
         }
         public static bool operator >(Fraction A, Int B)
         {
-            if (A.IsNaN) return false;
-            return A.Divisible > B * A.Divider;
+            return A.IsNaN ? false : A.Divisible > B * A.Divider;
         }
 
         public static bool operator <(Int A, Fraction B)
         {
-            if (B.IsNaN) return false;
-            return A * B.Divider < B.Divisible;
+            return B.IsNaN ? false : A * B.Divider < B.Divisible;
         }
         public static bool operator >(Int A, Fraction B)
         {
-            if (B.IsNaN) return false;
-            return A * B.Divider > B.Divisible;
+            return B.IsNaN ? false : A * B.Divider > B.Divisible;
         }
 
         public static bool operator <=(Fraction A, Fraction B)
         {
-            if (A.IsNaN || B.IsNaN) return false;
-            return A.Divisible * B.Divider <= B.Divisible * A.Divider;
+            return A.IsNaN || B.IsNaN ? false : A.Divisible * B.Divider <= B.Divisible * A.Divider;
         }
         public static bool operator >=(Fraction A, Fraction B)
         {
-            if (A.IsNaN || B.IsNaN) return false;
-            return A.Divisible * B.Divider >= B.Divisible * A.Divider;
+            return A.IsNaN || B.IsNaN ? false : A.Divisible * B.Divider >= B.Divisible * A.Divider;
         }
 
         public static bool operator <=(Fraction A, Int B)
         {
-            if (A.IsNaN) return false;
-            return A.Divisible <= B * A.Divider;
+            return A.IsNaN ? false : A.Divisible <= B * A.Divider;
         }
         public static bool operator >=(Fraction A, Int B)
         {
-            if (A.IsNaN) return false;
-            return A.Divisible >= B * A.Divider;
+            return A.IsNaN ? false : A.Divisible >= B * A.Divider;
         }
 
         public static bool operator <=(Int A, Fraction B)
         {
-            if (B.IsNaN) return false;
-            return A * B.Divider <= B.Divisible;
+            return B.IsNaN ? false : A * B.Divider <= B.Divisible;
         }
         public static bool operator >=(Int A, Fraction B)
         {
-            if (B.IsNaN) return false;
-            return A * B.Divider >= B.Divisible;
+            return B.IsNaN ? false : A * B.Divider >= B.Divisible;
         }
 
         public static implicit operator Fraction(Int Value)
@@ -313,12 +288,7 @@ namespace Zion.MathExpressions
 
         public override string ToString()
         {
-            if (IsNaN) { return "NaN"; }
-            if (IsZero) { return "0"; }
-            if (IsOne) { return "1"; }
-            if (IsCeil(out Int Value)) { return Value.ToString(); }
-
-            return $"({Divisible}/{Divider})";
+            return IsNaN ? "NaN" : IsZero ? "0" : IsOne ? "1" : IsCeil(out Int Value) ? Value.ToString() : $"({Divisible}/{Divider})";
         }
 
         public string ToDecimalString(int Accuracy, Comma Seporator = Comma.Dot)
@@ -357,12 +327,7 @@ namespace Zion.MathExpressions
 
             string String = Builder.ToString();
 
-            if (!string.IsNullOrEmpty(String))
-            {
-                return $"{CeilPartString}{(char)Seporator}{String}";
-            }
-
-            return CeilPartString;
+            return !string.IsNullOrEmpty(String) ? $"{CeilPartString}{(char)Seporator}{String}" : CeilPartString;
         }
 
         public string ToStackedString(bool UseUnicodeChars = false)
@@ -408,12 +373,9 @@ namespace Zion.MathExpressions
 
             int DivisionSign = String.IndexOf('/');
 
-            if (DivisionSign == -1)
-            {
-                return String.ToBigInteger().ToFraction();
-            }
-
-            return new Fraction
+            return DivisionSign == -1
+                ? String.ToBigInteger().ToFraction()
+                : new Fraction
             (
                 Int.Parse(String[..DivisionSign]),
                 Int.Parse(String[(DivisionSign + 1)..])
@@ -460,14 +422,9 @@ namespace Zion.MathExpressions
 
             if (Dot == -1)
             {
-                if (Int.TryParse(String, out Int Result))
-                {
-                    return Result.ToFraction();
-                }
-                else
-                {
-                    throw new FormatException($"Couldn't convert \"{String}\" to Int");
-                }
+                return Int.TryParse(String, out Int Result)
+                    ? Result.ToFraction()
+                    : throw new FormatException($"Couldn't convert \"{String}\" to Int");
             }
 
             if (Dot == Start && String.Length > Start + 1)
@@ -670,15 +627,7 @@ namespace Zion.MathExpressions
 
         public Fraction SoftSimplify()
         {
-            if (IsNaN) { return NaN; }
-            if (IsOne) { return One; }
-            if (IsZero) { return Zero; }
-            if (IsCeil(out Int Value))
-            {
-                return Value.ToFraction();
-            }
-
-            return this;
+            return IsNaN ? NaN : IsOne ? One : IsZero ? Zero : IsCeil(out Int Value) ? Value.ToFraction() : this;
         }
 
         public (Int, Fraction) ToRegular()
@@ -744,41 +693,32 @@ namespace Zion.MathExpressions
 
         public static Fraction Abs(Fraction Value)
         {
-            if (Value.IsNaN) { return NaN; }
-            if (Value.IsPositive) { return Value; }
-            return new Fraction(-Value.Divisible, Value.Divider);
+            return Value.IsNaN ? NaN : Value.IsPositive ? Value : new Fraction(-Value.Divisible, Value.Divider);
         }
 
         public static Fraction Sign(Fraction Value)
         {
-            if (Value.IsNaN) { return NaN; }
-            if (Value.IsZero) { return Zero; }
-            return Value.IsPositive ? One : MinusOne;
+            return Value.IsNaN ? NaN : Value.IsZero ? Zero : Value.IsPositive ? One : MinusOne;
         }
 
         public static Fraction ToNegative(Fraction Value)
         {
-            if (Value.IsNaN) { return NaN; }
-            if (Value.IsNegative) { return Value; }
-            return new Fraction(-Value.Divisible, Value.Divider);
+            return Value.IsNaN ? NaN : Value.IsNegative ? Value : new Fraction(-Value.Divisible, Value.Divider);
         }
 
         public static Fraction Round(Fraction Value)
         {
-            if (Value.IsNaN) { return NaN; }
-            return RoundToInt(Value);
+            return Value.IsNaN ? NaN : (Fraction)RoundToInt(Value);
         }
 
         public static Fraction Ceiling(Fraction Value)
         {
-            if (Value.IsNaN) { return NaN; }
-            return CeilingToInt(Value);
+            return Value.IsNaN ? NaN : (Fraction)CeilingToInt(Value);
         }
 
         public static Fraction Floor(Fraction Value)
         {
-            if (Value.IsNaN) { return NaN; }
-            return FloorToInt(Value);
+            return Value.IsNaN ? NaN : (Fraction)FloorToInt(Value);
         }
 
         public static Fraction Truncate(Fraction Value)
@@ -788,14 +728,12 @@ namespace Zion.MathExpressions
 
         public static Fraction Max(Fraction A, Fraction B)
         {
-            if (A.IsNaN || B.IsNaN) { return NaN; }
-            return A > B ? A : B;
+            return A.IsNaN || B.IsNaN ? NaN : A > B ? A : B;
         }
 
         public static Fraction Min(Fraction A, Fraction B)
         {
-            if (A.IsNaN || B.IsNaN) { return NaN; }
-            return A < B ? A : B;
+            return A.IsNaN || B.IsNaN ? NaN : A < B ? A : B;
         }
 
 
@@ -810,12 +748,7 @@ namespace Zion.MathExpressions
             Int A = CeilingToInt(Min);
             Int B = FloorToInt(Max);
 
-            if (Min >= Max)
-            {
-                return Zero;
-            }
-
-            return ((B - A + Int.One) * (A + B)) >> 1;
+            return Min >= Max ? Zero : (Fraction)(((B - A + Int.One) * (A + B)) >> 1);
         }
 
 
@@ -1022,8 +955,8 @@ namespace Zion.MathExpressions
                 }
 
                 Fraction NextApproximation =
-                    (new Fraction(RootDegree - 1)
-                    * CurrentApproximation + Value / PowerOfApproximation)
+                    ((new Fraction(RootDegree - 1)
+                    * CurrentApproximation) + (Value / PowerOfApproximation))
                     / new Fraction(RootDegree);
 
                 if (NextApproximation == PreviousApproximation)
@@ -1056,19 +989,13 @@ namespace Zion.MathExpressions
 
         public static Fraction Sqrt(Fraction Value, Fraction RootDegree, int Accuracy = 14)
         {
-            if (RootDegree.IsNaN || Value.IsNaN) { return NaN; }
-
-            if (Value < Zero && RootDegree.IsCeil(out Int CeilDegree) && CeilDegree.IsEven)
-            {
-                return NaN;
-            }
-
-            if (RootDegree.IsCeil(out Int Degree) && Degree <= int.MaxValue && Degree >= int.MinValue)
-            {
-                return Sqrt(Value, (int)Degree, Accuracy);
-            }
-
-            return Pow(Value, RootDegree.Inversed, Accuracy);
+            return RootDegree.IsNaN || Value.IsNaN
+                ? NaN
+                : Value < Zero && RootDegree.IsCeil(out Int CeilDegree) && CeilDegree.IsEven
+                ? NaN
+                : RootDegree.IsCeil(out Int Degree) && Degree <= int.MaxValue && Degree >= int.MinValue
+                ? Sqrt(Value, (int)Degree, Accuracy)
+                : Pow(Value, RootDegree.Inversed, Accuracy);
         }
 
 
@@ -1086,20 +1013,7 @@ namespace Zion.MathExpressions
                 }
             }
 
-            if (Value > One)
-            {
-                return One;
-            }
-            if (Value < One && Value > Zero)
-            {
-                return Value;
-            }
-            if (Value < Zero)
-            {
-                return new Fraction(-1);
-            }
-
-            return One;
+            return Value > One ? One : Value < One && Value > Zero ? Value : Value < Zero ? new Fraction(-1) : One;
         }
 
         private static Fraction TryFindExactRoot(Fraction Value, int RootDegree)
@@ -1151,7 +1065,7 @@ namespace Zion.MathExpressions
                 return One;
             }
 
-            Int CurrentValue = Number / 2 + 1;
+            Int CurrentValue = (Number / 2) + 1;
             for (int Iteration = 0; Iteration < 100; Iteration++)
             {
                 Int PowerOfCurrentValue = Int.Pow(CurrentValue, RootDegree - 1);
@@ -1160,7 +1074,7 @@ namespace Zion.MathExpressions
                     break;
                 }
 
-                Int NextValue = ((RootDegree - 1) * CurrentValue + Number / PowerOfCurrentValue) / RootDegree;
+                Int NextValue = (((RootDegree - 1) * CurrentValue) + (Number / PowerOfCurrentValue)) / RootDegree;
 
                 if (NextValue >= CurrentValue)
                 {
@@ -1169,12 +1083,7 @@ namespace Zion.MathExpressions
                 CurrentValue = NextValue;
             }
 
-            if (Int.Pow(CurrentValue, RootDegree) == Number)
-            {
-                return CurrentValue.ToFraction();
-            }
-
-            return NaN;
+            return Int.Pow(CurrentValue, RootDegree) == Number ? CurrentValue.ToFraction() : NaN;
         }
 
         private static Fraction TrySmallRoots(Fraction Value, int RootDegree)
@@ -1216,7 +1125,7 @@ namespace Zion.MathExpressions
 
             Parallel.For(0, ProcssorCount, i =>
             {
-                Int Start = i * ChunkSize + 1;
+                Int Start = (i * ChunkSize) + 1;
                 Int End = (i == ProcssorCount - 1) ? Value : (i + 1) * ChunkSize;
 
                 Int LocalResult = 1;
@@ -1240,8 +1149,8 @@ namespace Zion.MathExpressions
         private static Fraction ParallelDoubleFactorial(Int Value)
         {
             int ProcessorCount = Environment.ProcessorCount;
-            Int Even = (Value.IsEven) ? 2 : 1;
-            Int Count = (Value - Even) / 2 + 1;
+            Int Even = Value.IsEven ? 2 : 1;
+            Int Count = ((Value - Even) / 2) + 1;
 
             Int ChunkSize = Count / ProcessorCount;
             Int[] Members = new Int[ProcessorCount];
@@ -1249,12 +1158,12 @@ namespace Zion.MathExpressions
             Parallel.For(0, ProcessorCount, i =>
             {
                 Int Start = i * ChunkSize;
-                Int End = (i == ProcessorCount - 1) ? Count - 1 : (i + 1) * ChunkSize - 1;
+                Int End = (i == ProcessorCount - 1) ? Count - 1 : ((i + 1) * ChunkSize) - 1;
 
                 Int Member = 1;
                 for (Int j = Start; j <= End; j++)
                 {
-                    Int value = Even + j * 2;
+                    Int value = Even + (j * 2);
                     Member *= value;
                 }
                 Members[i] = Member;
@@ -1314,9 +1223,7 @@ namespace Zion.MathExpressions
 
         private static Int GetLeastCommonMultiple(Int A, Int B)
         {
-            if (A == 0 || B == 0) { return 0; }
-
-            return Int.Abs(A * B) / GetGreatestCommonDivisor(A, B);
+            return A == 0 || B == 0 ? (Int)0 : Int.Abs(A * B) / GetGreatestCommonDivisor(A, B);
         }
 
 

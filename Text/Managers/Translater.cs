@@ -111,7 +111,7 @@
         public static bool IsEnglish(this char Char)
         {
             int CharIndex = Char;
-            return 65 <= CharIndex && CharIndex <= 90 || 97 <= CharIndex && CharIndex <= 122;
+            return (65 <= CharIndex && CharIndex <= 90) || (97 <= CharIndex && CharIndex <= 122);
         }
 
         public static bool IsRussian(this char Char)
@@ -126,12 +126,9 @@
             bool IsUpper = char.IsUpper(Char);
             char LowerChar = char.ToLower(Char);
 
-            if (!UniversalChar.Contains(Char) && IsLetter(Char) && Dictionary.TryGetValue(Char, out char Value))
-            {
-                return IsUpper ? char.ToUpper(Value) : Value;
-            }
-
-            return Char;
+            return !UniversalChar.Contains(Char) && IsLetter(Char) && Dictionary.TryGetValue(Char, out char Value)
+                ? IsUpper ? char.ToUpper(Value) : Value
+                : Char;
         }
 
         private static bool IsLetter(char Input)

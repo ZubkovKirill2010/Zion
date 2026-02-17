@@ -71,17 +71,9 @@
                 {
                     return new FloorDivision(Left, Right);
                 }
-                else if (Operator == '*')
-                {
-                    Left = new Product(Left, Right);
-                }
-                else if (Operator == '/')
-                {
-                    Left = new Division(Left, Right);
-                }
                 else
                 {
-                    Left = new Remainder(Left, Right);
+                    Left = Operator == '*' ? new Product(Left, Right) : Operator == '/' ? new Division(Left, Right) : new Remainder(Left, Right);
                 }
             }
 
@@ -208,28 +200,11 @@
             Index = String.Skip(Index, IsLetter);
             string Identifier = String[Start..Index];
 
-            if (!Finished && Current == '(')
-            {
-                if (ExistsFunction(Identifier))
-                {
-                    return ParseFunctionCall(Identifier);
-                }
-                else if (ExistsVariable(Identifier))
-                {
-                    return new Product(Variables[Identifier], ParseBrackets());
-                }
-                else
-                {
-                    return Throw($"Unknown identifier '{Identifier}'");
-                }
-            }
-
-            if (Variables.TryGetValue(Identifier, out Fraction value))
-            {
-                return value;
-            }
-
-            return Throw($"Unknown identifier '{Identifier}'");
+            return !Finished && Current == '('
+                ? ExistsFunction(Identifier)
+                    ? ParseFunctionCall(Identifier)
+                    : ExistsVariable(Identifier) ? new Product(Variables[Identifier], ParseBrackets()) : Throw($"Unknown identifier '{Identifier}'")
+                : Variables.TryGetValue(Identifier, out Fraction value) ? value : Throw($"Unknown identifier '{Identifier}'");
         }
 
         private IMathTerm ParseFunctionCall(string Identifier)

@@ -22,14 +22,7 @@
         /// <returns>The modified long integer value.</returns>
         public static long SetBit(this long Value, int Index, bool Bit)
         {
-            if (Bit)
-            {
-                return Value | (1 << Index);
-            }
-            else
-            {
-                return Value & ~(1 << Index);
-            }
+            return Bit ? Value | (1 << Index) : Value & ~(1 << Index);
         }
 
         /// <summary>
@@ -82,14 +75,7 @@
         /// <returns>The modified unsigned long integer value.</returns>
         public static ulong SetBit(this ulong Value, int Index, bool Bit)
         {
-            if (Bit)
-            {
-                return Value | (ulong)(1 << Index);
-            }
-            else
-            {
-                return Value & ~(ulong)(1 << Index);
-            }
+            return Bit ? Value | (ulong)(1 << Index) : Value & ~(ulong)(1 << Index);
         }
 
         /// <summary>

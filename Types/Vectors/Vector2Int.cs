@@ -19,7 +19,7 @@ namespace Zion.Vectors
         {
             get
             {
-                float Magnitude = MathF.Sqrt(x * x + y * y);
+                float Magnitude = MathF.Sqrt((x * x) + (y * y));
                 return new Vector2Int((int)(x / Magnitude), (int)(y / Magnitude));
             }
         }
@@ -105,7 +105,7 @@ namespace Zion.Vectors
         public static explicit operator Vector2(Vector2Int Vector) => new Vector2(Vector.x, Vector.y);
 
 
-        public override readonly string ToString() => $"[{x}, {y}]";
+        public override readonly string ToString() => $"[{x}; {y}]";
         public override readonly bool Equals([NotNullWhen(true)] object? Object)
         {
             return Object is not null && Object is Vector2Int Vector && this == Vector;
@@ -115,8 +115,8 @@ namespace Zion.Vectors
             unchecked
             {
                 int Hash = 17;
-                Hash = Hash * 23 + x;
-                Hash = Hash * 23 + y;
+                Hash = (Hash * 23) + x;
+                Hash = (Hash * 23) + y;
                 return Hash;
             }
         }
@@ -201,11 +201,9 @@ namespace Zion.Vectors
 
         public static Direction ToDirection(Vector2Int Vector)
         {
-            if (Vector == Up) { return Direction.Up; }
-            if (Vector == Right) { return Direction.Right; }
-            if (Vector == Down) { return Direction.Down; }
-            if (Vector == Left) { return Direction.Left; }
-            return Direction.None;
+            return Vector == Up
+                ? Direction.Up
+                : Vector == Right ? Direction.Right : Vector == Down ? Direction.Down : Vector == Left ? Direction.Left : Direction.None;
         }
 
 
@@ -234,7 +232,7 @@ namespace Zion.Vectors
             return Result;
         }
 
-        
+
         public static bool IsNegative(in Vector2Int Value)
         {
             return int.IsNegative(Value.x) || int.IsNegative(Value.y);

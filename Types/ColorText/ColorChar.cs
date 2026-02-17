@@ -28,7 +28,7 @@
         public void Write(BinaryWriter Writer)
         {
             Writer.Write(Char);
-            Writer.Write(Color);
+            Writer.Write<RGBColor>(Color);
         }
         public static ColorChar Read(BinaryReader Reader)
         {

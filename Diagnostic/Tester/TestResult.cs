@@ -104,14 +104,9 @@ namespace Zion.Diagnostics
     StackTrace: {Error.StackTrace};".Replace("\n", Offset);
             }
 
-            if (Object is IEnumerable Enumerable)
-            {
-                return $"{Object.GetType().FullName} {{ {string.Join(", ", Enumerable.Cast<object>())} }}";
-            }
-            else
-            {
-                return Object?.ToString() ?? "Object.ToString() => null";
-            }
+            return Object is IEnumerable Enumerable
+                ? $"{Object.GetType().FullName} {{ {string.Join(", ", Enumerable.Cast<object>())} }}"
+                : Object?.ToString() ?? "Object.ToString() => null";
         }
     }
 }

@@ -194,7 +194,7 @@ namespace Zion.Diagnostics
 
         public override void Write(byte[] Buffer)
         {
-            int size = Buffer?.Length * 8 ?? 0;
+            int size = (Buffer?.Length * 8) ?? 0;
             string binaryRepresentation = Buffer != null
                 ? $"[{string.Join(' ', Buffer.Select(b => Convert.ToString(b, 2).PadLeft(8, '0')))}]"
                 : "null";

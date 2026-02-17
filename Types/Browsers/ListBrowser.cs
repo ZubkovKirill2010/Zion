@@ -16,7 +16,7 @@ namespace Zion
             Count = List.Count;
         }
 
-        public T this[int   Index] => List[Index];
+        public T this[int Index] => List[Index];
         public T this[Index Index] => List[Index];
 
         public IEnumerator<T> GetEnumerator()

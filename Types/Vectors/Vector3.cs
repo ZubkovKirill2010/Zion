@@ -19,7 +19,7 @@ namespace Zion.Vectors
         {
             get
             {
-                float Magnitude = MathF.Sqrt(x * x + y * y + z * z);
+                float Magnitude = MathF.Sqrt((x * x) + (y * y) + (z * z));
                 return new Vector3(x / Magnitude, y / Magnitude, z / Magnitude);
             }
         }
@@ -107,7 +107,7 @@ namespace Zion.Vectors
         }
 
 
-        public override readonly string ToString() => $"[{x}, {y}, {z}]";
+        public override readonly string ToString() => $"[{x}; {y}; {z}]";
         public override readonly bool Equals([NotNullWhen(true)] object? Object)
         {
             return Object is not null && Object is Vector3 Vector && this == Vector;
@@ -117,9 +117,9 @@ namespace Zion.Vectors
             unchecked
             {
                 int Hash = 17;
-                Hash = Hash * 23 + x.GetHashCode();
-                Hash = Hash * 23 + y.GetHashCode();
-                Hash = Hash * 23 + z.GetHashCode();
+                Hash = (Hash * 23) + x.GetHashCode();
+                Hash = (Hash * 23) + y.GetHashCode();
+                Hash = (Hash * 23) + z.GetHashCode();
                 return Hash;
             }
         }
@@ -174,12 +174,12 @@ namespace Zion.Vectors
             float DiferenceX = A.x - B.x;
             float DiferenceY = A.y - B.y;
             float DiferenceZ = A.z - B.z;
-            return DiferenceX * DiferenceX + DiferenceY * DiferenceY + DiferenceZ * DiferenceZ <= MaxDistance * MaxDistance;
+            return (DiferenceX * DiferenceX) + (DiferenceY * DiferenceY) + (DiferenceZ * DiferenceZ) <= MaxDistance * MaxDistance;
         }
 
         public static Vector3 Lerp(Vector3 A, Vector3 B, float Alpha)
         {
-            return A + (B - A) * Alpha;
+            return A + ((B - A) * Alpha);
         }
 
         public static Vector3 Sum(params IEnumerable<Vector3> Vectors)

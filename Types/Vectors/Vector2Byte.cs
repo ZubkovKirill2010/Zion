@@ -21,14 +21,9 @@ namespace Zion.Vectors
             get => ConvertBits(Value & 0b0000_1111);
             set
             {
-                if (IsInside(value))
-                {
-                    Value = (byte)((Value & 0b1111_0000) | ConvertToBits(value));
-                }
-                else
-                {
-                    throw new ArgumentOutOfRangeException($"new x(={value}) out of Range -3 - 4");
-                }
+                Value = IsInside(value)
+                    ? (byte)((Value & 0b1111_0000) | ConvertToBits(value))
+                    : throw new ArgumentOutOfRangeException($"new x(={value}) out of Range -3 - 4");
             }
         }
         public int y
@@ -36,14 +31,9 @@ namespace Zion.Vectors
             get => ConvertBits(Value >> 4);
             set
             {
-                if (IsInside(value))
-                {
-                    Value = (byte)((Value & 0b0000_1111) | (ConvertToBits(value) << 4));
-                }
-                else
-                {
-                    throw new ArgumentOutOfRangeException($"new y(={value}) out of Range -3 - 4");
-                }
+                Value = IsInside(value)
+                    ? (byte)((Value & 0b0000_1111) | (ConvertToBits(value) << 4))
+                    : throw new ArgumentOutOfRangeException($"new y(={value}) out of Range -3 - 4");
             }
         }
 
@@ -94,7 +84,7 @@ namespace Zion.Vectors
         public static explicit operator Vector2Int(Vector2Byte Vector) => new Vector2Int(Vector.x, Vector.y);
 
 
-        public override string ToString() => $"[{x}, {y}]";
+        public override string ToString() => $"[{x}; {y}]";
         public override int GetHashCode() => Value;
         public override bool Equals([NotNullWhen(true)] object? Object)
         {

@@ -14,7 +14,7 @@
 
 //        public override bool Check(StringView String, int Start)
 //        {
-            
+
 //        }
 //    }
 //}

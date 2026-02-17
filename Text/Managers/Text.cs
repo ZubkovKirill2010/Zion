@@ -102,12 +102,7 @@ namespace Zion
         public static string[] SplitIntoLines(this string String)
         {
             ArgumentNullException.ThrowIfNull(String);
-            if (String.Length == 0)
-            {
-                return Array.Empty<string>();
-            }
-
-            return String.Split(Environment.NewLine, StringSplitOptions.None).TrimEmptyLines();
+            return String.Length == 0 ? Array.Empty<string>() : String.Split(Environment.NewLine, StringSplitOptions.None).TrimEmptyLines();
         }
 
         public static string[] TrimEmptyLines(this string[] StringArray)
@@ -131,12 +126,7 @@ namespace Zion
                 End--;
             }
 
-            if (Start > End)
-            {
-                return Array.Empty<string>();
-            }
-
-            return StringArray[Start..(End + 1)];
+            return Start > End ? Array.Empty<string>() : StringArray[Start..(End + 1)];
         }
 
 
@@ -166,12 +156,9 @@ namespace Zion
         public static string Truncate(this string String, int TotalLength)
         {
             ArgumentNullException.ThrowIfNull(String);
-            if (TotalLength <= 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(TotalLength), $"TotalLength(={TotalLength}) <= 0");
-            }
-
-            return String.Length <= TotalLength ? String : String[..(TotalLength - 3)] + "...";
+            return TotalLength <= 0
+                ? throw new ArgumentOutOfRangeException(nameof(TotalLength), $"TotalLength(={TotalLength}) <= 0")
+                : String.Length <= TotalLength ? String : String[..(TotalLength - 3)] + "...";
         }
 
 
@@ -233,12 +220,9 @@ namespace Zion
             ArgumentNullException.ThrowIfNull(String);
             ArgumentNullException.ThrowIfNull(Converter);
 
-            if (String.Length == 0)
-            {
-                return string.Empty;
-            }
-
-            return string.Create
+            return String.Length == 0
+                ? string.Empty
+                : string.Create
             (
                 String.Length,
                 String,
@@ -295,12 +279,7 @@ namespace Zion
             ArgumentNullException.ThrowIfNull(String);
             ArgumentNullException.ThrowIfNull(Prefix);
 
-            if (String.Length == 0 || String.Length < Prefix.Length)
-            {
-                return String;
-            }
-
-            return String.StartsWith(Prefix) ? String[Prefix.Length..] : String;
+            return String.Length == 0 || String.Length < Prefix.Length ? String : String.StartsWith(Prefix) ? String[Prefix.Length..] : String;
         }
         public static string RemoveSuffix(this string String, string Suffix)
         {
@@ -315,24 +294,14 @@ namespace Zion
             ArgumentNullException.ThrowIfNull(String);
             ArgumentNullException.ThrowIfNull(Prefix);
 
-            if (Prefix.Length == 0)
-            {
-                return String;
-            }
-
-            return String.StartsWith(Prefix) ? String : Prefix + String;
+            return Prefix.Length == 0 ? String : String.StartsWith(Prefix) ? String : Prefix + String;
         }
         public static string EnsureSuffix(this string String, string Suffix)
         {
             ArgumentNullException.ThrowIfNull(String);
             ArgumentNullException.ThrowIfNull(Suffix);
 
-            if (Suffix.Length == 0)
-            {
-                return String;
-            }
-
-            return String.EndsWith(Suffix) ? String : String + Suffix;
+            return Suffix.Length == 0 ? String : String.EndsWith(Suffix) ? String : String + Suffix;
         }
 
         public static string GetCommonStart(this IEnumerable<string> Strings)
@@ -462,7 +431,7 @@ namespace Zion
                 return true;
             }
 
-            Stack<char> Stack = new Stack<char>(String.Length / 2 + 1);
+            Stack<char> Stack = new Stack<char>((String.Length / 2) + 1);
             char Current = '\0';
 
             for (int i = 0; i < String.Length; i++)

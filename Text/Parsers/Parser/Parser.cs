@@ -6,11 +6,7 @@ namespace Zion
     {
         public static int ToInt32(this string String)
         {
-            if (String == "_")
-            {
-                return 0;
-            }
-            return int.Parse(Normalize(String));
+            return String == "_" ? 0 : int.Parse(Normalize(String));
         }
         public static bool ToInt32(this string String, out int Value)
         {
@@ -24,11 +20,7 @@ namespace Zion
 
         public static float ToFloat(this string String)
         {
-            if (String == "_")
-            {
-                return 0;
-            }
-            return float.Parse(NormalizeFloated(String));
+            return String == "_" ? 0 : float.Parse(NormalizeFloated(String));
         }
         public static bool ToFloat(this string String, out float Value)
         {
@@ -42,11 +34,7 @@ namespace Zion
 
         public static double ToDouble(this string String)
         {
-            if (String == "_")
-            {
-                return 0;
-            }
-            return double.Parse(NormalizeFloated(String));
+            return String == "_" ? 0 : double.Parse(NormalizeFloated(String));
         }
         public static bool ToDouble(this string String, out double Value)
         {
@@ -155,10 +143,11 @@ namespace Zion
 
         public static int ToHex(char Char)
         {
-            if (char.IsDigit(Char)) { return Char - '0'; }
-            if (Char >= 'a' && Char <= 'f') { return Char - 'a' + 10; }
-            if (Char >= 'A' && Char <= 'F') { return Char - 'A' + 10; }
-            throw new FormatException($"Couldn't convert '{Char}' to hex");
+            return char.IsDigit(Char)
+                ? Char - '0'
+                : Char >= 'a' && Char <= 'f'
+                ? Char - 'a' + 10
+                : Char >= 'A' && Char <= 'F' ? Char - 'A' + 10 : throw new FormatException($"Couldn't convert '{Char}' to hex");
         }
 
 
