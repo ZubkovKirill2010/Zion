@@ -33,99 +33,91 @@ namespace Zion
         }
 
 
-        public static void Write<T>(this BinaryWriter Writer, IEnumerable<T> Values) where T : IBinaryObject<T>
+        public static void Write<T>(this BinaryWriter Writer, ICollection<T> Values) where T : IBinaryWritable
         {
-            Write(Writer, Values, (Writer, Item) => Writer.Write(Item));
+            Write(Writer, Values, Item => Writer.Write(Item));
         }
 
-        public static void Write(this BinaryWriter Writer, IEnumerable<object> Values)
+        public static void Write(this BinaryWriter Writer, ICollection<object> Values)
         {
-            Write(Writer, Values, (Writer, Item) => Writer.Write(Item));
+            Write(Writer, Values, Writer.Write);
         }
 
-        public static void Write(this BinaryWriter Writer, IEnumerable Values)
+        public static void Write(this BinaryWriter Writer, ICollection Values)
         {
-            Write(Writer, Values.Cast<object>(), (Writer, Item) => Writer.Write(Item));
+            Writer.Write(Values.Count);
+            foreach (object Item in Values)
+            {
+                Writer.Write(Item);
+            }
         }
 
 
-        public static void Write<T>(this BinaryWriter Writer, IEnumerable<T> Values, Action<BinaryWriter, T> Write)
+        public static void Write<T>(this BinaryWriter Writer, ICollection<T> Values, Action<T> Write)
         {
-            Stream Stream = Writer.BaseStream;
-
-            long Start = Stream.Position;
-            int Count = 0;
-
-            Writer.Seek(4, SeekOrigin.Current);
-
+            Writer.Write(Values.Count);
             foreach (T Item in Values)
             {
-                Write(Writer, Item);
-                Count++;
+                Write(Item);
             }
-
-            long End = Stream.Position;
-
-            Stream.Position = Start;
-            Writer.Write(Count);
-            Stream.Position = End;
         }
 
-        public static void Write<T, I>(this BinaryWriter Writer, IBinaryGeneric<T, I> Object, Action<BinaryWriter, I> Write) where T : IBinaryGeneric<T, I>
+        public static void Write<T, I>(this BinaryWriter Writer, IBinaryGeneric<T, I> Object, Action<I> Write) where T : IBinaryGeneric<T, I>
         {
             Object.Write(Writer, Write);
         }
 
 
-        public static void Write<T>(this BinaryWriter Writer, IBinaryObject<T> Object) where T : IBinaryObject<T>
+        public static void Write<T>(this BinaryWriter Writer, IBinarySerializable<T> Object) where T : IBinarySerializable<T>
         {
             Object.Write(Writer);
         }
 
         public static void Write(this BinaryWriter Writer, object Object)
         {
+            if (Object is IBinaryWritable Writable)
+            {
+                Writable.Write(Writer);
+                return;
+            }
+
             Type Type = Object.GetType();
 
             if (SerializationMap.TryGetValue(Type, out Action<BinaryWriter, object>? Write))
             {
                 Write(Writer, Object);
-            }
-
-            if (Type.IsGenericType && Type.GetGenericTypeDefinition() == typeof(IBinaryObject<>))
-            {
-                dynamic Item = Object;
-                Item.Write(Writer);
+                return;
             }
 
             throw new ArgumentException($"Instructions for writing an object of type '{Type}' does not exist");
         }
 
 
-        public static void Write(this BinaryWriter Writer, IEnumerable<string> Values)
-            => Write(Writer, Values, (Writer, Item) => Writer.Write(Item));
-        public static void Write(this BinaryWriter Writer, IEnumerable<bool> Values)
-            => Write(Writer, Values, (Writer, Item) => Writer.Write(Item));
-        public static void Write(this BinaryWriter Writer, IEnumerable<byte> Values)
-            => Write(Writer, Values, (Writer, Item) => Writer.Write(Item));
-        public static void Write(this BinaryWriter Writer, IEnumerable<char> Values)
-            => Write(Writer, Values, (Writer, Item) => Writer.Write(Item));
-        public static void Write(this BinaryWriter Writer, IEnumerable<int> Values)
-            => Write(Writer, Values, (Writer, Item) => Writer.Write(Item));
-        public static void Write(this BinaryWriter Writer, IEnumerable<float> Values)
-            => Write(Writer, Values, (Writer, Item) => Writer.Write(Item));
-        public static void Write(this BinaryWriter Writer, IEnumerable<double> Values)
-            => Write(Writer, Values, (Writer, Item) => Writer.Write(Item));
-        public static void Write(this BinaryWriter Writer, IEnumerable<decimal> Values)
-            => Write(Writer, Values, (Writer, Item) => Writer.Write(Item));
-        public static void Write(this BinaryWriter Writer, IEnumerable<long> Values)
-            => Write(Writer, Values, (Writer, Item) => Writer.Write(Item));
-        public static void Write(this BinaryWriter Writer, IEnumerable<sbyte> Values)
-            => Write(Writer, Values, (Writer, Item) => Writer.Write(Item));
-        public static void Write(this BinaryWriter Writer, IEnumerable<ushort> Values)
-            => Write(Writer, Values, (Writer, Item) => Writer.Write(Item));
-        public static void Write(this BinaryWriter Writer, IEnumerable<uint> Values)
-            => Write(Writer, Values, (Writer, Item) => Writer.Write(Item));
-        public static void Write(this BinaryWriter Writer, IEnumerable<ulong> Values)
-            => Write(Writer, Values, (Writer, Item) => Writer.Write(Item));
+        public static void Write(this BinaryWriter Writer, ICollection<string> Values)
+            => Write(Writer, Values, Writer.Write);
+        public static void Write(this BinaryWriter Writer, ICollection<bool> Values)
+            => Write(Writer, Values, Writer.Write);
+        public static void Write(this BinaryWriter Writer, ICollection<byte> Values)
+            => Write(Writer, Values, Writer.Write);
+        public static void Write(this BinaryWriter Writer, ICollection<char> Values)
+            => Write(Writer, Values, Writer.Write);
+        public static void Write(this BinaryWriter Writer, ICollection<int> Values)
+            => Write(Writer, Values, Writer.Write);
+        public static void Write(this BinaryWriter Writer, ICollection<float> Values)
+            => Write(Writer, Values, Writer.Write);
+        public static void Write(this BinaryWriter Writer, ICollection<double> Values)
+            => Write(Writer, Values, Writer.Write);
+        public static void Write(this BinaryWriter Writer, ICollection<decimal> Values)
+            => Write(Writer, Values, Writer.Write);
+        public static void Write(this BinaryWriter Writer, ICollection<long> Values)
+            => Write(Writer, Values, Writer.Write);
+        public static void Write(this BinaryWriter Writer, ICollection<sbyte> Values)
+            => Write(Writer, Values, Writer.Write);
+        public static void Write(this BinaryWriter Writer, ICollection<ushort> Values)
+            => Write(Writer, Values, Writer.Write);
+        public static void Write(this BinaryWriter Writer, ICollection<uint> Values)
+            => Write(Writer, Values, Writer.Write);
+        public static void Write(this BinaryWriter Writer, ICollection<ulong> Values)
+            => Write(Writer, Values, Writer.Write);
     }
 }

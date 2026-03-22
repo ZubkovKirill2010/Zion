@@ -362,9 +362,7 @@ namespace Zion.MathExpressions
 
         public static Fraction Parse(string String)
         {
-            ArgumentNullException.ThrowIfNull(String);
-
-            String = Parser.Normalize(String);
+            String = Parser.Normalize(Accessor.NotNull(String));
 
             if (String.Length == 0)
             {
@@ -384,11 +382,9 @@ namespace Zion.MathExpressions
 
         public static bool TryParse(string String, out Fraction Value)
         {
-            ArgumentNullException.ThrowIfNull(String);
-
             try
             {
-                Value = Parse(String);
+                Value = Parse(String.NotNull());
                 return true;
             }
             catch
@@ -401,8 +397,7 @@ namespace Zion.MathExpressions
 
         public static Fraction ParseDecimal(string String)
         {
-            ArgumentNullException.ThrowIfNull(String);
-            String = Parser.NormalizeFloated(String);
+            String = Parser.NormalizeFloated(String.NotNull());
 
             bool IsNegative = String.StartsWith('-');
             bool HasSign = IsNegative || String.StartsWith('+');
@@ -493,8 +488,7 @@ namespace Zion.MathExpressions
 
         public static bool TryParseDecimal(string String, out Fraction Value)
         {
-            ArgumentNullException.ThrowIfNull(String);
-            String = Parser.NormalizeFloated(String);
+            String = Parser.NormalizeFloated(String.NotNull());
             Value = default;
 
             bool IsNegative = String.StartsWith('-');
@@ -755,6 +749,7 @@ namespace Zion.MathExpressions
         public static Fraction Sum(params IList<Fraction> Values)
         {
             ArgumentNullException.ThrowIfNull(Values);
+
             if (Values.IsNullOrEmpty()) { return Zero; }
             if (Values.Count == 1) { return Values[0]; }
             if (Values.Any(m => m.IsNaN)) { return NaN; }
@@ -819,6 +814,7 @@ namespace Zion.MathExpressions
         public static Fraction Product(params IEnumerable<Fraction> Members)
         {
             ArgumentNullException.ThrowIfNull(Members);
+
             if (Members.IsNullOrEmpty()) { return Zero; }
             if (!Members.HasAtLeast(2)) { return Members.First(); }
             if (Members.Any(m => m.IsNaN)) { return NaN; }

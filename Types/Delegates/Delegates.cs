@@ -1,6 +1,8 @@
 ﻿namespace Zion
 {
-    public delegate bool SafeConverter<TIn, TOut>(in TIn Input, out TOut Output);
+    public delegate bool SafeConverter<TIn, TOut>(TIn Input, out TOut Output);
+    public delegate bool SafeParser<TOut>(string Input, out TOut Output);
+    public delegate bool SafeGetter<TOut>(out TOut Output);
 
     public delegate Task AsyncAction();
     public delegate Task AsyncAction<in T>(T T1);

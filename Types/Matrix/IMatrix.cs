@@ -19,6 +19,5 @@ namespace Zion
         abstract void Fill(T Value);
 
         abstract void ForEach(Action<T> Action);
-        abstract void ForEach(Func<T, T> Converter);
     }
 }

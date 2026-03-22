@@ -145,11 +145,33 @@ namespace Zion
 
         public void Fill(T Value)
         {
-            ForEach(OldValue => Value);
+            for (int x = 0; x < Size.x; x++)
+            {
+                for (int y = 0; y < Size.y; y++)
+                {
+                    this[x, y] = Value;
+                }
+            }
         }
         public void Fill(Func<T> Value)
         {
-            ForEach(OldValue => Value());
+            for (int x = 0; x < Size.x; x++)
+            {
+                for (int y = 0; y < Size.y; y++)
+                {
+                    this[x, y] = Value();
+                }
+            }
+        }
+        public void Fill(Func<int, int, T> Value)
+        {
+            for (int x = 0; x < Size.x; x++)
+            {
+                for (int y = 0; y < Size.y; y++)
+                {
+                    this[x, y] = Value(x, y);
+                }
+            }
         }
         public void FillChessPattern(T A, T B)
         {
@@ -189,16 +211,6 @@ namespace Zion
                 }
             }
         }
-        public void ForEach(Func<T, T> Converter)
-        {
-            for (int x = 0; x < Size.x; x++)
-            {
-                for (int y = 0; y < Size.y; y++)
-                {
-                    this[x, y] = Converter(this[x, y]);
-                }
-            }
-        }
 
         public Matrix<I> Convert<I>(Converter<T, I> Converter)
         {
@@ -231,20 +243,20 @@ namespace Zion
         }
 
 
-        public void Write(BinaryWriter Writer, Action<BinaryWriter, T> Write)
+        public void Write(BinaryWriter Writer, Action<T> Write)
         {
             Writer.Write(Size);
             foreach (T Item in this)
             {
-                Write(Writer, Item);
+                Write(Item);
             }
         }
-        public static Matrix<T> Read(BinaryReader Reader, Func<BinaryReader, T> Read)
+        public static Matrix<T> Read(BinaryReader Reader, Func<T> Read)
         {
             return new Matrix<T>
             (
                 Reader.Read<Vector2Int>(),
-                () => Read(Reader)
+                () => Read()
             );
         }
     }

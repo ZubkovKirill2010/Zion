@@ -63,6 +63,7 @@ namespace Zion
         public static string Duplicate(this string String, int Count)
         {
             ArgumentNullException.ThrowIfNull(String);
+
             if (Count < 0)
             {
                 throw new ArgumentException($"Count(={Count}) < 0");
@@ -102,12 +103,14 @@ namespace Zion
         public static string[] SplitIntoLines(this string String)
         {
             ArgumentNullException.ThrowIfNull(String);
+
             return String.Length == 0 ? Array.Empty<string>() : String.Split(Environment.NewLine, StringSplitOptions.None).TrimEmptyLines();
         }
 
         public static string[] TrimEmptyLines(this string[] StringArray)
         {
             ArgumentNullException.ThrowIfNull(StringArray);
+
             if (StringArray.Length == 0)
             {
                 return StringArray;
@@ -133,6 +136,7 @@ namespace Zion
         public static string Centering(this string String, int TotalLength, char PaddingChar = ' ')
         {
             ArgumentNullException.ThrowIfNull(String);
+
             if (TotalLength <= 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(TotalLength), $"TotalLength(={TotalLength}) <= 0");
@@ -156,6 +160,7 @@ namespace Zion
         public static string Truncate(this string String, int TotalLength)
         {
             ArgumentNullException.ThrowIfNull(String);
+
             return TotalLength <= 0
                 ? throw new ArgumentOutOfRangeException(nameof(TotalLength), $"TotalLength(={TotalLength}) <= 0")
                 : String.Length <= TotalLength ? String : String[..(TotalLength - 3)] + "...";
@@ -261,6 +266,7 @@ namespace Zion
         public static string Create(this ICollection<char> Chars)
         {
             ArgumentNullException.ThrowIfNull(Chars);
+
             return string.Create(Chars.Count, Chars, (Span, List) =>
             {
                 int Index = 0;
@@ -307,6 +313,7 @@ namespace Zion
         public static string GetCommonStart(this IEnumerable<string> Strings)
         {
             ArgumentNullException.ThrowIfNull(Strings);
+
             if (Enumerable.Any(Strings, String => String is null))
             {
                 throw new ArgumentNullException("StringArray[`] is null");
@@ -457,6 +464,7 @@ namespace Zion
         {
             ArgumentNullException.ThrowIfNull(String);
             ArgumentOutOfRangeException.ThrowIfNegative(Start);
+
             if (End > String.Length)
             {
                 throw new ArgumentOutOfRangeException($"End(={End}) >= String.Length(={String.Length})");
@@ -604,6 +612,7 @@ namespace Zion
         public static string ToCamelCase(this IList<string> Strings, bool Underlining = false)
         {
             ArgumentNullException.ThrowIfNull(Strings);
+
             if (Strings.Count == 0)
             {
                 return string.Empty;
@@ -624,6 +633,7 @@ namespace Zion
         public static string ToPascalCase(this ICollection<string> Strings, bool Underlining = false)
         {
             ArgumentNullException.ThrowIfNull(Strings);
+
             if (Strings.Count == 0)
             {
                 return string.Empty;
@@ -643,6 +653,7 @@ namespace Zion
         public static string ToSnakeCase(this ICollection<string> Strings, bool Underlining = false)
         {
             ArgumentNullException.ThrowIfNull(Strings);
+
             if (Strings.Count == 0)
             {
                 return string.Empty;
@@ -655,6 +666,7 @@ namespace Zion
         public static string ToKebabCase(this ICollection<string> Strings, bool Underlining = false)
         {
             ArgumentNullException.ThrowIfNull(Strings);
+
             if (Strings.Count == 0)
             {
                 return string.Empty;
@@ -662,6 +674,27 @@ namespace Zion
 
             string Result = string.Join('-', Strings.Select(String => String.ToLower()));
             return Underlining ? '_' + Result : Result;
+        }
+
+
+        public static string ToCamelCase(this string String, bool Underlining = false)
+        {
+            return ToCamelCase(SplitIdentifier(String.NotNull()), Underlining);
+        }
+
+        public static string ToPascalCase(this string String, bool Underlining = false)
+        {
+            return ToPascalCase(SplitIdentifier(String.NotNull()), Underlining);
+        }
+
+        public static string ToSnakeCase(this string String, bool Underlining = false)
+        {
+            return ToSnakeCase(SplitIdentifier(String.NotNull()), Underlining);
+        }
+
+        public static string ToKebabCase(this string String, bool Underlining = false)
+        {
+            return ToKebabCase(SplitIdentifier(String.NotNull()), Underlining);
         }
 
         #endregion

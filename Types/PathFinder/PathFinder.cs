@@ -12,12 +12,12 @@ namespace Zion
             }
 
             ConcurrentDictionary<TPoint, byte> Visited = new ConcurrentDictionary<TPoint, byte>();
-            ConcurrentBag<Structure<TPoint>> Results = new ConcurrentBag<Structure<TPoint>>();
+            ConcurrentBag<Tree<TPoint>> Results = new ConcurrentBag<Tree<TPoint>>();
             int MaxDistance = Info.MaxDistance == -1 ? int.MaxValue : Info.MaxDistance;
 
-            bool Found = Pave(Info, 0, new Structure<TPoint>(Info.Start), Visited, Results, MaxDistance);
+            bool Found = Pave(Info, 0, new Tree<TPoint>(Info.Start), Visited, Results, MaxDistance);
 
-            return Found && Results.TryTake(out Structure<TPoint> Result) ? ToArray(Result) : Array.Empty<TPoint>();
+            return Found && Results.TryTake(out Tree<TPoint> Result) ? ToArray(Result) : Array.Empty<TPoint>();
         }
 
         public static TPoint[][] PaveMultiple<TPoint>(MultiplePathInfo<TPoint> Info)
@@ -26,14 +26,14 @@ namespace Zion
             ConcurrentDictionary<TPoint, byte> GlobalVisited = Info.ExcludeVisited ? new ConcurrentDictionary<TPoint, byte>() : null;
             int MaxDistance = Info.MaxDistance == -1 ? int.MaxValue : Info.MaxDistance;
 
-            PaveMultiple(Info, 0, new Structure<TPoint>(Info.Start), new ConcurrentDictionary<TPoint, byte>(), GlobalVisited, Results);
+            PaveMultiple(Info, 0, new Tree<TPoint>(Info.Start), new ConcurrentDictionary<TPoint, byte>(), GlobalVisited, Results);
 
             return Results.ToArray();
         }
 
 
-        private static bool Pave<TPoint>(PathInfo<TPoint> Info, int Length, Structure<TPoint> Branch,
-            ConcurrentDictionary<TPoint, byte> Visited, ConcurrentBag<Structure<TPoint>> Results, int MaxDistance)
+        private static bool Pave<TPoint>(PathInfo<TPoint> Info, int Length, Tree<TPoint> Branch,
+            ConcurrentDictionary<TPoint, byte> Visited, ConcurrentBag<Tree<TPoint>> Results, int MaxDistance)
         {
             if (Length >= MaxDistance)
             {
@@ -43,7 +43,7 @@ namespace Zion
             Visited[Branch.Value] = 0;
 
             TPoint LastPosition = default;
-            Structure<TPoint> Parent = Branch.Parent;
+            Tree<TPoint> Parent = Branch.Parent;
 
             if (Parent is not null)
             {
@@ -63,12 +63,12 @@ namespace Zion
 
             bool Found = false;
 
-            if (Length < 3) // Многопоточность на первых уровнях
+            if (Length < 3)
             {
                 ParallelOptions Options = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
                 Parallel.ForEach(ValidNeighbors, Options, (Cell, State) =>
                 {
-                    Structure<TPoint> Child = new Structure<TPoint>(Cell);
+                    Tree<TPoint> Child = new Tree<TPoint>(Cell);
                     Branch.Add(Child);
 
                     if (Info.EqualsPoints(Cell, Info.End))
@@ -91,7 +91,7 @@ namespace Zion
             {
                 foreach (TPoint Cell in ValidNeighbors)
                 {
-                    Structure<TPoint> Child = new Structure<TPoint>(Cell);
+                    Tree<TPoint> Child = new Tree<TPoint>(Cell);
                     Branch.Add(Child);
 
                     if (Info.EqualsPoints(Cell, Info.End))
@@ -111,7 +111,7 @@ namespace Zion
             return Found;
         }
 
-        private static void PaveMultiple<TPoint>(MultiplePathInfo<TPoint> Info, int Length, Structure<TPoint> Branch,
+        private static void PaveMultiple<TPoint>(MultiplePathInfo<TPoint> Info, int Length, Tree<TPoint> Branch,
             ConcurrentDictionary<TPoint, byte> LocalVisited, ConcurrentDictionary<TPoint, byte> GlobalVisited,
             ConcurrentBag<TPoint[]> Results)
         {
@@ -121,13 +121,13 @@ namespace Zion
             }
 
             LocalVisited[Branch.Value] = 0;
-            if (GlobalVisited != null)
+            if (GlobalVisited is not null)
             {
                 GlobalVisited[Branch.Value] = 0;
             }
 
-            TPoint LastPosition = default;
-            Structure<TPoint> Parent = Branch.Parent;
+            TPoint LastPosition = default!;
+            Tree<TPoint> Parent = Branch.Parent!;
 
             if (Parent is not null)
             {
@@ -139,7 +139,7 @@ namespace Zion
 
             foreach (TPoint Cell in Neighbors)
             {
-                if (!LocalVisited.ContainsKey(Cell) && (GlobalVisited == null || !GlobalVisited.ContainsKey(Cell)))
+                if (!LocalVisited.ContainsKey(Cell) && (GlobalVisited is null || !GlobalVisited.ContainsKey(Cell)))
                 {
                     ValidNeighbors.Add(Cell);
                 }
@@ -150,7 +150,7 @@ namespace Zion
                 ParallelOptions Options = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
                 Parallel.ForEach(ValidNeighbors, Options, Cell =>
                 {
-                    Structure<TPoint> Child = new Structure<TPoint>(Cell);
+                    Tree<TPoint> Child = new Tree<TPoint>(Cell);
                     Branch.Add(Child);
 
                     if (Info.EqualsPoints(Cell, Info.End))
@@ -168,7 +168,7 @@ namespace Zion
             {
                 foreach (TPoint Cell in ValidNeighbors)
                 {
-                    Structure<TPoint> Child = new Structure<TPoint>(Cell);
+                    Tree<TPoint> Child = new Tree<TPoint>(Cell);
                     Branch.Add(Child);
 
                     if (Info.EqualsPoints(Cell, Info.End))
@@ -184,12 +184,12 @@ namespace Zion
             }
         }
 
-        private static TPoint[] ToArray<TPoint>(Structure<TPoint> Structure)
+        private static TPoint[] ToArray<TPoint>(Tree<TPoint> Tree)
         {
             List<TPoint> Path = new List<TPoint>();
-            Structure<TPoint> Current = Structure;
+            Tree<TPoint>? Current = Tree;
 
-            while (Current != null)
+            while (Current is not null)
             {
                 Path.Add(Current.Value);
                 Current = Current.Parent;

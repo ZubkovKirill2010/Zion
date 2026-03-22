@@ -2,7 +2,7 @@
 
 namespace Zion.Vectors
 {
-    public struct Vector2Byte : IBinaryObject<Vector2Byte>, IRandomizable<Vector2Byte>
+    public struct Vector2Byte : IBinarySerializable<Vector2Byte>, IRandomizable<Vector2Byte>
     {
         public static readonly Vector2Byte Zero = new Vector2Byte(0, 0);
         public static readonly Vector2Byte Up = new Vector2Byte(0, 1);

@@ -4,7 +4,7 @@
     {
         public static SafeConverter<string, T> TryParse<T>(this Func<string, T?> Parser)
         {
-            return (in string String, out T Value) =>
+            return (string String, out T Value) =>
             {
                 T? Input = Parser(String);
                 Value = Input ?? default!;

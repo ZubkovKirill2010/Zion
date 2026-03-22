@@ -1,4 +1,6 @@
-﻿namespace Zion
+﻿using System.Runtime.CompilerServices;
+
+namespace Zion
 {
     public static class Accessor
     {
@@ -76,6 +78,12 @@
 
             Result = default;
             return false;
+        }
+
+        public static T NotNull<T>(this T Value, [CallerArgumentExpression("Value")] string? ParameterName = null)
+        {
+            ArgumentNullException.ThrowIfNull(Value, ParameterName);
+            return Value;
         }
 
         public static I AddAndReturn<T, I>(this T Collection, in I Item) where T : ICollection<I>

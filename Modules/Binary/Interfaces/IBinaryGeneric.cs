@@ -8,11 +8,11 @@
         /// <summary>
         /// Serializes the object using custom writer for inner type.
         /// </summary>
-        void Write(BinaryWriter Writer, Action<BinaryWriter, I> WriteObject);
+        void Write(BinaryWriter Writer, Action<I> Write);
 
         /// <summary>
         /// Deserializes the object using custom reader for inner type.
         /// </summary>
-        abstract static T Read(BinaryReader Reader, Func<BinaryReader, I> ReadObject);
+        abstract static T Read(BinaryReader Reader, Func<I> Read);
     }
 }

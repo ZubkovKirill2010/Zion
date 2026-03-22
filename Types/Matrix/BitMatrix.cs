@@ -3,7 +3,7 @@ using Zion.Vectors;
 
 namespace Zion
 {
-    public sealed class BitMatrix : IMatrix<bool>, IBinaryObject<BitMatrix>
+    public sealed class BitMatrix : IMatrix<bool>, IBinarySerializable<BitMatrix>
     {
         private readonly byte[] Data;
         public Vector2Int Size { get; }

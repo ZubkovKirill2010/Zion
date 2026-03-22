@@ -8,7 +8,7 @@
 
         public ArrayBrowser(T[] Array)
         {
-            ArgumentNullException.ThrowIfNull(Array, "Array");
+            ArgumentNullException.ThrowIfNull(Array);
 
             this.Array = Array;
             Length = Array.Length;

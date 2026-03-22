@@ -2,18 +2,18 @@
 {
     public static class BinaryReaderExtensions
     {
-        public static T Read<T>(this BinaryReader Reader) where T : IBinaryObject<T>
+        public static T Read<T>(this BinaryReader Reader) where T : IBinarySerializable<T>
         {
             return T.Read(Reader);
         }
 
-        public static T Read<T, I>(this BinaryReader Reader, Func<BinaryReader, I> Read) where T : IBinaryGeneric<T, I>
+        public static T Read<T, I>(this BinaryReader Reader, Func<I> Read) where T : IBinaryGeneric<T, I>
         {
             return T.Read(Reader, Read);
         }
 
 
-        public static T[] ReadArray<T>(this BinaryReader Reader) where T : IBinaryObject<T>
+        public static T[] ReadArray<T>(this BinaryReader Reader) where T : IBinarySerializable<T>
         {
             return ReadArray(Reader, T.Read, Reader.ReadInt32());
         }
@@ -31,7 +31,7 @@
             return Result;
         }
 
-        public static List<T> ReadList<T>(this BinaryReader Reader, int AdditionalCapacity = 0) where T : IBinaryObject<T>
+        public static List<T> ReadList<T>(this BinaryReader Reader, int AdditionalCapacity = 0) where T : IBinarySerializable<T>
         {
             return ReadList(Reader, T.Read, AdditionalCapacity);
         }
@@ -46,7 +46,7 @@
             }
             return Result;
         }
-        public static void ReadList<T>(this BinaryReader Reader, List<T> List) where T : IBinaryObject<T>
+        public static void ReadList<T>(this BinaryReader Reader, List<T> List) where T : IBinarySerializable<T>
         {
             int Count = Reader.ReadInt32();
 

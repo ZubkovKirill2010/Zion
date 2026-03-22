@@ -3,7 +3,7 @@
 namespace Zion.Vectors
 {
     [Serializable]
-    public struct Vector3Int : IBinaryObject<Vector3Int>, IRandomizable<Vector3Int>
+    public struct Vector3Int : IBinarySerializable<Vector3Int>, IRandomizable<Vector3Int>
     {
         public static readonly Vector3Int Zero = new Vector3Int(0);
         public static readonly Vector3Int Up = new Vector3Int(0, 1, 0);
@@ -85,6 +85,15 @@ namespace Zion.Vectors
         public static bool operator >=(Vector3Int A, Vector3Int B)
         {
             return A.x >= B.x && A.y >= B.y && A.y <= B.y;
+        }
+
+        public static bool operator <(Vector3Int A, Vector3Int B)
+        {
+            return A.x < B.x && A.y < B.y && A.z < B.z;
+        }
+        public static bool operator >(Vector3Int A, Vector3Int B)
+        {
+            return A.x > B.x && A.y > B.y && A.y < B.y;
         }
 
         public override string ToString() => $"[{x}; {y}; {z}]";
@@ -175,6 +184,11 @@ namespace Zion.Vectors
                 Math.Clamp(Value.y, Min.y, Max.y),
                 Math.Clamp(Value.z, Min.z, Max.z)
             );
+        }
+
+        public static bool IsPositive(in Vector3Int Value)
+        {
+            return int.IsPositive(Value.x) && int.IsPositive(Value.y) && int.IsPositive(Value.z);
         }
     }
 }

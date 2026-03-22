@@ -2,7 +2,7 @@
 {
     public static class BinaryObject
     {
-        public static T Load<T>(string Path) where T : IBinaryObject<T>
+        public static T Load<T>(string Path) where T : IBinarySerializable<T>
         {
             using (FileStream Stream = new FileStream(Path, FileMode.Open))
             using (BinaryReader Reader = new BinaryReader(Stream))
@@ -11,7 +11,7 @@
             }
         }
 
-        public static void Save<T>(this T Object, string Path) where T : IBinaryObject<T>
+        public static void Save<T>(this T Object, string Path) where T : IBinarySerializable<T>
         {
             using (FileStream Stream = new FileStream(Path, FileMode.Create))
             using (BinaryWriter Writer = new BinaryWriter(Stream))
@@ -21,12 +21,12 @@
         }
 
 
-        public static async Task<T> LoadAsync<T>(string Path) where T : IBinaryObject<T>
+        public static async Task<T> LoadAsync<T>(string Path) where T : IBinarySerializable<T>
         {
             return await Task.Run(() => Load<T>(Path));
         }
 
-        public static async Task SaveAsync<T>(T Object, string Path) where T : IBinaryObject<T>
+        public static async Task SaveAsync<T>(T Object, string Path) where T : IBinarySerializable<T>
         {
             await Task.Run(() => Save(Object, Path));
         }

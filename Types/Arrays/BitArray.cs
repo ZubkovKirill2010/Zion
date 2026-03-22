@@ -2,7 +2,7 @@
 
 namespace Zion
 {
-    public class BitArray : IBinaryObject<BitArray>, IEnumerable<bool>
+    public class BitArray : IBinarySerializable<BitArray>, IEnumerable<bool>
     {
         private readonly byte[] Data;
 

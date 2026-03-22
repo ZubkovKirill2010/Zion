@@ -2,7 +2,7 @@
 {
     public sealed class Indexer<T>
     {
-        public Func  <int, T>? Getter { private get; init; }
+        public Func<int, T>? Getter { private get; init; }
         public Action<int, T>? Setter { private get; init; }
 
         public bool ContainsGetter => Getter is not null;

@@ -5,11 +5,16 @@ using Zion.Vectors;
 namespace Zion
 {
     [Serializable]
-    public struct RGBColor : IBinaryObject<RGBColor>, IEnumerable<byte>
+    public struct RGBColor : IBinarySerializable<RGBColor>, IEnumerable<byte>
     {
         public byte R { get; set; }
         public byte G { get; set; }
         public byte B { get; set; }
+
+        /// <summary>
+        /// Range: [0; 255]
+        /// </summary>
+        public float Brightness => (R * 0.2126f) + (G * 0.7152f) + (B * 0.0722f);
 
         public static readonly RGBColor Black = new RGBColor(0);
         public static readonly RGBColor DarkGray = new RGBColor(128);
@@ -170,10 +175,6 @@ namespace Zion
             return $"#{R.ToString(Format)}{G.ToString(Format)}{B.ToString(Format)}";
         }
 
-        public readonly float GetBrightness()//Range 0 - 255
-        {
-            return (R * 0.2126f) + (G * 0.7152f) + (B * 0.0722f);
-        }
         public readonly RGBColor GetOpposite()
         {
             return new RGBColor((byte)(byte.MaxValue - R), (byte)(byte.MaxValue - G), (byte)(byte.MaxValue - B));

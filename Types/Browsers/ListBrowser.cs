@@ -10,7 +10,7 @@ namespace Zion
 
         public ListBrowser(IList<T> List)
         {
-            ArgumentNullException.ThrowIfNull(List, "List");
+            ArgumentNullException.ThrowIfNull(List);
 
             this.List = List;
             Count = List.Count;

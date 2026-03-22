@@ -193,6 +193,7 @@ namespace Zion
         public static IEnumerable<T> Repeat<T>(this IEnumerable<T> Enumerable, int Count)
         {
             ArgumentNullException.ThrowIfNull(Enumerable);
+
             if (Count < 0)
             {
                 throw new ArgumentException($"Count(={Count}) < 0");

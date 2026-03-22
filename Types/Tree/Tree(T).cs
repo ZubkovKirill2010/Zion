@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -6,63 +7,57 @@ using System.Text.Json.Serialization;
 namespace Zion
 {
     [Serializable]
-    public class Structure<T> : IList<Structure<T>>, IBinaryGeneric<Structure<T>, T>, IColorText
+    public class Tree<T> : IList<Tree<T>>, IBinaryGeneric<Tree<T>, T>, IColorText
     {
         private static InvalidOperationException IsParentException => new InvalidOperationException("Cannot add a parent structure to its child elements");
 
-        [JsonPropertyName("Value")] public T Value { get; set; }
-        [JsonPropertyName("Child")] private List<Structure<T>> Childs { get; set; }
-        [JsonPropertyName("Parent")] public Structure<T>? Parent { get; private set; }
+        [JsonPropertyName("Value")]  public T Value               { get; set; }
+        [JsonPropertyName("Child")]  private List<Tree<T>> Childs { get; set; }
+        [JsonPropertyName("Parent")] public Tree<T>? Parent       { get; private set; }
 
-        public Structure<T> Root => IsRoot ? this : Parent.Root;
-
-
-        private static readonly JsonSerializerOptions JsonOptions = new JsonSerializerOptions
-        {
-            ReferenceHandler = ReferenceHandler.Preserve,
-            WriteIndented = true
-        };
+        public Tree<T> Root => Parent is null ? this : Parent.Root;
 
         public const string FileExtension = ".struct";
 
         public int Count => Childs.Count;
+
         public bool IsRoot => Parent is null;
         public bool IsEmpty => Childs.Count == 0;
-        public bool IsReadOnly => ((ICollection<Structure<T>>)Childs).IsReadOnly;
+        public bool IsReadOnly => ((ICollection<Tree<T>>)Childs).IsReadOnly;
 
 
-        public Structure(T Value)
+        public Tree(T Value)
         {
             this.Value = Value;
-            Childs = new List<Structure<T>>();
+            Childs = new List<Tree<T>>();
             Parent = null;
         }
-        public Structure(T Value, Structure<T> Parent)
+        public Tree(T Value, Tree<T> Parent)
         {
             this.Value = Value;
             this.Parent = Parent;
-            Childs = new List<Structure<T>>();
+            Childs = new List<Tree<T>>();
         }
-        public Structure(T Value, IList<T> Childs)
+        public Tree(T Value, IList<T> Childs)
         {
             this.Value = Value;
             Parent = null;
             SetChilds(Childs);
         }
-        public Structure(T Value, IList<Structure<T>> Childs)
+        public Tree(T Value, IList<Tree<T>> Childs)
         {
             this.Value = Value;
             Parent = null;
             SetChilds(Childs);
         }
-        public Structure(T Value, IList<Structure<T>> Childs, Structure<T>? Parent)
+        public Tree(T Value, IList<Tree<T>> Childs, Tree<T>? Parent)
         {
             this.Value = Value;
             this.Parent = Parent;
             SetChilds(Childs);
         }
 
-        Structure<T> IList<Structure<T>>.this[int Index]
+        Tree<T> IList<Tree<T>>.this[int Index]
         {
             get => Childs[Index];
             set
@@ -91,58 +86,6 @@ namespace Zion
             BuildTreeColorString(Result, string.Empty, true, LineColor);
             return Result.ToString().TrimEnd();
         }
-
-
-        public void Write(BinaryWriter Writer, Action<BinaryWriter, T> Write)
-        {
-            Write(Writer, Value);
-            Writer.Write(Count);
-            foreach (Structure<T> Child in Childs)
-            {
-                Child.Write(Writer, Write);
-            }
-        }
-
-        public static Structure<T> Read(BinaryReader Reader, Func<BinaryReader, T> Read)
-        {
-            return Read<T>(Reader, Read, null);
-        }
-        public static Structure<I> Read<I>(BinaryReader Reader, Func<BinaryReader, I> Read, Structure<I>? Parent)
-        {
-            int Count = 0;
-            Structure<I> Result = new Structure<I>
-            (
-                Read(Reader),
-                new List<Structure<I>>(Accessor.Set(out Count, Reader.ReadInt32())),
-                Parent
-            );
-
-            for (int i = 0; i < Count; i++)
-            {
-                Result.Add(Read<I>(Reader, Read, Result));
-            }
-
-            return Result;
-        }
-
-        public void SaveIn(string FilePath, Action<BinaryWriter, T> Write)
-        {
-            using FileStream Stream = new FileStream(FilePath, FileMode.Create);
-            using BinaryWriter Writer = new BinaryWriter(Stream);
-            this.Write(Writer, Write);
-        }
-        public static Structure<I> Read<I>(string FilePath, Func<BinaryReader, I> Read)
-        {
-            if (!System.IO.File.Exists(FilePath))
-            {
-                throw new FileNotFoundException($"File \"{FilePath}\" not exists");
-            }
-
-            using FileStream Stream = new FileStream(FilePath, FileMode.Open);
-            using BinaryReader Reader = new BinaryReader(Stream);
-            return Read<I>(Reader, Read, null);
-        }
-
 
         private void BuildTreeString(StringBuilder Builder, string Prefix, bool IsLast)
         {
@@ -190,13 +133,14 @@ namespace Zion
         }
 
 
-        public void SetChilds(IList<Structure<T>> Childs)
+        [MemberNotNull(nameof(Childs))]
+        public void SetChilds(IList<Tree<T>> Childs)
         {
             ArgumentNullException.ThrowIfNull(Childs);
 
-            List<Structure<T>> NewChilds = new List<Structure<T>>(Childs.Count);
+            List<Tree<T>> NewChilds = new List<Tree<T>>(Childs.Count);
 
-            foreach (Structure<T> Child in Childs.Where(Child => Child is not null))
+            foreach (Tree<T> Child in Childs.Where(Child => Child is not null))
             {
                 if (IsAncestor(Child))
                 {
@@ -207,17 +151,19 @@ namespace Zion
             }
             this.Childs = NewChilds;
         }
+        [MemberNotNull(nameof(Childs))]
         public void SetChilds(IList<T> Childs)
         {
             SetChilds(Childs, Item => Item);
         }
+        [MemberNotNull(nameof(Childs))]
         public void SetChilds<I>(IList<I> Childs, Converter<I, T> Converter)
         {
-            List<Structure<T>>? NewChilds = new List<Structure<T>>(Childs.Count);
+            List<Tree<T>>? NewChilds = new List<Tree<T>>(Childs.Count);
 
             foreach (I Child in Childs.Where(Child => Child is not null))
             {
-                NewChilds.Add(new Structure<T>(Converter(Child), this));
+                NewChilds.Add(new Tree<T>(Converter(Child), this));
             }
 
             this.Childs = NewChilds;
@@ -234,7 +180,7 @@ namespace Zion
         public void InvokeForAll(Action<T> Action)
         {
             Action(Value);
-            foreach (Structure<T> Child in Childs)
+            foreach (Tree<T> Child in Childs)
             {
                 Child.InvokeForAll(Action);
             }
@@ -246,13 +192,13 @@ namespace Zion
         private void InvokeForAll(Action<int, T> Action, int Level)
         {
             Action(Level, Value);
-            foreach (Structure<T> Child in Childs)
+            foreach (Tree<T> Child in Childs)
             {
                 Child.InvokeForAll(Action, Level + 1);
             }
         }
 
-        public Structure<T> AddIf(T Item, bool Condition)
+        public Tree<T> AddIf(T Item, bool Condition)
         {
             if (Condition)
             {
@@ -260,7 +206,7 @@ namespace Zion
             }
             return this;
         }
-        public Structure<T> AddIf(Structure<T> Item, bool Condition)
+        public Tree<T> AddIf(Tree<T> Item, bool Condition)
         {
             if (Condition)
             {
@@ -269,7 +215,7 @@ namespace Zion
             return this;
         }
 
-        public Structure<T> AddIf(T Item, Predicate<T> Condition)
+        public Tree<T> AddIf(T Item, Predicate<T> Condition)
         {
             if (Condition(Item))
             {
@@ -277,7 +223,7 @@ namespace Zion
             }
             return this;
         }
-        public Structure<T> AddIf(Structure<T> Item, Predicate<Structure<T>> Condition)
+        public Tree<T> AddIf(Tree<T> Item, Predicate<Tree<T>> Condition)
         {
             if (Condition(Item))
             {
@@ -286,7 +232,7 @@ namespace Zion
             return this;
         }
 
-        public Structure<T> AddWhere(Predicate<T> Condition, params T[] Items)
+        public Tree<T> AddWhere(Predicate<T> Condition, params T[] Items)
         {
             foreach (T Item in Items.Where(Condition))
             {
@@ -294,21 +240,21 @@ namespace Zion
             }
             return this;
         }
-        public Structure<T> AddWhere(Predicate<Structure<T>> Condition, params Structure<T>[] Items)
+        public Tree<T> AddWhere(Predicate<Tree<T>> Condition, params Tree<T>[] Items)
         {
-            foreach (Structure<T> Item in Items.Where(Condition))
+            foreach (Tree<T> Item in Items.Where(Condition))
             {
                 Add(Item);
             }
             return this;
         }
 
-        public Structure<T>? GetParent(int Level)
+        public Tree<T>? GetParent(int Level)
         {
-            if (Level < 0) { return null; }
+            if (Level < 0)  { return null; }
             if (Level == 0) { return this; }
 
-            Structure<T> Current = this;
+            Tree<T>? Current = this;
 
             for (int i = 0; i < Level; i++)
             {
@@ -322,7 +268,7 @@ namespace Zion
 
             return Current;
         }
-        public bool TryGetParent(int Level, out Structure<T>? Parent)
+        public bool TryGetParent(int Level, out Tree<T>? Parent)
         {
             if (Level < 0)
             {
@@ -353,9 +299,9 @@ namespace Zion
         public void Add(T Item)
         {
             ArgumentNullException.ThrowIfNull(Item);
-            Add(new Structure<T>(Item, this));
+            Add(new Tree<T>(Item, this));
         }
-        public void Add(Structure<T> Item)
+        public void Add(Tree<T> Item)
         {
             ArgumentNullException.ThrowIfNull(Item);
             if (IsAncestor(Item))
@@ -365,7 +311,7 @@ namespace Zion
             Item.Parent = this;
             Childs.Add(Item);
         }
-        public void Insert(int Index, Structure<T> Item)
+        public void Insert(int Index, Tree<T> Item)
         {
             ArgumentNullException.ThrowIfNull(Item);
             if (IsAncestor(Item))
@@ -376,17 +322,17 @@ namespace Zion
             Childs.Insert(Index, Item);
         }
 
-        public int IndexOf(Structure<T> Item)
+        public int IndexOf(Tree<T> Item)
         {
             ArgumentNullException.ThrowIfNull(Item);
             return Childs.IndexOf(Item);
         }
-        public bool Contains(Structure<T> Item)
+        public bool Contains(Tree<T> Item)
         {
             ArgumentNullException.ThrowIfNull(Item);
             return Childs.Contains(Item);
         }
-        public void CopyTo(Structure<T>[] Array, int ArrayIndex)
+        public void CopyTo(Tree<T>[] Array, int ArrayIndex)
         {
             ArgumentNullException.ThrowIfNull(Array);
             Childs.CopyTo(Array, ArrayIndex);
@@ -394,13 +340,13 @@ namespace Zion
 
         public void Clear()
         {
-            foreach (Structure<T> Child in Childs)
+            foreach (Tree<T> Child in Childs)
             {
                 Child.Parent = null;
             }
             Childs.Clear();
         }
-        public bool Remove(Structure<T> Item)
+        public bool Remove(Tree<T> Item)
         {
             Item.Parent = null;
             return Childs.Remove(Item);
@@ -412,7 +358,7 @@ namespace Zion
         }
 
 
-        public IEnumerator<Structure<T>> GetEnumerator()
+        public IEnumerator<Tree<T>> GetEnumerator()
         {
             return Childs.GetEnumerator();
         }
@@ -422,15 +368,48 @@ namespace Zion
         }
 
 
-        public bool IsAncestor(Structure<T> Structure)
+        public void Write(BinaryWriter Writer, Action<T> Write)
         {
-            ArgumentNullException.ThrowIfNull(Structure);
+            Write(Value);
+            Writer.Write(Count);
+            foreach (Tree<T> Child in Childs)
+            {
+                Child.Write(Writer, Write);
+            }
+        }
 
-            Structure<T>? Current = this;
+        public static Tree<T> Read(BinaryReader Reader, Func<T> Read)
+        {
+            return Read<T>(Reader, Read, null);
+        }
+        public static Tree<I> Read<I>(BinaryReader Reader, Func<I> Read, Tree<I>? Parent)
+        {
+            int Count = 0;
+            Tree<I> Result = new Tree<I>
+            (
+                Read(),
+                new List<Tree<I>>(Accessor.Set(out Count, Reader.ReadInt32())),
+                Parent
+            );
+
+            for (int i = 0; i < Count; i++)
+            {
+                Result.Add(Read<I>(Reader, Read, Result));
+            }
+
+            return Result;
+        }
+
+
+        public bool IsAncestor(Tree<T> Tree)
+        {
+            ArgumentNullException.ThrowIfNull(Tree);
+
+            Tree<T>? Current = this;
 
             while (Current is not null)
             {
-                if (ReferenceEquals(Current, Structure))
+                if (ReferenceEquals(Current, Tree))
                 {
                     return true;
                 }

@@ -44,16 +44,16 @@ namespace Zion
         }
 
 
-        public void Write(BinaryWriter Writer, Action<BinaryWriter, T> WriteObject)
+        public void Write(BinaryWriter Writer, Action<T> Write)
         {
             Writer.Write(Length);
             foreach (T? item in this)
             {
-                WriteObject(Writer, item);
+                Write(item);
             }
         }
 
-        public static GapBuffer<T> Read(BinaryReader Reader, Func<BinaryReader, T> ReadObject)
+        public static GapBuffer<T> Read(BinaryReader Reader, Func<T> Read)
         {
             int Length = Reader.ReadInt32();
 
@@ -61,7 +61,7 @@ namespace Zion
 
             for (int i = 0; i < Length; i++)
             {
-                Buffer.Add(ReadObject(Reader));
+                Buffer.Add(Read());
             }
 
             return Buffer;
@@ -134,6 +134,7 @@ namespace Zion
         {
             ArgumentNullException.ThrowIfNull(Array);
             ArgumentOutOfRangeException.ThrowIfNegative(ArrayIndex);
+
             if (Array.Length - ArrayIndex < Length)
             {
                 throw new ArgumentException("Target array too small");

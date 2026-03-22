@@ -3,7 +3,7 @@
 namespace Zion.Vectors
 {
     [Serializable]
-    public struct Vector2 : IBinaryObject<Vector2>, IRandomizable<Vector2>
+    public struct Vector2 : IBinarySerializable<Vector2>, IRandomizable<Vector2>
     {
         public static readonly Vector2 Zero = new Vector2(0, 0);
         public static readonly Vector2 Up = new Vector2(0, 1);

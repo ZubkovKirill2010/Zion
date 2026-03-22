@@ -287,18 +287,18 @@ namespace Zion
         }
 
 
-        public void Write(BinaryWriter Writer, Action<BinaryWriter, T> WriteObject)
+        public void Write(BinaryWriter Writer, Action<T> Write)
         {
             Writer.Write(Length);
             Writer.Write((sbyte)CompareMode);
 
             for (int i = 0; i < Length; i++)
             {
-                WriteObject(Writer, Data[i]);
+                Write(Data[i]);
             }
         }
 
-        public static SortedList<T> Read(BinaryReader Reader, Func<BinaryReader, T> ReadObject)
+        public static SortedList<T> Read(BinaryReader Reader, Func<T> Read)
         {
             int Length = Reader.ReadInt32();
             int CompareModeValue = Reader.ReadSByte();
@@ -306,7 +306,7 @@ namespace Zion
 
             for (int i = 0; i < Length; i++)
             {
-                Data[i] = ReadObject(Reader);
+                Data[i] = Read();
             }
 
             return new SortedList<T>(Data, Length, CompareModeValue);

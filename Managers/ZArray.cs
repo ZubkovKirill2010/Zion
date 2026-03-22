@@ -42,7 +42,7 @@
 
         public static T[] Clone<T>(T[] Source)
         {
-            ArgumentNullException.ThrowIfNull(Source, "Source");
+            Source.NotNull();
 
             T[] Result = new T[Source.Length];
 

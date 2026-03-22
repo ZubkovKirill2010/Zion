@@ -1,7 +1,7 @@
 ﻿namespace Zion
 {
     [Serializable]
-    public struct ColorChar : IColorText, IBinaryObject<ColorChar>
+    public struct ColorChar : IColorText, IBinarySerializable<ColorChar>
     {
         public char Char;
         public RGBColor Color;

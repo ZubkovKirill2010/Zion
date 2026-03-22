@@ -1,28 +1,28 @@
 ﻿namespace Zion
 {
-    public static class Structure
+    public static class Tree
     {
-        public static bool IsEmpty<T>(Structure<T> Structure) => Structure.IsEmpty;
-        public static bool IsNotEmpty<T>(Structure<T> Structure) => !Structure.IsEmpty;
+        public static bool IsEmpty<T>(Tree<T> Tree) => Tree.IsEmpty;
+        public static bool IsNotEmpty<T>(Tree<T> Tree) => !Tree.IsEmpty;
 
-        public static Structure<string> Parse(string Text, char OffsetChar = '\t')
+        public static Tree<string> Parse(string Text, char OffsetChar = '\t')
         {
             return Parse(Text, Item => Item, OffsetChar);
         }
-        public static Structure<string> Parse(string[] Lines, char OffsetChar = '\t')
+        public static Tree<string> Parse(string[] Lines, char OffsetChar = '\t')
         {
             return Parse(Lines, Item => Item, OffsetChar);
         }
 
-        public static Structure<I> Parse<I>(string Text, Converter<string, I> Converter, char OffsetChar = '\t')
+        public static Tree<I> Parse<I>(string Text, Converter<string, I> Converter, char OffsetChar = '\t')
         {
             return Parse(Text.Split(Environment.NewLine), Converter, OffsetChar);
         }
-        public static Structure<I> Parse<I>(string[] Lines, Converter<string, I> Converter, char OffsetChar = '\t')
+        public static Tree<I> Parse<I>(string[] Lines, Converter<string, I> Converter, char OffsetChar = '\t')
         {
             if (Lines.Length <= 0)
             {
-                return new Structure<I>(default);
+                return new Tree<I>(default);
             }
 
             int StartOffset = GetOffset(Lines[0], out _, OffsetChar);
@@ -32,11 +32,11 @@
         }
 
 
-        private static Structure<I> Parse<I>(string[] Lines, Converter<string, I> Converter, ref int Line, int MinOffset, int TargetIndent, char OffsetChar)
+        private static Tree<I> Parse<I>(string[] Lines, Converter<string, I> Converter, ref int Line, int MinOffset, int TargetIndent, char OffsetChar)
         {
             int Offset = GetOffset(Lines[Line], out string Value, OffsetChar);
 
-            Structure<I> Current = new Structure<I>(Converter(Value));
+            Tree<I> Current = new Tree<I>(Converter(Value));
             Line++;
 
             while (Line < Lines.Length)
@@ -69,24 +69,24 @@
         }
 
 
-        public static Structure<string> UnParse(string Text)
+        public static Tree<string> UnParse(string Text)
         {
             return UnParse(Text, Item => Item);
         }
-        public static Structure<string> UnParse(string[] Lines)
+        public static Tree<string> UnParse(string[] Lines)
         {
             return UnParse(Lines, Item => Item);
         }
 
-        public static Structure<I> UnParse<I>(string Text, Converter<string, I> Converter)
+        public static Tree<I> UnParse<I>(string Text, Converter<string, I> Converter)
         {
             return UnParse(Text.Split(Environment.NewLine), Converter);
         }
-        public static Structure<I> UnParse<I>(string[] Lines, Converter<string, I> Converter)
+        public static Tree<I> UnParse<I>(string[] Lines, Converter<string, I> Converter)
         {
             if (Lines.Length <= 0)
             {
-                return new Structure<I>(default);
+                return new Tree<I>(default);
             }
 
             int StartOffset = GetLinesOffset(Lines[0], out _);
@@ -96,11 +96,11 @@
         }
 
 
-        private static Structure<I> UnParse<I>(string[] Lines, Converter<string, I> Converter, ref int Line, int MinOffset, int TargetIndent)
+        private static Tree<I> UnParse<I>(string[] Lines, Converter<string, I> Converter, ref int Line, int MinOffset, int TargetIndent)
         {
             int Offset = GetLinesOffset(Lines[Line], out string Value);
 
-            Structure<I> Current = new Structure<I>(Converter(Value));
+            Tree<I> Current = new Tree<I>(Converter(Value));
             Line++;
 
             while (Line < Lines.Length)
