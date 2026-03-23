@@ -348,15 +348,16 @@ namespace Zion
         #endregion
 
         #region Predicate
-        public static bool Begins(this string String, int Index, string Target, bool IgnoreCase = false)
+        public static bool Begins(this string String, int Start, string Target, bool IgnoreCase = false)
         {
             ArgumentNullException.ThrowIfNull(String);
+            ArgumentNullException.ThrowIfNull(Target);
 
-            if (Index >= String.Length)
+            if (Start >= String.Length)
             {
-                throw new ArgumentException($"Index(={Index}) >= String.Length(={String.Length})");
+                throw new ArgumentException($"Start(={Start}) >= String.Length(={String.Length})");
             }
-            if (String.Length - Index < Target.Length)
+            if (String.Length - Start < Target.Length)
             {
                 return false;
             }
@@ -365,7 +366,7 @@ namespace Zion
             {
                 for (int i = 0; i < Target.Length; i++)
                 {
-                    if (char.ToLower(String[Index + i]) != char.ToLower(Target[i]))
+                    if (char.ToLower(String[Start + i]) != char.ToLower(Target[i]))
                     {
                         return false;
                     }
@@ -375,7 +376,7 @@ namespace Zion
             {
                 for (int i = 0; i < Target.Length; i++)
                 {
-                    if (String[Index + i] != Target[i])
+                    if (String[Start + i] != Target[i])
                     {
                         return false;
                     }

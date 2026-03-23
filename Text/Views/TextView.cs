@@ -4,6 +4,19 @@
     {
         public abstract override string ToString();
 
+
+        protected sealed override bool Equals(char A, char B)
+        {
+            return A == B;
+        }
+
+
+        public bool Begins(int Start, string Target, Func<char, char, bool>? Equals = null)
+        {
+            return Begins(Start, Target, Target.Length, Equals);
+        }
+
+
         public string Substring(int Start, int Length)
         {
             if (Start < 0 || Start > this.Length)
@@ -41,24 +54,18 @@
         public string Substring(Range Range)
         {
             int Start = Range.Start.IsFromEnd ? Length - Range.Start.Value : Range.Start.Value;
-            int End   = Range.End.IsFromEnd   ? Length - Range.End.Value   : Range.End.Value;
+            int End = Range.End.IsFromEnd ? Length - Range.End.Value : Range.End.Value;
 
             if (Start < 0 || Start > Length)
             {
                 throw new ArgumentOutOfRangeException(nameof(Range), $"Start index {Start} is out of range");
             }
 
-            if (End < 0 || End > Length)
-            {
-                throw new ArgumentOutOfRangeException(nameof(Range), $"End index {End} is out of range");
-            }
-
-            if (Start > End)
-            {
-                throw new ArgumentException($"Start index {Start} must be less than or equal to end index {End}");
-            }
-
-            return Substring(Start, End - Start);
+            return End < 0 || End > Length
+                ? throw new ArgumentOutOfRangeException(nameof(Range), $"End index {End} is out of range")
+                : Start > End
+                ? throw new ArgumentException($"Start index {Start} must be less than or equal to end index {End}")
+                : Substring(Start, End - Start);
         }
 
         public string Substring(int Start)

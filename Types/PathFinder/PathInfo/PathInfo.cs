@@ -5,7 +5,7 @@
         public readonly TPoint Start;
         public readonly TPoint End;
         public readonly Func<TPoint, TPoint, bool> EqualsPoints;
-        public readonly Func<TPoint, TPoint?, IEnumerable<TPoint>> GetAllPath; //(Current, Last, AvailablePaths)
+        public readonly Func<TPoint, TPoint?, IEnumerable<TPoint>> GetAllPath; //(CurrentChar, Last, AvailablePaths)
 
         public int MaxDistance { get; init; } = -1;
 

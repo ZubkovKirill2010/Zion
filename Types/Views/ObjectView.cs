@@ -1,6 +1,4 @@
 ﻿using System.Collections;
-using System.Runtime.CompilerServices;
-using System.Text;
 
 namespace Zion
 {
@@ -37,7 +35,7 @@ namespace Zion
             get
             {
                 int Start = Range.Start.IsFromEnd ? this.Length - Range.Start.Value : Range.Start.Value;
-                int End   = Range.End.IsFromEnd   ? this.Length - Range.End.Value   : Range.End.Value;
+                int End = Range.End.IsFromEnd ? this.Length - Range.End.Value : Range.End.Value;
 
                 if (Start < 0 || Start > this.Length)
                 {
@@ -66,6 +64,89 @@ namespace Zion
                 return Result;
             }
         }
+
+
+        protected virtual bool Equals(T A, T B)
+        {
+            return A.Equals(B);
+        }
+
+
+        public IEnumerable<T> For(int Start)
+        {
+            return ZEnumerable.Range(Start, Length).Select(Index => this[Index]);
+        }
+
+        public IEnumerable<T> For(int Start, int Count)
+        {
+            return ZEnumerable.For(Start, Count).Select(Index => this[Index]);
+        }
+
+        public IEnumerable<T> Range(int Start, int End)
+        {
+            return ZEnumerable.Range(Start, End).Select(Index => this[Index]);
+        }
+
+        public IEnumerable<T> Range(int Count)
+        {
+            return ZEnumerable.Range(Count).Select(Index => this[Index]);
+        }
+
+
+        public bool Begins(int Start, IEnumerable<T> Target, Func<T, T, bool>? Equals = null)
+        {
+            ArgumentNullException.ThrowIfNull(Target);
+            ArgumentOutOfRangeException.ThrowIf(Start >= Length, $"Start(={Start}) >= Length(={Length})");
+
+            Equals ??= this.Equals;
+
+            int Index = 0;
+
+            foreach (T TargetItem in Target.Limit(Length - Start))
+            {
+                if (!Equals(this[Start + Index++], TargetItem))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public bool Begins(int Start, ICollection<T> Target, Func<T, T, bool>? Equals = null)
+        {
+            return Begins(Start, Target, Target.Count, Equals);
+        }
+
+        public bool Begins(int Start, T[] Target, Func<T, T, bool>? Equals = null)
+        {
+            return Begins(Start, Target, Target.Length, Equals);
+        }
+
+        public bool Begins(int Start, ObjectView<T> Target, Func<T, T, bool>? Equals = null)
+        {
+            return Begins(Start, Target, Target.Length, Equals);
+        }
+
+        internal protected bool Begins(int Start, IEnumerable<T> Target, int Count, Func<T, T, bool>? Equals = null)
+        {
+            ArgumentNullException.ThrowIfNull(Target);
+            ArgumentOutOfRangeException.ThrowIf(Start >= Length, $"Start(={Start}) >= Length(={Length})");
+            ArgumentOutOfRangeException.ThrowIf(Start + Count >= Length, $"Start(={Start}) + Count(={Count}) >= Length(={Length})");
+
+            Equals ??= this.Equals;
+
+            int Index = 0;
+
+            foreach (T TargetItem in Target)
+            {
+                if (!Equals(this[Start + Index++], TargetItem))
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
 
@@ -74,6 +155,6 @@ namespace Zion
         public IEnumerator<T> GetEnumerator()
         {
             return ZEnumerable.Range(Length).Select(Index => this[Index]).GetEnumerator();
-        }        
+        }
     }
 }
