@@ -1,154 +1,157 @@
 ﻿using System.Collections;
 
-public class ConcurrentSortedSet<T> : IEnumerable<T> where T : IComparable<T>
+namespace Zion
 {
-    private readonly ReaderWriterLockSlim Lock = new(LockRecursionPolicy.NoRecursion);
-    private readonly SortedSet<T> Set = new();
-
-    public int Count
+    public class ConcurrentSortedSet<T> : IEnumerable<T> where T : IComparable<T>
     {
-        get
+        private readonly ReaderWriterLockSlim Lock = new(LockRecursionPolicy.NoRecursion);
+        private readonly SortedSet<T> Set = new();
+
+        public int Count
+        {
+            get
+            {
+                Lock.EnterReadLock();
+                try { return Set.Count; }
+                finally { Lock.ExitReadLock(); }
+            }
+        }
+
+
+        public void ForEach(Action<T> Action)
         {
             Lock.EnterReadLock();
-            try { return Set.Count; }
-            finally { Lock.ExitReadLock(); }
-        }
-    }
-
-
-    public void ForEach(Action<T> Action)
-    {
-        Lock.EnterReadLock();
-        try
-        {
-            foreach (T item in Set)
+            try
             {
-                Action(item);
+                foreach (T item in Set)
+                {
+                    Action(item);
+                }
+            }
+            finally
+            {
+                Lock.ExitReadLock();
             }
         }
-        finally
-        {
-            Lock.ExitReadLock();
-        }
-    }
 
-    public void ForEachInRange(T Min, T Max, Action<T> Action)
-    {
-        Lock.EnterReadLock();
-        try
+        public void ForEachInRange(T Min, T Max, Action<T> Action)
         {
-            foreach (T item in Set.GetViewBetween(Min, Max))
+            Lock.EnterReadLock();
+            try
             {
-                Action(item);
+                foreach (T item in Set.GetViewBetween(Min, Max))
+                {
+                    Action(item);
+                }
+            }
+            finally
+            {
+                Lock.ExitReadLock();
             }
         }
-        finally
+
+
+        public bool Add(T Item)
         {
-            Lock.ExitReadLock();
-        }
-    }
-
-
-    public bool Add(T Item)
-    {
-        Lock.EnterWriteLock();
-        try
-        {
-            return Set.Add(Item);
-        }
-        finally
-        {
-            Lock.ExitWriteLock();
-        }
-    }
-
-    public bool Remove(T Item)
-    {
-        Lock.EnterWriteLock();
-        try
-        {
-            return Set.Remove(Item);
-        }
-        finally
-        {
-            Lock.ExitWriteLock();
-        }
-    }
-
-    public bool Contains(T Item)
-    {
-        Lock.EnterReadLock();
-        try
-        {
-            return Set.Contains(Item);
-        }
-        finally
-        {
-            Lock.ExitReadLock();
-        }
-    }
-
-    public void Clear()
-    {
-        Lock.EnterWriteLock();
-        try
-        {
-            Set.Clear();
-        }
-        finally
-        {
-            Lock.ExitWriteLock();
-        }
-    }
-
-
-    public Enumerator GetEnumerator() => new Enumerator(this);
-
-
-    IEnumerator<T> IEnumerable<T>.GetEnumerator() => GetEnumerator();
-    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
-
-    public struct Enumerator : IEnumerator<T>, IDisposable
-    {
-        private readonly ConcurrentSortedSet<T> Parent;
-        private SortedSet<T>.Enumerator NativeEnumerator;
-        private bool IsLocked;
-
-        internal Enumerator(ConcurrentSortedSet<T> Parent)
-        {
-            this.Parent = Parent;
-            NativeEnumerator = default;
-            IsLocked = false;
-
-            Parent.Lock.EnterReadLock();
-            IsLocked = true;
-
-            NativeEnumerator = Parent.Set.GetEnumerator();
-        }
-
-        public T Current => NativeEnumerator.Current;
-        object IEnumerator.Current => Current;
-
-        public bool MoveNext() => NativeEnumerator.MoveNext();
-
-        public void Reset()
-        {
-            if (IsLocked)
+            Lock.EnterWriteLock();
+            try
             {
-                NativeEnumerator.Dispose();
+                return Set.Add(Item);
+            }
+            finally
+            {
+                Lock.ExitWriteLock();
+            }
+        }
+
+        public bool Remove(T Item)
+        {
+            Lock.EnterWriteLock();
+            try
+            {
+                return Set.Remove(Item);
+            }
+            finally
+            {
+                Lock.ExitWriteLock();
+            }
+        }
+
+        public bool Contains(T Item)
+        {
+            Lock.EnterReadLock();
+            try
+            {
+                return Set.Contains(Item);
+            }
+            finally
+            {
+                Lock.ExitReadLock();
+            }
+        }
+
+        public void Clear()
+        {
+            Lock.EnterWriteLock();
+            try
+            {
+                Set.Clear();
+            }
+            finally
+            {
+                Lock.ExitWriteLock();
+            }
+        }
+
+
+        public Enumerator GetEnumerator() => new Enumerator(this);
+
+
+        IEnumerator<T> IEnumerable<T>.GetEnumerator() => GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+
+        public struct Enumerator : IEnumerator<T>, IDisposable
+        {
+            private readonly ConcurrentSortedSet<T> Parent;
+            private SortedSet<T>.Enumerator NativeEnumerator;
+            private bool IsLocked;
+
+            internal Enumerator(ConcurrentSortedSet<T> Parent)
+            {
+                this.Parent = Parent;
+                NativeEnumerator = default;
+                IsLocked = false;
+
+                Parent.Lock.EnterReadLock();
+                IsLocked = true;
+
                 NativeEnumerator = Parent.Set.GetEnumerator();
             }
-        }
 
-        public void Dispose()
-        {
-            if (IsLocked)
+            public T Current => NativeEnumerator.Current;
+            object IEnumerator.Current => Current;
+
+            public bool MoveNext() => NativeEnumerator.MoveNext();
+
+            public void Reset()
             {
-                Parent.Lock.ExitReadLock();
-                IsLocked = false;
+                if (IsLocked)
+                {
+                    NativeEnumerator.Dispose();
+                    NativeEnumerator = Parent.Set.GetEnumerator();
+                }
             }
-            NativeEnumerator.Dispose();
+
+            public void Dispose()
+            {
+                if (IsLocked)
+                {
+                    Parent.Lock.ExitReadLock();
+                    IsLocked = false;
+                }
+                NativeEnumerator.Dispose();
+            }
         }
     }
 }

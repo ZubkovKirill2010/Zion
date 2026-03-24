@@ -93,6 +93,28 @@ namespace Zion
         }
 
 
+        public bool Begins(int Start, IEnumerable<T> Target, out int Count, Func<T, T, bool>? Equals = null)
+        {
+            ArgumentNullException.ThrowIfNull(Target);
+            ArgumentOutOfRangeException.ThrowIf(Start >= Length, $"Start(={Start}) >= Length(={Length})");
+
+            Equals ??= this.Equals;
+            Count  = 0;
+
+            int Index = 0;
+
+            foreach (T TargetItem in Target.Limit(Length - Start))
+            {
+                Count++;
+                if (!Equals(this[Start + Index++], TargetItem))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         public bool Begins(int Start, IEnumerable<T> Target, Func<T, T, bool>? Equals = null)
         {
             ArgumentNullException.ThrowIfNull(Target);

@@ -2,24 +2,50 @@
 {
     public sealed partial class ObjectReader //_Main
     {
-        private readonly TextView Text;
+        public readonly TextView Text;
+        public readonly int Length;
 
-        public int Index { get; private set; }
+        public int Index
+        {
+            get;
+            private set
+            {
+                ArgumentOutOfRangeException.ThrowIf
+                (
+                    int.IsNegative(value) || value > Length,
+                    $"Index(={Index}) < 0 || > Length(={Length})"
+                );
+
+                if (IgnoreWhiteSpaces)
+                {
+                    while (value < Length && char.IsWhiteSpace(Text[value]))
+                    {
+                        value++;
+                    }
+                }
+
+                field = value;
+            }
+        }
+
+        public bool IgnoreWhiteSpaces { get; init; }
+
+        public bool IsEnd => Index == Length;
+
 
         public ObjectReader(TextView Text)
         {
             this.Text = Text.NotNull();
+            this.Length = Text.Length;
         }
 
         public ObjectReader(string Text)
-        {
-            this.Text = new StringView(Text.NotNull());
-        }
+            : this(new StringView(Text.NotNull())) { }
 
 
         public bool TryRead<T>(IReader<T> Reader, out T Value)
         {
-            if (Reader.TryRead(this, Text, Index, out Value, out int Length))
+            if (Reader.TryRead(this, Index, out Value, out int Length))
             {
                 Index += Length;
                 return true;
@@ -29,7 +55,7 @@
 
         public bool TryRead<T>(out T Value) where T : IReadable<T>
         {
-            if (T.TryRead(this, Text, Index, out Value, out int Length))
+            if (T.TryRead(this, Index, out Value, out int Length))
             {
                 Index += Length;
                 return true;
@@ -48,21 +74,11 @@
         }
 
 
-        public void SetIndex(int NewIndex)
-        {
-            ArgumentOutOfRangeException.ThrowIf
-            (
-                int.IsNegative(NewIndex) || NewIndex >= Text.Length,
-                $"Index(={Index}) < 0 || >= Text.Length(={Text.Length})"
-            );
-            Index = NewIndex;
-        }
-
-
         public bool TryRead(string Target)
         {
             if (Text.Begins(Index, Target))
             {
+                Index += Target.Length;
                 return true;
             }
             return false;
@@ -72,6 +88,7 @@
         {
             if (Text.Begins(Index, Target))
             {
+                Index += Target.Length;
                 return true;
             }
             return false;
@@ -81,6 +98,7 @@
         {
             if (Text.Begins(Index, Target))
             {
+                Index += Target.Length;
                 return true;
             }
             return false;
@@ -88,8 +106,9 @@
 
         public bool TryRead(params IEnumerable<char> Target)
         {
-            if (Text.Begins(Index, Target))
+            if (Text.Begins(Index, Target, out int Length))
             {
+                Index += Length;
                 return true;
             }
             return false;
@@ -137,7 +156,7 @@
         {
             ArgumentNullException.ThrowIfNull(Condition);
 
-            while (Index < Text.Length && Condition(Text[Index]))
+            while (Index < Length && Condition(Text[Index]))
             {
                 Index++;
             }
@@ -145,9 +164,28 @@
 
         public void SkipSpaces()
         {
-            Skip(char.IsWhiteSpace);
+            if (!IgnoreWhiteSpaces)
+            {
+                Skip(char.IsWhiteSpace);
+            }
         }
 
+       
+        public bool IsWithout(int Index)
+        {
+            return int.IsNegative(Index) || Index >= Length;
+        }
+
+
+        private bool IsAt(int Index, char Target)
+        {
+            return int.IsPositive(Index) && Index < Length && Text[Index] == Target;
+        }
+
+        private bool IsNotAt(int Index, char Exception)
+        {
+            return int.IsPositive(Index) && Index < Length && Text[Index] != Exception;
+        }
 
         private T Unsafe<T>(SafeGetter<T> SafeFunction)
         {

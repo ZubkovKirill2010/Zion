@@ -20,13 +20,17 @@ namespace Zion
             { 'n', '\n' }
         };
 
+        private readonly StringBuilder Builder = new StringBuilder(70);
+
+
         public bool TryReadChar(out char Value)
         {
             int Index = this.Index;
 
-            if (Index < Text.Length && Text[Index++] == '\''
-                && TryReadChar(ref Index, out Value, false)
-                && Index < Text.Length && Text[Index++] == '\'')
+            if (  IsAt(Index++, '\'')
+               && TryReadChar(ref Index, out Value, false)
+               && IsAt(Index++, '\'')
+               )
             {
                 this.Index = Index;
                 return true;
@@ -38,18 +42,23 @@ namespace Zion
         public bool TryReadString(out string Value)
         {
             Value = null!;
-
             int Index = this.Index;
 
-            StringBuilder Builder = new StringBuilder();
+            if (IsNotAt(Index, '"'))
+            {
+                return false;
+            }
 
-            if (Index >= Text.Length || Text[Index++] != '"') { return false; }
+            Index++;
+            StringBuilder Builder = this.Builder;
 
-            while (Index < Text.Length)
+            while (Index < Length)
             {
                 if (Text[Index] == '"')
                 {
                     Value = Builder.ToString();
+                    Builder.Clear();
+
                     this.Index = Index + 1;
                     return true;
                 }
@@ -60,10 +69,12 @@ namespace Zion
                 }
                 else
                 {
+                    Builder.Clear();
                     return false;
                 }
             }
 
+            Builder.Clear();
             return false;
         }
 
@@ -82,7 +93,7 @@ namespace Zion
         {
             Char = default;
 
-            if (Index >= Text.Length) { return false; }
+            if (IsWithout(Index)) { return false; }
 
             char Current = Text[Index];
 
@@ -90,7 +101,7 @@ namespace Zion
             {
                 Index++;
 
-                if (Index >= Text.Length) { return false; }
+                if (IsWithout(Index)) { return false; }
 
                 Current = Text[Index];
 
@@ -114,7 +125,7 @@ namespace Zion
                         if (TryReadHexCode(++Index, 4, out int uHexCode))
                         {
                             Char = (char)uHexCode;
-                            Index += 4;
+                            Index += 3;
                             return true;
                         }
                         return false;
@@ -136,7 +147,7 @@ namespace Zion
                         int xHexCode = 0;
                         int DigitCount = 0;
 
-                        while (Index < Text.Length && DigitCount < 4)
+                        while (Index < Length && DigitCount < 4)
                         {
                             if (IsHexadecimal(Text[Index], out int Digit))
                             {
@@ -184,7 +195,7 @@ namespace Zion
         {
             HexCode = 0;
             
-            if (Start + CharCount > Text.Length) { return false; }
+            if (Start + CharCount > Length) { return false; }
 
             for (int i = 0; i < CharCount; i++)
             {

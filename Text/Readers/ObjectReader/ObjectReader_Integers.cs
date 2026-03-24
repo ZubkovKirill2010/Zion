@@ -3,7 +3,7 @@ using BigInt = System.Numerics.BigInteger;
 
 namespace Zion
 {
-    public sealed partial class ObjectReader //_Integer
+    public sealed partial class ObjectReader //_Integers
     {
         private static readonly IntReaderData<byte> ByteData = new
         (
@@ -240,14 +240,11 @@ namespace Zion
 
         public bool TryReadInt<T>(IntReaderData<T> Data, out T Value)  where T : IComparable<T>, INumber<T>, new()
         {
-            int Index = this.Index;
-
             Value = new();
 
-            if (Index >= Text.Length)
-            {
-                return false;
-            }
+            if (IsEnd) { return false; }
+
+            int Index = this.Index;
 
             bool IsNegative = Text[Index] == '-';
 
@@ -290,7 +287,7 @@ namespace Zion
         {
             int Bits = 0;
 
-            while (Index < Text.Length)
+            while (Index < Length)
             {
                 char Char = Text[Index++];
 
@@ -324,7 +321,7 @@ namespace Zion
 
         private bool TryReadHexadecimalInt<T>(ref T Value, IntReaderData<T> Data, ref int Index, bool IsNegative)  where T : IComparable<T>, INumber<T>, new()
         {
-            while (Index < Text.Length)
+            while (Index < Length)
             {
                 char Char = Text[Index++];
 
@@ -357,7 +354,7 @@ namespace Zion
 
         private bool TryReadDecimalInt<T>(ref T Value, IntReaderData<T> Data, ref int Index, bool IsNegative)  where T : IComparable<T>, INumber<T>, new()
         {
-            while (Index < Text.Length)
+            while (Index < Length)
             {
                 char Char = Text[Index++];
 

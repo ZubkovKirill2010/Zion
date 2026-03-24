@@ -7,6 +7,8 @@
             Value = null!;
             int Index = this.Index;
 
+            if (IsEnd) { return false; }
+
             bool IsNormal(char Char)
             {
                 return Char.IsEnglish() || Char == '_' || (Char >= '0'&& Char <= '9');
@@ -20,7 +22,7 @@
                 return false;
             }
 
-            while (Index < Text.Length && IsNormal(Text[Index]))
+            while (Index < Length && IsNormal(Text[Index]))
             {
                 Index++;
             }
@@ -31,6 +33,7 @@
             }
 
             Value = Text.Substring(Start, Index - Start);
+            this.Index = Index;
             return true;
         }
 
