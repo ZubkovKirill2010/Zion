@@ -8,7 +8,7 @@
         public int Index
         {
             get;
-            private set
+            set
             {
                 ArgumentOutOfRangeException.ThrowIf
                 (
@@ -74,6 +74,17 @@
         }
 
 
+        public bool TryRead(char Target)
+        {
+            if (!IsEnd && Text[Index] == Target)
+            {
+                Index++;
+                return true;
+            }
+
+            return false;
+        }
+
         public bool TryRead(string Target)
         {
             if (Text.Begins(Index, Target))
@@ -114,6 +125,15 @@
             return false;
         }
 
+
+        public void Read(char Target)
+        {
+            if (!TryRead(Target))
+            {
+                throw new FormatException($"Failed to read \"{Target}\" at position {Index}.");
+            }
+        }
+
         public void Read(string Target)
         {
             if (!TryRead(Target))
@@ -152,6 +172,30 @@
             Index += Count;
         }
 
+        public void Skip(char Target)
+        {
+            while (Index < Length && Text[Index] == Target)
+            {
+                Index++;
+            }
+        }
+
+        public void Skip(params IEnumerable<char> Targets)
+        {
+            while (Index < Length && Targets.Contains(Text[Index]))
+            {
+                Index++;
+            }
+        }
+
+        public void Skip(HashSet<char> Targets)
+        {
+            while (Index < Length && Targets.Contains(Text[Index]))
+            {
+                Index++;
+            }
+        }
+
         public void Skip(Func<char, bool> Condition)
         {
             ArgumentNullException.ThrowIfNull(Condition);
@@ -167,6 +211,14 @@
             if (!IgnoreWhiteSpaces)
             {
                 Skip(char.IsWhiteSpace);
+            }
+        }
+
+        public void SkipTo(char Target)
+        {
+            while (Index < Length && Text[Index] != Target)
+            {
+                Index++;
             }
         }
 

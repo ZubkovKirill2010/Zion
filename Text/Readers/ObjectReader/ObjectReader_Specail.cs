@@ -33,6 +33,9 @@
             }
 
             Value = Text.Substring(Start, Index - Start);
+
+            if (Value == "_") { return false; }
+
             this.Index = Index;
             return true;
         }

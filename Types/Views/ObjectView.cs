@@ -96,7 +96,12 @@ namespace Zion
         public bool Begins(int Start, IEnumerable<T> Target, out int Count, Func<T, T, bool>? Equals = null)
         {
             ArgumentNullException.ThrowIfNull(Target);
-            ArgumentOutOfRangeException.ThrowIf(Start >= Length, $"Start(={Start}) >= Length(={Length})");
+
+            if (Start >= Length)
+            {
+                Count = 0;
+                return false;
+            }
 
             Equals ??= this.Equals;
             Count  = 0;
@@ -118,7 +123,8 @@ namespace Zion
         public bool Begins(int Start, IEnumerable<T> Target, Func<T, T, bool>? Equals = null)
         {
             ArgumentNullException.ThrowIfNull(Target);
-            ArgumentOutOfRangeException.ThrowIf(Start >= Length, $"Start(={Start}) >= Length(={Length})");
+
+            if (Start >= Length) { return false; }
 
             Equals ??= this.Equals;
 
@@ -153,8 +159,11 @@ namespace Zion
         internal protected bool Begins(int Start, IEnumerable<T> Target, int Count, Func<T, T, bool>? Equals = null)
         {
             ArgumentNullException.ThrowIfNull(Target);
-            ArgumentOutOfRangeException.ThrowIf(Start >= Length, $"Start(={Start}) >= Length(={Length})");
-            ArgumentOutOfRangeException.ThrowIf(Start + Count >= Length, $"Start(={Start}) + Count(={Count}) >= Length(={Length})");
+
+            if (Start >= Length || Start + Count >= Length)
+            {
+                return false;
+            }
 
             Equals ??= this.Equals;
 

@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 
 namespace Zion
 {
@@ -80,7 +81,8 @@ namespace Zion
             return false;
         }
 
-        public static T NotNull<T>(this T Value, [CallerArgumentExpression("Value")] string? ParameterName = null)
+        [return: NotNull]
+        public static T NotNull<T>(this T? Value, [CallerArgumentExpression("Value")] string? ParameterName = null) where T : class
         {
             ArgumentNullException.ThrowIfNull(Value, ParameterName);
             return Value;
