@@ -68,7 +68,7 @@ namespace Zion
 
         protected virtual bool Equals(T A, T B)
         {
-            return A.Equals(B);
+            return A?.Equals(B) ?? false;
         }
 
 
