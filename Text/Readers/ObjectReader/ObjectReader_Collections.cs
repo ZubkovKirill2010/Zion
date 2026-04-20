@@ -9,7 +9,7 @@
             if (IsEnd) { return false; }
 
             int StartIndex = Index;
-            char Current   = Text[StartIndex];
+            char Current = Text[StartIndex];
 
             if (Current != '[') { return false; }
 

@@ -104,7 +104,7 @@ namespace Zion
             }
 
             Equals ??= this.Equals;
-            Count  = 0;
+            Count = 0;
 
             int Index = 0;
 

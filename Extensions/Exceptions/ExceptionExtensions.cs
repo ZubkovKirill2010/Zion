@@ -25,6 +25,14 @@ namespace Zion
                 }
             }
 
+            public static void ThrowIfWithout(int Index, string String)
+            {
+                if (int.IsNegative(Index) || Index >= String.Length)
+                {
+                    throw new ArgumentOutOfRangeException($"Index(={Index}) out of string");
+                }
+            }
+
             public static void ThrowIfWithout(int Index, int Count)
             {
                 if (Index < 0 || Index >= Count)
@@ -46,14 +54,6 @@ namespace Zion
                 if (Index < 0 || Index >= Array.Length)
                 {
                     throw new ArgumentOutOfRangeException($"Index(={Index}) out of range [0 - Array.Length(={Array.Length})]");
-                }
-            }
-
-            public static void ThrowIfWithout(int Index, string String)
-            {
-                if (Index < 0 || Index >= String.Length)
-                {
-                    throw new ArgumentOutOfRangeException($"Index(={Index}) out of range [0 - Array.Length(={String.Length})]");
                 }
             }
 

@@ -36,7 +36,7 @@
         public ObjectReader(TextView Text)
         {
             this.Text = Text.NotNull();
-            this.Length = Text.Length;
+            Length = Text.Length;
         }
 
         public ObjectReader(string Text)
@@ -68,7 +68,7 @@
             return Unsafe((out T Value) => TryRead(Reader, out Value));
         }
 
-        public T Read<T>() where T : IReadable<T> 
+        public T Read<T>() where T : IReadable<T>
         {
             return Unsafe((out T Value) => TryRead(out Value));
         }
@@ -222,7 +222,7 @@
             }
         }
 
-       
+
         public bool IsWithout(int Index)
         {
             return int.IsNegative(Index) || Index >= Length;

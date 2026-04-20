@@ -198,15 +198,27 @@ namespace Zion
         }
 
 
-        public static IEnumerable<T> Range<T>(this IList<T> Collection, int Start, int Count)
+        public static IEnumerable<T> Range<T>(this IList<T> List, int Start, int Count)
         {
             ArgumentOutOfRangeException.ThrowIfNegative(Start, nameof(Start));
             ArgumentOutOfRangeException.ThrowIfNegative(Count, nameof(Count));
-            ArgumentOutOfRangeException.ThrowIf(Start + Count >= Collection.Count, nameof(Count));
+            ArgumentOutOfRangeException.ThrowIf(Start + Count >= List.Count, nameof(Count));
 
             foreach (int Index in ZEnumerable.For(Start, Count))
             {
-                yield return Collection[Index];
+                yield return List[Index];
+            }
+        }
+
+        public static IEnumerable<T> EnumerateFrom<T>(this IList<T> List, int Start)
+        {
+            ArgumentOutOfRangeException.ThrowIfNegative(Start, nameof(Start));
+
+            int Count = List.Count;
+
+            for (int i = Start; i < Count; i++)
+            {
+                yield return List[i];
             }
         }
 

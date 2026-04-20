@@ -54,6 +54,23 @@
             return Result;
         }
 
+        public static T[] FromCollection<T>(ICollection<T> Collection)
+        {
+            ArgumentNullException.ThrowIfNull(Collection);
+
+            int Count = Collection.Count;
+            int Index = 0;
+
+            T[] Result = new T[Count];
+
+            foreach (T Item in Collection)
+            {
+                Result[Index++] = Item;
+            }
+
+            return Result;
+        }
+
         public static TOut[] TryConvertAll<TIn, TOut>(this ICollection<TIn> Input, SafeConverter<TIn, TOut> Converter)
         {
             ArgumentNullException.ThrowIfNull(Input, nameof(Input));

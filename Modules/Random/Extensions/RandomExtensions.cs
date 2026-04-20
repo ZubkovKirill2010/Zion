@@ -11,6 +11,11 @@
             return Random.Next((int)Min, (int)Max) + Random.NextDouble();
         }
 
+        public static bool NextBoolean(this Random Random)
+        {
+            return Random.Next(0, 2) == 0;
+        }
+
 
         public static T NextOf<T>(this Random Random, T Min, T Max) where T : IRandomizable<T>
         {

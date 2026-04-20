@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Numerics;
 using System.Text;
 using Int = System.Numerics.BigInteger;
 
@@ -678,6 +679,11 @@ namespace Zion.MathExpressions
             return false;
         }
 
+        public Fraction Reverse()
+        {
+            return new Fraction(Divider, Divisible);
+        }
+
 
         public static Fraction GetSimple(Fraction Value)
         {
@@ -881,7 +887,7 @@ namespace Zion.MathExpressions
         {
             if (Value.IsNaN || Degree.IsNaN) { return NaN; }
             if (Value.IsOne) { return One; }
-            if (Degree.Divider == 1) { return Pow(Value, (int)Degree.Divisible); }
+            if (Degree.IsCeil(out Int CeilDegree)) { return Pow(Value, CeilDegree); }
             if (Accuracy <= 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(Accuracy), $"Accuracy(={Accuracy}) <= 0");
@@ -897,24 +903,23 @@ namespace Zion.MathExpressions
             return NegativePower ? One / Result : Result;
         }
 
-        public static Fraction Pow(Fraction Value, int Degree)
+        public static Fraction Pow(Fraction Value, Int Degree)
         {
-            if (Value.IsNaN) return NaN;
-            if (Degree == 0) return One;
-            if (Degree < 0) return One / Pow(Value, -Degree);
+            if (Value.IsNaN) { return NaN; }
+            if (Degree.IsZero) { return One; }
+            if (Int.IsNegative(Degree)) { return Pow(Value, -Degree).Reverse(); }
 
             Fraction Result = One;
-            Fraction BaseValue = Value;
-            int Exponent = Degree;
+            Fraction Multiplier = Value;
 
-            while (Exponent > 0)
+            foreach (bool Bit in EnumerateBits(Degree))
             {
-                if ((Exponent & 1) == 1)
+                if (Bit)
                 {
-                    Result *= BaseValue;
+                    Result *= Multiplier;
                 }
-                BaseValue *= BaseValue;
-                Exponent >>= 1;
+
+                Multiplier *= Multiplier;
             }
 
             return Result;
@@ -1258,6 +1263,46 @@ namespace Zion.MathExpressions
             return Value.Divisible.Sign < 0 && !Value.Remainder.IsZero
                 ? Ceil - 1
                 : Ceil;
+        }
+
+
+        private static IEnumerable<bool> EnumerateBits(BigInteger positiveValue)
+        {
+            byte[] Bytes = positiveValue.ToByteArray();
+
+            int LastByteIndex = Bytes.Length - 1;
+
+            if (LastByteIndex > 0 && Bytes[LastByteIndex] == 0)
+            {
+                LastByteIndex--;
+            }
+
+            for (int ByteIndex = 0; ByteIndex <= LastByteIndex; ByteIndex++)
+            {
+                byte Byte = Bytes[ByteIndex];
+
+                int BitsToProcess = (ByteIndex == LastByteIndex)
+                    ? GetLastByteBitLength(Byte)
+                    : 8;
+
+                for (int BitIndex = 0; BitIndex < BitsToProcess; BitIndex++)
+                {
+                    yield return ((Byte >> BitIndex) & 1) != 0;
+                }
+            }
+        }
+
+        private static int GetLastByteBitLength(byte LastByte)
+        {
+            if (LastByte == 0) { return 0; }
+
+            int BitLength = 8;
+            while ((LastByte & 128) == 0)
+            {
+                BitLength--;
+                LastByte <<= 1;
+            }
+            return BitLength;
         }
     }
 }

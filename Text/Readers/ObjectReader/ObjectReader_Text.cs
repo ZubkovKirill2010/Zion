@@ -27,7 +27,7 @@ namespace Zion
         {
             int Index = this.Index;
 
-            if (  IsAt(Index++, '\'')
+            if (IsAt(Index++, '\'')
                && TryReadChar(ref Index, out Value, false)
                && IsAt(Index++, '\'')
                )
@@ -194,7 +194,7 @@ namespace Zion
         private bool TryReadHexCode(int Start, int CharCount, out int HexCode)
         {
             HexCode = 0;
-            
+
             if (Start + CharCount > Length) { return false; }
 
             for (int i = 0; i < CharCount; i++)

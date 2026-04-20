@@ -11,7 +11,7 @@
 
             bool IsNormal(char Char)
             {
-                return Char.IsEnglish() || Char == '_' || (Char >= '0'&& Char <= '9');
+                return Char.IsEnglish() || Char == '_' || (Char >= '0' && Char <= '9');
             }
 
             int Start = Index;

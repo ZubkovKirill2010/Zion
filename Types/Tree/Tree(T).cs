@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace Zion
@@ -11,9 +10,9 @@ namespace Zion
     {
         private static InvalidOperationException IsParentException => new InvalidOperationException("Cannot add a parent structure to its child elements");
 
-        [JsonPropertyName("Value")]  public T Value               { get; set; }
-        [JsonPropertyName("Child")]  private List<Tree<T>> Childs { get; set; }
-        [JsonPropertyName("Parent")] public Tree<T>? Parent       { get; private set; }
+        [JsonPropertyName("Value")] public T Value { get; set; }
+        [JsonPropertyName("Child")] private List<Tree<T>> Childs { get; set; }
+        [JsonPropertyName("Parent")] public Tree<T>? Parent { get; private set; }
 
         public Tree<T> Root => Parent is null ? this : Parent.Root;
 
@@ -67,6 +66,11 @@ namespace Zion
             }
         }
 
+
+        public override bool Equals(object? Object)
+        {
+            return Object is Tree<T> Tree && ReferenceEquals(this, Tree);
+        }
 
         public override string ToString()
         {
@@ -251,7 +255,7 @@ namespace Zion
 
         public Tree<T>? GetParent(int Level)
         {
-            if (Level < 0)  { return null; }
+            if (Level < 0) { return null; }
             if (Level == 0) { return this; }
 
             Tree<T>? Current = this;

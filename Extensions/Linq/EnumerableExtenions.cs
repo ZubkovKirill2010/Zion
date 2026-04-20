@@ -318,6 +318,12 @@ namespace Zion
         }
 
 
+        public static bool Begins<T>(this IEnumerable<T> Enumerable, IEnumerable<T> Target)
+        {
+
+        }
+
+
         public static string ToEnumerableString<T>(this IEnumerable<T> Enumerable)
         {
             return $"[{string.Join(", ", Enumerable)}]";

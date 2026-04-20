@@ -13,6 +13,8 @@
         /// <exception cref="ArgumentException">Thrown if duplicate values exist in the original dictionary.</exception>
         public static Dictionary<TValue, TKey> Reverse<TKey, TValue>(this Dictionary<TKey, TValue> Dictionary)
         {
+            ArgumentNullException.ThrowIfNull(Dictionary);
+
             Dictionary<TValue, TKey> Result = new Dictionary<TValue, TKey>(Dictionary.Count);
 
             foreach (KeyValuePair<TKey, TValue> Item in Dictionary)

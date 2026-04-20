@@ -238,7 +238,7 @@ namespace Zion
 
 
 
-        public bool TryReadInt<T>(IntReaderData<T> Data, out T Value)  where T : IComparable<T>, INumber<T>, new()
+        public bool TryReadInt<T>(IntReaderData<T> Data, out T Value) where T : IComparable<T>, INumber<T>, new()
         {
             Value = new();
 
@@ -283,7 +283,7 @@ namespace Zion
         }
 
 
-        private bool TryReadBinaryInt<T>(ref T Value, IntReaderData<T> Data, ref int Index, bool IsNegative)  where T : IComparable<T>, INumber<T>, new()
+        private bool TryReadBinaryInt<T>(ref T Value, IntReaderData<T> Data, ref int Index, bool IsNegative) where T : IComparable<T>, INumber<T>, new()
         {
             int Bits = 0;
 
@@ -319,7 +319,7 @@ namespace Zion
             return true;
         }
 
-        private bool TryReadHexadecimalInt<T>(ref T Value, IntReaderData<T> Data, ref int Index, bool IsNegative)  where T : IComparable<T>, INumber<T>, new()
+        private bool TryReadHexadecimalInt<T>(ref T Value, IntReaderData<T> Data, ref int Index, bool IsNegative) where T : IComparable<T>, INumber<T>, new()
         {
             while (Index < Length)
             {
@@ -352,7 +352,7 @@ namespace Zion
             return true;
         }
 
-        private bool TryReadDecimalInt<T>(ref T Value, IntReaderData<T> Data, ref int Index, bool IsNegative)  where T : IComparable<T>, INumber<T>, new()
+        private bool TryReadDecimalInt<T>(ref T Value, IntReaderData<T> Data, ref int Index, bool IsNegative) where T : IComparable<T>, INumber<T>, new()
         {
             while (Index < Length)
             {
@@ -420,7 +420,7 @@ namespace Zion
         }
 
 
-        private bool CheckOverflow<T>(T Value, IntReaderData<T> Data, int CalculusSystem, int Digit)  where T : IComparable<T>, INumber<T>, new()
+        private bool CheckOverflow<T>(T Value, IntReaderData<T> Data, int CalculusSystem, int Digit) where T : IComparable<T>, INumber<T>, new()
         {
             if (!Data.HasMaxValue)
             {
