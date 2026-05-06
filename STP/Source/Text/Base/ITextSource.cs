@@ -5,7 +5,7 @@ namespace Zion.STP
     public interface ITextSource : IEnumerable<char>
     {
         public char Current { get; }
-        public bool IsEnd { get; } 
+        public bool IsEnd { get; }
 
         public bool MoveNext();
 
@@ -13,25 +13,44 @@ namespace Zion.STP
 
         public void Reset();
 
-        public bool Begins(string Target)
+
+        public bool Begins(string Target, out ITextSource Readed)
         {
+            Readed = this;
             if (Target.NotNull().Length == 0) { return true; }
 
-            ITextSource Part = BeginNew();
+            ITextSource Source = BeginNew();
             int Index = 0;
 
-            while (!Part.IsEnd && Index < Target.Length)
+            while (!Source.IsEnd && Index < Target.Length)
             {
-                if (Part.Current != Target[Index])
+                if (Source.Current != Target[Index])
                 {
                     return false;
                 }
 
-                Part.MoveNext();
+                Source.MoveNext();
                 Index++;
             }
 
-            return Index == Target.Length;
+            if (Index == Target.Length)
+            {
+                Readed = Source;
+                return true;
+            }
+
+            return false;
+        }
+
+        public bool Begins(string Target)
+        {
+            return Begins(Target, out _);
+        }
+
+
+        public bool CurrentIs(char Target)
+        {
+            return !IsEnd && Current == Target;
         }
 
 

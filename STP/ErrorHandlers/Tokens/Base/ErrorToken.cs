@@ -1,6 +1,6 @@
 ﻿namespace Zion.STP
 {
-    public readonly struct NewLineToken : IToken
+    public readonly struct ErrorToken : IToken
     {
         public int Length { get; init; }
     }

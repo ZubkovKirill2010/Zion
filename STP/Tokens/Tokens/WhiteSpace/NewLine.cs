@@ -1,8 +1,13 @@
 ﻿namespace Zion.STP
 {
+    public readonly record struct NewLineToken : IToken
+    {
+        public int Length { get; init; }
+    }
+
     public readonly struct NewLineReader : ITokenReader
     {
-        public bool Read(ITextSource Source, out IToken Token)
+        public bool Read(ref ITextSource Source, out IToken Token)
         {
             if (Source.Begins("\n"))
             {

@@ -5,12 +5,12 @@ namespace Zion.STP
     public sealed class NodeSource<Node> : IEnumerable<Node> where Node : INode
     {
         private readonly List<Node> Source;
-        public  readonly int Count;
+        public readonly int Count;
 
         public NodeSource(List<Node> Source)
         {
             this.Source = Source.NotNull();
-            this.Count  = Source.Count;
+            Count = Source.Count;
         }
 
         public Node this[int Index]

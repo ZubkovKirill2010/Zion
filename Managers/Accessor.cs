@@ -87,6 +87,13 @@ namespace Zion
             ArgumentNullException.ThrowIfNull(Value, ParameterName);
             return Value;
         }
+        [return: NotNull]
+        public static T NotNullOrEmpty<T, I>(this T? Value, [CallerArgumentExpression("Value")] string? ParameterName = null) where T : IEnumerable<I>
+        {
+            ArgumentNullException.ThrowIfNull(Value, ParameterName);
+            ArgumentException.ThrowIf(Value.IsEmpty(), $"Enumerable is empty");
+            return Value;
+        }
 
         public static I AddAndReturn<T, I>(this T Collection, in I Item) where T : ICollection<I>
         {

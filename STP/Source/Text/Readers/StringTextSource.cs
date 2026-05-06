@@ -32,11 +32,12 @@
         public StringTextSource(string Source) : this(Source, 0) { }
         public StringTextSource(string Source, int Start)
         {
-            ArgumentOutOfRangeException.ThrowIfWithout(Start, Source);
+            ArgumentOutOfRangeException.ThrowIfNegative(Start);
 
             this.Source = Source.NotNull();
             this.Start = Start;
             Index = Start;
+            IsEnd = Start >= Source.Length;
         }
 
 

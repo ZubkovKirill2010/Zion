@@ -318,9 +318,10 @@ namespace Zion
         }
 
 
-        public static bool Begins<T>(this IEnumerable<T> Enumerable, IEnumerable<T> Target)
+        public static bool Begins<T>(this IEnumerable<T> Enumerable, IEnumerable<T> Target, Func<T, T, bool>? Equals)
         {
-
+            Equals ??= static (A, B) => A?.Equals(B) ?? false;
+            return ZEnumerable.ToPair(Enumerable.NotNull(), Target.NotNull()).All(Pair => Equals(Pair.Item1, Pair.Item2));
         }
 
 

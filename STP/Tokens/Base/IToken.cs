@@ -2,6 +2,6 @@
 {
     public interface IToken
     {
-        int Length { get; init; }
+        public int Length { get; init; }
     }
 }
