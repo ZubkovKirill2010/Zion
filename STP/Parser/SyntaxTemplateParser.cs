@@ -3,7 +3,7 @@
     //Text -> Tokens -> Nodes -> Result
     public sealed class SyntaxTemplateParser<T, Node> where Node : INode
     {
-        private readonly ITextSource Source;
+        private readonly TextSource Source;
         private readonly ITokenReader[] TokenReaders;
         private readonly INodeReader<Node>[] NodeReaders;
         private readonly IParsingResult<T, Node> NodeConverter;
@@ -28,7 +28,7 @@
         } = 10;
 
 
-        public SyntaxTemplateParser(ITextSource Source,
+        public SyntaxTemplateParser(TextSource Source,
                                     ICollection<ITokenReader> TokenReaders,
                                     ICollection<INodeReader<Node>> NodeReaders,
                                     IParsingResult<T, Node> Result)
@@ -72,11 +72,11 @@
         }
 
 
-        private bool ReadTokens(out List<IToken> Tokens, Action<ErrorData> AddError)
+        public bool ReadTokens(out List<IToken> Tokens, Action<ErrorData> AddError)
         {
             Tokens = new List<IToken>(TokensCapacity);
 
-            ITextSource Source = this.Source.BeginNew();
+            TextSource Source = this.Source.BeginNew();
 
             while (!Source.IsEnd)
             {
@@ -84,17 +84,17 @@
 
                 foreach (ITokenReader Reader in TokenReaders)
                 {
-                    Source.Reset();
+                    TextSource ReaderSource = Source.BeginNew();
 
-                    if (Reader.Read(ref Source, out IToken Token) && Token is not null)
+                    if (Reader.Read(ref ReaderSource, out IToken Token) && Token is not null)
                     {
-                        ArgumentNullException.ThrowIfNull(Source);
+                        ArgumentNullException.ThrowIfNull(ReaderSource);
                         CheckTokenLength(Token);
 
                         TokenReaded = true;
                         Tokens.Add(Token);
 
-                        Source = Source.BeginNew();
+                        Source = ReaderSource;
 
                         break;
                     }
@@ -104,11 +104,8 @@
                 {
                     if (TokenRecoveryStrategy == TokenRecoveryStrategy.SkipToSync)
                     {
-                        ITextSource ErrorHandlerSource = Source.BeginNew();
+                        TokenErrorHandler.Handle(ref Source, out ErrorToken ErrorToken);
 
-                        TokenErrorHandler.Handle(ref ErrorHandlerSource, out ErrorToken ErrorToken);
-
-                        Source = ErrorHandlerSource.NotNull();
                         CheckTokenLength(ErrorToken);
 
                         if (Tokens.Count != 0 && Tokens[^1] is ErrorToken LastErrorToken)
@@ -133,10 +130,9 @@
             return true;
         }
 
-        private bool ReadNodes(List<IToken> Tokens, out List<Node> Nodes, Action<ErrorData> AddError)
+        public bool ReadNodes(List<IToken> Tokens, out List<Node> Nodes, Action<ErrorData> AddError)
         {
             Nodes = new List<Node>(NodesCapacity);
-            ErrorPosition = 0;
 
             bool NodeReaded = false;
             int Start = 0;
@@ -163,10 +159,10 @@
 
                 if (!NodeReaded)
                 {
-                    if (CalculateErrorPosition)
-                    {
-                        ErrorPosition = GetTokenOffset(Tokens, Start);
-                    }
+                    //if (CalculateErrorPosition)
+                    //{
+                    //    ErrorPosition = GetTokenOffset(Tokens, Start);
+                    //}
                     return false;
                 }
             }

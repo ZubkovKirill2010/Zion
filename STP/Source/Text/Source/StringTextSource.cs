@@ -1,10 +1,8 @@
 ﻿namespace Zion.STP
 {
-    public sealed class StringTextSource : ITextSource
+    public sealed class StringTextSource : TextSource
     {
         private readonly string Source;
-
-        private readonly int Start;
 
         private int Index
         {
@@ -13,20 +11,23 @@
             {
                 if (value < Source.Length)
                 {
-                    Current = Source[value];
-                    IsEnd = false;
+                    _Current = Source[value];
+                    _IsEnd = false;
                 }
                 else
                 {
-                    IsEnd = true;
+                    _IsEnd = true;
                 }
 
                 field = value;
             }
         }
 
-        public char Current { get; private set; }
-        public bool IsEnd { get; private set; }
+        private char _Current;
+        private bool _IsEnd;
+
+        public override char Current => _Current;
+        public override bool IsEnd => _IsEnd;
 
 
         public StringTextSource(string Source) : this(Source, 0) { }
@@ -35,28 +36,18 @@
             ArgumentOutOfRangeException.ThrowIfNegative(Start);
 
             this.Source = Source.NotNull();
-            this.Start = Start;
             Index = Start;
-            IsEnd = Start >= Source.Length;
         }
 
 
-        public ITextSource BeginNew()
+        public override TextSource BeginNew()
         {
             return new StringTextSource(Source, Index);
         }
 
-        public bool MoveNext()
+        public override void MoveNext()
         {
-            if (IsEnd) { return false; }
-
             Index++;
-            return !IsEnd;
-        }
-
-        public void Reset()
-        {
-            Index = Start;
         }
     }
 }

@@ -56,5 +56,17 @@
             }
             return Result;
         }
+
+        public static Dictionary<TKey, TValue> ToDictionary<TKey, TValue>(this ICollection<KeyValuePair<TKey, TValue>> Collection) where TKey : notnull
+        {
+            Dictionary<TKey, TValue> Result = new Dictionary<TKey, TValue>(Collection.NotNull().Count);
+
+            foreach (KeyValuePair<TKey, TValue> Pair in Collection)
+            {
+                Result.Add(Pair.Key, Pair.Value);
+            }
+
+            return Result;
+        }
     }
 }

@@ -7,6 +7,6 @@
 
     public interface ITokenErrorHandler
     {
-        public void Handle(ref ITextSource Source, out ErrorToken Token);
+        public void Handle(ref TextSource Source, out ErrorToken Token);
     }
 }

@@ -20,7 +20,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="STP\Tokens\Tokens\Objects\Numbers\Ceil\" />
     <Folder Include="STP\Tokens\Tokens\Objects\Numbers\Float\" />
   </ItemGroup>
 

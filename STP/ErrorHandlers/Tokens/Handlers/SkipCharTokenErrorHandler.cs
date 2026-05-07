@@ -4,7 +4,7 @@
     {
         public static readonly SkipCharTokenErrorHandler Instance = new SkipCharTokenErrorHandler();
 
-        public void Handle(ref ITextSource Source, out ErrorToken Token)
+        public void Handle(ref TextSource Source, out ErrorToken Token)
         {
             Source.MoveNext();
             Token = new ErrorToken() { Length = 1 };

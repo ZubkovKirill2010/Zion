@@ -2,6 +2,6 @@
 {
     public interface ITokenReader
     {
-        public bool Read(ref ITextSource Source, out IToken Token);
+        public bool Read(ref TextSource Source, out IToken Token);
     }
 }

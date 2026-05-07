@@ -3,11 +3,14 @@
     public readonly record struct NewLineToken : IToken
     {
         public int Length { get; init; }
+        public TokenStatus Status { get; init; }
+
+        public override string ToString() => "[\\n]";
     }
 
     public readonly struct NewLineReader : ITokenReader
     {
-        public bool Read(ref ITextSource Source, out IToken Token)
+        public bool Read(ref TextSource Source, out IToken Token)
         {
             if (Source.Begins("\n"))
             {

@@ -23,7 +23,7 @@ namespace Zion
             (A, B) => (sbyte)(A / B),
             (A, B) => (sbyte)(A % B),
             (A, B) => (sbyte)(A << B),
-            (A, B) => (sbyte)((int)A | B)
+            (A, B) => (sbyte)(A | B)
         );
 
         private static readonly IntReaderData<BigInt> BigIntData = new
@@ -45,7 +45,7 @@ namespace Zion
             (A, B) => (short)(A / B),
             (A, B) => (short)(A % B),
             (A, B) => (short)(A << B),
-            (A, B) => (short)((int)A | B)
+            (A, B) => (short)(A | B)
         );
         private static readonly IntReaderData<int> Int32Data = new
         (

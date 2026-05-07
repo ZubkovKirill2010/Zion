@@ -4,6 +4,9 @@
     {
         public int Length { get; init; }
         public bool Value { get; init; }
+        public TokenStatus Status { get; init; }
+
+        public override string ToString() => Value ? "[True]" : "[False]";
     }
 
     public readonly struct BooleanTokenReader : ITokenReader
@@ -13,7 +16,7 @@
 
         public BooleanTokenReader() { }
 
-        public bool Read(ref ITextSource Source, out IToken Token)
+        public bool Read(ref TextSource Source, out IToken Token)
         {
             if (Source.Begins(True, out Source))
             {
