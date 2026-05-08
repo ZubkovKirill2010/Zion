@@ -1,6 +1,6 @@
 ﻿namespace Zion.STP
 {
-    public readonly struct WordToken : IValueToken<string>
+    public class WordToken : IValueToken<string>
     {
         public int Length { get; init; }
         public string Value { get; init; }

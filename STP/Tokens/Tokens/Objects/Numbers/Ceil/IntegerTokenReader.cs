@@ -284,61 +284,22 @@ namespace Zion.STP
 
         private static bool IsBinary(char Char, out int Digit)
         {
-            if (Char == '0')
-            {
-                Digit = 0;
-                return true;
-            }
-            if (Char == '1')
-            {
-                Digit = 1;
-                return true;
-            }
-            Digit = default;
-            return false;
+            return Char.IsBinaryDigit(out Digit);
         }
 
         private static bool IsOctal(char Char, out int Digit)
         {
-            if (Char >= '0' && Char <= '7')
-            {
-                Digit = Char - '0';
-                return true;
-            }
-            Digit = default;
-            return false;
+            return Char.IsOctalDigit(out Digit);
         }
 
         private static bool IsDecimal(char Char, out int Digit)
         {
-            if (Char >= '0' && Char <= '9')
-            {
-                Digit = Char - '0';
-                return true;
-            }
-            Digit = default;
-            return false;
+            return Char.IsDigit(out Digit);
         }
 
         private static bool IsHexadecimal(char Char, out int Digit)
         {
-            if (Char >= '0' && Char <= '9')
-            {
-                Digit = Char - '0';
-                return true;
-            }
-            if (Char >= 'a' && Char <= 'f')
-            {
-                Digit = Char - 'a' + 10;
-                return true;
-            }
-            if (Char >= 'A' && Char <= 'F')
-            {
-                Digit = Char - 'A' + 10;
-                return true;
-            }
-            Digit = default;
-            return false;
+            return Char.IsHexadecimalDigit(out Digit);
         }
     }
 }

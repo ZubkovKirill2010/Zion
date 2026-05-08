@@ -8,7 +8,7 @@
         private readonly INodeReader<Node>[] NodeReaders;
         private readonly IParsingResult<T, Node> NodeConverter;
 
-        public TokenRecoveryStrategy TokenRecoveryStrategy { private get; init; } = TokenRecoveryStrategy.Abort;
+        public TokenRecoveryStrategy TokenRecoveryStrategy { get; init; } = TokenRecoveryStrategy.Abort;
         public ITokenErrorHandler TokenErrorHandler
         {
             private get;

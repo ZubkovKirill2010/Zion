@@ -106,6 +106,10 @@ namespace Zion.STP
         {
             return !IsEnd && Current == Target;
         }
+        public bool CurrentIs(Func<char, bool> Condition)
+        {
+            return !IsEnd && Condition(Current);
+        }
 
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
