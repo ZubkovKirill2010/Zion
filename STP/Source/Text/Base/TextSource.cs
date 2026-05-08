@@ -15,7 +15,25 @@ namespace Zion.STP
         public bool Begins(string Target, out TextSource Readed)
         {
             Readed = this;
-            if (Target.NotNull().Length == 0) { return true; }
+            if (IsEnd)
+            {
+                return false;
+            }
+            if (Target.NotNull().Length == 0)
+            {
+                return true;
+            }
+            if (Target.Length == 1)
+            {
+                if (Current == Target[0])
+                {
+                    Readed = BeginNew();
+                    Readed.MoveNext();
+                    return true;
+                }
+
+                return false;
+            }
 
             TextSource Source = BeginNew();
             int Index = 0;

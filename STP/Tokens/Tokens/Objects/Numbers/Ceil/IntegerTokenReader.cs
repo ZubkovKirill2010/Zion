@@ -5,6 +5,8 @@ namespace Zion.STP
     public sealed class IntegerTokenReader<T, I> : ITokenReader where T : IValueToken<I>, new() where I : IComparable<I>, INumber<I>, new()
     {
         public readonly NumberParsingParameters<I> NumberParameters;
+        
+        public bool IgnoreSuffixes { get; init; }
 
         public IntegerTokenReader(NumberParsingParameters<I> Parameters)
         {
@@ -32,124 +34,139 @@ namespace Zion.STP
 
             if (Source.Begins("0b", out Source))
             {
-                return ReadBinary(Source, out Token, IsNegative, CharCount + 2);
+                return ReadBinary(ref Source, out Token, IsNegative, CharCount + 2);
             }
             if (Source.Begins("0o", out Source))
             {
-                return ReadOctal(Source, out Token, IsNegative, CharCount + 2);
+                return ReadOctal(ref Source, out Token, IsNegative, CharCount + 2);
             }
             if (Source.Begins("0x", out Source))
             {
-                return ReadHexadecimal(Source, out Token, IsNegative, CharCount + 2);
+                return ReadHexadecimal(ref Source, out Token, IsNegative, CharCount + 2);
             }
 
-            return ReadDecimal(Source, out Token, IsNegative, CharCount);
+            return ReadDecimal(ref Source, out Token, IsNegative, CharCount);
         }
 
 
-        private bool ReadBinary(TextSource Source, out IToken Token, bool IsNegative, int CharCount)
+        private bool ReadBinary(ref TextSource Source, out IToken Token, bool IsNegative, int CharCount)
+        {
+            return Read(ref Source, out Token, IsNegative, CharCount, IsBinary, 1, 2);
+        }
+
+        private bool ReadOctal(ref TextSource Source, out IToken Token, bool IsNegative, int CharCount)
+        {
+            return Read(ref Source, out Token, IsNegative, CharCount, IsOctal, 3, 8);
+        }
+
+        private bool ReadHexadecimal(ref TextSource Source, out IToken Token, bool IsNegative, int CharCount)
+        {
+            return Read(ref Source, out Token, IsNegative, CharCount, IsHexadecimal, 4, 16);
+        }
+
+        private bool ReadDecimal(ref TextSource Source, out IToken Token, bool IsNegative, int CharCount)
         {
             Token = default!;
 
             I Value = new();
-            NumberParsingParameters<I> NumberParameters = this.NumberParameters;
+            NumberParsingParameters<I> Parameters = NumberParameters;
+
+            while (!Source.IsEnd)
+            {
+                char Current = Source.Current;
+
+                if (Current == '_')
+                {
+                    Source.MoveNext();
+                    CharCount++;
+                    continue;
+                }
+
+                if (BeginsSuffix(ref Source, ref CharCount))
+                {
+                    break;
+                }
+
+                if (IsDecimal(Current, out int Digit))
+                {
+                    if (IsNegative)
+                    {
+                        Digit = -Digit;
+                    }
+
+                    if (CheckOverflow(Value, Digit))
+                    {
+                        Token = ReadErrorToken(ref Source, CharCount, static Char => Char >= '0' && Char <= '9');
+                        return true;
+                    }
+
+                    Value = Parameters.Multiply(Value, 10);
+
+                    if (Digit != 0)
+                    {
+                        Value = Parameters.Sum(Value, Digit);
+                    }
+                }
+                else
+                {
+                    return false;
+                }
+
+                Source.MoveNext();
+                CharCount++;
+            }
+
+            Token = new T() { Value = Value, Length = CharCount, Status = TokenStatus.Valid };
+            return true;
+        }
+
+
+        private bool Read(ref TextSource Source, out IToken Token, bool IsNegative, int CharCount, SafeConverter<char, int> IsDigit, int BinaryLength, int CalculusSystem)
+        {
+            Token = default!;
+
+            I Value = new();
+            NumberParsingParameters<I> Parameters = NumberParameters;
 
             int Bits = 0;
 
             while (!Source.IsEnd)
             {
-                char Char = Source.Current;
+                char Current = Source.Current;
 
-                if (Char == '_')
+                if (Current == '_')
                 {
                     Source.MoveNext();
                     CharCount++;
                     continue;
                 }
-                if (this.NumberParameters.Suffixes.Contains(Char))
+
+                if (BeginsSuffix(ref Source, ref CharCount))
                 {
-                    Source.MoveNext();
-                    CharCount++;
                     break;
                 }
 
-                if (Char is '0' or '1')
-                {
-                    if (Bits++ >= NumberParameters.BitCount)
-                    {
-                        Token = ReadErrorToken(Source, CharCount, static Char => Char is '0' or '1');
-                        return true;
-                    }
 
-                    Value = NumberParameters.LeftShift(Value, 1);
-
-                    if (Char == '1')
-                    {
-                        Value = NumberParameters.Or(Value, 1);
-                    }
-                }
-                else
-                {
-                    return false;
-                }
-
-                Source.MoveNext();
-                CharCount++;
-            }
-
-            if (IsNegative)
-            {
-                Value = NumberParameters.Multiply(Value, -1);
-            }
-
-            Token = new T() { Value = Value, Length = CharCount, Status = TokenStatus.Valid };
-            return true;
-        }
-
-        private bool ReadOctal(TextSource Source, out IToken Token, bool IsNegative, int CharCount)
-        {
-            return Read(Source, out Token, IsNegative, CharCount, IsOctal, 3, 8);
-        }
-
-        private bool ReadDecimal(TextSource Source, out IToken Token, bool IsNegative, int CharCount)
-        {
-            Token = default!;
-
-            I Value = new();
-            NumberParsingParameters<I> NumberParameters = this.NumberParameters;
-
-            while (!Source.IsEnd)
-            {
-                char Char = Source.Current;
-
-                if (Char == '_')
-                {
-                    Source.MoveNext();
-                    CharCount++;
-                    continue;
-                }
-                if (NumberParameters.Suffixes.Contains(Char))
-                {
-                    Source.MoveNext();
-                    CharCount++;
-                    break;
-                }
-
-                if (IsDecimal(Char, out int Digit))
+                if (IsDigit(Current, out int Digit))
                 {
                     if (IsNegative)
                     {
                         Digit = -Digit;
                     }
 
-                    if (CheckOverflow(Value, NumberParameters, 10, Digit))
+                    Bits += BinaryLength;
+                    if (Bits > Parameters.BitCount)
                     {
-                        Token = ReadErrorToken(Source, CharCount, static Char => Char >= '0' && Char <= '9');
+                        Token = ReadErrorToken(ref Source, CharCount, Char => IsDigit(Char, out _));
                         return true;
                     }
 
-                    Value = NumberParameters.Multiply(Value, 10);
-                    Value = NumberParameters.Sum(Value, Digit);
+                    Value = Parameters.LeftShift(Value, BinaryLength);
+
+                    if (Digit != 0)
+                    {
+                        Value = Parameters.Or(Value, Digit);
+                    }
                 }
                 else
                 {
@@ -164,66 +181,7 @@ namespace Zion.STP
             return true;
         }
 
-        private bool ReadHexadecimal(TextSource Source, out IToken Token, bool IsNegative, int CharCount)
-        {
-            return Read(Source, out Token, IsNegative, CharCount, IsHexadecimal, 4, 16);
-        }
-
-
-        private bool Read(TextSource Source, out IToken Token, bool IsNegative, int CharCount, IsDigit IsDigit, int BinaryLength, int CalculusSystem)
-        {
-            Token = default!;
-
-            I Value = new();
-            NumberParsingParameters<I> NumberParameters = this.NumberParameters;
-
-            while (!Source.IsEnd)
-            {
-                char Char = Source.Current;
-
-                if (Char == '_')
-                {
-                    Source.MoveNext();
-                    CharCount++;
-                    continue;
-                }
-                if (NumberParameters.Suffixes.Contains(Char))
-                {
-                    Source.MoveNext();
-                    CharCount++;
-                    break;
-                }
-
-                if (IsDigit(Char, out int Digit))
-                {
-                    if (IsNegative)
-                    {
-                        Digit = -Digit;
-                    }
-
-                    if (CheckOverflow(Value, NumberParameters, CalculusSystem, Digit))
-                    {
-                        Token = ReadErrorToken(Source, CharCount, Char => IsDigit(Char, out _));
-                        return true;
-                    }
-
-                    Value = NumberParameters.LeftShift(Value, BinaryLength);
-                    Value = NumberParameters.Or(Value, Digit);
-                }
-                else
-                {
-                    return false;
-                }
-
-                Source.MoveNext();
-                CharCount++;
-            }
-
-            Token = new T() { Value = Value, Length = CharCount, Status = TokenStatus.Valid };
-            return true;
-        }
-
-        private IToken ReadErrorToken(TextSource Source, int CharCount, Func<char, bool> IsDigit)
+        private IToken ReadErrorToken(ref TextSource Source, int CharCount, Func<char, bool> IsDigit)
         {
             NumberParsingParameters<I> Parameters = NumberParameters;
 
@@ -231,22 +189,114 @@ namespace Zion.STP
             {
                 char Current = Source.Current;
 
-                if (!(Current == '_' || IsDigit(Current)))
+                if (Current == '_' || IsDigit(Current))
                 {
-                    if (Parameters.Suffixes.Contains(Current))
-                    {
-                        Source.MoveNext();
-                    }
-                    break;
+                    Source.MoveNext();
+                    CharCount++;
+                    continue;
                 }
 
-                Source.MoveNext();
-                CharCount++;
+                BeginsSuffix(ref Source, ref CharCount);
+
+                break;
             }
 
             return new T() { Value = default!, Length = CharCount, Status = TokenStatus.HasErrors };
         }
 
+
+        private bool CheckOverflow(I Value, int Digit)
+        {
+            NumberParsingParameters<I> Parameters = NumberParameters;
+
+            if (!Parameters.HasMaxValue)
+            {
+                return false;
+            }
+
+            I Zero = I.Zero;
+
+            if (int.IsPositive(Value.CompareTo(Zero)))
+            {
+                if (int.IsNegative(Digit))
+                {
+                    return true;
+                }
+
+                I MaxDivision = Parameters.Divide(Parameters.MaxValue, 10);
+
+                if (Value.CompareTo(MaxDivision) > 0)
+                {
+                    return true;
+                }
+
+                if (Value.CompareTo(MaxDivision) == 0)
+                {
+                    int MaxRemainder = Parameters.Remainder(Parameters.MaxValue, 10);
+                    if (Digit > MaxRemainder)
+                    {
+                        return true;
+                    }
+                }
+            }
+            else
+            {
+                if (int.IsPositive(Digit))
+                {
+                    return true;
+                }
+
+                I MinDivision = Parameters.Divide(Parameters.MinValue, 10);
+
+                if (Value.CompareTo(MinDivision) < 0)
+                {
+                    return true;
+                }
+
+                if (Value.CompareTo(MinDivision) == 0 && Digit < Parameters.Remainder(Parameters.MinValue, 10))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private bool BeginsSuffix(ref TextSource Source, ref int CharCount)
+        {
+            NumberParsingParameters<I> Parameters = NumberParameters;
+
+            if (!IgnoreSuffixes && Translater.IsEnglish(Source.Current))
+            {
+                foreach (string Suffix in Parameters.Suffixes)
+                {
+                    if (Source.Begins(Suffix, out Source))
+                    {
+                        CharCount += Suffix.Length;
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+
+        private static bool IsBinary(char Char, out int Digit)
+        {
+            if (Char == '0')
+            {
+                Digit = 0;
+                return true;
+            }
+            if (Char == '1')
+            {
+                Digit = 1;
+                return true;
+            }
+            Digit = default;
+            return false;
+        }
 
         private static bool IsOctal(char Char, out int Digit)
         {
@@ -290,64 +340,5 @@ namespace Zion.STP
             Digit = default;
             return false;
         }
-
-
-        private bool CheckOverflow(I Value, NumberParsingParameters<I> Data, int CalculusSystem, int Digit)
-        {
-            if (!Data.HasMaxValue)
-            {
-                return false;
-            }
-
-            I Zero = I.Zero;
-
-            if (int.IsPositive(Value.CompareTo(Zero)))
-            {
-                if (int.IsNegative(Digit))
-                {
-                    return true;
-                }
-
-                I MaxDivision = Data.Divide(Data.MaxValue, CalculusSystem);
-
-                if (Value.CompareTo(MaxDivision) > 0)
-                {
-                    return true;
-                }
-
-                if (Value.CompareTo(MaxDivision) == 0)
-                {
-                    int MaxRemainder = Data.Remainder(Data.MaxValue, CalculusSystem);
-                    if (Digit > MaxRemainder)
-                    {
-                        return true;
-                    }
-                }
-            }
-            else
-            {
-                if (int.IsPositive(Digit))
-                {
-                    return true;
-                }
-
-                I MinDivision = Data.Divide(Data.MinValue, CalculusSystem);
-
-                if (Value.CompareTo(MinDivision) < 0)
-                {
-                    return true;
-                }
-
-                if (Value.CompareTo(MinDivision) == 0 && Digit < Data.Remainder(Data.MinValue, CalculusSystem))
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-
-        private delegate bool IsDigit(char Char, out int Digit);
     }
 }
