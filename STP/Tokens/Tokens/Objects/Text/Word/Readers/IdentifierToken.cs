@@ -25,7 +25,7 @@
             {
                 char Current = Source.Current;
 
-                if (Current == '_' || Translater.IsEnglish(Current) || (AllowDigits && Current.IsDecimalDigit()))
+                if (Current == '_' || Translater.IsEnglish(Current) || (AllowDigits && Current.IsDigit()))
                 {
                     Chars.Add(Current);
                     Source.MoveNext();

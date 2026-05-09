@@ -66,19 +66,13 @@ namespace Zion.STP
 
         private bool ReadDecimal(ref TextSource Source, out IToken Token, bool IsNegative, int CharCount)
         {
-            Token = default!;
-
-            I Value = new();
-            NumberParsingParameters<I> Parameters = NumberParameters;
+            SkipZeros(Source, ref CharCount);
+            InitializeVariables(out Token, out I Value, out NumberParsingParameters<I> Parameters);
 
             while (!Source.IsEnd)
             {
-                char Current = Source.Current;
-
-                if (Current == '_')
+                if (IsSeporator(Source, ref CharCount))
                 {
-                    Source.MoveNext();
-                    CharCount++;
                     continue;
                 }
 
@@ -87,7 +81,7 @@ namespace Zion.STP
                     break;
                 }
 
-                if (IsDecimal(Current, out int Digit))
+                if (IsDecimal(Source.Current, out int Digit))
                 {
                     if (IsNegative)
                     {
@@ -96,7 +90,7 @@ namespace Zion.STP
 
                     if (CheckOverflow(Value, Digit))
                     {
-                        Token = ReadErrorToken(ref Source, CharCount, static Char => Char >= '0' && Char <= '9');
+                        Token = ReadErrorToken(ref Source, CharCount, static Char => Char.IsDigit());
                         return true;
                     }
 
@@ -116,28 +110,34 @@ namespace Zion.STP
                 CharCount++;
             }
 
-            Token = new T() { Value = Value, Length = CharCount, Status = TokenStatus.Valid };
+            Token = CreateToken(Value, CharCount);
             return true;
         }
 
 
         private bool Read(ref TextSource Source, out IToken Token, bool IsNegative, int CharCount, SafeConverter<char, int> IsDigit, int BinaryLength, int CalculusSystem)
         {
-            Token = default!;
-
-            I Value = new();
-            NumberParsingParameters<I> Parameters = NumberParameters;
+            SkipZeros(Source, ref CharCount);
+            InitializeVariables(out Token, out I Value, out NumberParsingParameters<I> Parameters);
 
             int Bits = 0;
+            Action<int> AddBits = AddFirstBits;
+
+            void AddFirstBits(int Count)
+            {
+                AddBits = AddBitsOther;
+                Bits += GetBitsCount(Count, BinaryLength);
+            }
+
+            void AddBitsOther(int Count)
+            {
+                Bits += BinaryLength;
+            }
 
             while (!Source.IsEnd)
             {
-                char Current = Source.Current;
-
-                if (Current == '_')
+                if (IsSeporator(Source, ref CharCount))
                 {
-                    Source.MoveNext();
-                    CharCount++;
                     continue;
                 }
 
@@ -147,14 +147,15 @@ namespace Zion.STP
                 }
 
 
-                if (IsDigit(Current, out int Digit))
+                if (IsDigit(Source.Current, out int Digit))
                 {
                     if (IsNegative)
                     {
                         Digit = -Digit;
                     }
 
-                    Bits += BinaryLength;
+                    AddBits(Digit);
+
                     if (Bits > Parameters.BitCount)
                     {
                         Token = ReadErrorToken(ref Source, CharCount, Char => IsDigit(Char, out _));
@@ -177,7 +178,7 @@ namespace Zion.STP
                 CharCount++;
             }
 
-            Token = new T() { Value = Value, Length = CharCount, Status = TokenStatus.Valid };
+            Token = CreateToken(Value, CharCount);
             return true;
         }
 
@@ -189,12 +190,8 @@ namespace Zion.STP
             {
                 char Current = Source.Current;
 
-                if (Current == '_' || IsDigit(Current))
-                {
-                    Source.MoveNext();
-                    CharCount++;
-                    continue;
-                }
+                Source.Skip(Char => Char == '_' || IsDigit(Char), out int Skipped);
+                CharCount += Skipped;
 
                 BeginsSuffix(ref Source, ref CharCount);
 
@@ -281,6 +278,13 @@ namespace Zion.STP
             return false;
         }
 
+        private void InitializeVariables(out IToken Token, out I Value, out NumberParsingParameters<I> Parameters)
+        {
+            Token = default!;
+            Value = new();
+            Parameters = NumberParameters;
+        }
+
 
         private static bool IsBinary(char Char, out int Digit)
         {
@@ -300,6 +304,47 @@ namespace Zion.STP
         private static bool IsHexadecimal(char Char, out int Digit)
         {
             return Char.IsHexadecimalDigit(out Digit);
+        }
+
+
+        private static bool IsSeporator(TextSource Source, ref int CharCount)
+        {
+            if (Source.Current == '_')
+            {
+                Source.MoveNext();
+                CharCount++;
+                return true;
+            }
+            return false;
+        }
+
+        private static void SkipZeros(TextSource Source, ref int CharCount)
+        {
+            Source.Skip('0', out int ZerosReaded);
+            CharCount += ZerosReaded;
+        }
+
+        private static int GetBitsCount(int Value, int BitsCount)
+        {
+            BitsCount--;
+
+            int Index = 1 << BitsCount;
+
+            for (int i = BitsCount; i >= 0; i--)
+            {
+                if ((Value & Index) != 0)
+                {
+                    return i + 1;
+                }
+                Index >>= 1;
+            }
+
+            return 0;
+        }
+
+        private static T CreateToken(I Value, int Length)
+        {
+            return new T() { Value = Value, Length = Length, Status = TokenStatus.Valid };
         }
     }
 }

@@ -14,7 +14,7 @@
                 return Char >= '0' && Char <= '7';
             }
 
-            public bool IsDecimalDigit()
+            public bool IsDigit()
             {
                 return Char >= '0' && Char <= '9';
             }
