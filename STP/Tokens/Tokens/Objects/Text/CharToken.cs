@@ -1,6 +1,4 @@
-﻿using static System.Runtime.InteropServices.JavaScript.JSType;
-
-namespace Zion.STP
+﻿namespace Zion.STP
 {
     public readonly struct CharToken : IValueToken<char>
     {

@@ -6,20 +6,21 @@ namespace Zion.STP
     (
         bool OnlyPositive,
         bool HasMaxValue,
-        int  BitCount,
+        int BitCount,
 
         T MinValue,
         T MaxValue,
 
-        Func<T, int, T>   Sum,
-        Func<T, int, T>   Multiply,
-        Func<T, int, T>   Divide,
+        Func<T, int, T> Sum,
+        Func<T, int, T> Multiply,
+        Func<T, int, T> Divide,
         Func<T, int, int> Remainder,
-        Func<T, int, T>   LeftShift,
-        Func<T, int, T>   Or,
+        Func<T, int, T> LeftShift,
 
         params string[] Suffixes
-    ) where T : IComparable<T>, INumber<T>
+    ) where T : IComparable<T>, INumber<T>;
+
+    public static class NumberParsingParameters
     {
         public static readonly NumberParsingParameters<byte> Byte = new
         (
@@ -29,7 +30,6 @@ namespace Zion.STP
             (A, B) => (byte)(A / B),
             (A, B) => (byte)(A % B),
             (A, B) => (byte)(A << B),
-            (A, B) => (byte)(A | B),
             "b", "B"
         );
         public static readonly NumberParsingParameters<sbyte> SByte = new
@@ -40,7 +40,6 @@ namespace Zion.STP
             (A, B) => (sbyte)(A / B),
             (A, B) => (sbyte)(A % B),
             (A, B) => (sbyte)(A << B),
-            (A, B) => (sbyte)(A | B),
             "sb", "SB"
         );
 
@@ -52,7 +51,6 @@ namespace Zion.STP
             (A, B) => (short)(A / B),
             (A, B) => (short)(A % B),
             (A, B) => (short)(A << B),
-            (A, B) => (short)(A | B),
             "s", "S"
         );
         public static readonly NumberParsingParameters<int> Int32 = new
@@ -62,8 +60,7 @@ namespace Zion.STP
             (A, B) => A * B,
             (A, B) => A / B,
             (A, B) => A % B,
-            (A, B) => A << B,
-            (A, B) => A | B
+            (A, B) => A << B
         );
         public static readonly NumberParsingParameters<long> Int64 = new
         (
@@ -73,7 +70,6 @@ namespace Zion.STP
             (A, B) => A / B,
             (A, B) => (int)(A % B),
             (A, B) => A << B,
-            (A, B) => A | B,
             "l", "L"
         );
         public static readonly NumberParsingParameters<Int128> Int128 = new
@@ -84,7 +80,6 @@ namespace Zion.STP
             (A, B) => A / B,
             (A, B) => (int)(A % B),
             (A, B) => A << B,
-            (A, B) => A | B,
             "q", "Q"
         );
 
@@ -96,7 +91,6 @@ namespace Zion.STP
             (A, B) => (ushort)(A / B),
             (A, B) => (ushort)(A % B),
             (A, B) => (ushort)(A << B),
-            (A, B) => (ushort)(A | B),
             "us", "US"
         );
         public static readonly NumberParsingParameters<uint> UInt32 = new
@@ -107,7 +101,6 @@ namespace Zion.STP
             (A, B) => (uint)(A / B),
             (A, B) => (int)(A % B),
             (A, B) => A << B,
-            (A, B) => (uint)(A | B),
             "u", "U"
         );
         public static readonly NumberParsingParameters<ulong> UInt64 = new
@@ -118,7 +111,6 @@ namespace Zion.STP
             (A, B) => A / (ulong)B,
             (A, B) => (int)(A % (ulong)B),
             (A, B) => A << B,
-            (A, B) => A | (ulong)B,
             "ul", "UL"
         );
         public static readonly NumberParsingParameters<UInt128> UInt128 = new
@@ -129,7 +121,6 @@ namespace Zion.STP
             (A, B) => A / (UInt128)B,
             (A, B) => (int)(A % (UInt128)B),
             (A, B) => A << B,
-            (A, B) => A | (UInt128)B,
             "uq", "UQ"
         );
 
@@ -140,8 +131,7 @@ namespace Zion.STP
             (A, B) => A * B,
             (A, B) => A / B,
             (A, B) => (int)(A % B),
-            (A, B) => A << B,
-            (A, B) => A | B
+            (A, B) => A << B
         );
     }
 }
