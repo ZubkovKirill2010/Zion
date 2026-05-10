@@ -1,7 +1,7 @@
 ﻿namespace Zion.STP
 {
-    public interface INodeReader<Node> where Node : INode
+    public interface INodeReader<N> where N : Node
     {
-        public bool Read(TokenSlice Tokens, out Node Node);
+        public bool Read(TokenSlice Tokens, out N Node);
     }
 }

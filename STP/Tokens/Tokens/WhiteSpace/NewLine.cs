@@ -1,16 +1,10 @@
 ﻿namespace Zion.STP
 {
-    public readonly record struct NewLineToken : IToken
-    {
-        public int Length { get; init; }
-        public TokenStatus Status { get; init; }
+    public sealed class NewLineToken : WhiteSpaceToken { }
 
-        public override string ToString() => "[\\n]";
-    }
-
-    public readonly struct NewLineReader : ITokenReader
+    public readonly struct NewLineTokenReader : ITokenReader
     {
-        public bool Read(ref TextSource Source, out IToken Token)
+        public bool Read(ref TextSource Source, out Token Token)
         {
             if (Source.Begins("\n"))
             {

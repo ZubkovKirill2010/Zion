@@ -3,11 +3,25 @@
     public readonly record struct ParsingResult<T>
     (
         T Result,
-        ErrorData[] Errors
+        TokenSlice Tokens,
+        ParsingErrors Errors
     );
 
-    public readonly record struct ErrorData
+    public readonly record struct ParsingErrors
     (
-        int Position
+        TokenErrors TokenErrors,
+        NodeErrors  NodeErrors
+    );
+
+    public readonly record struct TokenErrors
+    (
+        int[] InvalidTokens,
+        int[] ErrorTokens
+    );
+
+    public readonly record struct NodeErrors
+    (
+        int[] InvalidNodes,
+        int[] ErrorNodes
     );
 }

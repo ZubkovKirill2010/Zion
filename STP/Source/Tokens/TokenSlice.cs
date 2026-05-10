@@ -2,9 +2,9 @@
 
 namespace Zion.STP
 {
-    public readonly struct TokenSlice : IEnumerable<IToken>
+    public readonly struct TokenSlice : IEnumerable<Token>
     {
-        private readonly List<IToken> Source;
+        private readonly List<Token> Source;
         private readonly int Start;
 
         public readonly int Count;
@@ -19,7 +19,7 @@ namespace Zion.STP
             this.Start = Source.Start + Start;
         }
 
-        public TokenSlice(List<IToken> Source, int Start)
+        public TokenSlice(List<Token> Source, int Start)
         {
             ArgumentOutOfRangeException.ThrowIfWithout(Start, Source);
 
@@ -29,7 +29,7 @@ namespace Zion.STP
         }
 
 
-        public IToken this[int Index]
+        public Token this[int Index]
         {
             get
             {
@@ -39,13 +39,13 @@ namespace Zion.STP
         }
 
 
-        public IEnumerable<IToken> EnumerateFrom(int Start)
+        public IEnumerable<Token> EnumerateFrom(int Start)
         {
             return Source.EnumerateFrom(this.Start + Start);
         }
 
 
-        public IEnumerator<IToken> GetEnumerator()
+        public IEnumerator<Token> GetEnumerator()
         {
             return Source.EnumerateFrom(Start).GetEnumerator();
         }

@@ -1,22 +1,15 @@
 ﻿namespace Zion.STP
 {
-    public readonly struct BooleanToken : IValueToken<bool>
-    {
-        public int Length { get; init; }
-        public bool Value { get; init; }
-        public TokenStatus Status { get; init; }
-
-        public override string ToString() => Value ? "[True]" : "[False]";
-    }
+    public sealed class BooleanToken : ValueToken<bool> { }
 
     public readonly struct BooleanTokenReader : ITokenReader
     {
-        public string True { get; init; } = "true";
+        public string True { get; init; }  = "true";
         public string False { get; init; } = "false";
 
         public BooleanTokenReader() { }
 
-        public bool Read(ref TextSource Source, out IToken Token)
+        public bool Read(ref TextSource Source, out Token Token)
         {
             if (Source.Begins(True, out Source))
             {

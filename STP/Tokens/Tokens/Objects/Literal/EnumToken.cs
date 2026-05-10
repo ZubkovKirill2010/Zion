@@ -1,13 +1,6 @@
 ﻿namespace Zion.STP
 {
-    public readonly struct EnumToken<T> : IValueToken<T> where T : Enum
-    {
-        public int Length { get; init; }
-        public T Value { get; init; }
-        public TokenStatus Status { get; init; }
-
-        public override string ToString() => $"[{Value}]";
-    }
+    public sealed class EnumToken<T> : ValueToken<T> where T : Enum { }
 
     public readonly struct EnumTokenReader<T> : ITokenReader where T : struct, Enum
     {
@@ -20,9 +13,9 @@
             Reader = new IdentifierTokenReader();
         }
 
-        public bool Read(ref TextSource Source, out IToken Token)
+        public bool Read(ref TextSource Source, out Token Token)
         {
-            if (Reader.Read(ref Source, out IToken WordToken))
+            if (Reader.Read(ref Source, out Token WordToken))
             {
                 string Identifier = ((WordToken)WordToken).Value;
 

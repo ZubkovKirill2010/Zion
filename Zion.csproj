@@ -19,8 +19,4 @@
     <None Remove="README.md" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="STP\Tokens\Tokens\Objects\Numbers\Float\" />
-  </ItemGroup>
-
 </Project>

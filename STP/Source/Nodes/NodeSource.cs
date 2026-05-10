@@ -2,7 +2,7 @@
 
 namespace Zion.STP
 {
-    public sealed class NodeSource<Node> : IEnumerable<Node> where Node : INode
+    public sealed class NodeSource<Node> : IEnumerable<Node> where Node : STP.Node
     {
         private readonly List<Node> Source;
         public readonly int Count;

@@ -1,19 +1,26 @@
 ﻿namespace Zion.STP
 {
-    //Text -> Tokens -> Nodes -> Result
-    public sealed class SyntaxTemplateParser<T, Node> where Node : INode
+    //Text -> TokenList -> Nodes --(Semantic checking)-> Result
+    public sealed class SyntaxTemplateParser<T, Node> where Node : STP.Node
     {
         private readonly TextSource Source;
         private readonly ITokenReader[] TokenReaders;
         private readonly INodeReader<Node>[] NodeReaders;
-        private readonly IParsingResult<T, Node> NodeConverter;
+        private readonly IParsingResult<T, Node> ResultConverter;
 
-        public TokenRecoveryStrategy TokenRecoveryStrategy { get; init; } = TokenRecoveryStrategy.Abort;
+        public RecoveryStrategy TokenRecoveryStrategy { get; init; } = RecoveryStrategy.Abort;
+        public RecoveryStrategy NodeRecoveryStrategy  { get; init; } = RecoveryStrategy.Abort;
+
         public ITokenErrorHandler TokenErrorHandler
         {
             private get;
             init => field = value.NotNull();
         } = SkipCharTokenErrorHandler.Instance;
+        public INodeErrorHandler<Node>? NodeErrorHandler
+        {
+            private get;
+            init => field = value.NotNull();
+        }
 
 
         public int TokensCapacity
@@ -34,49 +41,68 @@
                                     IParsingResult<T, Node> Result)
         {
             ArgumentException.ThrowIf(TokenReaders.Count == 0, "TokenReaders not transmitted (Count = 0)");
-            ArgumentException.ThrowIf(NodeReaders.Count == 0, "NodeReaders not transmitted (Count = 0)");
+            ArgumentException.ThrowIf(NodeReaders.Count  == 0, "NodeReaders not transmitted (Count = 0)" );
 
-            this.Source = Source.NotNull();
-            NodeConverter = Result.NotNull();
+            ResultConverter   = Result.NotNull();
+            this.Source       = Source.NotNull();
             this.TokenReaders = ZArray.FromCollection(TokenReaders);
-            this.NodeReaders = ZArray.FromCollection(NodeReaders);
+            this.NodeReaders  = ZArray.FromCollection(NodeReaders);
         }
 
 
-        private bool TryParse(out ParsingResult<T> Result)
+        public bool Parse(out ParsingResult<T> Result)
         {
-            List<ErrorData> Errors = new List<ErrorData>();
-
-            void AddError(ErrorData Error) => Errors.Add(Error);
-
-            if (!ReadTokens(out List<IToken>? Tokens, AddError))
+            if (!ReadTokens(out List<Token>? Tokens, out TokenErrors TokenErrors))
             {
                 Result = default!;
                 return false;
             }
 
-            if (!ReadNodes(Tokens, out List<Node>? Nodes, AddError))
+            if (!ReadNodes(Tokens, out List<Node>? Nodes, out NodeErrors NodeErrors))
             {
                 Result = default!;
                 return false;
             }
 
-            if (NodeConverter.GetResult(new NodeSource<Node>(Nodes), out T ParsingResult))
+            if (ResultConverter.GetResult(new NodeSource<Node>(Nodes), out T ParsingResult))
             {
-                Result = new ParsingResult<T>(ParsingResult, Errors.ToArray());
+                Result = new ParsingResult<T>
+                (
+                    ParsingResult,
+                    new TokenSlice(Tokens, 0),
+                    new ParsingErrors(TokenErrors, NodeErrors)
+                );
                 return true;
             }
 
-            Result = new ParsingResult<T>(default!, Array.Empty<ErrorData>());
+            Result = new ParsingResult<T>();
             return false;
         }
 
 
-        public bool ReadTokens(out List<IToken> Tokens, Action<ErrorData> AddError)
+        public bool ReadTokens(out List<Token> Tokens, out TokenErrors Errors)
         {
-            Tokens = new List<IToken>(TokensCapacity);
-
             TextSource Source = this.Source.BeginNew();
+
+            List<Token> TokenList = new List<Token>(TokensCapacity);
+
+            List<int> InvalidTokens = new List<int>(5);
+            List<int> ErrorTokens   = new List<int>(5);
+
+            void AddToken(Token Token)
+            {
+                if (Token.Status == TokenStatus.Invalid)
+                {
+                    InvalidTokens.Add(TokenList.Count);
+                }
+                TokenList.Add(Token);
+            }
+
+            void AddErrorToken(ErrorToken Token)
+            {
+                ErrorTokens.Add(TokenList.Count);
+                TokenList.Add(Token);
+            }
 
             while (!Source.IsEnd)
             {
@@ -86,13 +112,13 @@
                 {
                     TextSource ReaderSource = Source.BeginNew();
 
-                    if (Reader.Read(ref ReaderSource, out IToken Token) && Token is not null)
+                    if (Reader.Read(ref ReaderSource, out Token Token) && Token is not null)
                     {
                         ArgumentNullException.ThrowIfNull(ReaderSource);
                         CheckTokenLength(Token);
 
                         TokenReaded = true;
-                        Tokens.Add(Token);
+                        AddToken(Token);
 
                         Source = ReaderSource;
 
@@ -102,35 +128,40 @@
 
                 if (!TokenReaded)
                 {
-                    if (TokenRecoveryStrategy == TokenRecoveryStrategy.SkipToSync)
+                    if (TokenRecoveryStrategy == RecoveryStrategy.Synchronize)
                     {
                         TokenErrorHandler.Handle(ref Source, out ErrorToken ErrorToken);
 
                         CheckTokenLength(ErrorToken);
 
-                        if (Tokens.Count != 0 && Tokens[^1] is ErrorToken LastErrorToken)
+                        if (TokenList.Count != 0 && TokenList[^1] is ErrorToken LastErrorToken)
                         {
-                            Tokens[^1] = new ErrorToken()
+                            TokenList[^1] = new ErrorToken()
                             {
                                 Length = LastErrorToken.Length + ErrorToken.Length
                             };
                         }
                         else
                         {
-                            Tokens.Add(ErrorToken);
+                            AddErrorToken(ErrorToken);
                         }
 
                         continue;
                     }
 
+                    Tokens = default!;
+                    Errors = new TokenErrors(InvalidTokens.ToArray(), ErrorTokens.ToArray());
                     return false;
                 }
             }
 
+            Tokens = TokenList;
+            Errors = new TokenErrors(InvalidTokens.ToArray(), ErrorTokens.ToArray());
+
             return true;
         }
 
-        public bool ReadNodes(List<IToken> Tokens, out List<Node> Nodes, Action<ErrorData> AddError)
+        public bool ReadNodes(List<Token> Tokens, out List<Node> Nodes, out NodeErrors Errors)
         {
             Nodes = new List<Node>(NodesCapacity);
 
@@ -159,19 +190,29 @@
 
                 if (!NodeReaded)
                 {
-                    //if (CalculateErrorPosition)
-                    //{
-                    //    ErrorPosition = GetTokenOffset(Tokens, Start);
-                    //}
+                    if (NodeRecoveryStrategy == RecoveryStrategy.Synchronize)
+                    {
+                        NodeErrorHandler.Handle(Tokens, out ErrorToken ErrorToken);
+
+                        CheckTokenLength(ErrorToken);
+
+                        AddErrorToken(ErrorToken);
+
+                        continue;
+                    }
+
+                    Tokens = default!;
+                    Errors = new TokenErrors(InvalidTokens.ToArray(), ErrorTokens.ToArray());
                     return false;
                 }
             }
 
+            Errors = new NodeErrors()
             return true;
         }
 
 
-        private static int GetTokenOffset(List<IToken> Tokens, int TokenIndex)
+        private static int GetTokenOffset(List<Token> Tokens, int TokenIndex)
         {
             int Offset = 0;
 
@@ -183,7 +224,7 @@
             return Offset;
         }
 
-        private static void CheckTokenLength(IToken Token)
+        private static void CheckTokenLength(Token Token)
         {
             ArgumentOutOfRangeException.ThrowIf(Token.Length <= 0, $"Token.Length(={Token.Length}) <= 0");
         }

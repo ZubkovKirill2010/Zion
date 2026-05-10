@@ -11,7 +11,7 @@
             this.Target = Target;
         }
 
-        public bool Match(IToken Token, out bool GoToNext)
+        public bool Match(Token Token, out bool GoToNext)
         {
             GoToNext = true;
             return Token is IValueToken<T> ValueToken && Comparer(ValueToken.Value, Target);

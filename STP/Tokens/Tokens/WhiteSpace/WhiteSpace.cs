@@ -1,16 +1,10 @@
 ﻿namespace Zion.STP
 {
-    public readonly struct WhiteSpaceToken : IToken
-    {
-        public int Length { get; init; }
-        public TokenStatus Status { get; init; }
+    public class WhiteSpaceToken : Token { }
 
-        public override string ToString() => "[Space]";
-    }
-
-    public readonly struct WhiteSpaceReader : ITokenReader
+    public readonly struct WhiteSpaceTokenReader : ITokenReader
     {
-        public bool Read(ref TextSource Source, out IToken Token)
+        public bool Read(ref TextSource Source, out Token Token)
         {
             int Length = 0;
 

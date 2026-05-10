@@ -1,12 +1,11 @@
 ﻿namespace Zion.STP
 {
-    public readonly struct CharToken : IValueToken<char>
+    public sealed class CharToken : ValueToken<char>
     {
-        public int Length { get; init; }
-        public char Value { get; init; }
-        public TokenStatus Status { get; init; }
-
-        public override string ToString() => $"['{Value}']";
+        public override string ToString()
+        {
+            return $"[Char:'{Value}']";
+        }
     }
 
     public readonly struct CharTokenReader : ITokenReader
@@ -26,7 +25,7 @@
             { 'n', '\n' }
         };
 
-        public bool Read(ref TextSource Source, out IToken Token)
+        public bool Read(ref TextSource Source, out Token Token)
         {
             Token = default!;
 
@@ -40,7 +39,7 @@
             if (Source.IsEnd || Source.Current == '\'')
             {
                 Source.MoveNext();
-                Token = new CharToken() { Length = 2, Status = TokenStatus.HasErrors };
+                Token = new CharToken() { Length = 2, Status = TokenStatus.Invalid };
                 return true;
             }
 
@@ -65,7 +64,7 @@
             return false;
         }
 
-        private bool ReadEscapeChar(ref TextSource Source, out IToken Token)
+        private bool ReadEscapeChar(ref TextSource Source, out Token Token)
         {
             Source.MoveNext();
 
@@ -91,7 +90,7 @@
             }
         }
 
-        private static bool ReadHexFormat(ref TextSource Source, out IToken Token, int HexCodeLength)
+        private static bool ReadHexFormat(ref TextSource Source, out Token Token, int HexCodeLength)
         {
             Source.MoveNext();
 
@@ -104,7 +103,7 @@
 
                 Token = TryParseHexCode(HexCodeString, out HexCode)
                     ? new CharToken() { Length = HexCodeLength + 4, Value = (char)HexCode }
-                    : new CharToken() { Length = HexCodeLength + 4, Status = TokenStatus.HasErrors };
+                    : new CharToken() { Length = HexCodeLength + 4, Status = TokenStatus.Invalid };
                 return true;
             }
 
@@ -112,7 +111,7 @@
             return false;
         }
 
-        private static bool ReadHexFormat(ref TextSource Source, out IToken Token)
+        private static bool ReadHexFormat(ref TextSource Source, out Token Token)
         {
             Token = default!;
 
@@ -146,7 +145,7 @@
             return false;
         }
 
-        private static bool ReadUnicodeChar(ref TextSource Source, out IToken Token)
+        private static bool ReadUnicodeChar(ref TextSource Source, out Token Token)
         {
             char Char = Source.Current;
 
@@ -176,7 +175,7 @@
 
             Token = EscapeChars.TryGetValue(Char, out char UnicodeChar)
                 ? new CharToken() { Length = 4, Value = UnicodeChar }
-                : new CharToken() { Length = 4, Status = TokenStatus.HasErrors };
+                : new CharToken() { Length = 4, Status = TokenStatus.Invalid };
             return true;
         }
 

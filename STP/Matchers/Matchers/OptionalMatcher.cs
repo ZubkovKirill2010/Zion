@@ -9,7 +9,7 @@
             this.Validator = Validator.NotNull();
         }
 
-        public bool Match(IToken Token, out bool GoToNext)
+        public bool Match(Token Token, out bool GoToNext)
         {
             if (!Validator.Match(Token, out GoToNext))
             {

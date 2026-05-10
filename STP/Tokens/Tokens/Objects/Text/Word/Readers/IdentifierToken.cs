@@ -6,7 +6,7 @@
 
         public IdentifierTokenReader() { }
 
-        public bool Read(ref TextSource Source, out IToken Token)
+        public bool Read(ref TextSource Source, out Token Token)
         {
             Token = default!;
             List<char> Chars = new List<char>(20);

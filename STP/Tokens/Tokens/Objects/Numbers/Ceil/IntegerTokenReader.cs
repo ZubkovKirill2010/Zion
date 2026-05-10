@@ -23,7 +23,7 @@ namespace Zion.STP
         }
 
 
-        public bool Read(ref TextSource Source, out IToken Token)
+        public bool Read(ref TextSource Source, out Token Token)
         {
             if (Source.IsEnd)
             {
@@ -56,13 +56,13 @@ namespace Zion.STP
                 CharCount++;
             }
 
-            bool CheckSuffix(ref TextSource Source, out IToken Token)
+            bool CheckSuffix(ref TextSource Source, out Token Token)
             {
                 int SuffixLength = 0;
 
                 if (BeginsSuffix(ref Source, ref SuffixLength))
                 {
-                    Token = new T() { Length = CharCount + SuffixLength, Status = TokenStatus.HasErrors };
+                    Token = new T() { Length = CharCount + SuffixLength, Status = TokenStatus.Invalid };
                     return true;
                 }
 
@@ -90,28 +90,28 @@ namespace Zion.STP
         }
 
 
-        private bool ReadBinary(ref TextSource Source, out IToken Token, bool IsNegative, int CharCount)
+        private bool ReadBinary(ref TextSource Source, out Token Token, bool IsNegative, int CharCount)
         {
             return Read(ref Source, out Token, IsNegative, CharCount, IsBinary, BinaryCache, Value => NumberParameters.LeftShift(Value, 1), true);
         }
 
-        private bool ReadOctal(ref TextSource Source, out IToken Token, bool IsNegative, int CharCount)
+        private bool ReadOctal(ref TextSource Source, out Token Token, bool IsNegative, int CharCount)
         {
             return Read(ref Source, out Token, IsNegative, CharCount, IsOctal, OctalCache, Value => NumberParameters.LeftShift(Value, 3), true);
         }
 
-        private bool ReadHexadecimal(ref TextSource Source, out IToken Token, bool IsNegative, int CharCount)
+        private bool ReadHexadecimal(ref TextSource Source, out Token Token, bool IsNegative, int CharCount)
         {
             return Read(ref Source, out Token, IsNegative, CharCount, IsHexadecimal, HexadecimalCache, Value => NumberParameters.LeftShift(Value, 4));
         }
 
-        private bool ReadDecimal(ref TextSource Source, out IToken Token, bool IsNegative, int CharCount)
+        private bool ReadDecimal(ref TextSource Source, out Token Token, bool IsNegative, int CharCount)
         {
             return Read(ref Source, out Token, IsNegative, CharCount, IsDecimal, DecimalCache, Value => NumberParameters.Multiply(Value, 10));
         }
 
 
-        private bool Read(ref TextSource Source, out IToken Token, bool IsNegative, int CharCount, SafeConverter<char, int> IsDigit, Lazy<OverflowCache<I>> OverflowCache, Func<I, I> Shift, bool ForgivingNumbers = false)
+        private bool Read(ref TextSource Source, out Token Token, bool IsNegative, int CharCount, SafeConverter<char, int> IsDigit, Lazy<OverflowCache<I>> OverflowCache, Func<I, I> Shift, bool ForgivingNumbers = false)
         {
             int StartCharCount = CharCount;
 
@@ -166,7 +166,7 @@ namespace Zion.STP
 
             if (CharCount == StartCharCount)
             {
-                Token = new T() { Length = CharCount, Status = TokenStatus.HasErrors };
+                Token = new T() { Length = CharCount, Status = TokenStatus.Invalid };
                 return true;
             }
 
@@ -174,7 +174,7 @@ namespace Zion.STP
             return true;
         }
 
-        private IToken ReadErrorToken(ref TextSource Source, int CharCount, Func<char, bool> IsDigit)
+        private Token ReadErrorToken(ref TextSource Source, int CharCount, Func<char, bool> IsDigit)
         {
             NumberParsingParameters<I> Parameters = NumberParameters;
 
@@ -190,7 +190,7 @@ namespace Zion.STP
                 break;
             }
 
-            return new T() { Value = default!, Length = CharCount, Status = TokenStatus.HasErrors };
+            return new T() { Value = default!, Length = CharCount, Status = TokenStatus.Invalid };
         }
 
 
@@ -260,14 +260,14 @@ namespace Zion.STP
             return false;
         }
 
-        private void InitializeVariables(out IToken Token, out I Value, out NumberParsingParameters<I> Parameters)
+        private void InitializeVariables(out Token Token, out I Value, out NumberParsingParameters<I> Parameters)
         {
             Token = default!;
             Value = new();
             Parameters = NumberParameters;
         }
 
-        private bool IsZero(ref TextSource Source, out IToken Token, int CharCount)
+        private bool IsZero(ref TextSource Source, out Token Token, int CharCount)
         {
             int StartCharCount = CharCount;
 
@@ -285,7 +285,7 @@ namespace Zion.STP
 
                 if (IsEnd(ref Source))
                 {
-                    Token = new T() { Length = CharCount, Status = TokenStatus.HasErrors };
+                    Token = new T() { Length = CharCount, Status = TokenStatus.Invalid };
                     return true;
                 }
             }
@@ -303,7 +303,7 @@ namespace Zion.STP
 
                 if (IsEnd(ref Source))
                 {
-                    Token = new T() { Length = CharCount, Status = TokenStatus.HasErrors };
+                    Token = new T() { Length = CharCount, Status = TokenStatus.Invalid };
                     return true;
                 }
             }
