@@ -40,6 +40,11 @@
             }
         }
 
+        public static Func<TIn, bool> ToFunc<TIn, TOut>(this SafeConverter<TIn, TOut> Converter)
+        {
+            return In => Converter(In, out _);
+        }
+
         public static AsyncAction ToAsync(Action Action)
         {
             return () => Task.Run(Action);

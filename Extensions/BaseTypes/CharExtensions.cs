@@ -21,9 +21,9 @@
 
             public bool IsHexadecimalDigit()
             {
-                return Char >= '0' && Char <= '9'
-                    || Char >= 'a' && Char <= 'f'
-                    || Char >= 'A' && Char <= 'F';
+                return (Char >= '0' && Char <= '9')
+                    || (Char >= 'a' && Char <= 'f')
+                    || (Char >= 'A' && Char <= 'F');
             }
 
 
@@ -96,6 +96,6 @@
             {
                 return Chars.Contains(Char);
             }
-        }        
+        }
     }
 }

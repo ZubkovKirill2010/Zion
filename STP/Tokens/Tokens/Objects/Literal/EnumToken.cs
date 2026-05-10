@@ -3,7 +3,7 @@
     public readonly struct EnumToken<T> : IValueToken<T> where T : Enum
     {
         public int Length { get; init; }
-        public T   Value  { get; init; }
+        public T Value { get; init; }
         public TokenStatus Status { get; init; }
 
         public override string ToString() => $"[{Value}]";

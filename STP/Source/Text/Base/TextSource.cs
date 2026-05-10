@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.ComponentModel.DataAnnotations;
 
 namespace Zion.STP
 {
@@ -176,7 +175,7 @@ namespace Zion.STP
             Readed = this;
 
             if (Length == 0)
-            {   
+            {
                 return true;
             }
 
@@ -186,7 +185,7 @@ namespace Zion.STP
             }
 
             TextSource Source = BeginNew();
-            List<char> Chars  = new List<char>(Length);
+            List<char> Chars = new List<char>(Length);
 
             while (!Source.IsEnd && Chars.Count < Length)
             {

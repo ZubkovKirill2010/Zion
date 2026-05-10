@@ -29,8 +29,7 @@ namespace Zion.STP
             (A, B) => (byte)(A * B),
             (A, B) => (byte)(A / B),
             (A, B) => (byte)(A % B),
-            (A, B) => (byte)(A << B),
-            "b", "B"
+            (A, B) => (byte)(A << B)
         );
         public static readonly NumberParsingParameters<sbyte> SByte = new
         (
