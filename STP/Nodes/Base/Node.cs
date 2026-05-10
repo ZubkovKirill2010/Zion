@@ -2,7 +2,14 @@
 {
     public abstract class Node
     {
-        public int TokensCount { get; init; }
+        public int TokensCount
+        {
+            get;
+            init
+            {
+                field = value > 0 ? value : throw new ArgumentOutOfRangeException($"Node.TokensCount(={TokensCount}) <= 0");
+            }
+        }
         public Validation Status
         {
             get;

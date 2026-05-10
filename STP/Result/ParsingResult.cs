@@ -10,7 +10,7 @@
     public readonly record struct ParsingErrors
     (
         TokenErrors TokenErrors,
-        NodeErrors  NodeErrors
+        NodeErrors NodeErrors
     );
 
     public readonly record struct TokenErrors

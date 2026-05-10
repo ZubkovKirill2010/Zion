@@ -9,7 +9,7 @@
         private readonly IParsingResult<T, Node> ResultConverter;
 
         public RecoveryStrategy TokenRecoveryStrategy { get; init; } = RecoveryStrategy.Abort;
-        public RecoveryStrategy NodeRecoveryStrategy  { get; init; } = RecoveryStrategy.Abort;
+        public RecoveryStrategy NodeRecoveryStrategy { get; init; } = RecoveryStrategy.Abort;
 
         public ITokenErrorHandler TokenErrorHandler
         {
@@ -41,12 +41,12 @@
                                     IParsingResult<T, Node> Result)
         {
             ArgumentException.ThrowIf(TokenReaders.Count == 0, "TokenReaders not transmitted (Count = 0)");
-            ArgumentException.ThrowIf(NodeReaders.Count  == 0, "NodeReaders not transmitted (Count = 0)" );
+            ArgumentException.ThrowIf(NodeReaders.Count == 0, "NodeReaders not transmitted (Count = 0)");
 
-            ResultConverter   = Result.NotNull();
-            this.Source       = Source.NotNull();
+            ResultConverter = Result.NotNull();
+            this.Source = Source.NotNull();
             this.TokenReaders = ZArray.FromCollection(TokenReaders);
-            this.NodeReaders  = ZArray.FromCollection(NodeReaders);
+            this.NodeReaders = ZArray.FromCollection(NodeReaders);
         }
 
 
@@ -87,11 +87,11 @@
             List<Token> TokenList = new List<Token>(TokensCapacity);
 
             List<int> InvalidTokens = new List<int>(5);
-            List<int> ErrorTokens   = new List<int>(5);
+            List<int> ErrorTokens = new List<int>(5);
 
             void AddToken(Token Token)
             {
-                if (Token.Status == TokenStatus.Invalid)
+                if (Token.Status == Validation.Invalid)
                 {
                     InvalidTokens.Add(TokenList.Count);
                 }
@@ -115,7 +115,6 @@
                     if (Reader.Read(ref ReaderSource, out Token Token) && Token is not null)
                     {
                         ArgumentNullException.ThrowIfNull(ReaderSource);
-                        CheckTokenLength(Token);
 
                         TokenReaded = true;
                         AddToken(Token);
@@ -131,8 +130,6 @@
                     if (TokenRecoveryStrategy == RecoveryStrategy.Synchronize)
                     {
                         TokenErrorHandler.Handle(ref Source, out ErrorToken ErrorToken);
-
-                        CheckTokenLength(ErrorToken);
 
                         if (TokenList.Count != 0 && TokenList[^1] is ErrorToken LastErrorToken)
                         {
@@ -165,8 +162,13 @@
         {
             Nodes = new List<Node>(NodesCapacity);
 
+            List<int> InvalidNodes = new List<int>(5);
+            List<int> ErrorNodes = new List<int>(5);
+
             bool NodeReaded = false;
             int Start = 0;
+
+            TokenSlice GetTokenSlice() => new TokenSlice(Tokens, Start);
 
             while (Start < Tokens.Count)
             {
@@ -174,13 +176,8 @@
 
                 foreach (INodeReader<Node> Reader in NodeReaders)
                 {
-                    if (Reader.Read(new TokenSlice(Tokens, Start), out Node Node) && Node is not null)
+                    if (Reader.Read(GetTokenSlice(), out Node Node) && Node is not null)
                     {
-                        if (Node.TokensCount <= 0)
-                        {
-                            throw new ArgumentOutOfRangeException($"Node.TokensCount(={Node.TokensCount}) <= 0");
-                        }
-
                         Start += Node.TokensCount;
                         NodeReaded = true;
                         Nodes.Add(Node);
@@ -190,43 +187,23 @@
 
                 if (!NodeReaded)
                 {
-                    if (NodeRecoveryStrategy == RecoveryStrategy.Synchronize)
+                    if (NodeRecoveryStrategy == RecoveryStrategy.Synchronize && NodeErrorHandler is not null)
                     {
-                        NodeErrorHandler.Handle(Tokens, out ErrorToken ErrorToken);
+                        Node ErrorNode = NodeErrorHandler.Handle(GetTokenSlice());
 
-                        CheckTokenLength(ErrorToken);
-
-                        AddErrorToken(ErrorToken);
+                        ErrorNodes.Add(Nodes.Count);
+                        Nodes.Add(ErrorNode);
 
                         continue;
                     }
 
-                    Tokens = default!;
-                    Errors = new TokenErrors(InvalidTokens.ToArray(), ErrorTokens.ToArray());
+                    Errors = new NodeErrors(InvalidNodes.ToArray(), [Nodes.Count]);
                     return false;
                 }
             }
 
-            Errors = new NodeErrors()
+            Errors = new NodeErrors();
             return true;
-        }
-
-
-        private static int GetTokenOffset(List<Token> Tokens, int TokenIndex)
-        {
-            int Offset = 0;
-
-            for (int i = 0; i < TokenIndex && i < Tokens.Count; i++)
-            {
-                Offset += Tokens[i].Length;
-            }
-
-            return Offset;
-        }
-
-        private static void CheckTokenLength(Token Token)
-        {
-            ArgumentOutOfRangeException.ThrowIf(Token.Length <= 0, $"Token.Length(={Token.Length}) <= 0");
         }
     }
 }

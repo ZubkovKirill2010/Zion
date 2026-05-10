@@ -2,7 +2,7 @@
 
 namespace Zion.STP
 {
-    public sealed class IntegerTokenReader<T, I> : ITokenReader where T : IValueToken<I>, new() where I : IComparable<I>, INumber<I>, new()
+    public sealed class IntegerTokenReader<T, I> : ITokenReader where T : ValueToken<I>, new() where I : IComparable<I>, INumber<I>, new()
     {
         public readonly NumberParsingParameters<I> NumberParameters;
 
@@ -62,7 +62,7 @@ namespace Zion.STP
 
                 if (BeginsSuffix(ref Source, ref SuffixLength))
                 {
-                    Token = new T() { Length = CharCount + SuffixLength, Status = TokenStatus.Invalid };
+                    Token = new T() { Length = CharCount + SuffixLength, ErrorCodes = [6000] };
                     return true;
                 }
 
@@ -86,6 +86,7 @@ namespace Zion.STP
                 return ReadHexadecimal(ref Source, out Token, IsNegative, CharCount + 2);
             }
 
+            if (CheckSuffix(ref Source, out Token)) { return true; }
             return ReadDecimal(ref Source, out Token, IsNegative, CharCount);
         }
 
@@ -111,7 +112,11 @@ namespace Zion.STP
         }
 
 
-        private bool Read(ref TextSource Source, out Token Token, bool IsNegative, int CharCount, SafeConverter<char, int> IsDigit, Lazy<OverflowCache<I>> OverflowCache, Func<I, I> Shift, bool ForgivingNumbers = false)
+        private bool Read(ref TextSource Source, out Token Token,
+            bool IsNegative, int CharCount,
+            SafeConverter<char, int> IsDigit, Lazy<OverflowCache<I>> OverflowCache,
+            Func<I, I> Shift,
+            bool ForgivingNumbers = false)
         {
             int StartCharCount = CharCount;
 
@@ -139,7 +144,7 @@ namespace Zion.STP
 
                     if (CheckOverflow(Value, Digit, OverflowCache))
                     {
-                        Token = ReadErrorToken(ref Source, CharCount, ForgivingNumbers ? static Char => Char.IsDigit() : IsDigit.ToFunc());
+                        Token = ReadErrorToken(ref Source, CharCount, ForgivingNumbers ? static Char => Char.IsDigit() : IsDigit.ToFunc(), 6003);
                         return true;
                     }
 
@@ -152,7 +157,7 @@ namespace Zion.STP
                 }
                 else if (ForgivingNumbers && Source.Current.IsDigit())
                 {
-                    Token = ReadErrorToken(ref Source, CharCount, Char => Char.IsDigit());
+                    Token = ReadErrorToken(ref Source, CharCount, Char => Char.IsDigit(), 6002);
                     return true;
                 }
                 else
@@ -166,7 +171,7 @@ namespace Zion.STP
 
             if (CharCount == StartCharCount)
             {
-                Token = new T() { Length = CharCount, Status = TokenStatus.Invalid };
+                Token = new T() { Length = CharCount, ErrorCodes = [6001] };
                 return true;
             }
 
@@ -174,7 +179,7 @@ namespace Zion.STP
             return true;
         }
 
-        private Token ReadErrorToken(ref TextSource Source, int CharCount, Func<char, bool> IsDigit)
+        private Token ReadErrorToken(ref TextSource Source, int CharCount, Func<char, bool> IsDigit, short ErrorCode)
         {
             NumberParsingParameters<I> Parameters = NumberParameters;
 
@@ -190,7 +195,7 @@ namespace Zion.STP
                 break;
             }
 
-            return new T() { Value = default!, Length = CharCount, Status = TokenStatus.Invalid };
+            return new T() { Value = default!, Length = CharCount, ErrorCodes = [ErrorCode] };
         }
 
 
@@ -285,7 +290,7 @@ namespace Zion.STP
 
                 if (IsEnd(ref Source))
                 {
-                    Token = new T() { Length = CharCount, Status = TokenStatus.Invalid };
+                    Token = new T() { Length = CharCount, ErrorCodes = [6001] };
                     return true;
                 }
             }
@@ -303,7 +308,7 @@ namespace Zion.STP
 
                 if (IsEnd(ref Source))
                 {
-                    Token = new T() { Length = CharCount, Status = TokenStatus.Invalid };
+                    Token = new T() { Length = CharCount, ErrorCodes = [6001] };
                     return true;
                 }
             }
@@ -312,7 +317,7 @@ namespace Zion.STP
             {
                 if (Digit != 0)
                 {
-                    Token = ReadErrorToken(ref Source, CharCount, IsDigit.ToFunc());
+                    Token = ReadErrorToken(ref Source, CharCount, IsDigit.ToFunc(), 6002);
                     return true;
                 }
 

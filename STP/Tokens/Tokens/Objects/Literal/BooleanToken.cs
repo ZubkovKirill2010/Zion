@@ -4,7 +4,7 @@
 
     public readonly struct BooleanTokenReader : ITokenReader
     {
-        public string True { get; init; }  = "true";
+        public string True { get; init; } = "true";
         public string False { get; init; } = "false";
 
         public BooleanTokenReader() { }
