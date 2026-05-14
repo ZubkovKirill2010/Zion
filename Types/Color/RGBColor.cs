@@ -1,6 +1,6 @@
 ﻿using System.Collections;
 using System.Diagnostics.CodeAnalysis;
-using Zion.Vectors;
+using System.Drawing;
 
 namespace Zion
 {
@@ -50,18 +50,13 @@ namespace Zion
             this.G = G;
             this.B = B;
         }
-        public RGBColor(Vector3Int Color)
-        {
-            R = (byte)(Math.Abs(Color.x) % 256);
-            G = (byte)(Math.Abs(Color.y) % 256);
-            B = (byte)(Math.Abs(Color.z) % 256);
-        }
-        public RGBColor(System.Drawing.Color Color)
+        public RGBColor(Color Color)
         {
             R = Color.R;
             G = Color.G;
             B = Color.B;
         }
+
 
         public static bool operator ==(RGBColor A, RGBColor B)
         {
@@ -76,18 +71,25 @@ namespace Zion
             return new RGBColor((byte)(A.R * B), (byte)(A.G * B), (byte)(A.B * B));
         }
 
-        public static implicit operator System.Drawing.Color(RGBColor Color)
+        public static implicit operator Color(RGBColor Color)
         {
             return System.Drawing.Color.FromArgb(Color.R, Color.G, Color.B);
         }
+
 
         public override readonly string ToString()
         {
             return $"({R}, {G}, {B})";
         }
+        
         public override bool Equals([NotNullWhen(true)] object? Object)
         {
             return Object is RGBColor Color && this == Color;
+        }
+
+        public override int GetHashCode()
+        {
+            return R | (G << 8) | (B << 16);
         }
 
 
@@ -137,6 +139,7 @@ namespace Zion
             }
             return new RGBColor(Result[0], Result[1], Result[2]);
         }
+
         public static bool TryParse(string String, out RGBColor Color)
         {
             try
@@ -158,6 +161,7 @@ namespace Zion
             Writer.Write(G);
             Writer.Write(B);
         }
+
         public static RGBColor Read(BinaryReader Reader)
         {
             return new RGBColor
