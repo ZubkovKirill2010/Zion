@@ -1,4 +1,4 @@
-﻿namespace Zion
+﻿namespace Zion.FileSystem
 {
     public static class FilePath
     {
