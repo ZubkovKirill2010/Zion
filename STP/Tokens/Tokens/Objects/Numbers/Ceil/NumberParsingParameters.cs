@@ -5,7 +5,7 @@ namespace Zion.STP
     public readonly record struct NumberParsingParameters<T>
     (
         bool OnlyPositive,
-        bool HasMaxValue,
+        bool HasLimits,
         int BitCount,
 
         T MinValue,

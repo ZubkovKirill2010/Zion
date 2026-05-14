@@ -4,12 +4,74 @@ namespace Zion
 {
     public static class EnumerableExtensions
     {
-        public static int Summarize(this IEnumerable<int> Enumerable) => Enumerable.Summarize(i => i);
-        public static double Summarize(this IEnumerable<double> Enumerable) => Enumerable.Summarize(d => d);
+        public static int Average(this IEnumerable<int> Enumerable)
+        {
+            return Enumerable.Average(i => i);
+        }
 
-        public static int Average(this IEnumerable<int> Enumerable) => Enumerable.Average(i => i);
-        public static float Average(this IEnumerable<float> Enumerable) => Enumerable.Average(i => i);
-        public static double Average(this IEnumerable<double> Enumerable) => Enumerable.Average(i => i);
+        public static float Average(this IEnumerable<float> Enumerable)
+        {
+            return Enumerable.Average(i => i);
+        }
+
+        public static double Average(this IEnumerable<double> Enumerable)
+        {
+            return Enumerable.Average(i => i);
+        }
+
+
+        public static int Average<T>(this IEnumerable<T> Enumerable, Func<T, int> ToInt)
+        {
+            int Result = 0;
+            int Count = 0;
+
+            foreach (T Item in Enumerable)
+            {
+                Result += ToInt(Item);
+                Count++;
+            }
+
+            return Result / Count;
+        }
+
+        public static float Average<T>(this IEnumerable<T> Enumerable, Func<T, float> ToFloat)
+        {
+            float Result = 0;
+            int Count = 0;
+
+            foreach (T Item in Enumerable)
+            {
+                Result += ToFloat(Item);
+                Count++;
+            }
+
+            return Result / Count;
+        }
+
+        public static double Average<T>(this IEnumerable<T> Enumerable, Func<T, double> ToDouble)
+        {
+            double Result = 0;
+            int Count = 0;
+
+            foreach (T Item in Enumerable)
+            {
+                Result += ToDouble(Item);
+                Count++;
+            }
+
+            return Result / Count;
+        }
+
+
+        public static int Summarize(this IEnumerable<int> Enumerable)
+        {
+            return Enumerable.Summarize(i => i);
+        }
+
+        public static double Summarize(this IEnumerable<double> Enumerable)
+        {
+            return Enumerable.Summarize(d => d);
+        }
 
 
         /// <summary>
@@ -40,73 +102,6 @@ namespace Zion
             return Count;
         }
 
-
-        public static int Average<T>(this IEnumerable<T> Enumerable, Func<T, int> ToInt)
-        {
-            int Result = 0;
-            int Count = 0;
-
-            foreach (T Item in Enumerable)
-            {
-                Result += ToInt(Item);
-                Count++;
-            }
-
-            return Result / Count;
-        }
-        public static float Average<T>(this IEnumerable<T> Enumerable, Func<T, float> ToFloat)
-        {
-            float Result = 0;
-            int Count = 0;
-
-            foreach (T Item in Enumerable)
-            {
-                Result += ToFloat(Item);
-                Count++;
-            }
-
-            return Result / Count;
-        }
-
-        public static double Average<T>(this IEnumerable<T> Enumerable, Func<T, double> ToDouble)
-        {
-            double Result = 0;
-            int Count = 0;
-
-            foreach (T Item in Enumerable)
-            {
-                Result += ToDouble(Item);
-                Count++;
-            }
-
-            return Result / Count;
-        }
-
-
-        /// <summary>
-        /// Determines whether all elements satisfy a condition.
-        /// </summary>
-        /// <typeparam name="T">The type of elements in the collection.</typeparam>
-        /// <param name="Enumerable">The source collection.</param>
-        /// <param name="Condition">A predicate to test each element.</param>
-        /// <returns>
-        /// <c>true</c> if every element passes the condition; otherwise, <c>false</c>.
-        /// </returns>
-        /// <exception cref="ArgumentNullException">Thrown if <paramref name="Enumerable"/> or <paramref name="Condition"/> is null.</exception>
-        public static bool TrueForAll<T>(this IEnumerable<T> Enumerable, Predicate<T> Condition)
-        {
-            ArgumentNullException.ThrowIfNull(Enumerable);
-            ArgumentNullException.ThrowIfNull(Condition);
-
-            foreach (T Item in Enumerable)
-            {
-                if (!Condition(Item))
-                {
-                    return false;
-                }
-            }
-            return true;
-        }
 
         /// <summary>
         /// Determines whether no elements satisfy a condition.
@@ -153,6 +148,7 @@ namespace Zion
                 Action(Item);
             }
         }
+
 
         /// <summary>
         /// Repeats elements from the collection until a condition fails (lazy evaluation).
@@ -231,6 +227,7 @@ namespace Zion
             }
         }
 
+
         public static bool HasAtLeast<T>(this IEnumerable<T> Enumberable, int MinCount)
         {
             ArgumentNullException.ThrowIfNull(Enumberable);
@@ -245,21 +242,6 @@ namespace Zion
                 }
             }
             return false;
-        }
-
-
-        public static bool IsNullOrEmpty<T>([NotNullWhen(false)] this IEnumerable<T> Enumerable)
-        {
-            return Enumerable is null || IsEmpty(Enumerable);
-        }
-
-        public static bool IsEmpty<T>(this IEnumerable<T> Enumerable)
-        {
-            foreach (T Item in Enumerable)
-            {
-                return false;
-            }
-            return true;
         }
 
         public static T[] ToArray<T>(this IEnumerable<T> Enumerable, int Count)
@@ -280,7 +262,30 @@ namespace Zion
             return Array;
         }
 
-        public static IEnumerable<T> NotNullable<T>(this IEnumerable<T?> Enumerable)
+
+        public static bool IsNullOrEmpty<T>([NotNullWhen(false)] this IEnumerable<T> Enumerable)
+        {
+            return Enumerable is null || IsEmpty(Enumerable);
+        }
+
+        public static bool IsEmpty<T>(this IEnumerable<T> Enumerable)
+        {
+            foreach (T Item in Enumerable)
+            {
+                return false;
+            }
+            return true;
+        }
+
+
+        public static bool Begins<T>(this IEnumerable<T> Enumerable, IEnumerable<T> Target, Func<T, T, bool>? Equals)
+        {
+            Equals ??= static (A, B) => A?.Equals(B) ?? false;
+            return ZEnumerable.ToPair(Enumerable.NotNull(), Target.NotNull()).All(Pair => Equals(Pair.Item1, Pair.Item2));
+        }
+
+
+        public static IEnumerable<T> WhereNotNull<T>(this IEnumerable<T?> Enumerable)
         {
             ArgumentNullException.ThrowIfNull(Enumerable);
 
@@ -290,6 +295,31 @@ namespace Zion
                 {
                     yield return Item;
                 }
+            }
+        }
+
+        public static IEnumerable<TOut> WhereIs<TIn, TOut>(this IEnumerable<TIn> Enumerable)
+        {
+            foreach (TIn Item in Enumerable)
+            {
+                if (Item is TOut Target)
+                {
+                    yield return Target;
+                }
+            }
+        }
+
+
+        public static IEnumerable<T> Repeat<T>(this T Value, int Count)
+        {
+            ArgumentOutOfRangeException.ThrowIfNegative(Count);
+            if (Count == 0) { yield break; }
+
+            int Index = 0;
+            while (Index != Count)
+            {
+                yield return Value;
+                Index++;
             }
         }
 
@@ -312,38 +342,6 @@ namespace Zion
                     yield break;
                 }
 
-                yield return Value;
-                Index++;
-            }
-        }
-
-
-        public static bool Begins<T>(this IEnumerable<T> Enumerable, IEnumerable<T> Target, Func<T, T, bool>? Equals)
-        {
-            Equals ??= static (A, B) => A?.Equals(B) ?? false;
-            return ZEnumerable.ToPair(Enumerable.NotNull(), Target.NotNull()).All(Pair => Equals(Pair.Item1, Pair.Item2));
-        }
-
-
-        public static string ToEnumerableString<T>(this IEnumerable<T> Enumerable)
-        {
-            return $"[{string.Join(", ", Enumerable)}]";
-        }
-
-        public static string ToString<T>(this IEnumerable<T> Enumerable, Func<T, string> ToString)
-        {
-            return $"[{string.Join(", ", Enumerable.Select(ToString))}]";
-        }
-
-
-        public static IEnumerable<T> Repeat<T>(this T Value, int Count)
-        {
-            ArgumentOutOfRangeException.ThrowIfNegative(Count);
-            if (Count == 0) { yield break; }
-
-            int Index = 0;
-            while (Index != Count)
-            {
                 yield return Value;
                 Index++;
             }

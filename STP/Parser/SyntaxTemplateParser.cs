@@ -1,12 +1,12 @@
 ﻿namespace Zion.STP
 {
-    //Text -> TokenList -> Nodes --(Semantic checking)-> Result
-    public sealed class SyntaxTemplateParser<T, Node> where Node : STP.Node
+    //Text -> TokenList -> Nodes --(SemanticData checking)-> Result
+    public sealed class SyntaxTemplateParser<Result, Node, SemanticData> where Node : STP.Node where SemanticData : class, new()
     {
         private readonly TextSource Source;
         private readonly ITokenReader[] TokenReaders;
-        private readonly INodeReader<Node>[] NodeReaders;
-        private readonly IParsingResult<T, Node> ResultConverter;
+        private readonly INodeReader<Node, SemanticData>[] NodeReaders;
+        private readonly IParsingResult<Result, Node> ResultConverter;
 
         public RecoveryStrategy TokenRecoveryStrategy { get; init; } = RecoveryStrategy.Abort;
         public RecoveryStrategy NodeRecoveryStrategy { get; init; } = RecoveryStrategy.Abort;
@@ -16,12 +16,11 @@
             private get;
             init => field = value.NotNull();
         } = SkipCharTokenErrorHandler.Instance;
-        public INodeErrorHandler<Node>? NodeErrorHandler
+        public INodeErrorHandler<Node, SemanticData>? NodeErrorHandler
         {
             private get;
             init => field = value.NotNull();
         }
-
 
         public int TokensCapacity
         {
@@ -35,22 +34,23 @@
         } = 10;
 
 
+
         public SyntaxTemplateParser(TextSource Source,
                                     ICollection<ITokenReader> TokenReaders,
-                                    ICollection<INodeReader<Node>> NodeReaders,
-                                    IParsingResult<T, Node> Result)
+                                    ICollection<INodeReader<Node, SemanticData>> NodeReaders,
+                                    IParsingResult<Result, Node> Result)
         {
             ArgumentException.ThrowIf(TokenReaders.Count == 0, "TokenReaders not transmitted (Count = 0)");
-            ArgumentException.ThrowIf(NodeReaders.Count == 0, "NodeReaders not transmitted (Count = 0)");
+            ArgumentException.ThrowIf(NodeReaders.Count == 0,  "NodeReaders not transmitted (Count = 0)" );
 
-            ResultConverter = Result.NotNull();
-            this.Source = Source.NotNull();
+            ResultConverter   = Result.NotNull();
+            this.Source       = Source.NotNull();
             this.TokenReaders = ZArray.FromCollection(TokenReaders);
-            this.NodeReaders = ZArray.FromCollection(NodeReaders);
+            this.NodeReaders  = ZArray.FromCollection(NodeReaders);
         }
 
 
-        public bool Parse(out ParsingResult<T> Result)
+        public bool Parse(out ParsingResult<Result> Result)
         {
             if (!ReadTokens(out List<Token>? Tokens, out TokenErrors TokenErrors))
             {
@@ -58,15 +58,17 @@
                 return false;
             }
 
-            if (!ReadNodes(Tokens, out List<Node>? Nodes, out NodeErrors NodeErrors))
+            if (!ReadNodes(Tokens, out List<Node>? Nodes, out SemanticData SemanticData, out NodeErrors NodeErrors))
             {
                 Result = default!;
                 return false;
             }
 
-            if (ResultConverter.GetResult(new NodeSource<Node>(Nodes), out T ParsingResult))
+            HandleSemantic(SemanticData);
+
+            if (ResultConverter.GetResult(new NodeSource<Node>(Nodes), out Result ParsingResult))
             {
-                Result = new ParsingResult<T>
+                Result = new ParsingResult<Result>
                 (
                     ParsingResult,
                     new TokenSlice(Tokens, 0),
@@ -75,7 +77,7 @@
                 return true;
             }
 
-            Result = new ParsingResult<T>();
+            Result = new ParsingResult<Result>();
             return false;
         }
 
@@ -158,9 +160,10 @@
             return true;
         }
 
-        public bool ReadNodes(List<Token> Tokens, out List<Node> Nodes, out NodeErrors Errors)
+        public bool ReadNodes(List<Token> Tokens, out List<Node> Nodes, out SemanticData SemanticData, out NodeErrors Errors)
         {
             Nodes = new List<Node>(NodesCapacity);
+            SemanticData = new SemanticData();
 
             List<int> InvalidNodes = new List<int>(5);
             List<int> ErrorNodes = new List<int>(5);
@@ -174,10 +177,15 @@
             {
                 NodeReaded = false;
 
-                foreach (INodeReader<Node> Reader in NodeReaders)
+                foreach (INodeReader<Node, SemanticData> Reader in NodeReaders)
                 {
-                    if (Reader.Read(GetTokenSlice(), out Node Node) && Node is not null)
+                    if (Reader.Read(GetTokenSlice(), SemanticData, out Node Node) && Node is not null)
                     {
+                        if (Node is VerifableNode<SemanticData> VerifableNode)
+                        {
+                            Verification += VerifableNode.Verificate;
+                        }
+
                         Start += Node.TokensCount;
                         NodeReaded = true;
                         Nodes.Add(Node);
@@ -189,7 +197,7 @@
                 {
                     if (NodeRecoveryStrategy == RecoveryStrategy.Synchronize && NodeErrorHandler is not null)
                     {
-                        Node ErrorNode = NodeErrorHandler.Handle(GetTokenSlice());
+                        Node ErrorNode = NodeErrorHandler.Handle(GetTokenSlice(), SemanticData);
 
                         ErrorNodes.Add(Nodes.Count);
                         Nodes.Add(ErrorNode);
@@ -204,6 +212,22 @@
 
             Errors = new NodeErrors();
             return true;
+        }
+
+        public void HandleSemantic(List<Node> Nodes, SemanticData SemanticData)
+        {
+            foreach (VerifableNode<SemanticData> Node
+                in Nodes.WhereIs<Node, VerifableNode<SemanticData>>())
+            {
+                Validation OldStatus = Node.Status;
+
+                Node.Verificate(SemanticData);
+
+                if (Node.Status != OldStatus)
+                {
+
+                }
+            }
         }
     }
 }

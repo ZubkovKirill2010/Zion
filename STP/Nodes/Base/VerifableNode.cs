@@ -1,7 +1,7 @@
 ﻿namespace Zion.STP
 {
-    public abstract class VerifableNode<S> : Node where S : ISemanticData
+    public abstract class VerifableNode<SemanticData> : Node where SemanticData : class
     {
-        public abstract void Verificate(S Data);
+        public abstract void Verificate(SemanticData Data);
     }
 }

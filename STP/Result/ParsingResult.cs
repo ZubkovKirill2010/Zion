@@ -10,18 +10,18 @@
     public readonly record struct ParsingErrors
     (
         TokenErrors TokenErrors,
-        NodeErrors NodeErrors
+        NodeErrors  NodeErrors
     );
 
     public readonly record struct TokenErrors
     (
-        int[] InvalidTokens,
-        int[] ErrorTokens
+        int[] InvalidTokens, //Токены с внутренней ошибкой.
+        int[] ErrorTokens   //Токены которых не существует
     );
 
     public readonly record struct NodeErrors
     (
-        int[] InvalidNodes,
-        int[] ErrorNodes
+        int[] InvalidNodes,//Ноды содержащие InvalidTokens / токены не прошедшие семантическую проверку
+        int[] ErrorNodes  // Ноды содержащие ErrorTokens
     );
 }
