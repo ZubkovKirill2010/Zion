@@ -1,6 +1,6 @@
 ﻿namespace Zion.STP
 {
-    public readonly struct SkipToBreakToken<N> : INodeErrorHandler<N> where N : Node, new()
+    public readonly struct SkipToBreakToken<N, SemanticData> : INodeErrorHandler<N, SemanticData> where N : Node, new() where SemanticData : class
     {
         private readonly HashSet<Type> BreakTokens;
 
@@ -9,7 +9,7 @@
             this.BreakTokens = BreakTokens.ToHashSet();
         }
 
-        public N Handle(TokenSlice Tokens)
+        public N Handle(TokenSlice Tokens, SemanticData SemanticData)
         {
             for (int i = 0; i < Tokens.Count; i++)
             {

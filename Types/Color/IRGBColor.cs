@@ -2,8 +2,8 @@
 {
     public interface IRGBColor : IBinaryWritable
     {
-        public byte R { get; set; }
-        public byte G { get; set; }
-        public byte B { get; set; }
+        byte R { get; set; }
+        byte G { get; set; }
+        byte B { get; set; }
     }
 }

@@ -2,6 +2,6 @@
 {
     public interface ITokenMatcher
     {
-        public bool Match(Token Token, out bool GoToNext);
+        bool Match(Token Token, out bool GoToNext);
     }
 }

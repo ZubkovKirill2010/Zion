@@ -68,7 +68,7 @@ namespace Zion
 
         public override string ToString()
         {
-            return this.ToEnumerableString();
+            return StringFormatter.ToString(this);
         }
 
         public override bool Equals(object? Object)

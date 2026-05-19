@@ -10,6 +10,7 @@
                 field = value > 0 ? value : throw new ArgumentOutOfRangeException($"Node.TokensCount(={TokensCount}) <= 0");
             }
         }
+
         public Validation Status
         {
             get;
@@ -21,6 +22,12 @@
                     StatusChanged?.Invoke(value);
                 }
             }
+        }
+
+        public Symbol Semantic
+        {
+            get;
+            init => field = value.NotNull();
         }
 
         public event Action<Validation>? StatusChanged;

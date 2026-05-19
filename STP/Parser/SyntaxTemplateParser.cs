@@ -1,11 +1,11 @@
 ﻿namespace Zion.STP
 {
-    //Text -> TokenList -> Nodes --(SemanticData checking)-> Result
-    public sealed class SyntaxTemplateParser<Result, Node, SemanticData> where Node : STP.Node where SemanticData : class, new()
+    //Text -> Tokens -> Nodes -> Semantic verification -> Result
+    public sealed class SyntaxTemplateParser<Result, Node> where Node : STP.Node
     {
         private readonly TextSource Source;
         private readonly ITokenReader[] TokenReaders;
-        private readonly INodeReader<Node, SemanticData>[] NodeReaders;
+        private readonly INodeReader<Node>[] NodeReaders;
         private readonly IParsingResult<Result, Node> ResultConverter;
 
         public RecoveryStrategy TokenRecoveryStrategy { get; init; } = RecoveryStrategy.Abort;
@@ -37,16 +37,16 @@
 
         public SyntaxTemplateParser(TextSource Source,
                                     ICollection<ITokenReader> TokenReaders,
-                                    ICollection<INodeReader<Node, SemanticData>> NodeReaders,
+                                    ICollection<INodeReader<Node>> NodeReaders,
                                     IParsingResult<Result, Node> Result)
         {
             ArgumentException.ThrowIf(TokenReaders.Count == 0, "TokenReaders not transmitted (Count = 0)");
-            ArgumentException.ThrowIf(NodeReaders.Count == 0,  "NodeReaders not transmitted (Count = 0)" );
+            ArgumentException.ThrowIf(NodeReaders.Count == 0, "NodeReaders not transmitted (Count = 0)");
 
-            ResultConverter   = Result.NotNull();
-            this.Source       = Source.NotNull();
+            ResultConverter = Result.NotNull();
+            this.Source = Source.NotNull();
             this.TokenReaders = ZArray.FromCollection(TokenReaders);
-            this.NodeReaders  = ZArray.FromCollection(NodeReaders);
+            this.NodeReaders = ZArray.FromCollection(NodeReaders);
         }
 
 
@@ -58,13 +58,17 @@
                 return false;
             }
 
-            if (!ReadNodes(Tokens, out List<Node>? Nodes, out SemanticData SemanticData, out NodeErrors NodeErrors))
+            if (!ReadNodes(Tokens, out List<Node> Nodes, out SemanticData SemanticData, out NodeErrors NodeErrors))
             {
                 Result = default!;
                 return false;
             }
 
-            HandleSemantic(SemanticData);
+            if (!HandleSemantic(Nodes, SemanticData))
+            {
+                Result = default!;
+                return false;
+            }
 
             if (ResultConverter.GetResult(new NodeSource<Node>(Nodes), out Result ParsingResult))
             {
@@ -177,14 +181,14 @@
             {
                 NodeReaded = false;
 
-                foreach (INodeReader<Node, SemanticData> Reader in NodeReaders)
+                foreach (INodeReader<Node> Reader in NodeReaders)
                 {
-                    if (Reader.Read(GetTokenSlice(), SemanticData, out Node Node) && Node is not null)
+                    if (Reader.Read(GetTokenSlice(), out Node Node) && Node is not null)
                     {
-                        if (Node is VerifableNode<SemanticData> VerifableNode)
-                        {
-                            Verification += VerifableNode.Verificate;
-                        }
+                        //if (Node is VerifableNode VerifableNode)
+                        //{
+                            //Verification += VerifableNode.Verificate;
+                        //}
 
                         Start += Node.TokensCount;
                         NodeReaded = true;
@@ -214,20 +218,9 @@
             return true;
         }
 
-        public void HandleSemantic(List<Node> Nodes, SemanticData SemanticData)
+        public bool HandleSemantic(List<Node> Nodes, SemanticData SemanticData)
         {
-            foreach (VerifableNode<SemanticData> Node
-                in Nodes.WhereIs<Node, VerifableNode<SemanticData>>())
-            {
-                Validation OldStatus = Node.Status;
 
-                Node.Verificate(SemanticData);
-
-                if (Node.Status != OldStatus)
-                {
-
-                }
-            }
         }
     }
 }

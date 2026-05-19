@@ -9,6 +9,6 @@
         /// <summary>
         /// Deserializes the object from binary stream.
         /// </summary>
-        abstract static T Read(BinaryReader Reader);
+        static abstract T Read(BinaryReader Reader);
     }
 }

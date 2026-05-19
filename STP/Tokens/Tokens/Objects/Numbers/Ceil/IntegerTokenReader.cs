@@ -19,9 +19,9 @@ namespace Zion.STP
 
             if (Parameters.HasLimits)
             {
-                BinaryCache      = new Lazy<OverflowCache<I>>(() => new OverflowCache<I>(Parameters, 2));
-                OctalCache       = new Lazy<OverflowCache<I>>(() => new OverflowCache<I>(Parameters, 8));
-                DecimalCache     = new Lazy<OverflowCache<I>>(() => new OverflowCache<I>(Parameters, 10));
+                BinaryCache = new Lazy<OverflowCache<I>>(() => new OverflowCache<I>(Parameters, 2));
+                OctalCache = new Lazy<OverflowCache<I>>(() => new OverflowCache<I>(Parameters, 8));
+                DecimalCache = new Lazy<OverflowCache<I>>(() => new OverflowCache<I>(Parameters, 10));
                 HexadecimalCache = new Lazy<OverflowCache<I>>(() => new OverflowCache<I>(Parameters, 16));
             }
         }

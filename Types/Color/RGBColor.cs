@@ -81,7 +81,7 @@ namespace Zion
         {
             return $"({R}, {G}, {B})";
         }
-        
+
         public override bool Equals([NotNullWhen(true)] object? Object)
         {
             return Object is RGBColor Color && this == Color;

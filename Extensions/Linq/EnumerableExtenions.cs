@@ -298,17 +298,6 @@ namespace Zion
             }
         }
 
-        public static IEnumerable<TOut> WhereIs<TIn, TOut>(this IEnumerable<TIn> Enumerable)
-        {
-            foreach (TIn Item in Enumerable)
-            {
-                if (Item is TOut Target)
-                {
-                    yield return Target;
-                }
-            }
-        }
-
 
         public static IEnumerable<T> Repeat<T>(this T Value, int Count)
         {

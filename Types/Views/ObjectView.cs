@@ -156,7 +156,7 @@ namespace Zion
             return Begins(Start, Target, Target.Length, Equals);
         }
 
-        internal protected bool Begins(int Start, IEnumerable<T> Target, int Count, Func<T, T, bool>? Equals = null)
+        protected internal bool Begins(int Start, IEnumerable<T> Target, int Count, Func<T, T, bool>? Equals = null)
         {
             ArgumentNullException.ThrowIfNull(Target);
 

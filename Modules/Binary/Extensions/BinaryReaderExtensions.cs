@@ -13,6 +13,25 @@
         }
 
 
+        public static ushort ReadUInt16BigEndian(this BinaryReader reader)
+        {
+            ushort B1 = reader.ReadByte();
+            ushort B2 = reader.ReadByte();
+
+            return (ushort)((B1 << 8) | B2);
+        }
+
+        public static uint ReadUInt32BigEndian(this BinaryReader reader)
+        {
+            uint B1 = reader.ReadByte();
+            uint B2 = reader.ReadByte();
+            uint B3 = reader.ReadByte();
+            uint B4 = reader.ReadByte();
+
+            return (B1 << 24) | (B2 << 16) | (B3 << 8) | B4;
+        }
+
+
         public static T[] ReadArray<T>(this BinaryReader Reader) where T : IBinarySerializable<T>
         {
             return ReadArray(Reader, T.Read, Reader.ReadInt32());
