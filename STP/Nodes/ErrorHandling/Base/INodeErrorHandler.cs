@@ -1,7 +1,7 @@
 ﻿namespace Zion.STP
 {
-    public interface INodeErrorHandler<N, SemanticData> where N : Node where SemanticData : class
+    public interface INodeErrorHandler<N> where N : Node
     {
-        N Handle(TokenSlice Tokens, SemanticData SemanticData);
+        public N Handle(TokenSlice Tokens);
     }
 }

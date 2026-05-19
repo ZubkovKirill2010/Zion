@@ -24,12 +24,8 @@
             }
         }
 
-        public Symbol Semantic
-        {
-            get;
-            init => field = value.NotNull();
-        }
-
         public event Action<Validation>? StatusChanged;
+
+        public virtual Symbol? GetSymbol() => null;
     }
 }

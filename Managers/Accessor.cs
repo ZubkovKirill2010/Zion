@@ -95,6 +95,15 @@ namespace Zion
             return Value;
         }
 
+        public static void AddIfNotNull<T>(this ICollection<T> Collection, T? Value)
+        {
+            if (Value is not null)
+            {
+                Collection.NotNull().Add(Value);
+            }
+        }
+
+
         public static I AddAndReturn<T, I>(this T Collection, in I Item) where T : ICollection<I>
         {
             Collection.Add(Item);

@@ -1,22 +1,18 @@
 ﻿namespace Zion.STP
 {
     //Text -> Tokens -> Nodes -> Semantic verification -> Result
-    public sealed class SyntaxTemplateParser<Result, Node> where Node : STP.Node
+    public sealed class SyntaxTemplateParser<Node> where Node : STP.Node
     {
         private readonly TextSource Source;
         private readonly ITokenReader[] TokenReaders;
         private readonly INodeReader<Node>[] NodeReaders;
-        private readonly IParsingResult<Result, Node> ResultConverter;
 
-        public RecoveryStrategy TokenRecoveryStrategy { get; init; } = RecoveryStrategy.Abort;
-        public RecoveryStrategy NodeRecoveryStrategy { get; init; } = RecoveryStrategy.Abort;
-
-        public ITokenErrorHandler TokenErrorHandler
+        public required ITokenErrorHandler TokenErrorHandler
         {
             private get;
             init => field = value.NotNull();
         } = SkipCharTokenErrorHandler.Instance;
-        public INodeErrorHandler<Node, SemanticData>? NodeErrorHandler
+        public required INodeErrorHandler<Node> NodeErrorHandler
         {
             private get;
             init => field = value.NotNull();
@@ -34,63 +30,43 @@
         } = 10;
 
 
+        public Func<Symbol>? RootSymbol { get; init; }
+
 
         public SyntaxTemplateParser(TextSource Source,
                                     ICollection<ITokenReader> TokenReaders,
-                                    ICollection<INodeReader<Node>> NodeReaders,
-                                    IParsingResult<Result, Node> Result)
+                                    ICollection<INodeReader<Node>> NodeReaders)
         {
             ArgumentException.ThrowIf(TokenReaders.Count == 0, "TokenReaders not transmitted (Count = 0)");
             ArgumentException.ThrowIf(NodeReaders.Count == 0, "NodeReaders not transmitted (Count = 0)");
 
-            ResultConverter = Result.NotNull();
             this.Source = Source.NotNull();
             this.TokenReaders = ZArray.FromCollection(TokenReaders);
             this.NodeReaders = ZArray.FromCollection(NodeReaders);
         }
 
 
-        public bool Parse(out ParsingResult<Result> Result)
+        public ParsingResult<Node> Parse()
         {
-            if (!ReadTokens(out List<Token>? Tokens, out TokenErrors TokenErrors))
-            {
-                Result = default!;
-                return false;
-            }
+            TokenParsingResult Tokens = ReadTokens();
+            NodeParsingResult<Node> Nodes = ReadNodes(Tokens.Tokens);
 
-            if (!ReadNodes(Tokens, out List<Node> Nodes, out SemanticData SemanticData, out NodeErrors NodeErrors))
-            {
-                Result = default!;
-                return false;
-            }
+            HandleSemantic(Nodes);
 
-            if (!HandleSemantic(Nodes, SemanticData))
-            {
-                Result = default!;
-                return false;
-            }
-
-            if (ResultConverter.GetResult(new NodeSource<Node>(Nodes), out Result ParsingResult))
-            {
-                Result = new ParsingResult<Result>
-                (
-                    ParsingResult,
-                    new TokenSlice(Tokens, 0),
-                    new ParsingErrors(TokenErrors, NodeErrors)
-                );
-                return true;
-            }
-
-            Result = new ParsingResult<Result>();
-            return false;
+            return new ParsingResult<Node>
+            (
+                new ListView<Token>(Tokens.Tokens),
+                new ListView<Node>(Nodes.Nodes),
+                new ParsingErrors(Tokens.Errors, Nodes.Errors)
+            );
         }
 
 
-        public bool ReadTokens(out List<Token> Tokens, out TokenErrors Errors)
+        public TokenParsingResult ReadTokens()
         {
             TextSource Source = this.Source.BeginNew();
 
-            List<Token> TokenList = new List<Token>(TokensCapacity);
+            List<Token> Tokens = new List<Token>(TokensCapacity);
 
             List<int> InvalidTokens = new List<int>(5);
             List<int> ErrorTokens = new List<int>(5);
@@ -99,15 +75,15 @@
             {
                 if (Token.Status == Validation.Invalid)
                 {
-                    InvalidTokens.Add(TokenList.Count);
+                    InvalidTokens.Add(Tokens.Count);
                 }
-                TokenList.Add(Token);
+                Tokens.Add(Token);
             }
 
             void AddErrorToken(ErrorToken Token)
             {
-                ErrorTokens.Add(TokenList.Count);
-                TokenList.Add(Token);
+                ErrorTokens.Add(Tokens.Count);
+                Tokens.Add(Token);
             }
 
             while (!Source.IsEnd)
@@ -133,44 +109,33 @@
 
                 if (!TokenReaded)
                 {
-                    if (TokenRecoveryStrategy == RecoveryStrategy.Synchronize)
+                    TokenErrorHandler.Handle(ref Source, out ErrorToken ErrorToken);
+
+                    if (Tokens.Count != 0 && Tokens[^1] is ErrorToken LastErrorToken)
                     {
-                        TokenErrorHandler.Handle(ref Source, out ErrorToken ErrorToken);
-
-                        if (TokenList.Count != 0 && TokenList[^1] is ErrorToken LastErrorToken)
+                        Tokens[^1] = new ErrorToken()
                         {
-                            TokenList[^1] = new ErrorToken()
-                            {
-                                Length = LastErrorToken.Length + ErrorToken.Length
-                            };
-                        }
-                        else
-                        {
-                            AddErrorToken(ErrorToken);
-                        }
-
-                        continue;
+                            Length = LastErrorToken.Length + ErrorToken.Length
+                        };
                     }
-
-                    Tokens = default!;
-                    Errors = new TokenErrors(InvalidTokens.ToArray(), ErrorTokens.ToArray());
-                    return false;
+                    else
+                    {
+                        AddErrorToken(ErrorToken);
+                    }
                 }
             }
 
-            Tokens = TokenList;
-            Errors = new TokenErrors(InvalidTokens.ToArray(), ErrorTokens.ToArray());
-
-            return true;
+            return new TokenParsingResult(Tokens, new TokenErrors(InvalidTokens.ToArray(), ErrorTokens.ToArray()));
         }
 
-        public bool ReadNodes(List<Token> Tokens, out List<Node> Nodes, out SemanticData SemanticData, out NodeErrors Errors)
+        public NodeParsingResult<Node> ReadNodes(List<Token> Tokens)
         {
-            Nodes = new List<Node>(NodesCapacity);
-            SemanticData = new SemanticData();
+            List<Node> Nodes = new List<Node>(NodesCapacity);
+            List<Symbol> SemanticTree = new List<Symbol>(10);
 
             List<int> InvalidNodes = new List<int>(5);
-            List<int> ErrorNodes = new List<int>(5);
+
+            List<Verification> PendingVerifications = new List<Verification>();
 
             bool NodeReaded = false;
             int Start = 0;
@@ -185,10 +150,12 @@
                 {
                     if (Reader.Read(GetTokenSlice(), out Node Node) && Node is not null)
                     {
-                        //if (Node is VerifableNode VerifableNode)
-                        //{
-                            //Verification += VerifableNode.Verificate;
-                        //}
+                        SemanticTree.AddIfNotNull(Node.GetSymbol());
+
+                        if (Node is VerifiableNode Verifiable)
+                        {
+                            PendingVerifications.Add(Verifiable.Verificate);
+                        }
 
                         Start += Node.TokensCount;
                         NodeReaded = true;
@@ -199,28 +166,28 @@
 
                 if (!NodeReaded)
                 {
-                    if (NodeRecoveryStrategy == RecoveryStrategy.Synchronize && NodeErrorHandler is not null)
-                    {
-                        Node ErrorNode = NodeErrorHandler.Handle(GetTokenSlice(), SemanticData);
-
-                        ErrorNodes.Add(Nodes.Count);
-                        Nodes.Add(ErrorNode);
-
-                        continue;
-                    }
-
-                    Errors = new NodeErrors(InvalidNodes.ToArray(), [Nodes.Count]);
-                    return false;
+                    Node ErrorNode = NodeErrorHandler.Handle(GetTokenSlice());
+                    Nodes.Add(ErrorNode);
                 }
             }
 
-            Errors = new NodeErrors();
-            return true;
+            return new NodeParsingResult<Node>
+            (
+                Nodes,
+                new SemanticData(SemanticTree),
+                PendingVerifications,
+                new NodeErrors()
+            );
         }
 
-        public bool HandleSemantic(List<Node> Nodes, SemanticData SemanticData)
+        public void HandleSemantic(NodeParsingResult<Node> Nodes)
         {
+            SemanticData Semantic = Nodes.SemanticData;
 
+            foreach (Verification Verification in Nodes.PendingVerifications)
+            {
+                Verification.Invoke(Semantic);
+            }
         }
     }
 }

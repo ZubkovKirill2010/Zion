@@ -1,16 +1,16 @@
 ﻿namespace Zion.STP
 {
-    public readonly record struct ParsingResult<T>
+    public readonly record struct ParsingResult<Node>
     (
-        T Result,
-        TokenSlice Tokens,
+        ListView<Token> Tokens,
+        ListView<Node> Nodes,
         ParsingErrors Errors
-    );
+    ) where Node : STP.Node;
 
     public readonly record struct ParsingErrors
     (
         TokenErrors TokenErrors,
-        NodeErrors  NodeErrors
+        NodeErrors NodeErrors
     );
 
     public readonly record struct TokenErrors
