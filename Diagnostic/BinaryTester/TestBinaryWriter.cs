@@ -61,8 +61,8 @@ namespace Zion.Diagnostics
 
         public override void Write(string Value)
         {
-            int size = Value is not null ? 8 * Encoding.GetByteCount(Value) : 0;
-            Out<string>(size, Value ?? "null");
+            int Size = Value is not null ? 8 * Encoding.GetByteCount(Value) : 0;
+            Out<string>(Size, Value ?? "null");
             if (Writing)
             {
                 base.Write(Value);
@@ -89,8 +89,8 @@ namespace Zion.Diagnostics
 
         public override void Write(ReadOnlySpan<char> Chars)
         {
-            int size = 8 * Encoding.GetByteCount(Chars);
-            OutReadOnlySpanChar(size, Chars);
+            int Size = 8 * Encoding.GetByteCount(Chars);
+            OutReadOnlySpanChar(Size, Chars);
             base.Write(Chars);
         }
 
@@ -109,12 +109,12 @@ namespace Zion.Diagnostics
                 return;
             }
 
-            int size = 8 * Encoding.GetByteCount(Chars, Index, Count);
+            int Size = 8 * Encoding.GetByteCount(Chars, Index, Count);
             string content = Count > 50
                 ? $"Array[Length: {Chars.Length}], Index: {Index}, Count: {Count}, Content: \"{new string(Chars, Index, Math.Min(50, Count))}...\""
                 : $"Array[Length: {Chars.Length}], Index: {Index}, Count: {Count}, Content: \"{new string(Chars, Index, Count)}\"";
 
-            Out<char[]>(size, content);
+            Out<char[]>(Size, content);
             base.Write(Chars, Index, Count);
         }
 
@@ -184,8 +184,8 @@ namespace Zion.Diagnostics
 
         public override void Write(char Value)
         {
-            int size = 8 * Encoding.GetByteCount([Value]);
-            Out<char>(size, $"'{Value}' (Unicode: {(int)Value:X4})");
+            int Size = 8 * Encoding.GetByteCount([Value]);
+            Out<char>(Size, $"'{Value}' (Unicode: {(int)Value:X4})");
             if (Writing)
             {
                 base.Write(Value);
@@ -194,12 +194,12 @@ namespace Zion.Diagnostics
 
         public override void Write(byte[] Buffer)
         {
-            int size = (Buffer?.Length * 8) ?? 0;
+            int Size = (Buffer?.Length * 8) ?? 0;
             string binaryRepresentation = Buffer is not null
                 ? $"[{string.Join(' ', Buffer.Select(b => Convert.ToString(b, 2).PadLeft(8, '0')))}]"
                 : "null";
 
-            Out<byte[]>(size, $"Length: {Buffer?.Length ?? 0}, Binary: {binaryRepresentation}");
+            Out<byte[]>(Size, $"Length: {Buffer?.Length ?? 0}, Binary: {binaryRepresentation}");
             if (Writing)
             {
                 base.Write(Buffer);
@@ -235,8 +235,8 @@ namespace Zion.Diagnostics
 
         public override void Write(char[] Chars)
         {
-            int size = Chars is not null ? 8 * Encoding.GetByteCount(Chars) : 0;
-            Out<char[]>(size, $"Array[Length: {Chars?.Length ?? 0}], Content: \"{(Chars is not null ? new string(Chars) : "null")}\"");
+            int Size = Chars is not null ? 8 * Encoding.GetByteCount(Chars) : 0;
+            Out<char[]>(Size, $"Array[Length: {Chars?.Length ?? 0}], Content: \"{(Chars is not null ? new string(Chars) : "null")}\"");
             if (Writing)
             {
                 base.Write(Chars);
@@ -280,8 +280,8 @@ namespace Zion.Diagnostics
 
         private void Out<T>(int Size, object? Message)
         {
-            string sizeStr = Size >= 0 ? $"{Size}" : "variable";
-            Builder.AppendLine($"{sizeStr} | {typeof(T).Name} | {Message.ToNotNullString()}");
+            string SizeStr = Size >= 0 ? $"{Size}" : "variable";
+            Builder.AppendLine($"{SizeStr} | {typeof(T).Name} | {Message.ToNotNullString()}");
         }
 
         private void OutReadOnlySpanChar(int Size, ReadOnlySpan<char> Chars)

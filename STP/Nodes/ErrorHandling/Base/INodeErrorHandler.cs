@@ -1,7 +1,7 @@
 ﻿namespace Zion.STP
 {
-    public interface INodeErrorHandler<N> where N : Node
+    public interface INodeErrorHandler<Node> where Node : STP.Node
     {
-        public N Handle(TokenSlice Tokens);
+        public Node Handle(TokenSlice Tokens);
     }
 }

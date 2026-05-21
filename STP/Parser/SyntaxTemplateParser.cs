@@ -4,45 +4,28 @@
     public sealed class SyntaxTemplateParser<Node> where Node : STP.Node
     {
         private readonly TextSource Source;
+
         private readonly ITokenReader[] TokenReaders;
-        private readonly INodeReader<Node>[] NodeReaders;
+        private readonly ITokenErrorHandler TokenErrorHandler;
 
-        public required ITokenErrorHandler TokenErrorHandler
+        private readonly NodeParser<Node> NodeParser;
+       
+        private readonly int TokensCapacity; 
+
+        private readonly Func<Symbol>? RootSymbol;
+
+
+        public SyntaxTemplateParser(TextSource Source, ParsingContext<Node> Context)
         {
-            private get;
-            init => field = value.NotNull();
-        } = SkipCharTokenErrorHandler.Instance;
-        public required INodeErrorHandler<Node> NodeErrorHandler
-        {
-            private get;
-            init => field = value.NotNull();
-        }
-
-        public int TokensCapacity
-        {
-            get;
-            private init => field = Math.Max(5, value);
-        } = 20;
-        public int NodesCapacity
-        {
-            get;
-            private init => field = Math.Max(5, value);
-        } = 10;
-
-
-        public Func<Symbol>? RootSymbol { get; init; }
-
-
-        public SyntaxTemplateParser(TextSource Source,
-                                    ICollection<ITokenReader> TokenReaders,
-                                    ICollection<INodeReader<Node>> NodeReaders)
-        {
-            ArgumentException.ThrowIf(TokenReaders.Count == 0, "TokenReaders not transmitted (Count = 0)");
-            ArgumentException.ThrowIf(NodeReaders.Count == 0, "NodeReaders not transmitted (Count = 0)");
-
             this.Source = Source.NotNull();
-            this.TokenReaders = ZArray.FromCollection(TokenReaders);
-            this.NodeReaders = ZArray.FromCollection(NodeReaders);
+
+            TokenReaders = Context.TokenReadersArray;
+            TokenErrorHandler = Context.TokenErrorHandler;
+            TokensCapacity = Context.TokensCapacity;
+
+            NodeParser = new NodeParser<Node>(Context);
+
+            RootSymbol = Context.RootSymbol;
         }
 
 
@@ -130,54 +113,7 @@
 
         public NodeParsingResult<Node> ReadNodes(List<Token> Tokens)
         {
-            List<Node> Nodes = new List<Node>(NodesCapacity);
-            List<Symbol> SemanticTree = new List<Symbol>(10);
-
-            List<int> InvalidNodes = new List<int>(5);
-
-            List<Verification> PendingVerifications = new List<Verification>();
-
-            bool NodeReaded = false;
-            int Start = 0;
-
-            TokenSlice GetTokenSlice() => new TokenSlice(Tokens, Start);
-
-            while (Start < Tokens.Count)
-            {
-                NodeReaded = false;
-
-                foreach (INodeReader<Node> Reader in NodeReaders)
-                {
-                    if (Reader.Read(GetTokenSlice(), out Node Node) && Node is not null)
-                    {
-                        SemanticTree.AddIfNotNull(Node.GetSymbol());
-
-                        if (Node is VerifiableNode Verifiable)
-                        {
-                            PendingVerifications.Add(Verifiable.Verificate);
-                        }
-
-                        Start += Node.TokensCount;
-                        NodeReaded = true;
-                        Nodes.Add(Node);
-                        break;
-                    }
-                }
-
-                if (!NodeReaded)
-                {
-                    Node ErrorNode = NodeErrorHandler.Handle(GetTokenSlice());
-                    Nodes.Add(ErrorNode);
-                }
-            }
-
-            return new NodeParsingResult<Node>
-            (
-                Nodes,
-                new SemanticData(SemanticTree),
-                PendingVerifications,
-                new NodeErrors()
-            );
+            return NodeParser.Parse(Tokens);
         }
 
         public void HandleSemantic(NodeParsingResult<Node> Nodes)

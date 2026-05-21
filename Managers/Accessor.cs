@@ -82,17 +82,17 @@ namespace Zion
         }
 
         [return: NotNull]
-        public static T NotNull<T>(this T? Value, [CallerArgumentExpression("Value")] string? ParameterName = null) where T : class
+        public static T NotNull<T>(this T? Value, [CallerArgumentExpression(nameof(Value))] string? ParameterName = null) where T : class
         {
             ArgumentNullException.ThrowIfNull(Value, ParameterName);
             return Value;
         }
         [return: NotNull]
-        public static T NotNullOrEmpty<T, I>(this T? Value, [CallerArgumentExpression("Value")] string? ParameterName = null) where T : IEnumerable<I>
+        public static T NotNullOrEmpty<T, I>(this T? Collection, [CallerArgumentExpression(nameof(Collection))] string? ParameterName = null) where T : IEnumerable<I>
         {
-            ArgumentNullException.ThrowIfNull(Value, ParameterName);
-            ArgumentException.ThrowIf(Value.IsEmpty(), $"Enumerable is empty");
-            return Value;
+            ArgumentNullException.ThrowIfNull(Collection, ParameterName);
+            ArgumentException.ThrowIf(Collection.IsEmpty(), $"{ParameterName} is empty");
+            return Collection;
         }
 
         public static void AddIfNotNull<T>(this ICollection<T> Collection, T? Value)

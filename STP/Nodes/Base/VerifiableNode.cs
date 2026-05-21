@@ -1,6 +1,6 @@
 ﻿namespace Zion.STP
 {
-    public delegate bool Verification(SemanticData Semantic);
+    public delegate void Verification(SemanticData Semantic);
 
     public abstract class VerifiableNode : Node
     {

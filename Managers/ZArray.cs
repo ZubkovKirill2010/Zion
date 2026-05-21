@@ -24,6 +24,23 @@
             return Result;
         }
 
+        public static T[] Add<T>(T[] Array, T Value)
+        {
+            ArgumentNullException.ThrowIfNull(Array);
+
+            int Length = Array.Length;
+            if (Length == 0) { return [Value]; }
+
+            T[] Result = new T[Length + 1];
+            for (int i = 0; i < Length; i++)
+            {
+                Result[i] = Array[i];
+            }
+            Result[Length] = Value;
+
+            return Result;
+        }
+
         public static void Repeat(Action Action, int Count)
         {
             for (int i = 0; i < Count; i++)

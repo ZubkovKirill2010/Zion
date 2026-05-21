@@ -27,5 +27,7 @@
         public event Action<Validation>? StatusChanged;
 
         public virtual Symbol? GetSymbol() => null;
+
+        public virtual void ApplyFormat(TokenSlice Tokens) { }
     }
 }

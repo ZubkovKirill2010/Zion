@@ -10,22 +10,38 @@ namespace Zion.STP
         public readonly int Count;
 
 
+        public TokenSlice(List<Token> Source, int Start)
+        {
+            ArgumentOutOfRangeException.ThrowIfWithout(Start, Source.Count);
+
+            this.Source = Source;
+            this.Count = Source.Count - Start;
+            this.Start = Start;
+        }
+
+        public TokenSlice(List<Token> Source, int Start, int Count)
+            : this(Source, Start)
+        {
+            ArgumentOutOfRangeException.ThrowIfWithout(Count, this.Count);
+
+            this.Count = Count;
+        }
+        
         public TokenSlice(TokenSlice Source, int Start)
         {
             ArgumentOutOfRangeException.ThrowIfWithout(Start, Source.Count);
 
             this.Source = Source.Source;
-            Count = Source.Count - Start;
+            this.Count = Source.Count - Start;
             this.Start = Source.Start + Start;
         }
 
-        public TokenSlice(List<Token> Source, int Start)
+        public TokenSlice(TokenSlice Source, int Start, int Count)
+            : this(Source, Start)
         {
-            ArgumentOutOfRangeException.ThrowIfWithout(Start, Source);
+            ArgumentOutOfRangeException.ThrowIfWithout(Count, this.Count);
 
-            this.Source = Source.NotNull();
-            Count = Source.Count - Start;
-            this.Start = Start;
+            this.Count = Count;
         }
 
 
