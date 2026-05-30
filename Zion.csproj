@@ -19,8 +19,4 @@
     <None Remove="README.md" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="STP\Semantic\Symbols\" />
-  </ItemGroup>
-
 </Project>

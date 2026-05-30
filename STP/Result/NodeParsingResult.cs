@@ -4,7 +4,6 @@
     (
         List<Node> Nodes,
         SemanticData SemanticData,
-        List<Verification> PendingVerifications,
         NodeErrors Errors
     ) where Node : STP.Node;
 }

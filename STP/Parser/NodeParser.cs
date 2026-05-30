@@ -28,8 +28,6 @@
 
             List<int> InvalidNodes = new List<int>(5);
 
-            List<Verification> PendingVerifications = new List<Verification>();
-
             bool NodeReaded = false;
             int Start = 0;
 
@@ -44,11 +42,6 @@
                     if (Reader.Read(Slice, out Node Node) && Node is not null)
                     {
                         SemanticTree.AddIfNotNull(Node.GetSymbol());
-
-                        if (Node is VerifiableNode Verifiable)
-                        {
-                            PendingVerifications.Add(Verifiable.Verificate);
-                        }
 
                         Node.ApplyFormat(new TokenSlice(Slice, 0, Node.TokensCount));
 
@@ -76,7 +69,6 @@
             (
                 Nodes,
                 new SemanticData(SemanticTree),
-                PendingVerifications,
                 new NodeErrors()
             );
         }

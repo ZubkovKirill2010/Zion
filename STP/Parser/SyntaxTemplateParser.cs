@@ -120,9 +120,9 @@
         {
             SemanticData Semantic = Nodes.SemanticData;
 
-            foreach (Verification Verification in Nodes.PendingVerifications)
+            foreach (Node Node in Nodes.Nodes)
             {
-                Verification.Invoke(Semantic);
+                Node.Verificate(Semantic);
             }
         }
     }
