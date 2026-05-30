@@ -8,16 +8,16 @@
 
         public NodeParser(ParsingContext<Node> Context)
         {
-            Readers      = Context.NodeReadersArray;
+            Readers = Context.NodeReadersArray;
             ErrorHandler = Context.NodeErrorHandler;
-            Capacity     = Context.NodesCapacity;
+            Capacity = Context.NodesCapacity;
         }
 
         public NodeParser(NodeParsingContext<Node> Context)
         {
-            Readers      = Context.ReadersArray;
+            Readers = Context.ReadersArray;
             ErrorHandler = Context.ErrorHandler;
-            Capacity     = Context.Capacity;
+            Capacity = Context.Capacity;
         }
 
 

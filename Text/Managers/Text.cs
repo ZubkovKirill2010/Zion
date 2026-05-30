@@ -491,6 +491,33 @@ namespace Zion
             return Brackets.TryGetValue(Char, out ClosingBracket);
         }
 
+        public static bool Contains(this string String, Predicate<char> Condition)
+        {
+            foreach (char Char in String.NotNull())
+            {
+                if (Condition(Char))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+
+        public static bool Contains(this string String, HashSet<char> Chars)
+        {
+            ArgumentNullException.ThrowIfNull(Chars);
+
+            foreach (char Char in String.NotNull())
+            {
+                if (Chars.Contains(Char))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         public static int IndexOf(this string String, Predicate<char> Condition)
         {
             ArgumentNullException.ThrowIfNull(String);

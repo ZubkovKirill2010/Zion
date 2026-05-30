@@ -33,7 +33,7 @@
         {
             ReadersArray = Context.NodeReadersArray;
             ErrorHandler = Context.NodeErrorHandler;
-            Capacity     = Context.NodesCapacity;
+            Capacity = Context.NodesCapacity;
         }
 
 

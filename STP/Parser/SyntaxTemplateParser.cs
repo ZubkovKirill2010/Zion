@@ -9,8 +9,8 @@
         private readonly ITokenErrorHandler TokenErrorHandler;
 
         private readonly NodeParser<Node> NodeParser;
-       
-        private readonly int TokensCapacity; 
+
+        private readonly int TokensCapacity;
 
         private readonly Func<Symbol>? RootSymbol;
 

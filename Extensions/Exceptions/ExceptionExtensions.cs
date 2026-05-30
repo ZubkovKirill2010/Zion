@@ -1,4 +1,5 @@
-﻿using Zion.Vectors;
+﻿using Zion.FileSystem;
+using Zion.Vectors;
 
 namespace Zion
 {
@@ -81,6 +82,26 @@ namespace Zion
                 {
                     throw new ArgumentOutOfRangeException($"Index(={Index}) out of range [{Min} - {Max})]");
                 }
+            }
+        }
+
+        extension(FileNotFoundException)
+        {
+            public static void ThrowIfNotExists(string FilePath)
+            {
+                FileNotFoundException.ThrowIf
+                (
+                    !File.Exists(FilePath.NotNull()),
+                    $"File '{FilePath}' not exists"
+                );
+            }
+        }
+
+        extension(InvalidFileNameException)
+        {
+            public static void ThrowIfInvalid(string FileName)
+            {
+                InvalidFileNameException.ThrowIf(FilePath.IsInvalidFileName(FileName.NotNull()), $"FileName '{FileName}' is invalid");
             }
         }
     }

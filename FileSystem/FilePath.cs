@@ -1,7 +1,33 @@
-﻿namespace Zion
+﻿namespace Zion.FileSystem
 {
     public static class FilePath
     {
+        private static readonly HashSet<char> InvalidFileNameChars = Path.GetInvalidFileNameChars().ToHashSet();
+        private static readonly HashSet<char> InvalidPathChars = Path.GetInvalidPathChars().ToHashSet();
+
+
+        public static bool IsInvalidFileNameChar(char Char)
+        {
+            return InvalidFileNameChars.Contains(Char);
+        }
+
+        public static bool IsInvalidPathChar(char Char)
+        {
+            return InvalidPathChars.Contains(Char);
+        }
+
+
+        public static bool IsInvalidFileName(string FileName)
+        {
+            return FileName.Contains(InvalidFileNameChars);
+        }
+
+        public static bool IsInvalidPath(string Path)
+        {
+            return Path.Contains(InvalidPathChars);
+        }
+
+
         /// <summary>
         /// Generates a unique file path by appending an index if the file already exists.
         /// </summary>
