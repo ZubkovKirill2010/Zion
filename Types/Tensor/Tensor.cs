@@ -9,9 +9,9 @@ namespace Zion
 
         public readonly Vector3Int Size;
 
-        public int Width => Size.x;
-        public int Height => Size.y;
-        public int Depth => Size.z;
+        public int Width => Size.X;
+        public int Height => Size.Y;
+        public int Depth => Size.Z;
 
 
         public Tensor(in int Width, in int Height, in int Depth)
@@ -21,7 +21,7 @@ namespace Zion
         }
         public Tensor(in Vector3Int Size)
         {
-            Data = new T[Size.x, Size.y, Size.z];
+            Data = new T[Size.X, Size.Y, Size.Z];
             this.Size = Size;
         }
 
@@ -33,8 +33,8 @@ namespace Zion
         }
         public virtual T this[in Vector3Int Position]
         {
-            get => this[Position.x, Position.y, Position.z];
-            set => this[Position.x, Position.y, Position.z] = value;
+            get => this[Position.X, Position.Y, Position.Z];
+            set => this[Position.X, Position.Y, Position.Z] = value;
         }
 
 
@@ -45,28 +45,28 @@ namespace Zion
         public bool IsInside(in int x, in int y, in int z)
         {
             return int.IsPositive(x) && int.IsPositive(y) && int.IsPositive(z)
-                && x < Size.x && y < Size.y && z < Size.z;
+                && x < Size.X && y < Size.Y && z < Size.Z;
         }
 
         public bool IsEdge(Vector3Int Position)
         {
-            return IsEdge(Position.x, Position.y, Position.z);
+            return IsEdge(Position.X, Position.Y, Position.Z);
         }
         public bool IsEdge(in int x, in int y, in int z)
         {
             return x == 0 || y == 0 || z == 0
-                || x == Size.x - 1 || y == Size.y - 1 || z == Size.z - 1;
+                || x == Size.X - 1 || y == Size.Y - 1 || z == Size.Z - 1;
         }
 
         public Tensor<T> Clone()
         {
             Tensor<T> Result = new Tensor<T>(Size);
 
-            foreach (int x in ZEnumerable.Range(Size.x))
+            foreach (int x in ZEnumerable.Range(Size.X))
             {
-                foreach (int y in ZEnumerable.Range(Size.y))
+                foreach (int y in ZEnumerable.Range(Size.Y))
                 {
-                    foreach (int z in ZEnumerable.Range(Size.z))
+                    foreach (int z in ZEnumerable.Range(Size.Z))
                     {
                         Result[x, y, z] = this[x, y, z];
                     }
@@ -93,13 +93,13 @@ namespace Zion
             Vector3Int MatrixSize = End - Start;
             Tensor<T> Result = new Tensor<T>(MatrixSize);
 
-            foreach (int x in ZEnumerable.Range(Size.x))
+            foreach (int x in ZEnumerable.Range(Size.X))
             {
-                foreach (int y in ZEnumerable.Range(Size.y))
+                foreach (int y in ZEnumerable.Range(Size.Y))
                 {
-                    foreach (int z in ZEnumerable.Range(Size.z))
+                    foreach (int z in ZEnumerable.Range(Size.Z))
                     {
-                        Result[x, y, z] = this[Start.x + x, Start.z + z, Start.y + y];
+                        Result[x, y, z] = this[Start.X + x, Start.Z + z, Start.Y + y];
                     }
                 }
             }
@@ -111,11 +111,11 @@ namespace Zion
         {
             Tensor<T> Result = new Tensor<T>(NewSize);
 
-            foreach (int x in ZEnumerable.Range(Math.Min(Width, NewSize.x)))
+            foreach (int x in ZEnumerable.Range(Math.Min(Width, NewSize.X)))
             {
-                foreach (int y in ZEnumerable.Range(Math.Min(Height, NewSize.y)))
+                foreach (int y in ZEnumerable.Range(Math.Min(Height, NewSize.Y)))
                 {
-                    foreach (int z in ZEnumerable.Range(Math.Min(Height, NewSize.y)))
+                    foreach (int z in ZEnumerable.Range(Math.Min(Height, NewSize.Y)))
                     {
                         Result[x, y, z] = this[x, y, z];
                     }
@@ -127,11 +127,11 @@ namespace Zion
 
         public void Fill(T Value)
         {
-            foreach (int x in ZEnumerable.Range(Size.x))
+            foreach (int x in ZEnumerable.Range(Size.X))
             {
-                foreach (int y in ZEnumerable.Range(Size.y))
+                foreach (int y in ZEnumerable.Range(Size.Y))
                 {
-                    foreach (int z in ZEnumerable.Range(Size.z))
+                    foreach (int z in ZEnumerable.Range(Size.Z))
                     {
                         this[x, y, z] = Value;
                     }
@@ -144,11 +144,11 @@ namespace Zion
         }
         public void Fill(Func<int, int, int, T> Value)
         {
-            foreach (int x in ZEnumerable.Range(Size.x))
+            foreach (int x in ZEnumerable.Range(Size.X))
             {
-                foreach (int y in ZEnumerable.Range(Size.y))
+                foreach (int y in ZEnumerable.Range(Size.Y))
                 {
-                    foreach (int z in ZEnumerable.Range(Size.z))
+                    foreach (int z in ZEnumerable.Range(Size.Z))
                     {
                         this[x, y, z] = Value(x, y, z);
                     }
@@ -168,11 +168,11 @@ namespace Zion
         {
             Tensor<I> Result = new Tensor<I>(Size);
 
-            foreach (int x in ZEnumerable.Range(Size.x))
+            foreach (int x in ZEnumerable.Range(Size.X))
             {
-                foreach (int y in ZEnumerable.Range(Size.y))
+                foreach (int y in ZEnumerable.Range(Size.Y))
                 {
-                    foreach (int z in ZEnumerable.Range(Size.z))
+                    foreach (int z in ZEnumerable.Range(Size.Z))
                     {
                         Result[x, y, z] = Converter(this[x, y, z]);
                     }
@@ -184,11 +184,11 @@ namespace Zion
 
         public IEnumerator<T> GetEnumerator()
         {
-            foreach (int x in ZEnumerable.Range(Size.x))
+            foreach (int x in ZEnumerable.Range(Size.X))
             {
-                foreach (int y in ZEnumerable.Range(Size.y))
+                foreach (int y in ZEnumerable.Range(Size.Y))
                 {
-                    foreach (int z in ZEnumerable.Range(Size.z))
+                    foreach (int z in ZEnumerable.Range(Size.Z))
                     {
                         yield return this[x, y, z];
                     }

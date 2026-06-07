@@ -8,12 +8,12 @@ namespace Zion
         private readonly byte[] Data;
         public Vector2Int Size { get; }
 
-        public int Width => Size.x;
-        public int Height => Size.y;
+        public int Width => Size.X;
+        public int Height => Size.Y;
 
         public BitMatrix(Vector2Int Size)
         {
-            Data = new byte[(int)Math.Ceiling((float)(Size.x * Size.y / 8))];
+            Data = new byte[(int)Math.Ceiling((float)(Size.X * Size.Y / 8))];
             this.Size = Size;
         }
         public BitMatrix(int Width, int Height)
@@ -58,8 +58,8 @@ namespace Zion
         }
         public bool this[Vector2Int Position]
         {
-            get => this[Position.x, Position.y];
-            set => this[Position.x, Position.y] = value;
+            get => this[Position.X, Position.Y];
+            set => this[Position.X, Position.Y] = value;
         }
 
 
@@ -68,9 +68,9 @@ namespace Zion
             Vector2Int Size = BitMatrix.Size;
             Matrix<bool> Matrix = new Matrix<bool>(Size);
 
-            for (int x = 0; x < Size.x; x++)
+            for (int x = 0; x < Size.X; x++)
             {
-                for (int y = 0; y < Size.y; y++)
+                for (int y = 0; y < Size.Y; y++)
                 {
                     Matrix[x, y] = BitMatrix[x, y];
                 }
@@ -86,16 +86,16 @@ namespace Zion
         }
         public bool IsInside(int x, int y)
         {
-            return x >= 0 && y >= 0 && x < Size.x && y < Size.y;
+            return x >= 0 && y >= 0 && x < Size.X && y < Size.Y;
         }
 
         public bool IsEdge(Vector2Int Position)
         {
-            return IsEdge(Position.x, Position.y);
+            return IsEdge(Position.X, Position.Y);
         }
         public bool IsEdge(int x, int y)
         {
-            return x == 0 || (x == Size.x - 1 && y == 0) || y == Size.y - 1;
+            return x == 0 || (x == Size.X - 1 && y == 0) || y == Size.Y - 1;
         }
 
         public BitMatrix Clone()
@@ -120,11 +120,11 @@ namespace Zion
             Vector2Int MatrixSize = End - Start;
             BitMatrix Result = new BitMatrix(MatrixSize);
 
-            for (int x = 0; x < MatrixSize.x; x++)
+            for (int x = 0; x < MatrixSize.X; x++)
             {
-                for (int y = 0; y < MatrixSize.y; y++)
+                for (int y = 0; y < MatrixSize.Y; y++)
                 {
-                    Result[x, y] = this[Start.x + x, Start.y + y];
+                    Result[x, y] = this[Start.X + x, Start.Y + y];
                 }
             }
 
@@ -143,9 +143,9 @@ namespace Zion
 
         public void ForEach(Action<bool> Action)
         {
-            for (int x = 0; x < Size.x; x++)
+            for (int x = 0; x < Size.X; x++)
             {
-                for (int y = 0; y < Size.y; y++)
+                for (int y = 0; y < Size.Y; y++)
                 {
                     Action(this[x, y]);
                 }
@@ -153,9 +153,9 @@ namespace Zion
         }
         public void ForEach(Func<bool, bool> Converter)
         {
-            for (int x = 0; x < Size.x; x++)
+            for (int x = 0; x < Size.X; x++)
             {
-                for (int y = 0; y < Size.y; y++)
+                for (int y = 0; y < Size.Y; y++)
                 {
                     this[x, y] = Converter(this[x, y]);
                 }
@@ -166,9 +166,9 @@ namespace Zion
         {
             Matrix<I> Result = new Matrix<I>(Size);
 
-            for (int x = 0; x < Size.x; x++)
+            for (int x = 0; x < Size.X; x++)
             {
-                for (int y = 0; y < Size.y; y++)
+                for (int y = 0; y < Size.Y; y++)
                 {
                     Result[x, y] = Converter(this[x, y]);
                 }
@@ -191,7 +191,7 @@ namespace Zion
             {
                 throw new ArgumentOutOfRangeException($"Position [{x}, {y}] is not inside (size={Size})");
             }
-            int BitIndex = (Size.x * y) + x;
+            int BitIndex = (Size.X * y) + x;
             return (BitIndex / 8, BitIndex % 8);
         }
 

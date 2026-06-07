@@ -9,8 +9,8 @@ namespace Zion
 
         public Vector2Int Size { get; }
 
-        public int Width => Size.x;
-        public int Height => Size.y;
+        public int Width => Size.X;
+        public int Height => Size.Y;
 
 
         public Matrix(int Side)
@@ -43,7 +43,7 @@ namespace Zion
 
         public Matrix(Vector2Int Size)
         {
-            Data = new T[Size.x, Size.y];
+            Data = new T[Size.X, Size.Y];
             this.Size = Size;
         }
         public Matrix(Vector2Int Size, T Value) : this(Size)
@@ -63,8 +63,8 @@ namespace Zion
         }
         public T this[Vector2Int Position]
         {
-            get => this[Position.x, Position.y];
-            set => this[Position.x, Position.y] = value;
+            get => this[Position.X, Position.Y];
+            set => this[Position.X, Position.Y] = value;
         }
 
         public bool IsInside(Vector2Int Position)
@@ -73,25 +73,25 @@ namespace Zion
         }
         public bool IsInside(int x, int y)
         {
-            return x >= 0 && y >= 0 && x < Size.x && y < Size.y;
+            return x >= 0 && y >= 0 && x < Size.X && y < Size.Y;
         }
 
         public bool IsEdge(Vector2Int Position)
         {
-            return IsEdge(Position.x, Position.y);
+            return IsEdge(Position.X, Position.Y);
         }
         public bool IsEdge(int x, int y)
         {
-            return x == 0 || (x == Size.x - 1 && y == 0) || y == Size.y - 1;
+            return x == 0 || (x == Size.X - 1 && y == 0) || y == Size.Y - 1;
         }
 
         public Matrix<T> Clone()
         {
             Matrix<T> Result = new Matrix<T>(Size);
 
-            for (int x = 0; x < Size.x; x++)
+            for (int x = 0; x < Size.X; x++)
             {
-                for (int y = 0; y < Size.y; y++)
+                for (int y = 0; y < Size.Y; y++)
                 {
                     Result[x, y] = this[x, y];
                 }
@@ -117,11 +117,11 @@ namespace Zion
             Vector2Int MatrixSize = End - Start;
             Matrix<T> Result = new Matrix<T>(MatrixSize);
 
-            for (int x = 0; x < MatrixSize.x; x++)
+            for (int x = 0; x < MatrixSize.X; x++)
             {
-                for (int y = 0; y < MatrixSize.y; y++)
+                for (int y = 0; y < MatrixSize.Y; y++)
                 {
-                    Result[x, y] = this[Start.x + x, Start.y + y];
+                    Result[x, y] = this[Start.X + x, Start.Y + y];
                 }
             }
 
@@ -132,9 +132,9 @@ namespace Zion
         {
             Matrix<T> Result = new Matrix<T>(NewSize);
 
-            foreach (int x in ZEnumerable.Range(0, Math.Min(Width, NewSize.x)))
+            foreach (int x in ZEnumerable.Range(0, Math.Min(Width, NewSize.X)))
             {
-                foreach (int y in ZEnumerable.Range(0, Math.Min(Height, NewSize.y)))
+                foreach (int y in ZEnumerable.Range(0, Math.Min(Height, NewSize.Y)))
                 {
                     Result[x, y] = this[x, y];
                 }
@@ -145,9 +145,9 @@ namespace Zion
 
         public void Fill(T Value)
         {
-            for (int x = 0; x < Size.x; x++)
+            for (int x = 0; x < Size.X; x++)
             {
-                for (int y = 0; y < Size.y; y++)
+                for (int y = 0; y < Size.Y; y++)
                 {
                     this[x, y] = Value;
                 }
@@ -155,9 +155,9 @@ namespace Zion
         }
         public void Fill(Func<T> Value)
         {
-            for (int x = 0; x < Size.x; x++)
+            for (int x = 0; x < Size.X; x++)
             {
-                for (int y = 0; y < Size.y; y++)
+                for (int y = 0; y < Size.Y; y++)
                 {
                     this[x, y] = Value();
                 }
@@ -165,9 +165,9 @@ namespace Zion
         }
         public void Fill(Func<int, int, T> Value)
         {
-            for (int x = 0; x < Size.x; x++)
+            for (int x = 0; x < Size.X; x++)
             {
-                for (int y = 0; y < Size.y; y++)
+                for (int y = 0; y < Size.Y; y++)
                 {
                     this[x, y] = Value(x, y);
                 }
@@ -175,9 +175,9 @@ namespace Zion
         }
         public void FillChessPattern(T A, T B)
         {
-            for (int x = 0; x < Size.x; x++)
+            for (int x = 0; x < Size.X; x++)
             {
-                for (int y = 0; y < Size.y; y++)
+                for (int y = 0; y < Size.Y; y++)
                 {
                     this[x, y] = (x + y).IsEven() ? A : B;
                 }
@@ -186,15 +186,15 @@ namespace Zion
 
         public void SetEdge(T Value)
         {
-            int Down = Size.y - 1;
-            int Right = Size.x - 1;
+            int Down = Size.Y - 1;
+            int Right = Size.X - 1;
 
-            for (int i = 0; i < Size.x; i++)
+            for (int i = 0; i < Size.X; i++)
             {
                 Data[i, 0] = Value;
                 Data[i, Down] = Value;
             }
-            for (int i = 1; i < Size.y; i++)
+            for (int i = 1; i < Size.Y; i++)
             {
                 Data[0, i] = Value;
                 Data[Right, i] = Value;
@@ -203,9 +203,9 @@ namespace Zion
 
         public void ForEach(Action<T> Action)
         {
-            for (int x = 0; x < Size.x; x++)
+            for (int x = 0; x < Size.X; x++)
             {
-                for (int y = 0; y < Size.y; y++)
+                for (int y = 0; y < Size.Y; y++)
                 {
                     Action(this[x, y]);
                 }
@@ -216,9 +216,9 @@ namespace Zion
         {
             Matrix<I> Result = new Matrix<I>(Size);
 
-            for (int x = 0; x < Size.x; x++)
+            for (int x = 0; x < Size.X; x++)
             {
-                for (int y = 0; y < Size.y; y++)
+                for (int y = 0; y < Size.Y; y++)
                 {
                     Result[x, y] = Converter(this[x, y]);
                 }

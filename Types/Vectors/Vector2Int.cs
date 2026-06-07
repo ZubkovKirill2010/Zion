@@ -12,100 +12,100 @@ namespace Zion.Vectors
         public static readonly Vector2Int Left = new Vector2Int(-1, 0);
         public static readonly Vector2Int OneOne = new Vector2Int(1);
 
-        public int x, y;
+        public int X, Y;
 
-        public Vector2Int Reversed => new Vector2Int(y, x);
+        public Vector2Int Reversed => new Vector2Int(Y, X);
         public Vector2Int Normal
         {
             get
             {
-                float Magnitude = MathF.Sqrt((x * x) + (y * y));
-                return new Vector2Int((int)(x / Magnitude), (int)(y / Magnitude));
+                float Magnitude = MathF.Sqrt((X * X) + (Y * Y));
+                return new Vector2Int((int)(X / Magnitude), (int)(Y / Magnitude));
             }
         }
 
 
         public Vector2Int(int Axis)
         {
-            x = Axis;
-            y = Axis;
+            X = Axis;
+            Y = Axis;
         }
-        public Vector2Int(int x, int y)
+        public Vector2Int(int X, int Y)
         {
-            this.x = x;
-            this.y = y;
+            this.X = X;
+            this.Y = Y;
         }
 
 
         public static Vector2Int operator +(Vector2Int A, Direction B)
         {
             Vector2Int VectorB = GetDirection(B);
-            return new Vector2Int(A.x + VectorB.x, A.y + VectorB.y);
+            return new Vector2Int(A.X + VectorB.X, A.Y + VectorB.Y);
         }
         public static Vector2Int operator -(Vector2Int A, Direction B)
         {
             Vector2Int VectorB = GetDirection(B);
-            return new Vector2Int(A.x - VectorB.x, A.y - VectorB.y);
+            return new Vector2Int(A.X - VectorB.X, A.Y - VectorB.Y);
         }
         public static Vector2Int operator *(Vector2Int A, Direction B)
         {
             Vector2Int VectorB = GetDirection(B);
-            return new Vector2Int(A.x * VectorB.x, A.y * VectorB.y);
+            return new Vector2Int(A.X * VectorB.X, A.Y * VectorB.Y);
         }
         public static Vector2Int operator /(Vector2Int A, Direction B)
         {
             Vector2Int VectorB = GetDirection(B);
-            return new Vector2Int(A.x / VectorB.x, A.y / VectorB.y);
+            return new Vector2Int(A.X / VectorB.X, A.Y / VectorB.Y);
         }
 
         public static Vector2Int operator --(Vector2Int Vector)
         {
-            Vector.x--;
-            Vector.y--;
+            Vector.X--;
+            Vector.Y--;
             return Vector;
         }
         public static Vector2Int operator ++(Vector2Int Vector)
         {
-            Vector.x++;
-            Vector.y++;
+            Vector.X++;
+            Vector.Y++;
             return Vector;
         }
 
-        public static Vector2Int operator +(Vector2Int A, Vector2Int B) => new Vector2Int(A.x + B.x, A.y + B.y);
-        public static Vector2Int operator -(Vector2Int A, Vector2Int B) => new Vector2Int(A.x - B.x, A.y - B.y);
-        public static Vector2Int operator *(Vector2Int A, int B) => new Vector2Int(A.x * B, A.y * B);
-        public static Vector2Int operator /(Vector2Int A, int B) => new Vector2Int(A.x / B, A.y / B);
+        public static Vector2Int operator +(Vector2Int A, Vector2Int B) => new Vector2Int(A.X + B.X, A.Y + B.Y);
+        public static Vector2Int operator -(Vector2Int A, Vector2Int B) => new Vector2Int(A.X - B.X, A.Y - B.Y);
+        public static Vector2Int operator *(Vector2Int A, int B) => new Vector2Int(A.X * B, A.Y * B);
+        public static Vector2Int operator /(Vector2Int A, int B) => new Vector2Int(A.X / B, A.Y / B);
 
-        public static Vector2Int operator &(Vector2Int A, Vector2Int B) => new Vector2Int(A.x & B.x, A.y & B.y);
-        public static Vector2Int operator |(Vector2Int A, Vector2Int B) => new Vector2Int(A.x & B.x, A.y & B.y);
+        public static Vector2Int operator &(Vector2Int A, Vector2Int B) => new Vector2Int(A.X & B.X, A.Y & B.Y);
+        public static Vector2Int operator |(Vector2Int A, Vector2Int B) => new Vector2Int(A.X & B.X, A.Y & B.Y);
 
-        public static Vector2Int operator &(Vector2Int A, int B) => new Vector2Int(A.x & B, A.y & B);
-        public static Vector2Int operator |(Vector2Int A, int B) => new Vector2Int(A.x & B, A.y & B);
+        public static Vector2Int operator &(Vector2Int A, int B) => new Vector2Int(A.X & B, A.Y & B);
+        public static Vector2Int operator |(Vector2Int A, int B) => new Vector2Int(A.X & B, A.Y & B);
 
-        public static Vector2Int operator >>(Vector2Int A, int B) => new Vector2Int(A.x >> B, A.y >> B);
-        public static Vector2Int operator <<(Vector2Int A, int B) => new Vector2Int(A.x << B, A.y << B);
+        public static Vector2Int operator >>(Vector2Int A, int B) => new Vector2Int(A.X >> B, A.Y >> B);
+        public static Vector2Int operator <<(Vector2Int A, int B) => new Vector2Int(A.X << B, A.Y << B);
 
-        public static Vector2Int operator +(Vector2Int A, Vector2Byte B) => new Vector2Int(A.x + B.x, A.y + B.y);
-        public static Vector2Int operator -(Vector2Int A, Vector2Byte B) => new Vector2Int(A.x - B.x, A.y - B.y);
+        public static Vector2Int operator +(Vector2Int A, Vector2Byte B) => new Vector2Int(A.X + B.X, A.Y + B.Y);
+        public static Vector2Int operator -(Vector2Int A, Vector2Byte B) => new Vector2Int(A.X - B.X, A.Y - B.Y);
 
-        public static Vector2Int operator +(Vector2Int A, HorizontalDirection B) => new Vector2Int(A.x + (int)B, A.y);
-        public static Vector2Int operator -(Vector2Int A, HorizontalDirection B) => new Vector2Int(A.x - (int)B, A.y);
+        public static Vector2Int operator +(Vector2Int A, HorizontalDirection B) => new Vector2Int(A.X + (int)B, A.Y);
+        public static Vector2Int operator -(Vector2Int A, HorizontalDirection B) => new Vector2Int(A.X - (int)B, A.Y);
 
-        public static Vector2Int operator +(Vector2Int A, VerticalDirection B) => new Vector2Int(A.x, A.y + (int)B);
-        public static Vector2Int operator -(Vector2Int A, VerticalDirection B) => new Vector2Int(A.x, A.y - (int)B);
+        public static Vector2Int operator +(Vector2Int A, VerticalDirection B) => new Vector2Int(A.X, A.Y + (int)B);
+        public static Vector2Int operator -(Vector2Int A, VerticalDirection B) => new Vector2Int(A.X, A.Y - (int)B);
 
-        public static bool operator ==(Vector2Int A, Vector2Int B) => A.x == B.x && A.y == B.y;
-        public static bool operator !=(Vector2Int A, Vector2Int B) => A.x != B.x || A.y != B.y;
+        public static bool operator ==(Vector2Int A, Vector2Int B) => A.X == B.X && A.Y == B.Y;
+        public static bool operator !=(Vector2Int A, Vector2Int B) => A.X != B.X || A.Y != B.Y;
 
-        public static bool operator <(Vector2Int A, Vector2Int B) => A.x < B.x && A.y < B.y;
-        public static bool operator >(Vector2Int A, Vector2Int B) => A.x > B.x && A.y > B.y;
-        public static bool operator <=(Vector2Int A, Vector2Int B) => A.x <= B.x && A.y <= B.y;
-        public static bool operator >=(Vector2Int A, Vector2Int B) => A.x >= B.x && A.y >= B.y;
+        public static bool operator <(Vector2Int A, Vector2Int B) => A.X < B.X && A.Y < B.Y;
+        public static bool operator >(Vector2Int A, Vector2Int B) => A.X > B.X && A.Y > B.Y;
+        public static bool operator <=(Vector2Int A, Vector2Int B) => A.X <= B.X && A.Y <= B.Y;
+        public static bool operator >=(Vector2Int A, Vector2Int B) => A.X >= B.X && A.Y >= B.Y;
 
-        public static explicit operator Vector2(Vector2Int Vector) => new Vector2(Vector.x, Vector.y);
+        public static explicit operator Vector2(Vector2Int Vector) => new Vector2(Vector.X, Vector.Y);
 
 
-        public override readonly string ToString() => $"[{x}; {y}]";
+        public override readonly string ToString() => $"[{X}; {Y}]";
         public override readonly bool Equals([NotNullWhen(true)] object? Object)
         {
             return Object is not null && Object is Vector2Int Vector && this == Vector;
@@ -115,8 +115,8 @@ namespace Zion.Vectors
             unchecked
             {
                 int Hash = 17;
-                Hash = (Hash * 23) + x;
-                Hash = (Hash * 23) + y;
+                Hash = (Hash * 23) + X;
+                Hash = (Hash * 23) + Y;
                 return Hash;
             }
         }
@@ -124,8 +124,8 @@ namespace Zion.Vectors
 
         public void Write(BinaryWriter Writer)
         {
-            Writer.Write(x);
-            Writer.Write(y);
+            Writer.Write(X);
+            Writer.Write(Y);
         }
         public static Vector2Int Read(BinaryReader Reader)
         {
@@ -138,16 +138,16 @@ namespace Zion.Vectors
 
         public static Vector2Int GetRandom(Random Random, Vector2Int Min, Vector2Int Max)
         {
-            return new Vector2Int(Random.Next(Min.x, Max.x), Random.Next(Min.y, Max.y));
+            return new Vector2Int(Random.Next(Min.X, Max.X), Random.Next(Min.Y, Max.Y));
         }
 
 
-        public void MoveUp() => y++;
-        public void MoveDown() => y--;
-        public void MoveRight() => x++;
-        public void MoveLeft() => x--;
+        public void MoveUp() => Y++;
+        public void MoveDown() => Y--;
+        public void MoveRight() => X++;
+        public void MoveLeft() => X--;
 
-        public void Reverse() => Accessor.Reverse(ref x, ref y);
+        public void Reverse() => Accessor.Reverse(ref X, ref Y);
 
 
         public static Vector2Int GetRandomDirection()
@@ -171,7 +171,7 @@ namespace Zion.Vectors
                 Right,
                 Down,
                 Left
-            }.OrderBy(x => Random.Next()).ToArray();
+            }.OrderBy(X => Random.Next()).ToArray();
         }
 
 
@@ -213,8 +213,8 @@ namespace Zion.Vectors
 
             return Math.Sqrt
             (
-                (Difference.x * Difference.x) +
-                (Difference.y * Difference.y)
+                (Difference.X * Difference.X) +
+                (Difference.Y * Difference.Y)
             );
         }
 
@@ -235,26 +235,26 @@ namespace Zion.Vectors
 
         public static bool IsNegative(in Vector2Int Value)
         {
-            return int.IsNegative(Value.x) || int.IsNegative(Value.y);
+            return int.IsNegative(Value.X) || int.IsNegative(Value.Y);
         }
 
         public static bool IsPositive(in Vector2Int Value)
         {
-            return int.IsPositive(Value.x) && int.IsPositive(Value.y);
+            return int.IsPositive(Value.X) && int.IsPositive(Value.Y);
         }
 
 
         public static Vector2Int Abs(Vector2Int Vector)
         {
-            return new Vector2Int(Math.Abs(Vector.x), Math.Abs(Vector.y));
+            return new Vector2Int(Math.Abs(Vector.X), Math.Abs(Vector.Y));
         }
 
         public static Vector2Int Clamp(Vector2Int Value, Vector2Int Min, Vector2Int Max)
         {
             return new Vector2Int
             (
-                Math.Clamp(Value.x, Min.x, Max.x),
-                Math.Clamp(Value.y, Min.y, Max.y)
+                Math.Clamp(Value.X, Min.X, Max.X),
+                Math.Clamp(Value.Y, Min.Y, Max.Y)
             );
         }
     }

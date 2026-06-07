@@ -16,24 +16,24 @@ namespace Zion.Vectors
 
         private byte Value;
 
-        public int x
+        public int X
         {
             get => ConvertBits(Value & 0b0000_1111);
             set
             {
                 Value = IsInside(value)
                     ? (byte)((Value & 0b1111_0000) | ConvertToBits(value))
-                    : throw new ArgumentOutOfRangeException($"new x(={value}) out of Range -3 - 4");
+                    : throw new ArgumentOutOfRangeException($"new X(={value}) out of Range -3 - 4");
             }
         }
-        public int y
+        public int Y
         {
             get => ConvertBits(Value >> 4);
             set
             {
                 Value = IsInside(value)
                     ? (byte)((Value & 0b0000_1111) | (ConvertToBits(value) << 4))
-                    : throw new ArgumentOutOfRangeException($"new y(={value}) out of Range -3 - 4");
+                    : throw new ArgumentOutOfRangeException($"new Y(={value}) out of Range -3 - 4");
             }
         }
 
@@ -47,44 +47,44 @@ namespace Zion.Vectors
             }
             else
             {
-                throw new ArgumentOutOfRangeException($"new y(={Axis}) out of Range -3 - 4");
+                throw new ArgumentOutOfRangeException($"new Y(={Axis}) out of Range -3 - 4");
             }
         }
-        public Vector2Byte(int x, int y)
+        public Vector2Byte(int X, int Y)
         {
-            if (!IsInside(x)) { throw new ArgumentOutOfRangeException(nameof(x)); }
+            if (!IsInside(X)) { throw new ArgumentOutOfRangeException(nameof(X)); }
             ;
-            if (!IsInside(y)) { throw new ArgumentOutOfRangeException(nameof(y)); }
+            if (!IsInside(Y)) { throw new ArgumentOutOfRangeException(nameof(Y)); }
             ;
 
-            Value = (byte)((ConvertToBits(y) << 4) | ConvertToBits(x));
+            Value = (byte)((ConvertToBits(Y) << 4) | ConvertToBits(X));
         }
 
 
         public static bool operator ==(Vector2Byte A, Vector2Byte B) => A.Value == B.Value;
         public static bool operator !=(Vector2Byte A, Vector2Byte B) => A.Value != B.Value;
 
-        public static bool operator ==(Vector2Byte A, Vector2Int B) => A.x == B.x && A.y == B.y;
-        public static bool operator !=(Vector2Byte A, Vector2Int B) => A.x != B.x || A.y != B.y;
+        public static bool operator ==(Vector2Byte A, Vector2Int B) => A.X == B.X && A.Y == B.Y;
+        public static bool operator !=(Vector2Byte A, Vector2Int B) => A.X != B.X || A.Y != B.Y;
 
-        public static bool operator ==(Vector2Int A, Vector2Byte B) => A.x == B.x && A.y == B.y;
-        public static bool operator !=(Vector2Int A, Vector2Byte B) => A.x != B.x || A.y != B.y;
+        public static bool operator ==(Vector2Int A, Vector2Byte B) => A.X == B.X && A.Y == B.Y;
+        public static bool operator !=(Vector2Int A, Vector2Byte B) => A.X != B.X || A.Y != B.Y;
 
-        public static bool operator ==(Vector2Byte A, Vector2 B) => A.x == B.x && A.y == B.y;
-        public static bool operator !=(Vector2Byte A, Vector2 B) => A.x != B.x || A.y != B.y;
+        public static bool operator ==(Vector2Byte A, Vector2 B) => A.X == B.X && A.Y == B.Y;
+        public static bool operator !=(Vector2Byte A, Vector2 B) => A.X != B.X || A.Y != B.Y;
 
-        public static bool operator ==(Vector2 A, Vector2Byte B) => A.x == B.x && A.y == B.y;
-        public static bool operator !=(Vector2 A, Vector2Byte B) => A.x != B.x || A.y != B.y;
+        public static bool operator ==(Vector2 A, Vector2Byte B) => A.X == B.X && A.Y == B.Y;
+        public static bool operator !=(Vector2 A, Vector2Byte B) => A.X != B.X || A.Y != B.Y;
 
-        public static bool operator <(Vector2Byte A, Vector2Byte B) => A.x < B.x && A.y < B.y;
-        public static bool operator >(Vector2Byte A, Vector2Byte B) => A.x > B.x && A.y > B.y;
-        public static bool operator <=(Vector2Byte A, Vector2Byte B) => A.x <= B.x && A.y <= B.y;
-        public static bool operator >=(Vector2Byte A, Vector2Byte B) => A.x >= B.x && A.y >= B.y;
+        public static bool operator <(Vector2Byte A, Vector2Byte B) => A.X < B.X && A.Y < B.Y;
+        public static bool operator >(Vector2Byte A, Vector2Byte B) => A.X > B.X && A.Y > B.Y;
+        public static bool operator <=(Vector2Byte A, Vector2Byte B) => A.X <= B.X && A.Y <= B.Y;
+        public static bool operator >=(Vector2Byte A, Vector2Byte B) => A.X >= B.X && A.Y >= B.Y;
 
-        public static explicit operator Vector2Int(Vector2Byte Vector) => new Vector2Int(Vector.x, Vector.y);
+        public static explicit operator Vector2Int(Vector2Byte Vector) => new Vector2Int(Vector.X, Vector.Y);
 
 
-        public override string ToString() => $"[{x}; {y}]";
+        public override string ToString() => $"[{X}; {Y}]";
         public override int GetHashCode() => Value;
         public override bool Equals([NotNullWhen(true)] object? Object)
         {
@@ -104,7 +104,7 @@ namespace Zion.Vectors
 
         public static Vector2Byte GetRandom(Random Random, Vector2Byte Min, Vector2Byte Max)
         {
-            return new Vector2Byte(Random.Next(Min.x, Max.x), Random.Next(Min.y, Max.y));
+            return new Vector2Byte(Random.Next(Min.X, Max.X), Random.Next(Min.Y, Max.Y));
         }
 
 

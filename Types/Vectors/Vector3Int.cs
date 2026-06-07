@@ -13,90 +13,90 @@ namespace Zion.Vectors
         public static readonly Vector3Int Forward = new Vector3Int(0, 0, 1);
         public static readonly Vector3Int Back = new Vector3Int(0, 0, -1);
 
-        public int x, y, z;
+        public int X, Y, Z;
 
         public Vector3Int Normal
         {
             get
             {
-                float Magnitude = MathF.Sqrt((x * x) + (y * y) + (z * z));
-                return new Vector3Int((int)(x / Magnitude), (int)(y / Magnitude), (int)(z / Magnitude));
+                float Magnitude = MathF.Sqrt((X * X) + (Y * Y) + (Z * Z));
+                return new Vector3Int((int)(X / Magnitude), (int)(Y / Magnitude), (int)(Z / Magnitude));
             }
         }
 
 
         public Vector3Int(int Axis)
         {
-            x = Axis;
-            y = Axis;
-            z = Axis;
+            X = Axis;
+            Y = Axis;
+            Z = Axis;
         }
-        public Vector3Int(int x, int y, int z)
+        public Vector3Int(int X, int Y, int Z)
         {
-            this.x = x;
-            this.y = y;
-            this.z = z;
+            this.X = X;
+            this.Y = Y;
+            this.Z = Z;
         }
 
         public static Vector3Int operator +(Vector3Int A, Vector3Int B)
         {
-            return new Vector3Int(A.x + B.x, A.y + B.y, A.z + B.z);
+            return new Vector3Int(A.X + B.X, A.Y + B.Y, A.Z + B.Z);
         }
         public static Vector3Int operator -(Vector3Int A, Vector3Int B)
         {
-            return new Vector3Int(A.x - B.x, A.y - B.y, A.z - B.z);
+            return new Vector3Int(A.X - B.X, A.Y - B.Y, A.Z - B.Z);
         }
         public static Vector3Int operator *(Vector3Int A, int B)
         {
-            return new Vector3Int(A.x * B, A.y * B, A.z * B);
+            return new Vector3Int(A.X * B, A.Y * B, A.Z * B);
         }
         public static Vector3Int operator /(Vector3Int A, int B)
         {
-            return new Vector3Int(A.x / B, A.y / B, A.z / B);
+            return new Vector3Int(A.X / B, A.Y / B, A.Z / B);
         }
 
         public static Vector3Int operator --(Vector3Int Vector)
         {
-            Vector.x--;
-            Vector.y--;
-            Vector.z--;
+            Vector.X--;
+            Vector.Y--;
+            Vector.Z--;
             return Vector;
         }
         public static Vector3Int operator ++(Vector3Int Vector)
         {
-            Vector.x++;
-            Vector.y++;
-            Vector.z++;
+            Vector.X++;
+            Vector.Y++;
+            Vector.Z++;
             return Vector;
         }
 
         public static bool operator ==(Vector3Int A, Vector3Int B)
         {
-            return A.x == B.x && A.y == B.y && A.z == B.z;
+            return A.X == B.X && A.Y == B.Y && A.Z == B.Z;
         }
         public static bool operator !=(Vector3Int A, Vector3Int B)
         {
-            return A.x != B.x || A.y != B.y || A.z != B.z;
+            return A.X != B.X || A.Y != B.Y || A.Z != B.Z;
         }
         public static bool operator <=(Vector3Int A, Vector3Int B)
         {
-            return A.x <= B.x && A.y <= B.y && A.z <= B.z;
+            return A.X <= B.X && A.Y <= B.Y && A.Z <= B.Z;
         }
         public static bool operator >=(Vector3Int A, Vector3Int B)
         {
-            return A.x >= B.x && A.y >= B.y && A.y <= B.y;
+            return A.X >= B.X && A.Y >= B.Y && A.Y <= B.Y;
         }
 
         public static bool operator <(Vector3Int A, Vector3Int B)
         {
-            return A.x < B.x && A.y < B.y && A.z < B.z;
+            return A.X < B.X && A.Y < B.Y && A.Z < B.Z;
         }
         public static bool operator >(Vector3Int A, Vector3Int B)
         {
-            return A.x > B.x && A.y > B.y && A.y < B.y;
+            return A.X > B.X && A.Y > B.Y && A.Y < B.Y;
         }
 
-        public override string ToString() => $"[{x}; {y}; {z}]";
+        public override string ToString() => $"[{X}; {Y}; {Z}]";
         public override readonly bool Equals([NotNullWhen(true)] object? Object)
         {
             return Object is not null && Object is Vector3Int Vector && this == Vector;
@@ -106,9 +106,9 @@ namespace Zion.Vectors
             unchecked
             {
                 int hash = 17;
-                hash = (hash * 23) + x;
-                hash = (hash * 23) + y;
-                hash = (hash * 23) + z;
+                hash = (hash * 23) + X;
+                hash = (hash * 23) + Y;
+                hash = (hash * 23) + Z;
                 return hash;
             }
         }
@@ -116,9 +116,9 @@ namespace Zion.Vectors
 
         public void Write(BinaryWriter Writer)
         {
-            Writer.Write(x);
-            Writer.Write(y);
-            Writer.Write(z);
+            Writer.Write(X);
+            Writer.Write(Y);
+            Writer.Write(Z);
         }
         public static Vector3Int Read(BinaryReader Reader)
         {
@@ -132,15 +132,15 @@ namespace Zion.Vectors
 
         public static Vector3Int GetRandom(Random Random, Vector3Int Min, Vector3Int Max)
         {
-            return new Vector3Int(Random.Next(Min.x, Max.x), Random.Next(Min.y, Max.y), Random.Next(Min.z, Max.z));
+            return new Vector3Int(Random.Next(Min.X, Max.X), Random.Next(Min.Y, Max.Y), Random.Next(Min.Z, Max.Z));
         }
 
-        public void MoveUp() => y++;
-        public void MoveDown() => y--;
-        public void MoveRight() => x++;
-        public void MoveLeft() => x--;
-        public void MoveForward() => z++;
-        public void MoveBack() => z--;
+        public void MoveUp() => Y++;
+        public void MoveDown() => Y--;
+        public void MoveRight() => X++;
+        public void MoveLeft() => X--;
+        public void MoveForward() => Z++;
+        public void MoveBack() => Z--;
 
         public void Normalize() => this = Normal;
 
@@ -151,9 +151,9 @@ namespace Zion.Vectors
 
             return Math.Sqrt
             (
-                (Difference.x * Difference.x) +
-                (Difference.y * Difference.y) +
-                (Difference.z * Difference.z)
+                (Difference.X * Difference.X) +
+                (Difference.Y * Difference.Y) +
+                (Difference.Z * Difference.Z)
             );
         }
 
@@ -174,21 +174,21 @@ namespace Zion.Vectors
 
         public static Vector3Int Abs(Vector3Int Vector)
         {
-            return new Vector3Int(Math.Abs(Vector.x), Math.Abs(Vector.y), Math.Abs(Vector.z));
+            return new Vector3Int(Math.Abs(Vector.X), Math.Abs(Vector.Y), Math.Abs(Vector.Z));
         }
         public static Vector3Int Clamp(Vector3Int Value, Vector3Int Min, Vector3Int Max)
         {
             return new Vector3Int
             (
-                Math.Clamp(Value.x, Min.x, Max.x),
-                Math.Clamp(Value.y, Min.y, Max.y),
-                Math.Clamp(Value.z, Min.z, Max.z)
+                Math.Clamp(Value.X, Min.X, Max.X),
+                Math.Clamp(Value.Y, Min.Y, Max.Y),
+                Math.Clamp(Value.Z, Min.Z, Max.Z)
             );
         }
 
         public static bool IsPositive(in Vector3Int Value)
         {
-            return int.IsPositive(Value.x) && int.IsPositive(Value.y) && int.IsPositive(Value.z);
+            return int.IsPositive(Value.X) && int.IsPositive(Value.Y) && int.IsPositive(Value.Z);
         }
     }
 }

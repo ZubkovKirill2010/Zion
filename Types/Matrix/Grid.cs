@@ -29,7 +29,7 @@ namespace Zion
                 ArgumentOutOfRangeException.ThrowIf(!IsInside(Position), $"Position {Position} out of range [ [0, 0] - [{int.MaxValue}, {int.MaxValue}] ]");
 
                 return Chunks.TryGetValue(Position >> ChunkShift, out Matrix<T>? Chunk)
-                    ? Chunk[Position.x & ChunkFilter, Position.y & ChunkFilter]
+                    ? Chunk[Position.X & ChunkFilter, Position.Y & ChunkFilter]
                     : Base;
             }
             set
@@ -42,7 +42,7 @@ namespace Zion
                     ? Matrix
                     : Accessor.AddAndReturn(Chunks, ChunkPosition, new Matrix<T>(ChunkSize));
 
-                Chunk[Position.x & ChunkFilter, Position.y & ChunkFilter] = value;
+                Chunk[Position.X & ChunkFilter, Position.Y & ChunkFilter] = value;
             }
         }
         public T this[int x, int y]
@@ -78,7 +78,7 @@ namespace Zion
 
         public bool IsInside(Vector2Int Position)
         {
-            return IsInside(Position.x, Position.y);
+            return IsInside(Position.X, Position.Y);
         }
 
         public bool IsInside(int x, int y)

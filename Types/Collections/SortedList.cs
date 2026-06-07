@@ -253,6 +253,21 @@ namespace Zion
         }
 
 
+        public int FirstAfter(T Item)
+        {
+            if (Length == 0) { return -1; }
+
+            int Index = GetInsertIndex(Item);
+            
+            if (Index < Length && Item.CompareTo(Data[Index]) == 0)
+            {
+                Index++;
+            }
+
+            return Index < Length ? Index : -1;
+        }
+
+
         public void EnsureCapacity(int MinCapacity)
         {
             if (MinCapacity <= Data.Length) return;

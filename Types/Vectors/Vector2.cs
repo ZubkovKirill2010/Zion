@@ -11,138 +11,138 @@ namespace Zion.Vectors
         public static readonly Vector2 Down = new Vector2(0, -1);
         public static readonly Vector2 Left = new Vector2(-1, 0);
 
-        public float x, y;
+        public float X, Y;
 
-        public Vector2 Reversed => new Vector2(y, x);
+        public Vector2 Reversed => new Vector2(Y, X);
         public Vector2 Normal
         {
             get
             {
-                float Magnitude = MathF.Sqrt((x * x) + (y * y));
-                return new Vector2(x / Magnitude, y / Magnitude);
+                float Magnitude = MathF.Sqrt((X * X) + (Y * Y));
+                return new Vector2(X / Magnitude, Y / Magnitude);
             }
         }
 
 
         public Vector2(float Axis)
         {
-            x = Axis;
-            y = Axis;
+            X = Axis;
+            Y = Axis;
         }
-        public Vector2(float x, float y)
+        public Vector2(float X, float Y)
         {
-            this.x = x;
-            this.y = y;
+            this.X = X;
+            this.Y = Y;
         }
-        public Vector2(int x, int y)
+        public Vector2(int X, int Y)
         {
-            this.x = x;
-            this.y = y;
+            this.X = X;
+            this.Y = Y;
         }
         public Vector2(Vector2Int Vector)
         {
-            x = Vector.x;
-            y = Vector.y;
+            X = Vector.X;
+            Y = Vector.Y;
         }
 
 
         public static Vector2 operator +(Vector2 A, Direction B)
         {
             Vector2 VectorB = GetDirection(B);
-            return new Vector2(A.x + VectorB.x, A.y + VectorB.y);
+            return new Vector2(A.X + VectorB.X, A.Y + VectorB.Y);
         }
         public static Vector2 operator +(Direction A, Vector2 B)
         {
             Vector2 VectorA = GetDirection(A);
-            return new Vector2(VectorA.x + VectorA.x, B.y + B.y);
+            return new Vector2(VectorA.X + VectorA.X, B.Y + B.Y);
         }
 
         public static Vector2 operator -(Vector2 A, Direction B)
         {
             Vector2 VectorB = GetDirection(B);
-            return new Vector2(A.x - VectorB.x, A.y - VectorB.y);
+            return new Vector2(A.X - VectorB.X, A.Y - VectorB.Y);
         }
         public static Vector2 operator -(Direction A, Vector2 B)
         {
             Vector2 VectorA = GetDirection(A);
-            return new Vector2(VectorA.x - VectorA.x, B.y - B.y);
+            return new Vector2(VectorA.X - VectorA.X, B.Y - B.Y);
         }
 
         public static Vector2 operator *(Vector2 A, Direction B)
         {
             Vector2 VectorB = GetDirection(B);
-            return new Vector2(A.x * VectorB.x, A.y * VectorB.y);
+            return new Vector2(A.X * VectorB.X, A.Y * VectorB.Y);
         }
         public static Vector2 operator *(Direction A, Vector2 B)
         {
             Vector2 VectorA = GetDirection(A);
-            return new Vector2(VectorA.x * VectorA.x, B.y * B.y);
+            return new Vector2(VectorA.X * VectorA.X, B.Y * B.Y);
         }
 
         public static Vector2 operator /(Vector2 A, Direction B)
         {
             Vector2 VectorB = GetDirection(B);
-            return new Vector2(A.x / VectorB.x, A.y / VectorB.y);
+            return new Vector2(A.X / VectorB.X, A.Y / VectorB.Y);
         }
         public static Vector2 operator /(Direction A, Vector2 B)
         {
             Vector2 VectorA = GetDirection(A);
-            return new Vector2(VectorA.x / VectorA.x, B.y / B.y);
+            return new Vector2(VectorA.X / VectorA.X, B.Y / B.Y);
         }
 
         public static Vector2 operator --(Vector2 Vector)
         {
-            Vector.x--;
-            Vector.y--;
+            Vector.X--;
+            Vector.Y--;
             return Vector;
         }
         public static Vector2 operator ++(Vector2 Vector)
         {
-            Vector.x++;
-            Vector.y++;
+            Vector.X++;
+            Vector.Y++;
             return Vector;
         }
 
 
-        public static Vector2 operator +(Vector2 A, Vector2 B) => new Vector2(A.x + B.x, A.y + B.y);
-        public static Vector2 operator -(Vector2 A, Vector2 B) => new Vector2(A.x - B.x, A.y - B.y);
-        public static Vector2 operator *(Vector2 A, float B) => new Vector2(A.x * B, A.y * B);
-        public static Vector2 operator /(Vector2 A, float B) => new Vector2(A.x / B, A.y / B);
+        public static Vector2 operator +(Vector2 A, Vector2 B) => new Vector2(A.X + B.X, A.Y + B.Y);
+        public static Vector2 operator -(Vector2 A, Vector2 B) => new Vector2(A.X - B.X, A.Y - B.Y);
+        public static Vector2 operator *(Vector2 A, float B) => new Vector2(A.X * B, A.Y * B);
+        public static Vector2 operator /(Vector2 A, float B) => new Vector2(A.X / B, A.Y / B);
 
-        public static Vector2 operator +(Vector2 A, HorizontalDirection B) => new Vector2(A.x + (int)B, A.y);
-        public static Vector2 operator -(Vector2 A, HorizontalDirection B) => new Vector2(A.x - (int)B, A.y);
+        public static Vector2 operator +(Vector2 A, HorizontalDirection B) => new Vector2(A.X + (int)B, A.Y);
+        public static Vector2 operator -(Vector2 A, HorizontalDirection B) => new Vector2(A.X - (int)B, A.Y);
 
-        public static Vector2 operator +(Vector2 A, VerticalDirection B) => new Vector2(A.x, A.y + (int)B);
-        public static Vector2 operator -(Vector2 A, VerticalDirection B) => new Vector2(A.x, A.y - (int)B);
+        public static Vector2 operator +(Vector2 A, VerticalDirection B) => new Vector2(A.X, A.Y + (int)B);
+        public static Vector2 operator -(Vector2 A, VerticalDirection B) => new Vector2(A.X, A.Y - (int)B);
 
-        public static bool operator ==(Vector2 A, Vector2 B) => A.x == B.x && A.y == B.y;
-        public static bool operator !=(Vector2 A, Vector2 B) => A.x != B.x || A.y != B.y;
+        public static bool operator ==(Vector2 A, Vector2 B) => A.X == B.X && A.Y == B.Y;
+        public static bool operator !=(Vector2 A, Vector2 B) => A.X != B.X || A.Y != B.Y;
 
-        public static bool operator ==(Vector2 A, Vector2Int B) => A.x == B.x && A.y == B.y;
-        public static bool operator !=(Vector2 A, Vector2Int B) => A.x != B.x && A.y != B.y;
+        public static bool operator ==(Vector2 A, Vector2Int B) => A.X == B.X && A.Y == B.Y;
+        public static bool operator !=(Vector2 A, Vector2Int B) => A.X != B.X && A.Y != B.Y;
 
-        public static bool operator ==(Vector2Int A, Vector2 B) => A.x == B.x && A.y == B.y;
-        public static bool operator !=(Vector2Int A, Vector2 B) => A.x == B.x && A.y == B.y;
+        public static bool operator ==(Vector2Int A, Vector2 B) => A.X == B.X && A.Y == B.Y;
+        public static bool operator !=(Vector2Int A, Vector2 B) => A.X == B.X && A.Y == B.Y;
 
-        public static bool operator <(Vector2 A, Vector2 B) => A.x < B.x && A.y < B.y;
-        public static bool operator >(Vector2 A, Vector2 B) => A.x > B.x && A.y > B.y;
-        public static bool operator <=(Vector2 A, Vector2 B) => A.x <= B.x && A.y <= B.y;
-        public static bool operator >=(Vector2 A, Vector2 B) => A.x >= B.x && A.y >= B.y;
+        public static bool operator <(Vector2 A, Vector2 B) => A.X < B.X && A.Y < B.Y;
+        public static bool operator >(Vector2 A, Vector2 B) => A.X > B.X && A.Y > B.Y;
+        public static bool operator <=(Vector2 A, Vector2 B) => A.X <= B.X && A.Y <= B.Y;
+        public static bool operator >=(Vector2 A, Vector2 B) => A.X >= B.X && A.Y >= B.Y;
 
-        public static bool operator <(Vector2 A, Vector2Int B) => A.x < B.x && A.y < B.y;
-        public static bool operator >(Vector2 A, Vector2Int B) => A.x > B.x && A.y > B.y;
-        public static bool operator <=(Vector2 A, Vector2Int B) => A.x <= B.x && A.y <= B.y;
-        public static bool operator >=(Vector2 A, Vector2Int B) => A.x >= B.x && A.y >= B.y;
+        public static bool operator <(Vector2 A, Vector2Int B) => A.X < B.X && A.Y < B.Y;
+        public static bool operator >(Vector2 A, Vector2Int B) => A.X > B.X && A.Y > B.Y;
+        public static bool operator <=(Vector2 A, Vector2Int B) => A.X <= B.X && A.Y <= B.Y;
+        public static bool operator >=(Vector2 A, Vector2Int B) => A.X >= B.X && A.Y >= B.Y;
 
-        public static bool operator <(Vector2Int A, Vector2 B) => A.x < B.x && A.y < B.y;
-        public static bool operator >(Vector2Int A, Vector2 B) => A.x > B.x && A.y > B.y;
-        public static bool operator <=(Vector2Int A, Vector2 B) => A.x <= B.x && A.y <= B.y;
-        public static bool operator >=(Vector2Int A, Vector2 B) => A.x >= B.x && A.y >= B.y;
+        public static bool operator <(Vector2Int A, Vector2 B) => A.X < B.X && A.Y < B.Y;
+        public static bool operator >(Vector2Int A, Vector2 B) => A.X > B.X && A.Y > B.Y;
+        public static bool operator <=(Vector2Int A, Vector2 B) => A.X <= B.X && A.Y <= B.Y;
+        public static bool operator >=(Vector2Int A, Vector2 B) => A.X >= B.X && A.Y >= B.Y;
 
-        public static explicit operator Vector2Int(Vector2 Vector) => new Vector2Int((int)Vector.x, (int)Vector.y);
+        public static explicit operator Vector2Int(Vector2 Vector) => new Vector2Int((int)Vector.X, (int)Vector.Y);
 
 
-        public override readonly string ToString() => $"[{x}; {y}]";
+        public override readonly string ToString() => $"[{X}; {Y}]";
         public override readonly bool Equals([NotNullWhen(true)] object? Object)
         {
             return Object is not null && Object is Vector2 Vector && this == Vector;
@@ -152,17 +152,17 @@ namespace Zion.Vectors
             unchecked
             {
                 int Hash = 17;
-                Hash = (Hash * 23) + x.GetHashCode();
-                Hash = (Hash * 23) + y.GetHashCode();
+                Hash = (Hash * 23) + X.GetHashCode();
+                Hash = (Hash * 23) + Y.GetHashCode();
                 return Hash;
             }
         }
 
 
-        public void MoveUp() => y++;
-        public void MoveDown() => y--;
-        public void MoveRight() => x++;
-        public void MoveLeft() => x--;
+        public void MoveUp() => Y++;
+        public void MoveDown() => Y--;
+        public void MoveRight() => X++;
+        public void MoveLeft() => X--;
 
         public void Reverse() => this = Reversed;
         public void Normalize(Vector2 Vector) => this = Normal;
@@ -170,8 +170,8 @@ namespace Zion.Vectors
 
         public void Write(BinaryWriter Writer)
         {
-            Writer.Write(x);
-            Writer.Write(y);
+            Writer.Write(X);
+            Writer.Write(Y);
         }
         public static Vector2 Read(BinaryReader Reader)
         {
@@ -184,7 +184,7 @@ namespace Zion.Vectors
 
         public static Vector2 GetRandom(Random Random, Vector2 Min, Vector2 Max)
         {
-            return new Vector2(Random.NextFloat(Min.x, Max.x), Random.NextFloat(Min.y, Max.y));
+            return new Vector2(Random.NextFloat(Min.X, Max.X), Random.NextFloat(Min.Y, Max.Y));
         }
 
 
@@ -219,15 +219,15 @@ namespace Zion.Vectors
 
             return Math.Sqrt
             (
-                (Difference.x * Difference.x) +
-                (Difference.y * Difference.y)
+                (Difference.X * Difference.X) +
+                (Difference.Y * Difference.Y)
             );
         }
 
         public static bool CompareDistance(Vector2 A, Vector2 B, float MaxDistance)
         {
-            float DiferenceX = A.x - B.x;
-            float DiferenceY = A.y - B.y;
+            float DiferenceX = A.X - B.X;
+            float DiferenceY = A.Y - B.Y;
             return (DiferenceX * DiferenceX) + (DiferenceY * DiferenceY) <= MaxDistance * MaxDistance;
         }
 
@@ -253,14 +253,14 @@ namespace Zion.Vectors
 
         public static Vector2 Abs(Vector2 Vector)
         {
-            return new Vector2(Math.Abs(Vector.x), Math.Abs(Vector.y));
+            return new Vector2(Math.Abs(Vector.X), Math.Abs(Vector.Y));
         }
         public static Vector2 Clamp(Vector2 Value, Vector2 Min, Vector2 Max)
         {
             return new Vector2
             (
-                Math.Clamp(Value.x, Min.x, Max.x),
-                Math.Clamp(Value.y, Min.y, Max.y)
+                Math.Clamp(Value.X, Min.X, Max.X),
+                Math.Clamp(Value.Y, Min.Y, Max.Y)
             );
         }
     }
