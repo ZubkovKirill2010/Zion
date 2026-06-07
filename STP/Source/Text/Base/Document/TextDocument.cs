@@ -1,9 +1,9 @@
 ﻿namespace Zion.STP.Dynamic
 {
-    public abstract class TextDocument<Pointer> : TextSource where Pointer : TextPointer<Pointer>
+    public abstract class TextDocument<TPointer> : TextSource where TPointer : TextPointer<TPointer>
     {
-        public event Action<Pointer, int>? Changed;
+        public event Action<TPointer, int>? Changed;
 
-        public abstract TextSource BeginFrom(Pointer Position);
+        public abstract TextSource BeginFrom(TPointer Position);
     }
 }
