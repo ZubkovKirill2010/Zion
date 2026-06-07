@@ -19,4 +19,8 @@
     <None Remove="README.md" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="STP\DynamicReader\" />
+  </ItemGroup>
+
 </Project>
