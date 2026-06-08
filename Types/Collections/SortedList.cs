@@ -39,8 +39,37 @@ namespace Zion
         }
 
 
-        public T this[int Index] => Data[Index];
-        public T this[Index Index] => Data[Index];
+        public T this[int Index]
+        {
+            get => Data[Index];
+            set
+            {
+                ArgumentOutOfRangeException.ThrowIfWithout(Index, Length);
+
+                int Multiplier = (int)CompareMode;
+
+                bool ValidLeft = Index == 0 || value.CompareTo(Data[Index - 1]) * Multiplier >= 0;
+                bool ValidRight = Index == Length - 1 || value.CompareTo(Data[Index + 1]) * Multiplier <= 0;
+
+                if (ValidLeft && ValidRight)
+                {
+                    Data[Index] = value;
+                }
+                else
+                {
+                    RemoveAt(Index);
+                    Add(value);
+                }
+            }
+        }
+        public T this[Index Index]
+        {
+            get => Data[Index.GetOffset(Length)];
+            set
+            {
+                this[Index.GetOffset(Length)] = value;
+            }
+        }
         public T[] this[Range Range] => Data[Range];
 
 
