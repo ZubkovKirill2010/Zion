@@ -9,7 +9,7 @@
             get;
             set
             {
-                if (CanSet(field, value))
+                if (ShouldUpdate(field, value))
                 {
                     field = value;
                     Changed?.Invoke(value);
@@ -17,15 +17,15 @@
             }
         }
 
-        private readonly Func<T, T, bool> CanSet = static (Old, New) => true;
+        private readonly Func<T, T, bool> ShouldUpdate = static (Old, New) => true;
 
         public Changeable(T DefaultValue)
         {
             Value = DefaultValue;
         }
-        public Changeable(T DefaultValue, Func<T, T, bool> CanSet)
+        public Changeable(T DefaultValue, Func<T, T, bool> ShouldUpdate)
         {
-            this.CanSet ??= CanSet;
+            this.ShouldUpdate = ShouldUpdate.NotNull();
             Value = DefaultValue;
         }
 
