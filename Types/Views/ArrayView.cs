@@ -12,11 +12,12 @@
 
             public ArrayView(T[] Source)
             {
-                this.Source = Source;
+                this.Source = Source.NotNull();
                 this.Length = Source.Length;
             }
 
-            public T this[int Index] => Source[Index];
+            public T this[int   Index] => Source[Index];
+            public T this[Index Index] => Source[Index];
 
 
             public IEnumerator<T> GetEnumerator()

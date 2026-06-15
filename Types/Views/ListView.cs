@@ -10,10 +10,11 @@ namespace Zion
 
         public ListView(List<T> Source)
         {
-            this.Source = Source;
+            this.Source = Source.NotNull();
         }
 
-        public T this[int Index] => Source[Index];
+        public T this[int   Index] => Source[Index];
+        public T this[Index Index] => Source[Index];
 
         public IEnumerator<T> GetEnumerator()
         {
