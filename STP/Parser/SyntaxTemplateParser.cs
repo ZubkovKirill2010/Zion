@@ -31,43 +31,23 @@
 
         public ParsingResult<Node> Parse()
         {
-            TokenParsingResult Tokens = ReadTokens();
+            TokenParsingResult Tokens = ReadTokens(out TokenErrorCollector ErrorCollector);
             NodeParsingResult<Node> Nodes = ReadNodes(Tokens.Tokens);
 
-            HandleSemantic(Nodes);
+            HandleSemantic(Tokens, Nodes, ErrorCollector);
 
-            return new ParsingResult<Node>
-            (
-                new ListView<Token>(Tokens.Tokens),
-                new ListView<Node>(Nodes.Nodes),
-                new ParsingErrors(Tokens.Errors, Nodes.Errors)
-            );
+            return new ParsingResult<Node>(Tokens, Nodes);
         }
 
 
-        public TokenParsingResult ReadTokens()
+        private TokenParsingResult ReadTokens(out TokenErrorCollector ErrorCollector)
         {
             TextSource Source = this.Source.BeginNew();
 
             List<Token> Tokens = new List<Token>(TokensCapacity);
+            ListView<Token> TokensView = new ListView<Token>(Tokens);
 
-            List<int> InvalidTokens = new List<int>(5);
-            List<int> ErrorTokens = new List<int>(5);
-
-            void AddToken(Token Token)
-            {
-                if (Token.Status == Validation.Invalid)
-                {
-                    InvalidTokens.Add(Tokens.Count);
-                }
-                Tokens.Add(Token);
-            }
-
-            void AddErrorToken(ErrorToken Token)
-            {
-                ErrorTokens.Add(Tokens.Count);
-                Tokens.Add(Token);
-            }
+            ErrorCollector = new TokenErrorCollector(TokensView);
 
             while (!Source.IsEnd)
             {
@@ -82,7 +62,8 @@
                         ArgumentNullException.ThrowIfNull(ReaderSource);
 
                         TokenReaded = true;
-                        AddToken(Token);
+                        ErrorCollector.AddIfInvalid(Tokens.Count);
+                        Tokens.Add(Token);
 
                         Source = ReaderSource;
 
@@ -103,26 +84,38 @@
                     }
                     else
                     {
-                        AddErrorToken(ErrorToken);
+                        ErrorCollector.AddIfInvalid(Tokens.Count);
+                        Tokens.Add(ErrorToken);
                     }
                 }
             }
 
-            return new TokenParsingResult(Tokens, new TokenErrors(InvalidTokens.ToArray(), ErrorTokens.ToArray()));
+            return new TokenParsingResult(TokensView, ErrorCollector.ErrorsView);
         }
 
-        public NodeParsingResult<Node> ReadNodes(List<Token> Tokens)
+        private NodeParsingResult<Node> ReadNodes(ListView<Token> Tokens)
         {
             return NodeParser.Parse(Tokens);
         }
 
-        public void HandleSemantic(NodeParsingResult<Node> Nodes)
+        private void HandleSemantic(TokenParsingResult Tokens, NodeParsingResult<Node> Nodes, TokenErrorCollector ErrorCollector)
         {
             SemanticData Semantic = Nodes.SemanticData;
+            int Start = 0;
 
             foreach (Node Node in Nodes.Nodes)
             {
-                Node.Verificate(Semantic);
+                SemanticContext Context = new SemanticContext
+                (
+                    new TokenSlice(Tokens.Tokens, Start, Node.TokensCount),
+                    Start,
+                    Semantic,
+                    ErrorCollector
+                );
+
+                Start += Node.TokensCount;
+
+                Node.Verificate(Context);
             }
         }
     }

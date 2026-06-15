@@ -28,7 +28,7 @@
 
         public virtual Symbol? GetSymbol() => null;
 
-        public virtual void Verificate(SemanticData Semantic) { }
+        public virtual void Verificate(SemanticContext Context) { }
 
         public virtual void ApplyFormat(TokenSlice Tokens) { }
     }

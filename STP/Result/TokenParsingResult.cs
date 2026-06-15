@@ -2,7 +2,7 @@
 {
     public readonly record struct TokenParsingResult
     (
-        List<Token> Tokens,
-        TokenErrors Errors
+        ListView<Token> Tokens,
+        ListView<int>   Errors
     );
 }

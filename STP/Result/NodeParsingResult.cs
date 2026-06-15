@@ -2,8 +2,8 @@
 {
     public readonly record struct NodeParsingResult<Node>
     (
-        List<Node> Nodes,
-        SemanticData SemanticData,
-        NodeErrors Errors
+        List<Node>    Nodes,
+        SemanticData  SemanticData,
+        ListView<int> Errors
     ) where Node : STP.Node;
 }
