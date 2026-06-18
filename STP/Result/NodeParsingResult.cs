@@ -4,6 +4,9 @@
     (
         List<Node>    Nodes,
         SemanticData  SemanticData,
-        ListView<int> Errors
-    ) where Node : STP.Node;
+        int ErrorCount
+    ) where Node : STP.Node
+    {
+        public bool ContainsErrors => ErrorCount > 0;
+    }
 }

@@ -26,7 +26,7 @@
             List<Node> Nodes = new List<Node>(Capacity);
             List<Symbol> SemanticTree = new List<Symbol>(10);
 
-            bool ContainsErrors = false;
+            int ErrorCount = 0;
 
             bool NodeReaded = false;
             int Start = 0;
@@ -60,7 +60,7 @@
 
                     ErrorNode.ApplyFormat(new TokenSlice(Slice, 0, ErrorNode.TokensCount));
 
-                    ContainsErrors = true;
+                    ErrorCount++;
 
                     Start += ErrorNode.TokensCount;
                     Nodes.Add(ErrorNode);
@@ -71,7 +71,7 @@
             (
                 Nodes,
                 new SemanticData(SemanticTree),
-                ContainsErrors
+                ErrorCount
             );
         }
     }

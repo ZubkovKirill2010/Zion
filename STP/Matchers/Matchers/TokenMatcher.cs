@@ -9,9 +9,8 @@
             this.Predicate = Predicate ?? (static _ => true);
         }
 
-        public bool Match(Token Token, out bool GoToNext)
+        public bool Match(Token Token, MatchingContext Context)
         {
-            GoToNext = true;
             return Token is T Target && Predicate(Target);
         }
     }

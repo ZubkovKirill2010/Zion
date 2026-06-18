@@ -9,11 +9,11 @@
             this.Validator = Validator.NotNull();
         }
 
-        public bool Match(Token Token, out bool GoToNext)
+        public bool Match(Token Token, MatchingContext Context)
         {
-            if (!Validator.Match(Token, out GoToNext))
+            if (!Validator.Match(Token, Context))
             {
-                GoToNext = false;
+                Context.GoToNext = false;
             }
             return true;
         }
