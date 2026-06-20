@@ -1,6 +1,4 @@
-﻿using System.Security.Cryptography.X509Certificates;
-
-namespace Zion
+﻿namespace Zion
 {
     public sealed class EventRouter
     {
@@ -13,7 +11,10 @@ namespace Zion
 
                 field?.Invalidated -= OnInvalidated;
                 value?.Invalidated += OnInvalidated;
+
                 field = value;
+
+                Invalidated?.Invoke();
             }
         }
 
