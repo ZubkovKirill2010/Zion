@@ -1,19 +1,29 @@
 ﻿namespace Zion.STP
 {
-    //Text -> Tokens -> Nodes -> Semantic verification -> Result
     public sealed class SyntaxTemplateParser<Node> where Node : STP.Node
     {
+        #region Source
         private readonly TextSource Source;
 
+        #endregion
+
+        #region Tokenization
         private readonly ITokenReader[] TokenReaders;
         private readonly ITokenErrorHandler TokenErrorHandler;
 
-        private readonly NodeParser<Node> NodeParser;
-
         private readonly int TokensCapacity;
 
+        #endregion
+
+        #region Nodes
+        private readonly NodeParser<Node> NodeParser;
+
+        #endregion
+
+        #region Semantic
         private readonly Func<Symbol>? RootSymbol;
 
+        #endregion
 
         public SyntaxTemplateParser(TextSource Source, ParsingContext<Node> Context)
         {

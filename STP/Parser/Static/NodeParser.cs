@@ -6,6 +6,7 @@
         private readonly INodeErrorHandler<Node> ErrorHandler;
         private readonly int Capacity;
 
+
         public NodeParser(ParsingContext<Node> Context)
         {
             Readers = Context.NodeReadersArray;

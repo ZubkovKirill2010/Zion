@@ -1,19 +1,19 @@
 ﻿namespace Zion.STP.Dynamic
 {
-    public sealed class DynamicNodeReader<Node> where Node : STP.Node
+    public sealed class DynamicNodeParser<Node> where Node : STP.Node
     {
         private readonly INodeReader<Node>[] Readers;
         private readonly INodeErrorHandler<Node> ErrorHandler;
         private readonly int Capacity;
 
-        public DynamicNodeReader(ParsingContext<Node> Context)
+        public DynamicNodeParser(ParsingContext<Node> Context)
         {
             Readers = Context.NodeReadersArray;
             ErrorHandler = Context.NodeErrorHandler;
             Capacity = Context.NodesCapacity;
         }
 
-        public DynamicNodeReader(NodeParsingContext<Node> Context)
+        public DynamicNodeParser(NodeParsingContext<Node> Context)
         {
             Readers = Context.ReadersArray;
             ErrorHandler = Context.ErrorHandler;
