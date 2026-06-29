@@ -4,20 +4,20 @@ namespace Zion
 {
     public interface IMatrix<T> : IEnumerable<T>
     {
-        abstract Vector2Int Size { get; }
-        abstract int Width { get; }
-        abstract int Height { get; }
+        public abstract Vector2Int Size { get; }
+        public abstract int Width { get; }
+        public abstract int Height { get; }
 
-        abstract T this[int x, int y] { get; set; }
-        abstract T this[Vector2Int Position] { get; set; }
+        public abstract T this[int x, int y] { get; set; }
+        public abstract T this[Vector2Int Position] { get; set; }
 
-        abstract bool IsInside(Vector2Int Position);
-        abstract bool IsInside(int x, int y);
-        abstract bool IsEdge(Vector2Int Position);
-        abstract bool IsEdge(int x, int y);
+        public abstract bool IsInside(Vector2Int Position);
+        public abstract bool IsInside(int x, int y);
+        public abstract bool IsEdge(Vector2Int Position);
+        public abstract bool IsEdge(int x, int y);
 
-        abstract void Fill(T Value);
+        public abstract void Fill(T Value);
 
-        abstract void ForEach(Action<T> Action);
+        public abstract void ForEach(Action<T> Action);
     }
 }
