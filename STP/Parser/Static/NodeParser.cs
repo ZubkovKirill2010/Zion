@@ -7,14 +7,14 @@
         private readonly int Capacity;
 
 
-        public NodeParser(ParsingContext<Node> Context)
+        public NodeParser(Syntax<Node> Context)
         {
             Readers = Context.NodeReadersArray;
             ErrorHandler = Context.NodeErrorHandler;
             Capacity = Context.NodesCapacity;
         }
 
-        public NodeParser(NodeParsingContext<Node> Context)
+        public NodeParser(NodeSyntax<Node> Context)
         {
             Readers = Context.ReadersArray;
             ErrorHandler = Context.ErrorHandler;

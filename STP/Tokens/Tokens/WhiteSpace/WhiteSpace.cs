@@ -1,33 +1,37 @@
 ﻿namespace Zion.STP
 {
-    public class WhiteSpaceToken : Token { }
+    public class WhiteSpaceToken : Token
+    {
+        public override int LineBreakCount { get; }
+
+        public WhiteSpaceToken() { }
+
+        public WhiteSpaceToken(int LineBreakCount)
+        {
+            ArgumentOutOfRangeException.ThrowIfNegative(LineBreakCount);
+            this.LineBreakCount = LineBreakCount;
+        }
+    }
 
     public readonly struct WhiteSpaceTokenReader : ITokenReader
     {
         public bool Read(ref TextSource Source, out Token Token)
         {
             int Length = 0;
+            int LineBreakCount = 0;
 
-            foreach (char Char in Source)
+            while (!Source.IsEnd && char.IsWhiteSpace(Source.Current))
             {
-                if (char.IsWhiteSpace(Char))
+                if (Source.Current == '\n')
                 {
-                    Length++;
+                    LineBreakCount++;
                 }
-                else
-                {
-                    break;
-                }
+
+                Length++;
+                Source.MoveNext();
             }
 
-            if (Length != 0)
-            {
-                Token = new WhiteSpaceToken() { Length = Length };
-                return true;
-            }
-
-            Token = null!;
-            return false;
+            return WhiteSpaceToken.TryCreate(Length, () => new WhiteSpaceToken(LineBreakCount), out Token);
         }
     }
 }

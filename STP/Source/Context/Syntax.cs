@@ -1,6 +1,6 @@
 ﻿namespace Zion.STP
 {
-    public readonly struct ParsingContext<Node> where Node : STP.Node
+    public readonly struct Syntax<Node> where Node : STP.Node
     {
         internal readonly ITokenReader[] TokenReadersArray;
         internal readonly INodeReader<Node>[] NodeReadersArray;
@@ -48,7 +48,7 @@
 
         public Func<Symbol>? RootSymbol { get; init; }
 
-        public ParsingContext() { }
+        public Syntax() { }
 
 
         public ITokenReader[] GetTokenReaders()

@@ -1,6 +1,6 @@
 ﻿namespace Zion.STP.Dynamic
 {
-    public abstract class PointerSynchronizer<Pointer> where Pointer : TextPointer<Pointer>
+    public interface IPointerSynchronizer<Pointer> where Pointer : TextPointer<Pointer>
     {
         public abstract void Synchronize(Pointer Start, int Offset);
 

@@ -55,6 +55,8 @@ namespace Zion.STP
             }
         }
 
+        public virtual int LineBreakCount => 0;
+
         #endregion
 
         #region Actions

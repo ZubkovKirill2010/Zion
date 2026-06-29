@@ -35,7 +35,7 @@
 
         #endregion
 
-        public DynamicSyntaxTemplateParser(TextDocument<TPointer> Document, ParsingContext<Node> Context)
+        public DynamicSyntaxTemplateParser(TextDocument<TPointer> Document, Syntax<Node> Context)
         {
             this.Document = Document.NotNull();
 

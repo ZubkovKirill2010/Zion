@@ -23,6 +23,9 @@
     <Folder Include="STP\Parser\Static\" />
     <Folder Include="STP\Parser\Dynamic\" />
     <Folder Include="STP\Semantic\Data\" />
+    <Folder Include="STP\Source\Text\Document\" />
+    <Folder Include="STP\Source\Text\Source\Base\" />
+    <Folder Include="STP\Source\Text\Source\Source\" />
   </ItemGroup>
 
 </Project>

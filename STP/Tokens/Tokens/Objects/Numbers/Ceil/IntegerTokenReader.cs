@@ -11,6 +11,8 @@ namespace Zion.STP
         private readonly Lazy<OverflowCache<I>> DecimalCache;
         private readonly Lazy<OverflowCache<I>> HexadecimalCache;
 
+        public IDigitParser DigitParser { get; init => field = value.NotNull(); } = STP.DigitParser.Instance;
+
         public bool IgnoreSuffixes { get; init; }
 
         public IntegerTokenReader(NumberParsingParameters<I> Parameters)
@@ -74,17 +76,17 @@ namespace Zion.STP
                 return false;
             }
 
-            if (Source.Begins("0b", out Source))
+            if (Source.Begins(['0', DigitParser.BinaryPrefix], out Source))
             {
                 if (CheckSuffix(ref Source, out Token)) { return true; }
                 return ReadBinary(ref Source, out Token, IsNegative, CharCount + 2);
             }
-            if (Source.Begins("0o", out Source))
+            if (Source.Begins(['0', DigitParser.OctalPrefix], out Source))
             {
                 if (CheckSuffix(ref Source, out Token)) { return true; }
                 return ReadOctal(ref Source, out Token, IsNegative, CharCount + 2);
             }
-            if (Source.Begins("0x", out Source))
+            if (Source.Begins(['0', DigitParser.HexadecimalPrefix], out Source))
             {
                 if (CheckSuffix(ref Source, out Token)) { return true; }
                 return ReadHexadecimal(ref Source, out Token, IsNegative, CharCount + 2);
@@ -97,22 +99,22 @@ namespace Zion.STP
 
         private bool ReadBinary(ref TextSource Source, out Token Token, bool IsNegative, int CharCount)
         {
-            return Read(ref Source, out Token, IsNegative, CharCount, IsBinary, BinaryCache, Value => NumberParameters.LeftShift(Value, 1), true);
+            return Read(ref Source, out Token, IsNegative, CharCount, DigitParser.IsBinary, BinaryCache, Value => NumberParameters.LeftShift(Value, 1), true);
         }
 
         private bool ReadOctal(ref TextSource Source, out Token Token, bool IsNegative, int CharCount)
         {
-            return Read(ref Source, out Token, IsNegative, CharCount, IsOctal, OctalCache, Value => NumberParameters.LeftShift(Value, 3), true);
+            return Read(ref Source, out Token, IsNegative, CharCount, DigitParser.IsOctal, OctalCache, Value => NumberParameters.LeftShift(Value, 3), true);
         }
 
         private bool ReadHexadecimal(ref TextSource Source, out Token Token, bool IsNegative, int CharCount)
         {
-            return Read(ref Source, out Token, IsNegative, CharCount, IsHexadecimal, HexadecimalCache, Value => NumberParameters.LeftShift(Value, 4));
+            return Read(ref Source, out Token, IsNegative, CharCount, DigitParser.IsHexadecimal, HexadecimalCache, Value => NumberParameters.LeftShift(Value, 4));
         }
 
         private bool ReadDecimal(ref TextSource Source, out Token Token, bool IsNegative, int CharCount)
         {
-            return Read(ref Source, out Token, IsNegative, CharCount, IsDecimal, DecimalCache, Value => NumberParameters.Multiply(Value, 10));
+            return Read(ref Source, out Token, IsNegative, CharCount, DigitParser.IsDecimal, DecimalCache, Value => NumberParameters.Multiply(Value, 10));
         }
 
 
@@ -290,7 +292,7 @@ namespace Zion.STP
             if (Source.Begins("0b", out Source) || Source.Begins("0o", out Source))
             {
                 CharCount += 2;
-                IsDigit = IsDecimal;
+                IsDigit = DigitParser.IsDecimal;
 
                 if (IsEnd(ref Source))
                 {
@@ -303,11 +305,11 @@ namespace Zion.STP
                 if (Source.Begins("0x", out Source))
                 {
                     CharCount += 2;
-                    IsDigit = IsHexadecimal;
+                    IsDigit = DigitParser.IsHexadecimal;
                 }
                 else
                 {
-                    IsDigit = IsDecimal;
+                    IsDigit = DigitParser.IsDecimal;
                 }
 
                 if (IsEnd(ref Source))
@@ -331,27 +333,6 @@ namespace Zion.STP
 
             Token = CreateToken(new I(), CharCount);
             return true;
-        }
-
-
-        private static bool IsBinary(char Char, out int Digit)
-        {
-            return Char.IsBinaryDigit(out Digit);
-        }
-
-        private static bool IsOctal(char Char, out int Digit)
-        {
-            return Char.IsOctalDigit(out Digit);
-        }
-
-        private static bool IsDecimal(char Char, out int Digit)
-        {
-            return Char.IsDigit(out Digit);
-        }
-
-        private static bool IsHexadecimal(char Char, out int Digit)
-        {
-            return Char.IsHexadecimalDigit(out Digit);
         }
 
 

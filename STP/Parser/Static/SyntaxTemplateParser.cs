@@ -25,7 +25,7 @@
 
         #endregion
 
-        public SyntaxTemplateParser(TextSource Source, ParsingContext<Node> Context)
+        public SyntaxTemplateParser(TextSource Source, Syntax<Node> Context)
         {
             this.Source = Source.NotNull();
 

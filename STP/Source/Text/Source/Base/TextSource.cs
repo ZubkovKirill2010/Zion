@@ -63,6 +63,45 @@ namespace Zion.STP
             return Begins(Target, out _);
         }
 
+        public bool Begins(IEnumerable<char> Target, out TextSource Readed)
+        {
+            if (IsEnd)
+            {
+                Readed = this;
+                return false;
+            }
+
+            Readed = BeginNew();
+
+            foreach (char Char in Target)
+            {
+                if (!Readed.CurrentIs(Char))
+                {
+                    Readed = this;
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public bool Begins(IEnumerable<char> Target)
+        {
+            return Begins(Target, out _);
+        }
+
+        public bool Begins(char Target, out TextSource Readed)
+        {
+            if (Current == Target)
+            {
+                Readed = BeginNew();
+                Readed.MoveNext();
+                return true;
+            }
+            Readed = this;
+            return false;
+        }
+
 
         public void Skip(int Count)
         {
@@ -78,16 +117,12 @@ namespace Zion.STP
 
         public void Skip(int Count, out int Skipped)
         {
-            for (int i = 0; i < Count; i++)
+            Skipped = 0;
+            while (Skipped < Count && !IsEnd)
             {
-                if (IsEnd)
-                {
-                    Skipped = i;
-                    break;
-                }
                 MoveNext();
+                Skipped++;
             }
-            Skipped = Count;
         }
 
         public void Skip(char Target)
