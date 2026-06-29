@@ -6,14 +6,15 @@
         private readonly INodeErrorHandler<Node> ErrorHandler;
         private readonly int Capacity;
 
-        public NodeParser(ParsingContext<Node> Context)
+
+        public NodeParser(Syntax<Node> Context)
         {
             Readers = Context.NodeReadersArray;
             ErrorHandler = Context.NodeErrorHandler;
             Capacity = Context.NodesCapacity;
         }
 
-        public NodeParser(NodeParsingContext<Node> Context)
+        public NodeParser(NodeSyntax<Node> Context)
         {
             Readers = Context.ReadersArray;
             ErrorHandler = Context.ErrorHandler;
@@ -21,12 +22,12 @@
         }
 
 
-        public NodeParsingResult<Node> Parse(List<Token> Tokens)
+        public NodeParsingResult<Node> Parse(ListView<Token> Tokens)
         {
             List<Node> Nodes = new List<Node>(Capacity);
             List<Symbol> SemanticTree = new List<Symbol>(10);
 
-            List<int> InvalidNodes = new List<int>(5);
+            int ErrorCount = 0;
 
             bool NodeReaded = false;
             int Start = 0;
@@ -60,6 +61,8 @@
 
                     ErrorNode.ApplyFormat(new TokenSlice(Slice, 0, ErrorNode.TokensCount));
 
+                    ErrorCount++;
+
                     Start += ErrorNode.TokensCount;
                     Nodes.Add(ErrorNode);
                 }
@@ -69,7 +72,7 @@
             (
                 Nodes,
                 new SemanticData(SemanticTree),
-                new NodeErrors()
+                ErrorCount
             );
         }
     }

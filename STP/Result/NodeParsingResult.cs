@@ -2,8 +2,11 @@
 {
     public readonly record struct NodeParsingResult<Node>
     (
-        List<Node> Nodes,
-        SemanticData SemanticData,
-        NodeErrors Errors
-    ) where Node : STP.Node;
+        List<Node>    Nodes,
+        SemanticData  SemanticData,
+        int ErrorCount
+    ) where Node : STP.Node
+    {
+        public bool ContainsErrors => ErrorCount > 0;
+    }
 }

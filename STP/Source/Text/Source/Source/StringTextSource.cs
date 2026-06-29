@@ -1,6 +1,8 @@
-﻿namespace Zion.STP
+﻿using Zion.STP.Dynamic;
+
+namespace Zion.STP
 {
-    public sealed class StringTextSource : TextSource
+    public sealed class StringTextSource : TextDocument<IntPointer>
     {
         private readonly string Source;
 
@@ -39,6 +41,11 @@
             Index = Start;
         }
 
+
+        public override TextSource BeginFrom(IntPointer Position)
+        {
+            return new StringTextSource(Source, Position.Position);
+        }
 
         public override TextSource BeginNew()
         {

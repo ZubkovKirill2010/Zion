@@ -12,5 +12,15 @@
 
             return $"[{GetType().Name.RemoveSuffix("Token")}:{ValueString}]";
         }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(GetType(), Length, Value);
+        }
+
+        protected override bool DataEquals(Token Other)
+        {
+            return Other is ValueToken<T> ValueToken && EqualityComparer<T?>.Default.Equals(Value, ValueToken.Value);
+        }
     }
 }

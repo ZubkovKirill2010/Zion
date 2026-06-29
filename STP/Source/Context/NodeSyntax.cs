@@ -1,6 +1,6 @@
 ﻿namespace Zion.STP
 {
-    public readonly struct NodeParsingContext<Node> where Node : STP.Node
+    public readonly struct NodeSyntax<Node> where Node : STP.Node
     {
         internal readonly INodeReader<Node>[] ReadersArray;
 
@@ -27,9 +27,9 @@
         } = 20;
 
 
-        public NodeParsingContext() { }
+        public NodeSyntax() { }
 
-        public NodeParsingContext(ParsingContext<Node> Context)
+        public NodeSyntax(Syntax<Node> Context)
         {
             ReadersArray = Context.NodeReadersArray;
             ErrorHandler = Context.NodeErrorHandler;
