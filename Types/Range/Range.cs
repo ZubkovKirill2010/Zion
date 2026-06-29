@@ -1,6 +1,4 @@
-﻿using Zion.Vectors;
-
-namespace Zion
+﻿namespace Zion
 {
     public readonly struct Range<T> : IRange<T>, IEquatable<Range<T>> where T : IComparable<T>
     {
