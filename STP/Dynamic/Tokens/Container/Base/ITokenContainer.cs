@@ -4,7 +4,7 @@
     {
         public int Count { get; }
 
-        public void Add(Token Token);
+        public void Add(Token Token, TPointer Position);
 
         public void Clear();
 

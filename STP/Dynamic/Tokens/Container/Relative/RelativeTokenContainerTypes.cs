@@ -8,6 +8,11 @@ namespace Zion.STP.Dynamic
         {
             public TPointer Position;
 
+            public BaseNode(TPointer Position)
+            {
+                this.Position = Position;
+            }
+
             IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
             public abstract IEnumerator<Token> GetEnumerator();
@@ -18,12 +23,12 @@ namespace Zion.STP.Dynamic
             public BaseNode? Left;
             public BaseNode? Right;
 
-            public Node(BaseNode? Left)
+            public Node(TPointer Position, BaseNode? Left) : base(Position)
             {
                 this.Left = Left;
             }
 
-            public Node(BaseNode? Left, BaseNode? Right) : this(Left)
+            public Node(TPointer Position, BaseNode? Left, BaseNode? Right) : this(Position, Left)
             {
                 this.Right = Right;
             }
@@ -45,11 +50,11 @@ namespace Zion.STP.Dynamic
         {
             public readonly List<Token> Tokens;
 
-            public FinalNode()
+            public FinalNode(TPointer Position) : base(Position)
             {
                 Tokens = new List<Token>();
             }
-            public FinalNode(Token Token) : this()
+            public FinalNode(TPointer Position, Token Token) : this(Position)
             {
                 Add(Token);
             }

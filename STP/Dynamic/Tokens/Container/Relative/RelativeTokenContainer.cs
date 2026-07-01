@@ -13,21 +13,20 @@ namespace Zion.STP.Dynamic
         #endregion
 
         #region Properties
-        public int Count       { get; private set; }
-        public int TotalLength { get; private set; }
+        public int Count { get; private set; }
 
         public int TokenGroupLength { get; init => field = Math.Max(4, value); }
 
         #endregion
 
         #region IContainer
-        public void Add(Token Token)
+        public void Add(Token Token, TPointer Position)
         {
             Count++;
 
             if (GroupCount == 0)
             {
-                Last = new FinalNode(Token);
+                Last = new FinalNode(Position, Token);
                 Main = Last;
                 GroupCount++;
                 return;
@@ -41,22 +40,29 @@ namespace Zion.STP.Dynamic
 
             if (BitOperations.IsPow2(GroupCount++))
             {
-                //TODO: !Пересчитывать абсолютные позиции на относительные!
-                Last = new FinalNode(Token);
-                Main = new Node(Main, Last);
+                Main.Position = Main.Position.Subtract(Position);
+
+                Last = new FinalNode(Position, Token);
+                Last.Position = Last.Position.Subtract(Position);
+
+                Main = new Node(Position, Main, Last);
             }
             else
             {
-                FinalNode New = new FinalNode(Token);
+                FinalNode New = new FinalNode(Position, Token);
                 Node Parent = FindRightmostEmptySlot((Node)Main);
 
                 if (Parent.Right is null)
                 {
+                    New.Position = Position.Subtract(Parent.Position);
                     Parent.Right = New;
                 }
                 else
                 {
-                    Node NewParent = new Node(Parent.Right, New);
+                    TPointer NewParentPosition = Parent.Position;
+                    New.Position = Position.Subtract(NewParentPosition);
+
+                    Node NewParent = new Node(NewParentPosition, Parent.Right, New);
                     Parent.Right = NewParent;
                 }
 
@@ -66,7 +72,10 @@ namespace Zion.STP.Dynamic
 
         public void Clear()
         {
-            //TODO
+            Main = null;
+            Last = null;
+            Count = 0;
+            GroupCount = 0;
         }
 
         public void Overwrite(TPointer Start, int RemovedTokens, IEnumerable<Token> Tokens)
@@ -97,7 +106,7 @@ namespace Zion.STP.Dynamic
             }
             return Node;
         }
-
-        }
+        
+        #endregion
     }
 }
