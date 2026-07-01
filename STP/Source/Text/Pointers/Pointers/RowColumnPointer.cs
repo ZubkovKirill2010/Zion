@@ -10,6 +10,11 @@ namespace Zion.STP.Dynamic
 
         #endregion
 
+        #region Properties
+        public override bool IsValid => Row >= 0 && Column >= 0;
+
+        #endregion
+
         #region Constructors
         public RowColumnPointer(int Row, int Column)
         {

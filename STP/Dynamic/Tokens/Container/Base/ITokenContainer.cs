@@ -12,6 +12,6 @@
 
         public TPointer GetTokenStart(TPointer Position);
 
-        public IEnumerable<Token> EnumeratorFrom(TPointer Start);
+        public IEnumerable<Token> EnumeratorFrom(TPointer Start, out TPointer TokenStart);
     }
 }

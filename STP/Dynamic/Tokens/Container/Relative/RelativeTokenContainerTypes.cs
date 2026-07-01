@@ -48,7 +48,9 @@ namespace Zion.STP.Dynamic
 
         private sealed class FinalNode : BaseNode
         {
-            public readonly List<Token> Tokens;
+            private readonly List<Token> Tokens;
+
+            public int Count => Tokens.Count;
 
             public FinalNode(TPointer Position) : base(Position)
             {
@@ -59,10 +61,39 @@ namespace Zion.STP.Dynamic
                 Add(Token);
             }
 
+
             public void Add(Token Token)
             {
                 Tokens.Add(Token);
             }
+
+            public int GetTokenIndex(TPointer Target, out TPointer Start)
+            {
+                TPointer LocalTargetPosition = Target.Subtract(Position);
+                TPointer TokenStart = LocalTargetPosition;
+
+                int Count = Tokens.Count;
+
+                for (int i = 0; i < Tokens.Count; i++)
+                {                    
+                    if (TokenStart.CompareTo(LocalTargetPosition) >= 0)
+                    {
+                        Start = TokenStart;
+                        return i;
+                    }
+
+                    TokenStart = TokenStart.Sum(GetSize(Tokens[i]));
+                }
+
+                return -1;
+            }
+
+            public TPointer GetSize(Token Token)
+            {
+                throw new NotImplementedException();
+                //TODO
+            }
+
 
             public override IEnumerator<Token> GetEnumerator()
             {

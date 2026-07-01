@@ -4,6 +4,11 @@ namespace Zion.STP.Dynamic
 {
     public abstract class TextPointer<T> : IEquatable<T>, IEqualityComparer<T>, IComparable<T> where T : TextPointer<T>
     {
+        #region Properties
+        public abstract bool IsValid { get; }
+
+        #endregion
+
         #region Operators
         public static bool operator ==(TextPointer<T> A, TextPointer<T> B)
         {

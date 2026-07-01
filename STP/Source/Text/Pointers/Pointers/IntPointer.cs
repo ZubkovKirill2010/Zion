@@ -7,6 +7,11 @@
 
         #endregion
 
+        #region Properties
+        public override bool IsValid => Position >= 0;
+
+        #endregion
+
         #region Constructors
         public IntPointer(int Position)
         {
