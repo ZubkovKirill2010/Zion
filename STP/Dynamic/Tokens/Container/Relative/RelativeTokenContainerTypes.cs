@@ -85,6 +85,7 @@ namespace Zion.STP.Dynamic
                     TokenStart = TokenStart.Sum(GetSize(Tokens[i]));
                 }
 
+                Start = default!;
                 return -1;
             }
 
@@ -92,6 +93,12 @@ namespace Zion.STP.Dynamic
             {
                 throw new NotImplementedException();
                 //TODO
+            }
+
+
+            public IEnumerable<Token> Range(int Start)
+            {
+                return Tokens.Range<List<Token>, Token>(Start);
             }
 
 
