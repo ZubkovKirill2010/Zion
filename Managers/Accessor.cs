@@ -10,7 +10,7 @@ namespace Zion
             Target = Value;
             return Target;
         }
-        
+
         public static T SetByRef<T>(ref T Target, T Value)
         {
             Target = Value;
@@ -26,7 +26,7 @@ namespace Zion
             }
             return Target;
         }
-        
+
         public static T SetIf<T>(ref T Target, in T Value, in Func<T, bool> Condition)
         {
             if (Condition(Target))
@@ -68,7 +68,7 @@ namespace Zion
             A = B;
             B = Temp;
         }
-        
+
         public static void Reverse<T>(ref T A, ref T B, ref T Temp)
         {
             Temp = A;
@@ -103,20 +103,20 @@ namespace Zion
             Collection.Add(Item);
             return Item;
         }
-        
+
         public static T InsertAndReturn<T, I>(this T List, in int Index, in I Item) where T : IList<I>
         {
             List.Insert(Index, Item);
             return List;
         }
 
-        
+
         public static TValue AddAndReturn<D, TKey, TValue>(this D Dictionary, in TKey Key, TValue Value) where D : IDictionary<TKey, TValue>
         {
             Dictionary.Add(Key, Value);
             return Value;
         }
-        
+
         public static TValue RemoveAndReturn<D, TKey, TValue>(this D Dictionary, in TKey Key) where D : IDictionary<TKey, TValue>
         {
             TValue Value = Dictionary[Key];
