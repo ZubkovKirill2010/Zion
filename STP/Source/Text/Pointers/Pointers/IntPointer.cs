@@ -19,25 +19,9 @@
         }
 
 
-        public static bool operator ==(IntPointer A, IntPointer B)
-        {
-            return A.Position == B.Position;
-        }
-
-        public static bool operator !=(IntPointer A, IntPointer B)
-        {
-            return A.Position != B.Position;
-        }
-
-
         public override string ToString()
         {
             return $"[{Position}]";
-        }
-
-        public override bool Equals(object? Object)
-        {
-            return Object is IntPointer Pointer && this == Pointer;
         }
 
         public override int GetHashCode()
@@ -45,6 +29,11 @@
             return Position;
         }
 
+
+        public override bool Equals(IntPointer? Other)
+        {
+            return Other is not null && Position == Other.Position;
+        }
 
         public override int CompareTo(IntPointer? Pointer)
         {

@@ -26,7 +26,7 @@ namespace Zion.STP
 
             this.Count = Count;
         }
-        
+
         public TokenSlice(TokenSlice Source, int Start)
         {
             ArgumentOutOfRangeException.ThrowIfWithout(Start, Source.Count);

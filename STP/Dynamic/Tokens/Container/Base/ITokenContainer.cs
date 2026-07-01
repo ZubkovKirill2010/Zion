@@ -6,6 +6,8 @@
 
         public void Add(Token Token);
 
+        public void Clear();
+
         public void Overwrite(TPointer Start, int RemovedTokens, IEnumerable<Token> Tokens);
 
         public TPointer GetTokenStart(TPointer Position);

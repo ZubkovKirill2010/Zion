@@ -3,11 +3,11 @@
     public interface IDigitParser
     {
         public char BinaryPrefix { get; }
-        
+
         public char OctalPrefix { get; }
-        
+
         public char HexadecimalPrefix { get; }
-        
+
 
         public bool IsBinary(char Char, out int Digit);
 

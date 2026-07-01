@@ -49,16 +49,16 @@ namespace Zion.STP.Dynamic
             return $"[{Row}; {Column}]";
         }
 
-        public override bool Equals(object? Object)
-        {
-            return Object is RowColumnPointer Pointer && this == Pointer;
-        }
-
         public override int GetHashCode()
         {
             return HashCode.Combine(Row, Column);
         }
 
+
+        public override bool Equals(RowColumnPointer? Other)
+        {
+            return Other is not null && Row == Other.Row && Column == Other.Column;
+        }
 
         public override int CompareTo(RowColumnPointer? Pointer)
         {

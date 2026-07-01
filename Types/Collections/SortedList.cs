@@ -258,7 +258,7 @@ namespace Zion
             if (Length == 0) { return -1; }
 
             int Index = GetInsertIndex(Item);
-            
+
             if (Index < Length && Item.CompareTo(Data[Index]) == 0)
             {
                 Index++;
