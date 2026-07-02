@@ -14,7 +14,7 @@
             return Expression;
         }
 
-        internal IMathTerm ParseBeforeSeporator(out int End)
+        internal IMathTerm ParseBeforeSeparator(out int End)
         {
             IMathTerm Result = Parse();
             End = Index;

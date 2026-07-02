@@ -34,7 +34,7 @@
 
             MathExpressionParser Parser = new MathExpressionParser(String[Index..], Variables, Functions);
 
-            Result = Parser.ParseBeforeSeporator(out int End);
+            Result = Parser.ParseBeforeSeparator(out int End);
             Index += End;
 
             return MemberParsed();

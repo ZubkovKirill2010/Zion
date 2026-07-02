@@ -292,7 +292,7 @@ namespace Zion.MathExpressions
             return IsNaN ? "NaN" : IsZero ? "0" : IsOne ? "1" : IsCeil(out Int Value) ? Value.ToString() : $"({Divisible}/{Divider})";
         }
 
-        public string ToDecimalString(int Accuracy, Comma Seporator = Comma.Dot)
+        public string ToDecimalString(int Accuracy, Comma Separator = Comma.Dot)
         {
             if (IsNaN) { return "NaN"; }
             if (IsZero) { return "0"; }
@@ -328,7 +328,7 @@ namespace Zion.MathExpressions
 
             string String = Builder.ToString();
 
-            return !string.IsNullOrEmpty(String) ? $"{CeilPartString}{(char)Seporator}{String}" : CeilPartString;
+            return !string.IsNullOrEmpty(String) ? $"{CeilPartString}{(char)Separator}{String}" : CeilPartString;
         }
 
         public string ToStackedString(bool UseUnicodeChars = false)
@@ -363,7 +363,7 @@ namespace Zion.MathExpressions
 
         public static Fraction Parse(string String)
         {
-            String = Parser.Normalize(Accessor.NotNull(String));
+            String = Normalize(Accessor.NotNull(String));
 
             if (String.Length == 0)
             {
@@ -373,7 +373,7 @@ namespace Zion.MathExpressions
             int DivisionSign = String.IndexOf('/');
 
             return DivisionSign == -1
-                ? String.ToBigInteger().ToFraction()
+                ? ToBigInteger(String).ToFraction()
                 : new Fraction
             (
                 Int.Parse(String[..DivisionSign]),
@@ -398,7 +398,7 @@ namespace Zion.MathExpressions
 
         public static Fraction ParseDecimal(string String)
         {
-            String = Parser.NormalizeFloated(String.NotNull());
+            String = NormalizeFloated(String.NotNull());
 
             bool IsNegative = String.StartsWith('-');
             bool HasSign = IsNegative || String.StartsWith('+');
@@ -410,7 +410,7 @@ namespace Zion.MathExpressions
                 {
                     throw new FormatException("Invalid number format");
                 }
-                Int Result = String.ToBigInteger();
+                Int Result = ToBigInteger(String);
                 return Result.ToFraction();
             }
 
@@ -489,7 +489,7 @@ namespace Zion.MathExpressions
 
         public static bool TryParseDecimal(string String, out Fraction Value)
         {
-            String = Parser.NormalizeFloated(String.NotNull());
+            String = NormalizeFloated(String.NotNull());
             Value = default;
 
             bool IsNegative = String.StartsWith('-');
@@ -505,7 +505,7 @@ namespace Zion.MathExpressions
 
                 try
                 {
-                    Int Result = String.ToBigInteger();
+                    Int Result = ToBigInteger(String);
                     Value = Result.ToFraction();
                     return true;
                 }
@@ -1303,6 +1303,92 @@ namespace Zion.MathExpressions
                 LastByte <<= 1;
             }
             return BitLength;
+        }
+
+
+        private static Int ToBigInteger(string String)
+        {
+            String = Normalize(String);
+
+            bool IsNegative = String.StartsWith('-');
+            int Start = 0;
+
+            if (IsNegative || String.StartsWith('+'))
+            {
+                Start = 1;
+            }
+
+            BigInteger GetResult(BigInteger Value)
+            {
+                return IsNegative ? -Value : Value;
+            }
+
+            if (String.Begins(Start, "0b", true))
+            {
+                if (String.Length == Start + 2)
+                {
+                    return BigInteger.Zero;
+                }
+
+                BigInteger Result = 0;
+
+                for (int i = Start + 2; i < String.Length; i++)
+                {
+                    Result <<= 1;
+                    char Current = String[i];
+
+                    if (Current == '1')
+                    {
+                        Result |= 1;
+                    }
+                    else if (Current != '0')
+                    {
+                        throw new FormatException($"Couldn't convert \"{String}\" to BigInteger");
+                    }
+                }
+                return GetResult(Result);
+            }
+
+            if (String.Begins(Start, "0x", true))
+            {
+                if (String.Length == Start + 2)
+                {
+                    return BigInteger.Zero;
+                }
+
+                BigInteger Result = 0;
+
+                for (int i = Start + 2; i < String.Length; i++)
+                {
+                    Result <<= 4;
+                    Result |= ToHex(String[i]);
+                }
+                return GetResult(Result);
+            }
+
+            return BigInteger.Parse(String);
+        }
+
+        private static int ToHex(char Char)
+        {
+            return char.IsDigit(Char)
+                ? Char - '0'
+                : Char >= 'a' && Char <= 'f'
+                ? Char - 'a' + 10
+                : Char >= 'A' && Char <= 'F' ? Char - 'A' + 10 : throw new FormatException($"Couldn't convert '{Char}' to hex");
+        }
+
+        private static string Normalize(string String)
+        {
+            return String.RemoveChars
+            (
+                Char => char.IsWhiteSpace(Char) || Char == '_'
+            );
+        }
+
+        private static string NormalizeFloated(string String)
+        {
+            return Normalize(String).Replace('.', ',');
         }
     }
 }

@@ -34,14 +34,14 @@ namespace Zion
         {
             ArgumentNullException.ThrowIfNull(Chars);
 
-            int GetLength(byte Value) => Value switch
+            static int GetLength(byte Value) => Value switch
             {
                 >= 100 => 3,
                 >= 10 => 2,
                 _ => 1
             };
 
-            return string.Create(Chars.Count + 14 + Color.Summarize(GetLength), Chars, (Span, List) =>
+            return string.Create(Chars.Count + 14 + Color.Sum(GetLength), Chars, (Span, List) =>
             {
                 string g = $"\u001b[38;2;{Color.R};{Color.G};{Color.B}m{Chars}\u001b[0m";
                 int Index = 0;

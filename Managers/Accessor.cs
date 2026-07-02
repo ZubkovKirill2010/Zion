@@ -149,7 +149,7 @@ namespace Zion
         public static T NotNullOrEmpty<T, I>(this T? Collection, [CallerArgumentExpression(nameof(Collection))] string? ParameterName = null) where T : IEnumerable<I>
         {
             ArgumentNullException.ThrowIfNull(Collection, ParameterName);
-            ArgumentException.ThrowIf(Collection.IsEmpty(), $"{ParameterName} is empty");
+            ArgumentException.ThrowIf(Collection.IsNullOrEmpty(), $"{ParameterName} is null or empty");
             return Collection;
         }
     }

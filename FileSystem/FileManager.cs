@@ -10,9 +10,21 @@ namespace Zion.FileSystem
             FileNotFoundException.ThrowIfNotExists(FilePath);
             InvalidFileNameException.ThrowIfInvalid(NewName);
 
-            string NewFilePath = Path.GetDirectoryName(FilePath) + NewName;
+            string DirectoryPath = Path.GetDirectoryName(FilePath);
+            string NewFilePath = Path.Combine(DirectoryPath, NewName);
+
             File.Move(FilePath, NewFilePath);
-            File.Delete(FilePath);
+        }
+
+        public static void Rename(string FilePath, string NewName, bool Overwrite)
+        {
+            FileNotFoundException.ThrowIfNotExists(FilePath);
+            InvalidFileNameException.ThrowIfInvalid(NewName);
+
+            string DirectoryPath = Path.GetDirectoryName(FilePath);
+            string NewFilePath = Path.Combine(DirectoryPath, NewName);
+
+            File.Move(FilePath, NewFilePath, Overwrite);
         }
 
         public static void SetExtension(string FilePath, string NewExtension, bool Overwrite = true)
@@ -20,49 +32,39 @@ namespace Zion.FileSystem
             ArgumentNullException.ThrowIfNull(NewExtension);
             FileNotFoundException.ThrowIfNotExists(FilePath);
 
-            if (NewExtension.Length == 0
-                || NewExtension == "."
-                || FileSystem.FilePath.IsInvalidFileName(NewExtension))
+            if (NewExtension.Length == 0)
             {
-                throw new ArgumentException($"New file extension '{NewExtension}' is invalid");
+                throw new ArgumentException("New file extension cannot be empty", nameof(NewExtension));
             }
 
-            string FilePathWithoutExtension = Path.GetFileNameWithoutExtension(FilePath);
-            string NewFilePath = FilePathWithoutExtension + NewExtension.EnsurePrefix(".");
+            if (NewExtension == ".")
+            {
+                throw new ArgumentException("New file extension cannot be just a dot", nameof(NewExtension));
+            }
+
+            if (FileSystem.FilePath.IsInvalidFileName(NewExtension))
+            {
+                throw new ArgumentException($"New file extension '{NewExtension}' contains invalid characters", nameof(NewExtension));
+            }
+
+            string DirectoryPath = Path.GetDirectoryName(FilePath);
+            string FileNameWithoutExtension = Path.GetFileNameWithoutExtension(FilePath);
+            string NewFileName = FileNameWithoutExtension + NewExtension.EnsurePrefix(".");
+            string NewFilePath = Path.Combine(DirectoryPath, NewFileName);
 
             File.Move(FilePath, NewFilePath, Overwrite);
-            File.Delete(FilePath);
         }
 
-
-        public static bool MoveToRecycleBin(string Path, bool ShowDialog = false)
+        public static bool MoveToRecycleBin(string FilePath, bool ShowDialog = false)
         {
             try
             {
-                Microsoft.VisualBasic.FileIO.FileSystem.DeleteFile(Path,
+                Microsoft.VisualBasic.FileIO.FileSystem.DeleteFile(
+                    FilePath,
                     UIOption.OnlyErrorDialogs,
-                    ShowDialog ? RecycleOption.SendToRecycleBin : RecycleOption.SendToRecycleBin,
-                    UICancelOption.ThrowException);
-                return true;
-            }
-            catch (OperationCanceledException)
-            {
-                return false;
-            }
-            catch (Exception Exception)
-            {
-                throw new Exception($"Ошибка при удалении в корзину: {Exception.Message}", Exception);
-            }
-        }
+                    RecycleOption.SendToRecycleBin,
+                    ShowDialog ? UICancelOption.ThrowException : UICancelOption.DoNothing);
 
-        public static bool MoveDirectoryToRecycleBin(string Path, bool ShowDialog = false)
-        {
-            try
-            {
-                Microsoft.VisualBasic.FileIO.FileSystem.DeleteDirectory(Path,
-                    UIOption.OnlyErrorDialogs,
-                    ShowDialog ? RecycleOption.SendToRecycleBin : RecycleOption.SendToRecycleBin,
-                    UICancelOption.ThrowException);
                 return true;
             }
             catch (OperationCanceledException)
@@ -71,65 +73,134 @@ namespace Zion.FileSystem
             }
         }
 
-
-        public static void CopyDirectory(string DirectoryPath, string NewDirectoryPath, Action<ProgressInfo>? UpdateProgress = null)
+        public static bool MoveDirectoryToRecycleBin(string DirectoryPath, bool ShowDialog = false)
         {
-            CopyDirectoryAsync(DirectoryPath, NewDirectoryPath).GetAwaiter().GetResult();
+            try
+            {
+                Microsoft.VisualBasic.FileIO.FileSystem.DeleteDirectory(
+                    DirectoryPath,
+                    UIOption.OnlyErrorDialogs,
+                    RecycleOption.SendToRecycleBin,
+                    ShowDialog ? UICancelOption.ThrowException : UICancelOption.DoNothing);
+
+                return true;
+            }
+            catch (OperationCanceledException)
+            {
+                return false;
+            }
         }
 
-        public static async Task CopyDirectoryAsync(string DirectoryPath, string NewDirectoryPath, Action<ProgressInfo>? UpdateProgress = null)
+        public static void CopyDirectory(string SourceDirectoryPath, string DestinationDirectoryPath, Action<ProgressInfo>? UpdateProgress = null)
         {
-            ArgumentNullException.ThrowIfNull(DirectoryPath);
-            ArgumentNullException.ThrowIfNull(NewDirectoryPath);
+            CopyDirectoryAsync(SourceDirectoryPath, DestinationDirectoryPath, UpdateProgress)
+                .GetAwaiter()
+                .GetResult();
+        }
 
-            List<string> Files = Directory.EnumerateFiles(DirectoryPath, "*", SearchOption.AllDirectories).ToList();
-            List<string> Directories = Directory.EnumerateDirectories(DirectoryPath, "*", SearchOption.AllDirectories).ToList();
+        public static async Task CopyDirectoryAsync(string SourceDirectoryPath, string DestinationDirectoryPath, Action<ProgressInfo>? UpdateProgress = null)
+        {
+            ArgumentNullException.ThrowIfNull(SourceDirectoryPath);
+            ArgumentNullException.ThrowIfNull(DestinationDirectoryPath);
 
-            foreach (string CurrentDirectory in Directories)
+            if (!Directory.Exists(SourceDirectoryPath))
             {
-                string RelativePath = Path.GetRelativePath(DirectoryPath, CurrentDirectory);
-                string NewDirectory = Path.Combine(NewDirectoryPath, RelativePath);
-                Directory.CreateDirectory(NewDirectory);
+                throw new DirectoryNotFoundException($"Source directory not found: {SourceDirectoryPath}");
             }
 
-            long TotalBytes = Files.Sum(File => new FileInfo(File).Length);
+            List<string> AllFiles = Directory
+                .EnumerateFiles(SourceDirectoryPath, "*", SearchOption.AllDirectories)
+                .ToList();
+
+            List<string> AllDirectories = Directory
+                .EnumerateDirectories(SourceDirectoryPath, "*", SearchOption.AllDirectories)
+                .ToList();
+
+            foreach (string CurrentDirectory in AllDirectories)
+            {
+                string RelativePath = Path.GetRelativePath(SourceDirectoryPath, CurrentDirectory);
+                string NewDirectoryPath = Path.Combine(DestinationDirectoryPath, RelativePath);
+                Directory.CreateDirectory(NewDirectoryPath);
+            }
+
+            long TotalBytes = AllFiles.Sum(FilePath => new FileInfo(FilePath).Length);
             long CopiedBytes = 0;
 
-            ParallelOptions Options = new ParallelOptions
+            ParallelOptions ParallelOptions = new ParallelOptions
             {
                 MaxDegreeOfParallelism = Environment.ProcessorCount
             };
 
-            Action<string, string> CopyFile = UpdateProgress is null
-            ? async (Source, Destination) => await CopyFileAsync(Source, Destination)
-            : async (Source, Destination) => await CopyFileAsync(Source, Destination, Bytes =>
+            if (UpdateProgress is null)
             {
-                long NewCopied = Interlocked.Add(ref CopiedBytes, Bytes);
-                UpdateProgress(new ProgressInfo(TotalBytes, NewCopied));
-            });
+                await Parallel.ForEachAsync(
+                    AllFiles,
+                    ParallelOptions,
+                    async (CurrentFile, CancellationToken) =>
+                    {
+                        string RelativePath = Path.GetRelativePath(SourceDirectoryPath, CurrentFile);
+                        string DestinationFilePath = Path.Combine(DestinationDirectoryPath, RelativePath);
 
-            await Parallel.ForEachAsync(Files, Options, async (File, Token) =>
+                        await CopyFileAsync(CurrentFile, DestinationFilePath);
+                    });
+            }
+            else
             {
-                string RelativePath = Path.GetRelativePath(DirectoryPath, File);
-                string NewFile = Path.Combine(NewDirectoryPath, RelativePath);
-                CopyFile(File, NewFile);
-            });
+                await Parallel.ForEachAsync(
+                    AllFiles,
+                    ParallelOptions,
+                    async (CurrentFile, CancellationToken) =>
+                    {
+                        string RelativePath = Path.GetRelativePath(SourceDirectoryPath, CurrentFile);
+                        string DestinationFilePath = Path.Combine(DestinationDirectoryPath, RelativePath);
+
+                        await CopyFileAsync(
+                            CurrentFile,
+                            DestinationFilePath,
+                            (BytesCopied) =>
+                            {
+                                long NewTotalCopied = Interlocked.Add(ref CopiedBytes, BytesCopied);
+                                ProgressInfo Progress = new ProgressInfo(TotalBytes, NewTotalCopied);
+                                UpdateProgress(Progress);
+                            });
+                    });
+            }
         }
 
-
-        public static void CopyFile(string Source, string Destination, Action<long>? OnBytesCopied = null)
+        public static void CopyFile(string SourceFilePath, string DestinationFilePath, Action<long>? OnBytesCopied = null)
         {
-            CopyFileAsync(Source, Destination).GetAwaiter().GetResult();
+            CopyFileAsync(SourceFilePath, DestinationFilePath, OnBytesCopied)
+                .GetAwaiter()
+                .GetResult();
         }
 
-        public static async Task CopyFileAsync(string Source, string Destination, Action<long>? OnBytesCopied = null)
+        public static async Task CopyFileAsync(string SourceFilePath, string DestinationFilePath, Action<long>? OnBytesCopied = null)
         {
-            ArgumentNullException.ThrowIfNull(Source);
-            ArgumentNullException.ThrowIfNull(Destination);
+            ArgumentNullException.ThrowIfNull(SourceFilePath);
+            ArgumentNullException.ThrowIfNull(DestinationFilePath);
+
+            if (!File.Exists(SourceFilePath))
+            {
+                throw new FileNotFoundException($"Source file not found: {SourceFilePath}");
+            }
 
             const int BufferSize = 81920;
-            using FileStream SourceStream = new FileStream(Source, FileMode.Open, FileAccess.Read);
-            using FileStream DestinationStream = new FileStream(Destination, FileMode.Create, FileAccess.Write);
+
+            using FileStream SourceStream = new FileStream(
+                SourceFilePath,
+                FileMode.Open,
+                FileAccess.Read,
+                FileShare.Read,
+                BufferSize,
+                useAsync: true);
+
+            using FileStream DestinationStream = new FileStream(
+                DestinationFilePath,
+                FileMode.Create,
+                FileAccess.Write,
+                FileShare.None,
+                BufferSize,
+                useAsync: true);
 
             byte[] Buffer = new byte[BufferSize];
             int BytesRead;
@@ -139,6 +210,106 @@ namespace Zion.FileSystem
                 await DestinationStream.WriteAsync(Buffer, 0, BytesRead);
                 OnBytesCopied?.Invoke(BytesRead);
             }
+
+            await DestinationStream.FlushAsync();
+        }
+
+        public static async Task CopyFileAsync(
+            string SourceFilePath,
+            string DestinationFilePath,
+            Action<long>? OnBytesCopied,
+            CancellationToken CancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(SourceFilePath);
+            ArgumentNullException.ThrowIfNull(DestinationFilePath);
+
+            if (!File.Exists(SourceFilePath))
+            {
+                throw new FileNotFoundException($"Source file not found: {SourceFilePath}");
+            }
+
+            const int BufferSize = 81920;
+
+            using FileStream SourceStream = new FileStream(
+                SourceFilePath,
+                FileMode.Open,
+                FileAccess.Read,
+                FileShare.Read,
+                BufferSize,
+                useAsync: true);
+
+            using FileStream DestinationStream = new FileStream(
+                DestinationFilePath,
+                FileMode.Create,
+                FileAccess.Write,
+                FileShare.None,
+                BufferSize,
+                useAsync: true);
+
+            byte[] Buffer = new byte[BufferSize];
+            int BytesRead;
+
+            while ((BytesRead = await SourceStream.ReadAsync(Buffer, 0, Buffer.Length, CancellationToken)) > 0)
+            {
+                await DestinationStream.WriteAsync(Buffer, 0, BytesRead, CancellationToken);
+                OnBytesCopied?.Invoke(BytesRead);
+            }
+
+            await DestinationStream.FlushAsync(CancellationToken);
+        }
+
+        public static string FormatBytesHumanReadable(long Bytes)
+        {
+            string[] SizeSuffixes = { "B", "KB", "MB", "GB", "TB", "PB", "EB" };
+
+            if (Bytes == 0)
+            {
+                return "0 B";
+            }
+
+            int SuffixIndex = 0;
+            double DisplaySize = Bytes;
+
+            while (DisplaySize >= 1024 && SuffixIndex < SizeSuffixes.Length - 1)
+            {
+                DisplaySize /= 1024;
+                SuffixIndex++;
+            }
+
+            return $"{DisplaySize:0.##} {SizeSuffixes[SuffixIndex]}";
+        }
+
+        public static string GetFileSizeHumanReadable(string FilePath)
+        {
+            ArgumentNullException.ThrowIfNull(FilePath);
+            FileNotFoundException.ThrowIfNotExists(FilePath);
+
+            FileInfo FileInformation = new FileInfo(FilePath);
+            long FileSizeInBytes = FileInformation.Length;
+
+            return FormatBytesHumanReadable(FileSizeInBytes);
+        }
+
+        public static bool IsFileHidden(string FilePath)
+        {
+            ArgumentNullException.ThrowIfNull(FilePath);
+            FileNotFoundException.ThrowIfNotExists(FilePath);
+
+            FileInfo FileInformation = new FileInfo(FilePath);
+            return (FileInformation.Attributes & FileAttributes.Hidden) == FileAttributes.Hidden;
+        }
+
+        public static bool IsDirectoryHidden(string DirectoryPath)
+        {
+            ArgumentNullException.ThrowIfNull(DirectoryPath);
+
+            if (!Directory.Exists(DirectoryPath))
+            {
+                throw new DirectoryNotFoundException($"Directory not found: {DirectoryPath}");
+            }
+
+            DirectoryInfo DirectoryInformation = new DirectoryInfo(DirectoryPath);
+            return (DirectoryInformation.Attributes & FileAttributes.Hidden) == FileAttributes.Hidden;
         }
     }
 }

@@ -68,7 +68,7 @@ namespace Zion
         }
 
 
-        public static void Write<T>(this BinaryWriter Writer, IBinarySerializable<T> Object) where T : IBinarySerializable<T>
+        public static void Write<T>(this BinaryWriter Writer, T Object) where T : IBinaryWritable
         {
             Object.Write(Writer);
         }
