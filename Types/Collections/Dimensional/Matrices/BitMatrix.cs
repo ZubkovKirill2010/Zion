@@ -100,7 +100,7 @@ namespace Zion
 
         public BitMatrix Clone()
         {
-            return new BitMatrix(ArrayExtensions.Clone(Data), Size);
+            return new BitMatrix(ZArray.Clone(Data), Size);
         }
         public BitMatrix GetSubMatrix(Vector2Int Start, Vector2Int End)
         {

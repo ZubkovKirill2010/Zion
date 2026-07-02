@@ -15,9 +15,11 @@
         {
             Token Token = Tokens[0];
 
-            if (TokenMatcher.Match(Token, out bool GoToNext))
+            MatchingContext Context = new MatchingContext();
+
+            if (TokenMatcher.Match(Token, Context))
             {
-                ArgumentException.ThrowIf(!GoToNext, "SingleTokenNodeReader requires GoToNext = true. The token matched but refused to advance.");
+                ArgumentException.ThrowIf(!Context.GoToNext, "SingleTokenNodeReader requires GoToNext = true. The token matched but refused to advance.");
 
                 Node = NodeGetter(Token);
                 return true;

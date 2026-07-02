@@ -43,7 +43,7 @@
             Token = new WordToken
             {
                 Length = Chars.Count,
-                Value = string.FromCharCollection(Chars)
+                Value = Text.Create(Chars)
             };
             return true;
         }

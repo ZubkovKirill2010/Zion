@@ -228,10 +228,11 @@ namespace Zion.STP
                 Source.MoveNext();
             }
 
+
             if (Chars.Count == Length)
             {
                 Readed = Source;
-                String = string.FromCharCollection(Chars);
+                String = Text.Create(Chars);
                 return true;
             }
 

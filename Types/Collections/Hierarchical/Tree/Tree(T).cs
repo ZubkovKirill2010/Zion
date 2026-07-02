@@ -236,7 +236,7 @@ namespace Zion
             return this;
         }
 
-        public Tree<T> AddWhere(Predicate<T> Condition, params T[] Items)
+        public Tree<T> AddWhere(Func<T, bool> Condition, params T[] Items)
         {
             foreach (T Item in Items.Where(Condition))
             {
@@ -244,7 +244,7 @@ namespace Zion
             }
             return this;
         }
-        public Tree<T> AddWhere(Predicate<Tree<T>> Condition, params Tree<T>[] Items)
+        public Tree<T> AddWhere(Func<Tree<T>, bool> Condition, params Tree<T>[] Items)
         {
             foreach (Tree<T> Item in Items.Where(Condition))
             {

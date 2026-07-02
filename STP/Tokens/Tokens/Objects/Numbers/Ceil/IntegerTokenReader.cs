@@ -131,7 +131,7 @@ namespace Zion.STP
 
             while (!Source.IsEnd)
             {
-                if (IsSeporator(Source, ref CharCount))
+                if (IsSeparator(Source, ref CharCount))
                 {
                     continue;
                 }
@@ -336,7 +336,7 @@ namespace Zion.STP
         }
 
 
-        private static bool IsSeporator(TextSource Source, ref int CharCount)
+        private static bool IsSeparator(TextSource Source, ref int CharCount)
         {
             if (Source.Current == '_')
             {

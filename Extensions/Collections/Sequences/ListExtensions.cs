@@ -2,7 +2,7 @@
 {
     public static class ListExtensions
     {
-        extension<TList, T>(TList List) where TList : IList<T>
+        extension<T>(IList<T> List)
         {
             /// <summary>
             /// Converts all elements of the list to another type using the specified converter.

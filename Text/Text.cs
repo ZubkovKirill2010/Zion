@@ -318,7 +318,7 @@ namespace Zion
             {
                 throw new ArgumentNullException("StringArray[`] is null");
             }
-            if (Strings.IsEmpty())
+            if (Strings.IsNullOrEmpty())
             {
                 return string.Empty;
             }
@@ -646,7 +646,7 @@ namespace Zion
                 return string.Empty;
             }
 
-            StringBuilder Builder = new StringBuilder(Strings.Summarize(String => String.Length) + (Underlining ? 1 : 0));
+            StringBuilder Builder = new StringBuilder(Strings.Sum(static String => String.Length) + (Underlining ? 1 : 0));
 
             Builder.Append(Strings[0].ToLower());
             for (int i = 1; i < Strings.Count; i++)
@@ -667,7 +667,7 @@ namespace Zion
                 return string.Empty;
             }
 
-            StringBuilder Builder = new StringBuilder(Strings.Summarize(String => String.Length) + (Underlining ? 1 : 0));
+            StringBuilder Builder = new StringBuilder(Strings.Sum(static String => String.Length) + (Underlining ? 1 : 0));
 
             foreach (string Word in Strings)
             {
@@ -761,24 +761,24 @@ namespace Zion
             return Count;
         }
 
-        public static string JoinTrimEnd(this IList<string> Array, string Seporator)
+        public static string JoinTrimEnd(this IList<string> Strings, string Separator)
         {
-            ArgumentNullException.ThrowIfNull(Array);
-            ArgumentNullException.ThrowIfNull(Seporator);
+            ArgumentNullException.ThrowIfNull(Strings);
+            ArgumentNullException.ThrowIfNull(Separator);
 
-            int End = Array.EndIndexOf(s => !string.IsNullOrWhiteSpace(s));
+            int End = Strings.LastIndexOf(static String => !string.IsNullOrWhiteSpace(String));
             if (End == -1)
             {
                 return string.Empty;
             }
 
-            StringBuilder Builder = new StringBuilder(Array.Summarize(s => s.Length, End) + (Seporator.Length * End));
+            StringBuilder Builder = new StringBuilder(Strings.Sum(static String => String.Length) + Separator.Length * End);
 
-            Builder.Append(Array[0]);
+            Builder.Append(Strings[0]);
             for (int i = 1; i <= End; i++)
             {
-                Builder.Append(Seporator);
-                Builder.Append(Array[i]);
+                Builder.Append(Separator);
+                Builder.Append(Strings[i]);
             }
 
             return Builder.ToString();
