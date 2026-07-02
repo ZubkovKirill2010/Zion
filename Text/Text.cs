@@ -263,11 +263,11 @@ namespace Zion
             return Builder.ToString();
         }
 
-        public static string Create(this ICollection<char> Chars)
+        public static string Create(this ICollection<char> Collection)
         {
-            ArgumentNullException.ThrowIfNull(Chars);
+            ArgumentNullException.ThrowIfNull(Collection);
 
-            return string.Create(Chars.Count, Chars, (Span, List) =>
+            return string.Create(Collection.Count, Collection, (Span, List) =>
             {
                 int Index = 0;
                 foreach (char Char in List)

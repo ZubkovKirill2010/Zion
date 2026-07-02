@@ -1,0 +1,31 @@
+﻿namespace Zion
+{
+    public static class DoubleExtensions
+    {
+        extension(double Value)
+        {
+            /// <summary>
+            /// Rounds the double value to the nearest integer using specified rounding mode.
+            /// </summary>
+            /// <param name="Value">The value to round.</param>
+            /// <param name="Mode">The rounding mode to use.</param>
+            /// <returns>The rounded integer value.</returns>
+            public int RoundToInt(RoundMode Mode = RoundMode.Round)
+            {
+                return (int)Value.Round(Mode);
+            }
+
+            /// <summary>
+            /// Performs linear interpolation between two double values.
+            /// </summary>
+            /// <param name="A">The starting value.</param>
+            /// <param name="B">The ending value.</param>
+            /// <param name="Alpha">The interpolation factor (0-1).</param>
+            /// <returns>The interpolated value between A and B.</returns>
+            public static double Lerp(double A, double B, double Alpha)
+            {
+                return A + ((B - A) * Alpha);
+            }
+        }
+    }
+}

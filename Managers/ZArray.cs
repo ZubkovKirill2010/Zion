@@ -4,70 +4,70 @@
     {
         public static T[] Concat<T>(params T[][] Arrays)
         {
-            if (Arrays.IsNullOrEmpty())
+            if (Arrays.IsNullOrEmpty()) { return Array.Empty<T>(); }
+
+            int TotalLength = 0;
+            foreach (T[] Array in Arrays)
             {
-                return System.Array.Empty<T>();
+                TotalLength += Array.Length;
             }
 
-            int Index = 0;
-            int Count = Arrays.Summarize(Array => Array.Length);
-            T[] Result = new T[Count];
+            T[] Result = new T[TotalLength];
+            int Offset = 0;
 
             foreach (T[] Array in Arrays)
             {
-                foreach (T Item in Array)
-                {
-                    Result[Index++] = Item;
-                }
+                System.Array.Copy(Array, 0, Result, Offset, Array.Length);
+                Offset += Array.Length;
             }
 
             return Result;
         }
 
-        public static T[] Add<T>(T[] Array, T Value)
+        public static T[] Concat<T>(T[] Array, T Value)
         {
             ArgumentNullException.ThrowIfNull(Array);
 
-            int Length = Array.Length;
-            if (Length == 0) { return [Value]; }
-
-            T[] Result = new T[Length + 1];
-            for (int i = 0; i < Length; i++)
-            {
-                Result[i] = Array[i];
-            }
-            Result[Length] = Value;
+            T[] Result = new T[Array.Length + 1];
+            System.Array.Copy(Array, 0, Result, 0, Array.Length);
+            Result[Array.Length] = Value;
 
             return Result;
         }
 
-        public static void Repeat(Action Action, int Count)
+        public static T[] Insert<T>(T[] Array, int Index, T Value)
         {
-            for (int i = 0; i < Count; i++)
-            {
-                Action();
-            }
-        }
-        public static void Repeat(Action<int> Action, int Count)
-        {
-            for (int i = 0; i < Count; i++)
-            {
-                int Index = i;
-                Action(Index);
-            }
+            ArgumentNullException.ThrowIfNull(Array);
+            ArgumentOutOfRangeException.ThrowIfWithout(Index, Array);
+
+            T[] Result = new T[Array.Length + 1];
+            Result[Index] = Value;
+
+            System.Array.Copy(Array, 0, Result, 0, Index);
+            System.Array.Copy(Array, Index, Result, Index + 1, Array.Length - Index);
+
+            return Result;
         }
 
-        public static T[] Clone<T>(T[] Source)
+        public static T[] RemoveAt<T>(T[] Array, int Index)
         {
-            Source.NotNull();
+            ArgumentNullException.ThrowIfNull(Array);
+            ArgumentOutOfRangeException.ThrowIfWithout(Index, Array);
 
-            T[] Result = new T[Source.Length];
+            T[] Result = new T[Array.Length - 1];
 
-            for (int i = 0; i < Source.Length; i++)
-            {
-                Result[i] = Source[i];
-            }
+            System.Array.Copy(Array, 0, Result, 0, Index);
+            System.Array.Copy(Array, Index + 1, Result, Index, Array.Length - Index - 1);
 
+            return Result;
+        }
+
+        public static T[] Clone<T>(T[] Array)
+        {
+            ArgumentNullException.ThrowIfNull(Array);
+
+            T[] Result = new T[Array.Length];
+            System.Array.Copy(Array, 0, Result, 0, Array.Length);
             return Result;
         }
 
@@ -75,38 +75,54 @@
         {
             ArgumentNullException.ThrowIfNull(Collection);
 
-            int Count = Collection.Count;
-            int Index = 0;
-
-            T[] Result = new T[Count];
-
-            foreach (T Item in Collection)
-            {
-                Result[Index++] = Item;
-            }
-
+            T[] Result = new T[Collection.Count];
+            Collection.CopyTo(Result, 0);
             return Result;
         }
 
-        public static TOut[] TryConvertAll<TIn, TOut>(this ICollection<TIn> Input, SafeConverter<TIn, TOut> Converter)
+        public static TOut[] ConvertAll<TIn, TOut>(this ICollection<TIn> Source, SafeConverter<TIn, TOut> Converter)
         {
-            ArgumentNullException.ThrowIfNull(Input, nameof(Input));
-            ArgumentNullException.ThrowIfNull(Converter, nameof(Converter));
+            ArgumentNullException.ThrowIfNull(Source);
+            ArgumentNullException.ThrowIfNull(Converter);
 
-            int Count = Input.Count;
+            int Count = Source.Count;
+            TOut[] Result = new TOut[Count];
             int ItemCount = 0;
 
-            TOut[] Result = new TOut[Input.Count];
-
-            foreach (TIn In in Input)
+            foreach (TIn Item in Source)
             {
-                if (Converter(In, out TOut Item))
+                if (Converter(Item, out TOut Converted))
                 {
-                    Result[ItemCount++] = Item;
+                    Result[ItemCount++] = Converted;
                 }
             }
 
-            return Result.Length == Count ? Result : Result[..ItemCount];
+            return ItemCount == Count ? Result : Result[..ItemCount];
+        }
+
+        public static bool TryConvertAll<TIn, TOut>(this ICollection<TIn> Source, SafeConverter<TIn, TOut> Converter, out TOut[] Converted)
+        {
+            ArgumentNullException.ThrowIfNull(Source);
+            ArgumentNullException.ThrowIfNull(Converter);
+
+            int Count = Source.Count;
+            Converted = new TOut[Count];
+            int ItemCount = 0;
+
+            foreach (TIn Item in Source)
+            {
+                if (Converter(Item, out TOut ConvertedItem))
+                {
+                    Converted[ItemCount++] = ConvertedItem;
+                }
+                else
+                {
+                    Converted = Array.Empty<TOut>();
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 }

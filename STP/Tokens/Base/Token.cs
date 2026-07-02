@@ -90,7 +90,7 @@ namespace Zion.STP
 
         public void AddError(short ErrorCode)
         {
-            ErrorCodes = ZArray.Add(ErrorCodes, ErrorCode);
+            ErrorCodes = ZArray.Concat(ErrorCodes, ErrorCode);
         }
 
         public void ClearErrors()
