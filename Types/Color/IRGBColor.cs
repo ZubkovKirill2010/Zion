@@ -1,4 +1,6 @@
-﻿namespace Zion
+﻿using Zion.Serialization;
+
+namespace Zion
 {
     public interface IRGBColor : IBinaryWritable
     {

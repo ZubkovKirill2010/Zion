@@ -1,6 +1,4 @@
-﻿using Zion.Vectors;
-
-namespace Zion.Vectors
+﻿namespace Zion.Vectors
 {
     public static class DirectionExtensions
     {

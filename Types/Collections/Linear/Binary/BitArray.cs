@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using Zion.Serialization;
 
 namespace Zion
 {
@@ -76,7 +77,7 @@ namespace Zion
         {
             return new BitArray
             (
-                Reader.ReadByteArray(),
+                Reader.ReadArray<byte>(),
                 Reader.ReadInt32()
             );
         }

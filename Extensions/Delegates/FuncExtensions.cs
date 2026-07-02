@@ -1,6 +1,4 @@
-﻿using Zion.MathExpressions;
-
-namespace Zion
+﻿namespace Zion
 {
     public static class FuncExtensionsions
     {

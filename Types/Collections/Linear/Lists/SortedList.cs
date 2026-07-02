@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Runtime.CompilerServices;
+using Zion.Serialization;
 
 namespace Zion
 {
@@ -9,7 +10,7 @@ namespace Zion
         MaxToMin = -1
     }
 
-    public class SortedList<T> : ICollection<T>, IBinaryGeneric<SortedList<T>, T> where T : IComparable<T>
+    public class SortedList<T> : ICollection<T>, IBinarySerializable<SortedList<T>, T> where T : IComparable<T>
     {
         public CompareMode CompareMode { get; init; } = CompareMode.MinToMax;
 

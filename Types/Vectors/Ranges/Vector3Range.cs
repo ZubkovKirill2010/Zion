@@ -1,10 +1,14 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using Zion.Serialization;
+using Zion.Serialization.NSD;
 
 namespace Zion.Vectors
 {
     [Serializable]
-    public readonly struct Vector3Range : IRange<Vector3>, IEqualityComparer<Vector3Range>, IBinarySerializable<Vector3Range>
+    public readonly struct Vector3Range : INSDSizable<Vector3Range>, IRange<Vector3>, IEqualityComparer<Vector3Range>
     {
+        public int BinarySize => 24;
+
         public Vector3 Start { get; }
         public Vector3 End { get; }
 

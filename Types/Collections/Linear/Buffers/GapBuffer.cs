@@ -1,8 +1,9 @@
 ﻿using System.Collections;
+using Zion.Serialization;
 
 namespace Zion
 {
-    public sealed class GapBuffer<T> : IList<T>, IBinaryGeneric<GapBuffer<T>, T>
+    public sealed class GapBuffer<T> : IList<T>, IBinarySerializable<GapBuffer<T>, T>
     {
         private T[] Buffer;
         private int GapStart;

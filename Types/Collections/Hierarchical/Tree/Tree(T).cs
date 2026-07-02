@@ -2,11 +2,12 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Text.Json.Serialization;
+using Zion.Serialization;
 
 namespace Zion
 {
     [Serializable]
-    public class Tree<T> : IList<Tree<T>>, IBinaryGeneric<Tree<T>, T>, IColorText
+    public class Tree<T> : IList<Tree<T>>, IBinarySerializable<Tree<T>, T>, IColorText
     {
         private static InvalidOperationException IsParentException => new InvalidOperationException("Cannot add a parent structure to its child elements");
 

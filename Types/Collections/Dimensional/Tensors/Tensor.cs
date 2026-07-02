@@ -1,9 +1,10 @@
 ﻿using System.Collections;
 using Zion.Vectors;
+using Zion.Serialization;
 
 namespace Zion
 {
-    public class Tensor<T> : IBinaryGeneric<Tensor<T>, T>, IEnumerable<T>
+    public class Tensor<T> : IBinarySerializable<Tensor<T>, T>, IEnumerable<T>
     {
         private readonly T[,,] Data;
 

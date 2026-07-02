@@ -1,4 +1,6 @@
-﻿namespace Zion
+﻿using Zion.Serialization;
+
+namespace Zion
 {
     [Serializable]
     public struct ColorChar : IColorText, IBinarySerializable<ColorChar>

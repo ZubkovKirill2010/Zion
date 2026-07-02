@@ -1,9 +1,10 @@
 ﻿using System.Collections;
 using Zion.Vectors;
+using Zion.Serialization;
 
 namespace Zion
 {
-    public class Matrix<T> : IMatrix<T>, IBinaryGeneric<Matrix<T>, T>, IEnumerable<T>
+    public class Matrix<T> : IMatrix<T>, IBinarySerializable<Matrix<T>, T>, IEnumerable<T>
     {
         private readonly T[,] Data;
 

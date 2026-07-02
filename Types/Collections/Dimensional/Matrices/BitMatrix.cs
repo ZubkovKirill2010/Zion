@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using Zion.Vectors;
+using Zion.Serialization;
 
 namespace Zion
 {

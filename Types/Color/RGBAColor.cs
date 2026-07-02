@@ -1,9 +1,12 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using Zion.Serialization.NSD;
 
 namespace Zion
 {
-    public struct RGBAColor : IRGBColor, IBinarySerializable<RGBAColor>
+    public struct RGBAColor : IRGBColor, INSDSizable<RGBAColor>
     {
+        public int BinarySize => 4;
+
         public byte R { get; set; }
         public byte G { get; set; }
         public byte B { get; set; }

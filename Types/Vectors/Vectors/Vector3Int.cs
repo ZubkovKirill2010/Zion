@@ -1,11 +1,12 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using System.Numerics;
 using System.Runtime.Serialization;
+using Zion.Serialization;
+using Zion.Serialization.NSD;
 
 namespace Zion.Vectors
 {
     [Serializable]
-    public struct Vector3Int : IEquatable<Vector3Int>, IEqualityComparer<Vector3Int>, ISerializable, IBinarySerializable<Vector3Int>, IRandomizable<Vector3Int>
+    public struct Vector3Int : INSDSizable<Vector3Int>, IEquatable<Vector3Int>, IEqualityComparer<Vector3Int>, ISerializable, IRandomizable<Vector3Int>
     {
         #region Constants
         public static readonly Vector3Int Zero = new Vector3Int(0);
@@ -24,6 +25,8 @@ namespace Zion.Vectors
         #endregion
 
         #region Properties
+        public int BinarySize => 12;
+
         public float Magnitude => MathF.Sqrt(LengthSquared);
 
         public int LengthSquared => (X * X) + (Y * Y) + (Z * Z);
