@@ -1,6 +1,6 @@
 ﻿namespace Zion.Serialization.NSD
 {
-    public interface INSDWriter : INSDWriteProvider, IDisposable, IAsyncDisposable
+    public interface INSDWriter : IDisposable, IAsyncDisposable
     {
 
     }
