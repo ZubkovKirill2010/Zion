@@ -1,6 +1,6 @@
 ﻿namespace Zion.Serialization.NSD
 {
-    public abstract class NSDWriteContext
+    public abstract class NSDWriteContext : IDisposable
     {
         private readonly HashSet<string> UsingKeys = new();
 
@@ -53,6 +53,15 @@
         protected abstract void WriteSafe<T>(T Value) where T : INSDContainer<T>;
 
         protected abstract void WriteSafe<T>(T Value, IBinaryWriter<T>? ObjectWriter = null);
+
+        protected virtual void Dispose(bool Disposing) { }
+
+
+        public void Dispose()
+        {
+            Dispose(true);
+            Stream.Dispose();
+        }
 
 
         private void CheckKeyAndValue<T>(string Key, T Value)

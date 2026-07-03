@@ -20,7 +20,6 @@
                 NSDSeekableWriteContext Context = new NSDSeekableWriteContext(Stream);
                 Value.Write(Context);
             }
-
             Write(WriteValue);
         }
 
@@ -51,9 +50,9 @@
             long FinalPosition = Stream.Position;
             long Size = FinalPosition - SizePosition;
 
-            Stream.Seek(SizePosition, SeekOrigin.Begin);
+            Stream.Position = SizePosition;
             Writer.Write((uint)Size);
-            Stream.Seek(FinalPosition, SeekOrigin.Begin);
+            Stream.Position = FinalPosition;
         }
     }
 }
