@@ -18,7 +18,7 @@
             Provider.AddContainer(Key, Value);
         }
 
-        public void AddPrimitive<T>(string Key, T Value) where T : INSDPrimitive<T>
+        public void AddPrimitive<T>(string Key, T Value) where T : IBinaryWritable
         {
             CheckKeyValue(Key, Value);
             Provider.AddPrimitive(Key, Value);

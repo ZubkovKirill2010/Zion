@@ -1,6 +1,6 @@
 ﻿namespace Zion.Serialization.NSD
 {
-    public sealed class NSDFileWriter : IDisposable, IAsyncDisposable, INSDWriteProvider
+    public sealed class NSDFileWriter : INSDWriter
     {
         private readonly HashSet<string> UsingKeys = new();
 
@@ -34,7 +34,7 @@
             Value.Write(Writer);
         }
 
-        public void AddPrimitive<T>(string Key, T Value) where T : INSDPrimitive<T>
+        public void AddPrimitive<T>(string Key, T Value) where T : IBinaryWritable
         {
             CheckKeyAndValue(Key, Value);
             Write(Key, () => Value.Write(Writer));
@@ -44,6 +44,25 @@
         {
             CheckKeyAndValue(Key, Value);
             Write(Key, () => Value.Write(new NSDWriteContext(this)));
+        }
+
+        public void Add<T>(string Key, T Value, IBinaryWriter<T>? ObjectWriter = null)
+        {
+            CheckKeyAndValue(Key, Value);
+            ObjectWriter ??= BinarySerializer.GetWriter<T>();
+
+            if (ObjectWriter is not null)
+            {
+                Write(Key, () => ObjectWriter.Write(Writer, Value));
+            }
+            else if (Value is IBinaryWritable Writable)
+            {
+                Write(Key, () => Writable.Write(Writer));
+            }
+            else
+            {
+                BinarySerializer.WriterNotFound(ObjectWriter);
+            }
         }
 
 

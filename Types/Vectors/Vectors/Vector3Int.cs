@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Runtime.Serialization;
-using Zion.Serialization;
 using Zion.Serialization.NSD;
 
 namespace Zion.Vectors

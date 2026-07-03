@@ -23,6 +23,7 @@
     <Folder Include="Extensions\Collections\Linear\" />
     <Folder Include="Extensions\Collections\Dictionaries\" />
     <Folder Include="Extensions\Collections\Buffers\" />
+    <Folder Include="Serialization\BinarySerialization\NSD\Serializer\File\" />
     <Folder Include="STP\Parser\Static\" />
     <Folder Include="STP\Parser\Dynamic\" />
     <Folder Include="STP\Semantic\Data\" />

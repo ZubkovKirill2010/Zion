@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Zion.Serialization
 {
@@ -85,6 +86,33 @@ namespace Zion.Serialization
         public static IBinaryReader<T>? GetReader<T>()
         {
             return TryGetReader(out IBinaryReader<T> Reader) ? Reader : null;
+        }
+
+
+        public static void WriterNotFound<T>([NotNull] IBinaryWriter<T>? ObjectWriter)
+        {
+            if (ObjectWriter is null)
+            {
+                WriterNotFound<T>();
+            }
+        }
+
+        public static void ReaderNotFound<T>([NotNull] IBinaryReader<T>? ObjectReader)
+        {
+            if (ObjectReader is null)
+            {
+                ReaderNotFound<T>();
+            }
+        }
+
+        public static void WriterNotFound<T>()
+        {
+            throw new ArgumentException($"Writer for '{typeof(T)}' not found");
+        }
+
+        public static void ReaderNotFound<T>()
+        {
+            throw new ArgumentException($"Reader for '{typeof(T)}' not found");
         }
     }
 }

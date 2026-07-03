@@ -1,6 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-
-namespace Zion.Serialization
+﻿namespace Zion.Serialization
 {
     public static class BinaryReaderExtensions
     {
@@ -32,7 +30,6 @@ namespace Zion.Serialization
             public TCollection ReadCollection<TCollection, T>(Func<int, TCollection> NewCollection) where TCollection : ICollection<T> where T : IBinaryReadable<T>
             {
                 int Count = Reader.ReadInt32();
-
                 TCollection Collection = NewCollection(Count);
 
                 for (int i = 0; i < Count; i++)
@@ -51,11 +48,17 @@ namespace Zion.Serialization
 
             public TCollection ReadCollection<TCollection, T>(Func<int, TCollection> NewCollection, IBinaryReader<T>? ObjectReader = null) where TCollection : ICollection<T>
             {
-                FindReader(ref ObjectReader);
+                ObjectReader ??= BinarySerializer.GetReader<T>();
 
                 int Count = Reader.ReadInt32();
-
                 TCollection Collection = NewCollection(Count);
+
+                if (Count == 0)
+                {
+                    return Collection;
+                }
+
+                BinarySerializer.ReaderNotFound(ObjectReader);
 
                 for (int i = 0; i < Count; i++)
                 {
@@ -93,11 +96,17 @@ namespace Zion.Serialization
 
             public T[] ReadArray<T>(IBinaryReader<T>? ObjectReader = null)
             {
-                FindReader(ref ObjectReader);
+                ObjectReader ??= BinarySerializer.GetReader<T>();
 
                 int Count = Reader.ReadInt32();
-
                 T[] Array = new T[Count];
+
+                if (Count == 0)
+                {
+                    return Array;
+                }
+
+                BinarySerializer.ReaderNotFound(ObjectReader);
 
                 for (int i = 0; i < Count; i++)
                 {
@@ -105,12 +114,6 @@ namespace Zion.Serialization
                 }
 
                 return Array;
-            }
-
-
-            private static void FindReader<T>([NotNull] ref IBinaryReader<T>? ObjectReader)
-            {
-                ObjectReader ??= BinarySerializer.GetReader<T>() ?? throw new ArgumentException($"Reader for {typeof(T).FullName} not found");
             }
         }
     }

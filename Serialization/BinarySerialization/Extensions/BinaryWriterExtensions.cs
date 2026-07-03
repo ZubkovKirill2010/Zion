@@ -12,12 +12,7 @@
             public void Write<T>(T Value, IBinaryWriter<T>? ObjectWriter = null)
             {
                 ObjectWriter ??= BinarySerializer.GetWriter<T>();
-
-                if (ObjectWriter is null)
-                {
-                    throw new ArgumentException($"The basic Writer for {typeof(T).FullName} was not found");
-                }
-
+                BinarySerializer.WriterNotFound(ObjectWriter);
                 ObjectWriter.Write(Writer, Value);
             }
 
@@ -43,16 +38,9 @@
                     return;
                 }
 
-                if (ObjectWriter is not null)
-                {
-                    Writer.Write(Collection.Count);
-                    foreach (T Item in Collection)
-                    {
-                        ObjectWriter.Write(Writer, Item);
-                    }
-                }
+                ObjectWriter ??= BinarySerializer.GetWriter<T>();
 
-                if (BinarySerializer.TryGetWriter(out ObjectWriter))
+                if (ObjectWriter is not null)
                 {
                     Writer.Write(Collection.Count);
                     foreach (T Item in Collection)
@@ -67,6 +55,10 @@
                     {
                         Item.Write(Writer);
                     }
+                }
+                else
+                {
+                    BinarySerializer.WriterNotFound<T>();
                 }
             }
         }
