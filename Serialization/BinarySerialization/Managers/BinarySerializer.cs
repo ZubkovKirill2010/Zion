@@ -105,12 +105,12 @@ namespace Zion.Serialization
             }
         }
 
-        public static void WriterNotFound<T>()
+        [DoesNotReturn] public static void WriterNotFound<T>()
         {
             throw new ArgumentException($"Writer for '{typeof(T)}' not found");
         }
 
-        public static void ReaderNotFound<T>()
+        [DoesNotReturn] public static void ReaderNotFound<T>()
         {
             throw new ArgumentException($"Reader for '{typeof(T)}' not found");
         }
