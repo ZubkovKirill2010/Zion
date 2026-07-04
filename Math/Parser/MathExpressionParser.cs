@@ -92,6 +92,6 @@ namespace Zion.MathExpressions
         private FunctionHandler GetHandler(int Start) => new FunctionHandler(this, String, Start);
 
         private static bool IsDigit(char Char) => char.IsDigit(Char) || Char == ',';
-        private static bool IsLetter(char Char) => Translater.IsEnglish(Char);
+        private static bool IsLetter(char Char) => KeyboardTranslater.IsEnglish(Char);
     }
 }

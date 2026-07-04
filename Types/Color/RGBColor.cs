@@ -69,6 +69,7 @@ namespace Zion
         {
             return A.R != B.R || A.G != B.G || A.B != B.B;
         }
+
         public static RGBColor operator *(RGBColor A, float B)
         {
             return new RGBColor((byte)(A.R * B), (byte)(A.G * B), (byte)(A.B * B));
@@ -80,7 +81,7 @@ namespace Zion
         }
 
 
-        public override readonly string ToString()
+        public override string ToString()
         {
             return $"({R}, {G}, {B})";
         }
@@ -102,14 +103,6 @@ namespace Zion
 
             if (String.StartsWith('#') && String.Length == 7)
             {
-                if (String.Length == 3)
-                {
-                    return new RGBColor
-                    (
-                        HexToByte(String[1..3], "RGB")
-                    );
-                }
-
                 if (String.Length == 7)
                 {
                     byte R = HexToByte(String[1..3], 'R');
@@ -136,9 +129,9 @@ namespace Zion
                     Result[i] = byte.Parse(String[Start..Index]);
                 }
             }
-            catch
+            catch (Exception Exception)
             {
-                throw new FormatException($"Couldn't convert String(=\"{String}\") to Color");
+                throw new FormatException($"Couldn't convert String(=\"{String}\") to Color", Exception);
             }
             return new RGBColor(Result[0], Result[1], Result[2]);
         }

@@ -1,31 +1,7 @@
-﻿using System.Reflection;
-
-namespace Zion
+﻿namespace Zion
 {
     public static class ObjectExtensions
     {
-        /// <summary>
-        /// Checks if the object's type contains the specified attribute.
-        /// </summary>
-        /// <param name="Object">The object to check.</param>
-        /// <param name="Attribute">The attribute type to look for.</param>
-        /// <returns>True if the attribute exists, otherwise false.</returns>
-        public static bool ContainsAttribute(this object Object, object Attribute)
-        {
-            return Object.GetType().GetCustomAttribute<Attribute>() is not null;
-        }
-
-        /// <summary>
-        /// Checks if the type contains the specified attribute.
-        /// </summary>
-        /// <param name="Type">The type to check.</param>
-        /// <param name="Attribute">The attribute type to look for.</param>
-        /// <returns>True if the attribute exists, otherwise false.</returns>
-        public static bool ContainsAttribute(this Type Type, object Attribute)
-        {
-            return Type.GetCustomAttribute<Attribute>() is not null;
-        }
-
         /// <summary>
         /// Checks if the value is within the specified range (inclusive).
         /// Value >= Min && Value <= Max
@@ -35,7 +11,7 @@ namespace Zion
         /// <param name="Min">The minimum bound of the range.</param>
         /// <param name="Max">The maximum bound of the range.</param>
         /// <returns>True if the value is within bounds, otherwise false.</returns>
-        public static bool IsClamp<T>(this T Value, T Min, T Max) where T : IComparable
+        public static bool IsBetween<T>(this T Value, T Min, T Max) where T : IComparable<T>
         {
             return Value.CompareTo(Min) >= 0 && Value.CompareTo(Max) <= 0;
         }
@@ -69,10 +45,10 @@ namespace Zion
         /// If the object implements IColorText, the method calls its ToColorString() implementation.
         /// For non-IColorText objects, it falls back to standard ToString() behavior.
         /// </remarks>
-        public static string ToColorString(this object? Object, string Nullable = "null")
+        public static string ToColorString(this object Object, string Nullable = "null")
         {
             return Object is IColorText Colorable
-                ? Object?.ToColorString() ?? Nullable
+                ? Object?.ToColorString() ?? Nullable ?? "null"
                 : ToNotNullString(Object, Nullable);
         }
 
@@ -98,9 +74,9 @@ namespace Zion
         /// <returns>
         /// The object's string representation or the specified nullable replacement string.
         /// </returns>
-        public static string ToNotNullString(this object? Object, string Nullable)
+        public static string ToNotNullString(this object? Object, string Nullable = "null")
         {
-            return Object?.ToString() ?? string.Empty;
+            return Object?.ToString() ?? Nullable ?? "null";
         }
     }
 }

@@ -4,7 +4,7 @@
 
     public static class DateTimeExtension
     {
-        private static readonly MonthInfo[] _Months =
+        private static readonly MonthInfo[] Months =
         [
             new MonthInfo("January", 31),
             new MonthInfo("February", 28),
@@ -29,20 +29,20 @@
         /// <exception cref="ArgumentOutOfRangeException">Thrown when index is out of range.</exception>
         public static MonthInfo GetMonthInfo(int Index, bool LeapYear = false)
         {
-            return !Index.IsClamp(1, 12)
+            return !Index.IsBetween(1, 12)
                 ? throw new ArgumentOutOfRangeException($"The month index must be between 1 and 12, InputIndex = {Index}")
-                : LeapYear && Index == 2 && (DateTime.Now.Year & 3) == 0 ? (_Months[Index] with { DaysCount = 29 }) : _Months[Index - 1];
+                : LeapYear && Index == 1 && (DateTime.Now.Year & 3) == 0 ? (Months[Index] with { DaysCount = 29 }) : Months[Index - 1];
         }
 
         /// <summary>
         /// Gets month information from a DateTime object.
         /// </summary>
         /// <param name="Date">The DateTime object to examine.</param>
-        /// <param name="LeapYear">Whether to account for leap year for February.</param>
+        /// <param name="ConsiderLeapYear">Whether to account for leap year for February.</param>
         /// <returns>Month information including name and day count.</returns>
-        public static MonthInfo GetMonthInfo(this DateTime Date, bool LeapYear = false)
+        public static MonthInfo GetMonthInfo(this DateTime Date)
         {
-            return GetMonthInfo(Date.Month, LeapYear);
+            return GetMonthInfo(Date.Month, DateTime.IsLeapYear(Date.Year));
         }
 
         /// <summary>

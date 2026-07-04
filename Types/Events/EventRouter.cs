@@ -10,11 +10,11 @@
                 if (field == value) { return; }
 
                 field?.Invalidated -= OnInvalidated;
-                value?.Invalidated += OnInvalidated;
-
                 field = value;
 
                 Invalidated?.Invoke();
+
+                value?.Invalidated += OnInvalidated;
             }
         }
 

@@ -16,6 +16,17 @@
             }
 
             /// <summary>
+            /// Rounds the double value to the nearest integer64 using specified rounding mode.
+            /// </summary>
+            /// <param name="Value">The value to round.</param>
+            /// <param name="Mode">The rounding mode to use.</param>
+            /// <returns>The rounded integer value.</returns>
+            public long RoundToInt64(RoundMode Mode = RoundMode.Round)
+            {
+                return (long)Value.Round(Mode);
+            }
+
+            /// <summary>
             /// Rounds the decimal value using specified rounding mode.
             /// </summary>
             /// <param name="Value">The value to round.</param>

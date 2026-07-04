@@ -1,10 +1,5 @@
 ﻿namespace Zion
 {
-    public enum NumberFormat
-    {
-        Decimal, Hexadecimal, Binary
-    }
-
     public static class StringFormatter
     {
         public static string ToString<T>(IEnumerable<T> Enumerable)

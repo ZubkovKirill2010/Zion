@@ -10,6 +10,9 @@
 
     public interface IBinaryWritable<T>
     {
+        /// <summary>
+        /// Serializes the object to binary stream.
+        /// </summary>
         public void Write(BinaryWriter Writer, Action<T> Write);
     }
 }

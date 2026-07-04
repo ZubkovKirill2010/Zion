@@ -6,14 +6,15 @@
         {
             return Random.Next((int)Min, (int)Max) + Random.NextSingle();
         }
+
         public static double NextDouble(this Random Random, double Min, double Max)
         {
-            return Random.Next((int)Min, (int)Max) + Random.NextDouble();
+            return Random.NextInt64((long)Min, (long)Max) + Random.NextDouble();
         }
 
         public static bool NextBoolean(this Random Random)
         {
-            return Random.Next(0, 2) == 0;
+            return (Random.Next() & 1) == 0;
         }
 
 

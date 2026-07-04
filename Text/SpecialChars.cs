@@ -61,7 +61,7 @@ namespace Zion
         }
         public static char NormalizeDigit(char Char)
         {
-            return GetChar(Char, Group => Group.Degree);
+            return GetChar(Char, Group => Group.Normal);
         }
         public static char ToDegreeDigit(char Char)
         {

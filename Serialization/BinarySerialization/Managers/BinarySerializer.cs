@@ -24,6 +24,7 @@ namespace Zion.Serialization
             AddSerializer(new BinarySerializer<ulong>   (static (Writer, Value) => Writer.Write(Value), static Reader => Reader.ReadUInt64()  ));
             AddSerializer(new BinarySerializer<short>   (static (Writer, Value) => Writer.Write(Value), static Reader => Reader.ReadInt16()   ));
             AddSerializer(new BinarySerializer<ushort>  (static (Writer, Value) => Writer.Write(Value), static Reader => Reader.ReadUInt16()  ));
+            AddSerializer(new BinarySerializer<string>  (static (Writer, Value) => Writer.Write(Value), static Reader => Reader.ReadString()  ));
         }
 
 

@@ -24,7 +24,7 @@
                 {
                     if (Index >= Count)
                     {
-                        throw new ArgumentOutOfRangeException($"Count of Enumerable(={Enumerable.Count()}) >= Count(={Count})");
+                        throw new ArgumentOutOfRangeException($"Count of Enumerable >= Count(={Count})");
                     }
 
                     Array[Index++] = Item;
@@ -36,15 +36,13 @@
 
             public bool IsNullOrEmpty()
             {
-                if (Enumerable is not null)
+                if (Enumerable is null)
                 {
-                    foreach (T Item in Enumerable)
-                    {
-                        return false;
-                    }
+                    return true;
                 }
 
-                return true;
+                using IEnumerator<T> Enumerator = Enumerable.GetEnumerator();
+                return !Enumerator.MoveNext();
             }
 
             public bool None(Func<T, bool> Condition)

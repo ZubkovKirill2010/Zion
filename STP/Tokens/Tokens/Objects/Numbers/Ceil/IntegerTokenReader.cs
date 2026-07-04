@@ -256,7 +256,7 @@ namespace Zion.STP
         {
             NumberParsingParameters<I> Parameters = NumberParameters;
 
-            if (!IgnoreSuffixes && Translater.IsEnglish(Source.Current))
+            if (!IgnoreSuffixes && KeyboardTranslater.IsEnglish(Source.Current))
             {
                 foreach (string Suffix in Parameters.Suffixes)
                 {

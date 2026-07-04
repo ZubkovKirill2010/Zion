@@ -355,7 +355,7 @@ namespace Zion.Vectors
             return new Vector2(Math.Max(A.X, B.X), Math.Max(A.Y, B.Y));
         }
 
-        public static Vector2 Clamp(in Vector2 Value, in Vector2 Min, Vector2 Max)
+        public static Vector2 Clamp(in Vector2 Value, in Vector2 Min, in Vector2 Max)
         {
             return new Vector2
             (
@@ -365,12 +365,12 @@ namespace Zion.Vectors
         }
 
 
-        public static Vector2 Lerp(in Vector2 A, in Vector2 B, float Alpha)
+        public static Vector2 Lerp(in Vector2 A, in Vector2 B, in float Alpha)
         {
             return A + ((B - A) * Alpha);
         }
 
-        public static Vector2 MoveTowards(Vector2 Current, Vector2 Target, float MaxDelta)
+        public static Vector2 MoveTowards(in Vector2 Current, in Vector2 Target, in float MaxDelta)
         {
             Vector2 Difference = Target - Current;
             float DistanceSquared = Difference.LengthSquared;
@@ -380,18 +380,18 @@ namespace Zion.Vectors
                 : Current + Difference / MathF.Sqrt(DistanceSquared) * MaxDelta;
         }
 
-        public static Vector2 Project(Vector2 A, Vector2 B)
+        public static Vector2 Project(in Vector2 A, in Vector2 B)
         {
             return B == Zero ? Zero : B * (Dot(A, B) / B.LengthSquared);
         }
 
-        public static Vector2 Reflect(Vector2 Value, Vector2 Normal)
+        public static Vector2 Reflect(in Vector2 Value, in Vector2 Normal)
         {
             return Value - Normal * 2f * Dot(Value, Normal);
         }
 
 
-        public static float Dot(Vector2 A, Vector2 B)
+        public static float Dot(in Vector2 A, in Vector2 B)
         {
             return A.X * B.X + A.Y * B.Y;
         }
@@ -402,7 +402,7 @@ namespace Zion.Vectors
             return (A - B).Magnitude;
         }
 
-        public static bool WithinRadius(in Vector2 A, in Vector2 B, float Radius)
+        public static bool WithinRadius(in Vector2 A, in Vector2 B, in float Radius)
         {
             return (A - B).LengthSquared <= Radius * Radius;
         }

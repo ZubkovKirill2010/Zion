@@ -10,7 +10,7 @@
         {
             this.Total = Total;
             this.Completed = Completed;
-            this.Percentage = ((double)Completed / (double)Total) * 100d;
+            this.Percentage = Total == 0L ? 0d : (Completed / (double)Total) * 100d;
         }
     }
 }

@@ -1,12 +1,12 @@
 ﻿namespace Zion
 {
-    public static class Translater
+    public static class KeyboardTranslater
     {
         private static readonly HashSet<char> UniversalChar;
         private static readonly Dictionary<char, char> RusEngLayout;
         private static readonly Dictionary<char, char> EngRusLayout;
 
-        static Translater()
+        static KeyboardTranslater()
         {
             UniversalChar = new()
             {

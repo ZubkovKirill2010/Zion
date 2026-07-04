@@ -1,6 +1,6 @@
 ﻿namespace Zion
 {
-    public static class FuncExtensionsions
+    public static class FuncExtensions
     {
         public static bool Try<T>(this Func<T> Function, out T Result)
         {

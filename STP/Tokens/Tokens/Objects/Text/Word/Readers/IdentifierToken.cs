@@ -11,7 +11,7 @@
             Token = default!;
             List<char> Chars = new List<char>(20);
 
-            if (Source.CurrentIs(Char => Char == '_' || Translater.IsEnglish(Char)))
+            if (Source.CurrentIs(Char => Char == '_' || KeyboardTranslater.IsEnglish(Char)))
             {
                 Chars.Add(Source.Current);
                 Source.MoveNext();
@@ -25,7 +25,7 @@
             {
                 char Current = Source.Current;
 
-                if (Current == '_' || Translater.IsEnglish(Current) || (AllowDigits && Current.IsDigit()))
+                if (Current == '_' || KeyboardTranslater.IsEnglish(Current) || (AllowDigits && Current.IsDigit()))
                 {
                     Chars.Add(Current);
                     Source.MoveNext();

@@ -9,7 +9,7 @@
             int TotalLength = 0;
             foreach (T[] Array in Arrays)
             {
-                TotalLength += Array.Length;
+                TotalLength += Array.NotNull().Length;
             }
 
             T[] Result = new T[TotalLength];
@@ -38,7 +38,7 @@
         public static T[] Insert<T>(T[] Array, int Index, T Value)
         {
             ArgumentNullException.ThrowIfNull(Array);
-            ArgumentOutOfRangeException.ThrowIfWithout(Index, Array);
+            ArgumentOutOfRangeException.ThrowIf(Index < 0 || Index > Array.Length, $"Index(={Index} out of range [0..{Array.Length}]");
 
             T[] Result = new T[Array.Length + 1];
             Result[Index] = Value;
@@ -86,38 +86,40 @@
             ArgumentNullException.ThrowIfNull(Converter);
 
             int Count = Source.Count;
+            int Converted = 0;
+
             TOut[] Result = new TOut[Count];
-            int ItemCount = 0;
-
-            foreach (TIn Item in Source)
-            {
-                if (Converter(Item, out TOut Converted))
-                {
-                    Result[ItemCount++] = Converted;
-                }
-            }
-
-            return ItemCount == Count ? Result : Result[..ItemCount];
-        }
-
-        public static bool TryConvertAll<TIn, TOut>(this ICollection<TIn> Source, SafeConverter<TIn, TOut> Converter, out TOut[] Converted)
-        {
-            ArgumentNullException.ThrowIfNull(Source);
-            ArgumentNullException.ThrowIfNull(Converter);
-
-            int Count = Source.Count;
-            Converted = new TOut[Count];
-            int ItemCount = 0;
 
             foreach (TIn Item in Source)
             {
                 if (Converter(Item, out TOut ConvertedItem))
                 {
-                    Converted[ItemCount++] = ConvertedItem;
+                    Result[Converted++] = ConvertedItem;
+                }
+            }
+
+            return Converted == Count ? Result : Result[..Converted];
+        }
+
+        public static bool TryConvertAll<TIn, TOut>(this ICollection<TIn> Source, SafeConverter<TIn, TOut> Converter, out TOut[] Result)
+        {
+            ArgumentNullException.ThrowIfNull(Source);
+            ArgumentNullException.ThrowIfNull(Converter);
+
+            int Count = Source.Count;
+            int Converted = 0;
+
+            Result = new TOut[Count];
+
+            foreach (TIn Item in Source)
+            {
+                if (Converter(Item, out TOut ConvertedItem))
+                {
+                    Result[Converted++] = ConvertedItem;
                 }
                 else
                 {
-                    Converted = Array.Empty<TOut>();
+                    Result = Array.Empty<TOut>();
                     return false;
                 }
             }

@@ -12,7 +12,7 @@
             /// <returns>True if the bit is set, otherwise false.</returns>
             public bool GetBit(int Index)
             {
-                return (Value & (1 << Index)) != 0;
+                return (Value & (1L << Index)) != 0;
             }
 
             /// <summary>
@@ -24,7 +24,7 @@
             /// <returns>The modified short integer value.</returns>
             public short SetBit(int Index, bool Bit)
             {
-                return Bit ? (short)(Value | (1 << Index)) : (short)(Value & ~(1 << Index));
+                return Bit ? (short)(Value | (1L << Index)) : (short)(Value & ~(1L << Index));
             }
 
             /// <summary>
@@ -34,12 +34,12 @@
             /// <returns>True if the value is even, otherwise false.</returns>
             public bool IsEven()
             {
-                return (Value & 1) == 0;
+                return (Value & 1L) == 0;
             }
 
             public bool IsPrime()
             {
-                if (Value <= 1) { return false; }
+                if (Value <= 1L) { return false; }
                 if (Value == 2) { return true; }
                 if (IsEven(Value)) { return false; }
 
@@ -67,7 +67,7 @@
             /// <returns>True if the bit is set, otherwise false.</returns>
             public bool GetBit(int Index)
             {
-                return (Value & (1 << Index)) != 0;
+                return (Value & (1L << Index)) != 0;
             }
 
             /// <summary>
@@ -79,7 +79,7 @@
             /// <returns>The modified unsigned short integer value.</returns>
             public ushort SetBit(int Index, bool Bit)
             {
-                return Bit ? (ushort)(Value | (1 << Index)) : (ushort)(Value & ~(1 << Index));
+                return Bit ? (ushort)(Value | (1L << Index)) : (ushort)(Value & ~(1L << Index));
             }
 
             /// <summary>
@@ -89,12 +89,12 @@
             /// <returns>True if the value is even, otherwise false.</returns>
             public bool IsEven()
             {
-                return (Value & 1) == 0;
+                return (Value & 1L) == 0;
             }
 
             public bool IsPrime()
             {
-                if (Value <= 1) { return false; }
+                if (Value <= 1L) { return false; }
                 if (Value == 2) { return true; }
                 if (IsEven(Value)) { return false; }
 

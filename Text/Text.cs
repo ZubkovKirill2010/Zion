@@ -1,20 +1,19 @@
-﻿using System.Collections.ObjectModel;
-using System.Text;
+﻿using System.Text;
 
 namespace Zion
 {
     public static class Text
     {
-        public static readonly ReadOnlyDictionary<char, char> Brackets = new ReadOnlyDictionary<char, char>
-        (
-            new Dictionary<char, char>()
-            {
-                { '(', ')' },
-                { '[', ']' },
-                { '{', '}' }
-            }
-        );
+        #region Data
+        private static readonly Dictionary<char, char> Brackets = new Dictionary<char, char>(3)
+        {
+            { '(', ')' },
+            { '[', ']' },
+            { '{', '}' }
+        };
+        private static readonly HashSet<char> ClosingBrackets = [')', ']', '}'];
 
+        #endregion
 
         #region Edit
         public static string RemoveChars(this string String, Predicate<char> Condition)
@@ -75,7 +74,8 @@ namespace Zion
 
             char[] Result = new char[String.Length * Count];
             int Index = 0;
-            while (Index < String.Length)
+
+            while (Index < Result.Length)
             {
                 for (int i = 0; i < String.Length; i++)
                 {
@@ -147,8 +147,9 @@ namespace Zion
                 return String;
             }
 
-            int LeftPadding = TotalLength / String.Length;
-            int RightPadding = TotalLength - LeftPadding - String.Length;
+            int TotalPadding = TotalLength - String.Length;
+            int LeftPadding  = TotalPadding / 2;
+            int RightPadding = TotalPadding - LeftPadding;
 
             return new StringBuilder(TotalLength)
                 .Append(PaddingChar, LeftPadding)
@@ -161,7 +162,7 @@ namespace Zion
         {
             ArgumentNullException.ThrowIfNull(String);
 
-            return TotalLength <= 0
+            return TotalLength <= 3
                 ? throw new ArgumentOutOfRangeException(nameof(TotalLength), $"TotalLength(={TotalLength}) <= 0")
                 : String.Length <= TotalLength ? String : String[..(TotalLength - 3)] + "...";
         }
@@ -174,7 +175,7 @@ namespace Zion
                 return Array.Empty<string>();
             }
 
-            string[] Chunks = new string[(int)Math.Ceiling(String.Length / (double)ChunkLength)];
+            string[] Chunks = new string[(String.Length + ChunkLength - 1) / ChunkLength];
 
             int End = Chunks.Length - 1;
             int ChunkIndex = 0;
@@ -228,17 +229,17 @@ namespace Zion
             return String.Length == 0
                 ? string.Empty
                 : string.Create
-            (
-                String.Length,
-                String,
-                (Span, Original) =>
-                {
-                    for (int i = 0; i < Original.Length; i++)
-                    {
-                        Span[i] = Converter(Original[i]);
-                    }
-                }
-            );
+                  (
+                      String.Length,
+                      String,
+                      (Span, Original) =>
+                      {
+                          for (int i = 0; i < Original.Length; i++)
+                          {
+                              Span[i] = Converter(Original[i]);
+                          }
+                      }
+                  );
         }
 
         public static string RemoveEmptyLines(this string String)
@@ -353,11 +354,7 @@ namespace Zion
             ArgumentNullException.ThrowIfNull(String);
             ArgumentNullException.ThrowIfNull(Target);
 
-            if (Start >= String.Length)
-            {
-                throw new ArgumentException($"Start(={Start}) >= String.Length(={String.Length})");
-            }
-            if (String.Length - Start < Target.Length)
+            if (Start >= String.Length || String.Length - Start < Target.Length)
             {
                 return false;
             }
@@ -403,10 +400,11 @@ namespace Zion
 
             StartIndex = 0;
             int End = String.Length - Target.Length;
-            bool Founded = true;
 
             while (StartIndex <= End)
             {
+                bool Founded = true;
+
                 for (int j = 0; j < Target.Length; j++)
                 {
                     if (String[StartIndex + j] != Target[j])
@@ -430,9 +428,13 @@ namespace Zion
 
         public static bool CheckBrackets(this string String)
         {
-            return CheckBrackets(String, Brackets);
+            return CheckBrackets(String, Brackets, ClosingBrackets);
         }
-        public static bool CheckBrackets(this string String, IDictionary<char, char> Brackets)
+        public static bool CheckBrackets(this string String, Dictionary<char, char> Brackets)
+        {
+            return CheckBrackets(String, Brackets, Brackets.Values.ToHashSet());
+        }
+        public static bool CheckBrackets(this string String, Dictionary<char, char> Brackets, HashSet<char> ClosedBrackets)
         {
             if (string.IsNullOrEmpty(String) || Brackets.Count == 0)
             {
@@ -446,19 +448,16 @@ namespace Zion
             {
                 Current = String[i];
 
-                if (Brackets.TryGetValue(Current, out char Bracket))
+                if (Brackets.TryGetValue(Current, out char ClosedBracket))
                 {
-                    Stack.Push(Bracket);
+                    Stack.Push(ClosedBracket);
                 }
-                else if (Current.IsClosingBracket(out char ClosingBracket))
+                else if (ClosedBrackets.Contains(Current) && (Stack.Count == 0 || Current != Stack.Pop()))
                 {
-                    if (Stack.Count <= 0 || ClosingBracket != Stack.Pop())
-                    {
-                        return false;
-                    }
+                    return false;
                 }
             }
-            return true;
+            return Stack.Count == 0;
         }
 
         public static bool TrueFor(this string String, int Start, int End, Predicate<char> Condition)
@@ -625,7 +624,13 @@ namespace Zion
                 }
                 else
                 {
+
+                    if (LastWasDigit)
+                    {
+                        AddWord();
+                    }
                     CurrentWord.Append(Char);
+
                     LastWasUpper = false;
                     LastWasDigit = false;
                 }
@@ -856,7 +861,7 @@ namespace Zion
                         break;
                 }
             }
-            throw new Exception();
+            throw new Exception("The string does not contain the expression");
         }
 
         public static IEnumerable<char> JoinLines(this IList<IEnumerable<char>> Lines)

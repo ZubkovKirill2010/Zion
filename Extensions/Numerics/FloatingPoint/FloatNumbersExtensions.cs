@@ -25,6 +25,6 @@ namespace Zion
                         return T.Round(Value);
                 }
             }
-        }        
+        }
     }
 }

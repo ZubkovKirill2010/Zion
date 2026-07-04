@@ -152,11 +152,11 @@ namespace Zion.Vectors
 
         public static Vector2Int operator |(Vector2Int A, int B)
         {
-            return new Vector2Int(A.X & B, A.Y & B);
+            return new Vector2Int(A.X | B, A.Y | B);
         }
         public static Vector2Int operator |(Vector2Int A, Vector2Int B)
         {
-            return new Vector2Int(A.X & B.X, A.Y & B.Y);
+            return new Vector2Int(A.X | B.X, A.Y | B.Y);
         }
 
         public static Vector2Int operator >>(Vector2Int A, int B)
