@@ -7,6 +7,8 @@
         protected readonly Stream Stream;
         protected readonly BinaryWriter Writer;
 
+        public IEnumerable<string> Keys => UsingKeys;
+
 
         public NSDWriteContext(Stream Stream)
         {
@@ -47,7 +49,7 @@
         }
 
 
-        //Only Size + Data
+        //Only Size + Setters
         protected abstract void WritePrimitiveSafe<T>(T Value) where T : IBinaryWritable;
 
         protected abstract void WriteSafe<T>(T Value) where T : INSDContainer<T>;

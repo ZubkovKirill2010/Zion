@@ -58,7 +58,7 @@ namespace Zion
             return Item;
         }
 
-        public void Add(T Item)
+        public void Return(T Item)
         {
             if (IsDisposed)
             {

@@ -1,11 +1,11 @@
 ﻿namespace Zion.Serialization.NSD
 {
-    public sealed class NSDBufferedWriteContext : NSDWriteContext
+    public sealed class NSDParallelWriteContext : NSDWriteContext
     {
         private readonly MemoryStream Buffer;
         private readonly BinaryWriter BufferWriter;
 
-        public NSDBufferedWriteContext(Stream Stream) : base(Stream)
+        public NSDParallelWriteContext(Stream Stream) : base(Stream)
         {
             Buffer = new MemoryStream();
             BufferWriter = new BinaryWriter(Buffer);
@@ -21,7 +21,7 @@
         {
             void WriteValue()
             {
-                using NSDBufferedWriteContext Context = new NSDBufferedWriteContext(Buffer);
+                using NSDParallelWriteContext Context = new NSDParallelWriteContext(Buffer);
                 Value.Write(Context);
             }
 

@@ -9,8 +9,8 @@
         {
             this.Stream = Stream.NotNull();
             this.Context = Stream.CanSeek
-                ? new NSDSeekableWriteContext(Stream)
-                : new NSDBufferedWriteContext(Stream);
+                ? new NSDSequentialWriteContext(Stream)
+                : new NSDParallelWriteContext(Stream);
         }
 
 

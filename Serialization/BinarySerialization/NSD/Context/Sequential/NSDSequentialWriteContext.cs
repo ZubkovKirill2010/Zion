@@ -1,8 +1,8 @@
 ﻿namespace Zion.Serialization.NSD
 {
-    public sealed class NSDSeekableWriteContext : NSDWriteContext
+    public sealed class NSDSequentialWriteContext : NSDWriteContext
     {
-        public NSDSeekableWriteContext(Stream Stream) : base(Stream)
+        public NSDSequentialWriteContext(Stream Stream) : base(Stream)
         {
             ArgumentException.ThrowIf(!Stream.CanSeek, "The stream does not support seeking");
         }
@@ -17,7 +17,7 @@
         {
             void WriteValue()
             {
-                NSDSeekableWriteContext Context = new NSDSeekableWriteContext(Stream);
+                NSDSequentialWriteContext Context = new NSDSequentialWriteContext(Stream);
                 Value.Write(Context);
             }
             Write(WriteValue);
