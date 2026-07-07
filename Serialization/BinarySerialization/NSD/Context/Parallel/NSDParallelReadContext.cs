@@ -26,14 +26,14 @@
             BinaryReader Reader = new BinaryReader(Stream);
 
             long TotalLength = Stream.Length;
-            long Position = Stream.Position;
 
-            List<Task> Tasks = new List<Task>();
-            //TODO: Replace to Concurrent
-            ObjectPool<Stream> StreamPool = new ObjectPool<Stream>
-            (
-                NewStream, null, null, StreamLimit
-            );
+            ConcurrentObjectPool<Stream> StreamPool = new ConcurrentObjectPool<Stream>()
+            {
+                New = NewStream,
+                Remove = static Stream => Stream.Dispose()
+            };
+
+            List<Action<Stream>> Actions = new();
 
             while (Stream.Position < TotalLength)
             {
@@ -42,26 +42,18 @@
 
                 if (Batch.TryGetSetter(Key, out Action<Stream> Setter))
                 {
-                    Stream LocalStream = StreamPool.Get();
-                    LocalStream.Position = Stream.Position;
-
-                    Tasks.Add
-                    (
-                        Task.Run
-                        (
-                            () =>
-                            {
-                                Setter(LocalStream);
-                                StreamPool.Return(LocalStream);
-                            }
-                        )
-                    );
+                    long Offset = Stream.Position;
+                    Actions.Add(LocalStream =>
+                    {
+                        LocalStream.Position = Offset;
+                        Setter(LocalStream);
+                    });
                 }
 
                 Stream.Position += Size;
             }
 
-            Task.WhenAll(Tasks).GetAwaiter().GetResult();
+            StreamPool.ProcessBatch(StreamLimit, Actions);
         }
     }
 }

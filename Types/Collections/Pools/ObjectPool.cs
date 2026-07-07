@@ -1,97 +1,107 @@
-﻿using System.Collections.Concurrent;
-
-namespace Zion
+﻿namespace Zion
 {
-    public class ObjectPool<T> : IDisposable
+    public sealed class ObjectPool<T>
     {
-        private readonly ConcurrentBag<T> Objects;
-        private readonly Func<T> Create;
-        private readonly Action<T>? Remove;
-        private readonly Func<T, T>? Getter;
+        #region Data
+        private readonly List<T> Pool;
 
-        private bool IsDisposed;
+        public required Func<T> New { get; init => field = value.NotNull(); }
 
-        public int Count => Objects.Count;
-        public int CurrentSize { get; private set; }
-        public int MaxSize { get; private init; }
+        public Action<T>? Remove { get; init; }
+        public Func<T, T> Getter { get; init => field = value ?? BaseGet; } = BaseGet;
 
+        #endregion
 
-        public ObjectPool(Func<T> Create, Action<T>? Remove = null, Func<T, T>? Getter = null)
-            : this(Create, Remove, Getter, -1) { }
+        #region Properties
+        public int Count => Pool.Count;
 
-        public ObjectPool(Func<T> Create, Action<T>? Remove = null, Func<T, T>? Getter = null, int MaxSize = -1)
+        #endregion
+
+        #region Constructors
+        public ObjectPool()
         {
-            Objects = new ConcurrentBag<T>();
-            this.Create = Create ?? throw new ArgumentNullException(nameof(Create));
-            this.Remove = Remove;
-            this.Getter = Getter;
-            this.MaxSize = MaxSize;
-            CurrentSize = 0;
+            Pool = new List<T>(8);
+        }
+        
+        public ObjectPool(int Capacity)
+        {
+            ArgumentOutOfRangeException.ThrowIfNegative(Capacity);
+            Pool = new List<T>(Capacity);
+        }
+
+        #endregion
+
+        #region PublicMethods
+        public void Add(T Item)
+        {
+            Pool.Add(Item);
         }
 
         public T Get()
         {
-            if (IsDisposed)
+            if (Count != 0)
             {
-                throw new ObjectDisposedException(nameof(ObjectPool<T>));
+                T Item = Getter(Pool[^1]);
+                Pool.RemoveAt(Count - 1);
+                return Item;
             }
-
-            if (Objects.TryTake(out T Item))
-            {
-                return Getter is null ? Item : Getter(Item);
-            }
-
-            if (int.IsNegative(MaxSize) || CurrentSize < MaxSize)
-            {
-                int Size = 0;
-                Interlocked.Increment(ref Size);
-                CurrentSize = Size;
-                return Getter is null ? Create() : Getter(Create());
-            }
-
-            SpinWait SpinWait = new SpinWait();
-            while (!Objects.TryTake(out Item) && !IsDisposed)
-            {
-                SpinWait.SpinOnce();
-            }
-
-            return Item;
+            return New();
         }
 
-        public void Return(T Item)
+        public void Clear()
         {
-            if (IsDisposed)
+            if (Remove is not null)
             {
-                return;
-            }
-
-            if (Item is null)
-            {
-                throw new ArgumentNullException(nameof(Item));
-            }
-
-            Remove?.Invoke(Item);
-            Objects.Add(Item);
-        }
-
-        public void Dispose()
-        {
-            if (IsDisposed)
-            {
-                return;
-            }
-
-            IsDisposed = true;
-
-            if (typeof(IDisposable).IsAssignableFrom(typeof(T)))
-            {
-                foreach (T? Object in Objects)
+                foreach (T Item in Pool)
                 {
-                    (Object as IDisposable)?.Dispose();
+                    Remove(Item);
                 }
             }
-
-            Objects.Clear();
+            Pool.Clear();
         }
+
+
+        public void ProcessBatch(int MaxConcurrency, IEnumerable<T> Items, Action<T> Action)
+        {
+            ArgumentNullException.ThrowIfNull(Items);
+            ArgumentNullException.ThrowIfNull(Action);
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(MaxConcurrency);
+
+            using SemaphoreSlim Semaphore = new(MaxConcurrency, MaxConcurrency);
+            List<Task> Tasks = new();
+
+            foreach (T Item in Items)
+            {
+                Semaphore.Wait();
+
+                Tasks.Add
+                (
+                    Task.Run(() =>
+                    {
+                        try
+                        {
+                            Action(Item);
+                        }
+                        finally
+                        {
+                            Semaphore.Release();
+                            Add(Item);
+                        }
+                    })
+                );
+            }
+
+            Task.WaitAll(Tasks);
+        }
+
+        #endregion
+
+        #region PrivateMethods
+        private static T BaseGet(T Value)
+        {
+            return Value;
+        }
+
+        #endregion
     }
 }

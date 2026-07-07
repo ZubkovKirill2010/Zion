@@ -7,7 +7,10 @@ namespace Zion.Types.Collections.Binary
 {
     public class BitList : IList<bool>, IBinarySerializable<BitList>
     {
+        #region Constants
         private const int Filter = 0b111;
+
+        #endregion
 
         #region Data
         private byte[] Data;
@@ -32,7 +35,16 @@ namespace Zion.Types.Collections.Binary
             Data = new byte[GetByteCount(Capacity)];
         }
 
-        private BitList(byte[] Data, int Count)
+        public BitList(byte[] Data, int Count)
+        {
+            ArgumentNullException.ThrowIfNull(Data);
+            ArgumentOutOfRangeException.ThrowIfWithout(Count >> 3, Data.Length);
+
+            this.Data = ZArray.Clone(Data);
+            this.Count = Count;
+        }
+
+        private BitList(int Count, byte[] Data)
         {
             this.Data = Data.NotNull();
             this.Count = Count;
@@ -208,7 +220,7 @@ namespace Zion.Types.Collections.Binary
             if (LastByteLength != 0)
             {
                 byte LastByte = Data[FullBytes];
-                byte Target = Item ? (byte)0 : byte.MaxValue;
+                byte Target = Item ? byte.MinValue : byte.MaxValue;
 
                 Target <<= 8 - LastByteLength;
 
@@ -235,7 +247,7 @@ namespace Zion.Types.Collections.Binary
             int Capacity = GetByteCount(Count);
             byte[] NewData = new byte[Capacity];
             Array.Copy(Data, NewData, Capacity);
-            return new BitList(NewData, Count);
+            return new BitList(Count, NewData);
         }
 
 
@@ -334,7 +346,7 @@ namespace Zion.Types.Collections.Binary
             int Count   = Reader.ReadInt32();
             byte[] Data = Reader.ReadBytes(GetByteCount(Count));
 
-            return new BitList(Data, Count);
+            return new BitList(Count, Data);
         }
 
         #endregion

@@ -64,19 +64,6 @@ namespace Zion
             }
         }
 
-        public bool Remove(T Item)
-        {
-            Lock.EnterWriteLock();
-            try
-            {
-                return Set.Remove(Item);
-            }
-            finally
-            {
-                Lock.ExitWriteLock();
-            }
-        }
-
         public bool Contains(T Item)
         {
             Lock.EnterReadLock();
@@ -87,6 +74,20 @@ namespace Zion
             finally
             {
                 Lock.ExitReadLock();
+            }
+        }
+
+
+        public bool Remove(T Item)
+        {
+            Lock.EnterWriteLock();
+            try
+            {
+                return Set.Remove(Item);
+            }
+            finally
+            {
+                Lock.ExitWriteLock();
             }
         }
 
@@ -104,12 +105,14 @@ namespace Zion
         }
 
 
-        public Enumerator GetEnumerator() => new Enumerator(this);
-
-
-        IEnumerator<T> IEnumerable<T>.GetEnumerator() => GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
+        IEnumerator<T> IEnumerable<T>.GetEnumerator() => GetEnumerator();
+
+        public Enumerator GetEnumerator()
+        {
+            return new Enumerator(this);
+        }
 
         public struct Enumerator : IEnumerator<T>, IDisposable
         {
@@ -129,10 +132,16 @@ namespace Zion
                 NativeEnumerator = Parent.Set.GetEnumerator();
             }
 
+
             public T Current => NativeEnumerator.Current;
+
             object IEnumerator.Current => Current;
 
-            public bool MoveNext() => NativeEnumerator.MoveNext();
+
+            public bool MoveNext()
+            {
+                return NativeEnumerator.MoveNext();
+            }
 
             public void Reset()
             {

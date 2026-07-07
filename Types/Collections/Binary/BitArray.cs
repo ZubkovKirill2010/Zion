@@ -1,161 +1,160 @@
 ﻿using System.Collections;
 using Zion.Serialization;
+using Zion.Types.Collections.Binary;
 
 namespace Zion
 {
     public class BitArray : IBinarySerializable<BitArray>, IEnumerable<bool>
     {
-        private readonly byte[] Data;
+        #region Constants
+        private const int Filter = 0b111;
 
+        #endregion
+
+        #region Data
+        private readonly byte[] Data;
+        
         public readonly int Length;
 
-        public int Count => Length;
-        public bool IsReadOnly => true;
+        #endregion
 
-
+        #region Constructors
         public BitArray(int Length)
         {
-            Data = new byte[(Length / 8f).RoundToInt(RoundMode.Ceiling)];
+            this.Data = new byte[GetByteCount(Length)];
+            this.Length = Length;
         }
+
         public BitArray(byte[] Data, int Length)
         {
+            ArgumentNullException.ThrowIfNull(Data);
+            ArgumentOutOfRangeException.ThrowIfWithout(Length >> 3, Data.Length);
 
+            this.Data   = ZArray.Clone(Data);
+            this.Length = Length;
         }
-        //private BitArray(byte[] Data, int Length)
-        //{
-        //    this.Length = Length;
-        //    this.Data = new byte[Data.Length];
 
-        //    for (int i = 0; i < Data.Length; i++)
-        //    {
-        //        this.Data[i] = Data[i];
-        //    }
-        //}
+        private BitArray(int Length, byte[] Data)
+        {
+            this.Length = Length;
+            this.Data = Data;
+        }
 
+        #endregion
 
+        #region Indexers
         public bool this[int Index]
         {
             get
             {
-                int ByteIndex = Index / 8;
-                return Data[ByteIndex].GetBit(Index - ByteIndex);
+                if (Index < 0 || Index >= Length)
+                {
+                    throw new ArgumentOutOfRangeException($"Index(={Index}) out of range [0..{Length})");
+                }
+                return Data[Index >> 3].GetBit(Index & Filter);
             }
             set
             {
-                int ByteIndex = Index / 8;
-                Data[ByteIndex].SetBit(Index - ByteIndex, value);
-            }
-        }
-
-
-        public static implicit operator bool[](BitArray BitArray)
-        {
-            bool[] Array = new bool[BitArray.Length];
-
-            for (int i = 0; i < Array.Length; i++)
-            {
-                Array[i] = BitArray[i];
-            }
-
-            return Array;
-        }
-        public static implicit operator List<bool>(BitArray BitArray)
-        {
-            List<bool> List = new List<bool>(BitArray.Length);
-
-            foreach (bool Item in BitArray)
-            {
-                List.Add(Item);
-            }
-
-            return List;
-        }
-
-
-        public void Write(BinaryWriter Writer)
-        {
-            Writer.Write(Data);
-            Writer.Write(Length);
-        }
-        public static BitArray Read(BinaryReader Reader)
-        {
-            return new BitArray
-            (
-                Reader.ReadArray<byte>(),
-                Reader.ReadInt32()
-            );
-        }
-
-
-        public int IndexOf(bool Item)
-        {
-            for (int i = 0; i < Length; i++)
-            {
-                if (this[i] == Item)
+                if (Index < 0 || Index >= Length)
                 {
-                    return i;
+                    throw new ArgumentOutOfRangeException($"Index(={Index}) out of range [0..{Length})");
                 }
+                int ByteIndex = Index >> 3;
+                Data[ByteIndex] = Data[ByteIndex].SetBit(Index & Filter, value);
             }
-            return -1;
         }
 
-        public bool Contains(bool Item)
+        public bool this[Index Index]
         {
-            Predicate<byte> Condition = Item ? Byte => Byte != 0 : Byte => Byte == 0;
-            foreach (byte Byte in Data)
-            {
-                if (Condition(Byte))
-                {
-                    return true;
-                }
-            }
-            return false;
+            get => this[Index.GetOffset(Length)];
+            set => this[Index.GetOffset(Length)] = value;
         }
 
-        public void CopyTo(bool[] Array, int ArrayIndex)
-        {
-            ArgumentNullException.ThrowIfNull(Array);
-            ArgumentOutOfRangeException.ThrowIfNegative(ArrayIndex);
+        #endregion
 
-            if (Array.Length - ArrayIndex < Length)
-            {
-                throw new ArgumentException("Target array too small");
-            }
-
-            for (int i = 0; i < Length; i++)
-            {
-                Array[ArrayIndex + i] = this[i];
-            }
-        }
+        #region PublicMethods
 
         public BitArray Clone()
         {
             return new BitArray(Data, Length);
         }
 
+        public BitList ToBitList()
+        {
+            return new BitList(Data, Length);
+        }
+
+        #endregion
+
+        #region IBinarySerializable
+        public void Write(BinaryWriter Writer)
+        {
+            Writer.Write(Length);
+            Writer.Write(Data, 0, GetByteCount(Length));
+        }
+
+        public static BitArray Read(BinaryReader Reader)
+        {
+            int Count = Reader.ReadInt32();
+            byte[] Data = Reader.ReadBytes(GetByteCount(Count));
+
+            return new BitArray(Count, Data);
+        }
+
+        #endregion
+
+        #region IEnumerable
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         public IEnumerator<bool> GetEnumerator()
         {
-            int ByteIndex = 0;
-            int BitIndex = 0;
+            int FullBytes = Length >> 3;
 
-            for (int i = 0; i < Length; i++)
+            for (int i = 0; i < FullBytes; i++)
             {
-                yield return Data[ByteIndex].GetBit(BitIndex);
+                byte Current = Data[i];
+                yield return (Current & 0b0000_0001) != 0;
+                yield return (Current & 0b0000_0010) != 0;
+                yield return (Current & 0b0000_0100) != 0;
+                yield return (Current & 0b0000_1000) != 0;
+                yield return (Current & 0b0001_0000) != 0;
+                yield return (Current & 0b0010_0000) != 0;
+                yield return (Current & 0b0100_0000) != 0;
+                yield return (Current & 0b1000_0000) != 0;
+            }
 
-                BitIndex++;
-
-                if (BitIndex == 8)
-                {
-                    ByteIndex++;
-                    BitIndex = 0;
-                }
+            int LastByteLength = Length & Filter;
+            if (LastByteLength != 0)
+            {
+                byte Current = Data[FullBytes];
+                int BitIndex = 0;
+                if (++BitIndex > LastByteLength) { yield break; }
+                yield return (Current & 0b0000_0001) != 0;
+                if (++BitIndex > LastByteLength) { yield break; }
+                yield return (Current & 0b0000_0010) != 0;
+                if (++BitIndex > LastByteLength) { yield break; }
+                yield return (Current & 0b0000_0100) != 0;
+                if (++BitIndex > LastByteLength) { yield break; }
+                yield return (Current & 0b0000_1000) != 0;
+                if (++BitIndex > LastByteLength) { yield break; }
+                yield return (Current & 0b0001_0000) != 0;
+                if (++BitIndex > LastByteLength) { yield break; }
+                yield return (Current & 0b0010_0000) != 0;
+                if (++BitIndex > LastByteLength) { yield break; }
+                yield return (Current & 0b0100_0000) != 0;
+                if (++BitIndex > LastByteLength) { yield break; }
+                yield return (Current & 0b1000_0000) != 0;
             }
         }
 
-        IEnumerator IEnumerable.GetEnumerator()
+        #endregion
+
+        #region PrivateMethods
+        private static int GetByteCount(int Count)
         {
-            return GetEnumerator();
+            return (Count + 7) >> 3;
         }
+
+        #endregion
     }
 }
