@@ -17,6 +17,25 @@
             }
 
 
+            public void Write<T, I>(T Value) where T : IBinaryWritable<I> where I : IBinaryWritable
+            {
+                Value.Write(Writer, Item => Item.Write(Writer));
+            }
+
+            public void Write<T, I>(T Value, Action<BinaryWriter, I> ObjectWriter) where T : IBinaryWritable<I>
+            {
+                ArgumentNullException.ThrowIfNull(ObjectWriter);
+                Value.Write(Writer, Item => ObjectWriter(Writer, Item));
+            }
+
+            public void Write<T, I>(T Value, IBinaryWriter<I>? ObjectWriter = null) where T : IBinaryWritable<I>
+            {
+                ObjectWriter ??= BinarySerializer.GetWriter<I>();
+                BinarySerializer.WriterNotFound(ObjectWriter);
+                Value.Write(Writer, Item => ObjectWriter.Write(Writer, Item));
+            }
+
+
             public void WriteCollection<T>(ICollection<T> Collection) where T : IBinaryWritable
             {
                 ArgumentNullException.ThrowIfNull(Collection);
@@ -25,6 +44,18 @@
                 foreach (T Item in Collection)
                 {
                     Writer.Write(Item);
+                }
+            }
+
+            public void WriteCollection<T>(ICollection<T> Collection, Action<T> ObjectWriter)
+            {
+                ArgumentNullException.ThrowIfNull(Collection);
+                ArgumentNullException.ThrowIfNull(ObjectWriter);
+
+                Writer.Write(Collection);
+                foreach (T Item in Collection)
+                {
+                    ObjectWriter(Item);
                 }
             }
 

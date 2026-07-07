@@ -44,8 +44,8 @@
 
         public static IEnumerable<(T1, T2)> ToPair<T1, T2>(IEnumerable<T1> A, IEnumerable<T2> B)
         {
-            using IEnumerator<T1> AEnumerator = Accessor.NotNull(A).GetEnumerator();
-            using IEnumerator<T2> BEnumerator = Accessor.NotNull(B).GetEnumerator();
+            using IEnumerator<T1> AEnumerator = A.NotNull().GetEnumerator();
+            using IEnumerator<T2> BEnumerator = B.NotNull().GetEnumerator();
 
             while (true)
             {

@@ -1,6 +1,5 @@
 ﻿using System.Collections;
 using Zion.Serialization;
-using Zion.Types.Collections.Binary;
 
 namespace Zion
 {

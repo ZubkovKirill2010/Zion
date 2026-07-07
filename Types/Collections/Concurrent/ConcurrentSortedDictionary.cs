@@ -238,7 +238,7 @@
                 Lock.ExitReadLock();
             }
 
-            foreach (var kvp in Snapshot)
+            foreach (KeyValuePair<TKey, TValue> kvp in Snapshot)
             {
                 yield return kvp;
             }

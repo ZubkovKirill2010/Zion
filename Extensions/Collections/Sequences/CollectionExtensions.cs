@@ -61,6 +61,15 @@
                     Collection.Add(Value);
                 }
             }
+
+
+            public void AddIfNotNull(T? Value)
+            {
+                if (Value is not null)
+                {
+                    Collection.Add(Value);
+                }
+            }
         }
 
         public static Dictionary<TKey, TValue> ToDictionary<TKey, TValue>(this ICollection<KeyValuePair<TKey, TValue>> Collection) where TKey : notnull

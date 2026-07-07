@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.ComponentModel.DataAnnotations;
 using Zion.Serialization;
 using Zion.Vectors;
 

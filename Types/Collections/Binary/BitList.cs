@@ -1,9 +1,7 @@
 ﻿using System.Collections;
-using System.Numerics;
-using System.Runtime.InteropServices;
 using Zion.Serialization;
 
-namespace Zion.Types.Collections.Binary
+namespace Zion
 {
     public class BitList : IList<bool>, IBinarySerializable<BitList>
     {

@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using Zion.Serialization;
 
@@ -277,27 +276,23 @@ namespace Zion
         #region BinarySerializable
         public void Write(BinaryWriter Writer, Action<T> Write)
         {
-            //TODO: SortedList<T>.Write
-            Writer.Write(Count);
-
-            for (int i = 0; i < Count; i++)
-            {
-                Write(Data[i]);
-            }
+            Writer.WriteCollection(this);
         }
 
         public static SortedList<T> Read(BinaryReader Reader, Func<T> Read)
         {
-            //TODO: SortedList<T>.Read
             int Count = Reader.ReadInt32();
-            T[] Data = new T[Count];
+            int Index = 0;
 
-            for (int i = 0; i < Count; i++)
+            SortedList<T> Result = new SortedList<T>(Count);
+
+            while (Index < Count)
             {
-                Data[i] = Read();
+                Result.Insert(Index, Read());
+                Index++;
             }
 
-            return new SortedList<T>(Data, Count);
+            return Result;
         }
 
         #endregion

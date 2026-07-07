@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Text.Json.Serialization;
 using Zion.Serialization;
@@ -420,7 +419,7 @@ namespace Zion
             Tree<I> Result = new Tree<I>
             (
                 Read(),
-                new List<Tree<I>>(Accessor.Set(out Count, Reader.ReadInt32())),
+                new List<Tree<I>>(Reader.ReadInt32().Out(out Count)),
                 Parent
             );
 

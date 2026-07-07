@@ -22,6 +22,25 @@
             }
 
 
+            public T Read<T, I>() where T : IBinaryReadable<T, I> where I : IBinaryReadable<I>
+            {
+                return T.Read(Reader, () => I.Read(Reader));
+            }
+
+            public T Read<T, I>(Func<BinaryReader, I> ObjectReader) where T : IBinaryReadable<T, I> where I : IBinaryReadable<I>
+            {
+                ArgumentNullException.ThrowIfNull(ObjectReader);
+                return T.Read(Reader, () => ObjectReader(Reader));
+            }
+
+            public T Read<T, I>(IBinaryReader<I>? ObjectReader = null) where T : IBinaryReadable<T, I> where I : IBinaryReadable<I>
+            {
+                ObjectReader ??= BinarySerializer.GetReader<I>();
+                BinarySerializer.ReaderNotFound(ObjectReader);
+                return T.Read(Reader, () => ObjectReader.Read(Reader));
+            }
+
+
             public TCollection ReadCollection<TCollection, T>() where TCollection : ICollection<T>, new() where T : IBinaryReadable<T>
             {
                 return ReadCollection<TCollection, T>(Reader, static Count => new TCollection());

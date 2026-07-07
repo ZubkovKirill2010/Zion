@@ -104,7 +104,7 @@
             /// <returns>The modified unsigned integer value.</returns>
             public uint SetBit(int Index, bool Bit)
             {
-                return Bit ? Value | (1u << Index) : (uint)(Value & ~(1u << Index));
+                return Bit ? Value | (1u << Index) : Value & ~(1u << Index);
             }
 
 

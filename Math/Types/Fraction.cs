@@ -363,7 +363,7 @@ namespace Zion.MathExpressions
 
         public static Fraction Parse(string String)
         {
-            String = Normalize(Accessor.NotNull(String));
+            String = Normalize(String.NotNull());
 
             if (String.Length == 0)
             {
@@ -742,7 +742,7 @@ namespace Zion.MathExpressions
             if (Min.IsNaN || Max.IsNaN) { return NaN; }
             if (Min > Max)
             {
-                Accessor.Reverse(ref Min, ref Max);
+                object.Swap(ref Min, ref Max);
             }
 
             Int A = CeilingToInt(Min);
