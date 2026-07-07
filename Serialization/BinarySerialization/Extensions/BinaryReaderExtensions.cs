@@ -4,7 +4,7 @@
     {
         extension(BinaryReader Reader)
         {
-            public T Read<T>() where T : IBinarySerializable<T>
+            public T Read<T>() where T : IBinaryReadable<T>
             {
                 return T.Read(Reader);
             }

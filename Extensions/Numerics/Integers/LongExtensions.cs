@@ -27,6 +27,23 @@
                 return Bit ? Value | (1L << Index) : Value & ~(1L << Index);
             }
 
+
+            public IEnumerable<bool> EnumerateBits()
+            {
+                return EnumerateBits(64);
+            }
+
+            public IEnumerable<bool> EnumerateBits(int Count)
+            {
+                long CurrentBit = 1L;
+                for (int i = 0; i < Count; i++)
+                {
+                    yield return (Value & CurrentBit) != 0;
+                    CurrentBit <<= 1;
+                }
+            }
+
+
             /// <summary>
             /// Checks if the long integer value is even.
             /// </summary>
@@ -67,7 +84,7 @@
             /// <returns>True if the bit is set, otherwise false.</returns>
             public bool GetBit(int Index)
             {
-                return (Value & 1UL << Index) != 0;
+                return (Value & (1UL << Index)) != 0;
             }
 
             /// <summary>
@@ -81,6 +98,23 @@
             {
                 return Bit ? Value | 1UL << Index : Value & ~(1UL << Index);
             }
+
+
+            public IEnumerable<bool> EnumerateBits()
+            {
+                return EnumerateBits(64);
+            }
+
+            public IEnumerable<bool> EnumerateBits(int Count)
+            {
+                ulong CurrentBit = 1UL;
+                for (int i = 0; i < Count; i++)
+                {
+                    yield return (Value & CurrentBit) != 0;
+                    CurrentBit <<= 1;
+                }
+            }
+
 
             /// <summary>
             /// Checks if the unsigned long integer value is even.

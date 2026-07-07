@@ -12,7 +12,7 @@
             /// <returns>True if the bit is set, otherwise false.</returns>
             public bool GetBit(int Index)
             {
-                return (Value & (1L << Index)) != 0;
+                return (Value & (1 << Index)) != 0;
             }
 
             /// <summary>
@@ -27,6 +27,23 @@
                 return Bit ? Value | (1 << Index) : Value & ~(1 << Index);
             }
 
+
+            public IEnumerable<bool> EnumerateBits()
+            {
+                return EnumerateBits(32);
+            }
+
+            public IEnumerable<bool> EnumerateBits(int Count)
+            {
+                int CurrentBit = 1;
+                for (int i = 0; i < Count; i++)
+                {
+                    yield return (Value & CurrentBit) != 0;
+                    CurrentBit <<= 1;
+                }
+            }
+
+
             /// <summary>
             /// Checks if the integer value is even.
             /// </summary>
@@ -34,12 +51,12 @@
             /// <returns>True if the value is even, otherwise false.</returns>
             public bool IsEven()
             {
-                return (Value & 1L) == 0;
+                return (Value & 1) == 0;
             }
 
             public bool IsPrime()
             {
-                if (Value <= 1L) { return false; }
+                if (Value <= 1) { return false; }
                 if (Value == 2) { return true; }
                 if (IsEven(Value)) { return false; }
 
@@ -55,6 +72,7 @@
 
                 return true;
             }
+
 
             public bool IsWithin<T>(ICollection<T> Collection)
             {
@@ -74,7 +92,7 @@
             /// <returns>True if the bit is set, otherwise false.</returns>
             public bool GetBit(int Index)
             {
-                return (Value & (1L << Index)) != 0;
+                return (Value & (1u << Index)) != 0;
             }
 
             /// <summary>
@@ -86,8 +104,25 @@
             /// <returns>The modified unsigned integer value.</returns>
             public uint SetBit(int Index, bool Bit)
             {
-                return Bit ? Value | (uint)(1L << Index) : (uint)(Value & ~(1L << Index));
+                return Bit ? Value | (1u << Index) : (uint)(Value & ~(1u << Index));
             }
+
+
+            public IEnumerable<bool> EnumerateBits()
+            {
+                return EnumerateBits(32);
+            }
+
+            public IEnumerable<bool> EnumerateBits(int Count)
+            {
+                int CurrentBit = 1;
+                for (int i = 0; i < Count; i++)
+                {
+                    yield return (Value & CurrentBit) != 0;
+                    CurrentBit <<= 1;
+                }
+            }
+
 
             /// <summary>
             /// Checks if the unsigned integer value is even.
@@ -96,12 +131,12 @@
             /// <returns>True if the value is even, otherwise false.</returns>
             public bool IsEven()
             {
-                return (Value & 1L) == 0;
+                return (Value & 1u) == 0;
             }
 
             public bool IsPrime()
             {
-                if (Value <= 1L) { return false; }
+                if (Value <= 1u) { return false; }
                 if (Value == 2) { return true; }
                 if (IsEven(Value)) { return false; }
 

@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Runtime.CompilerServices;
 using Zion.Serialization;
 
 namespace Zion
@@ -10,7 +11,7 @@ namespace Zion
         private int GapEnd;
         private int Length;
 
-        private readonly bool TIsReference;
+        private readonly bool IsReference;
 
         private int GapLength => GapEnd - GapStart;
 
@@ -20,15 +21,17 @@ namespace Zion
 
 
         public GapBuffer() : this(50) { }
+
         public GapBuffer(int Capacity)
         {
-            Buffer = new T[Capacity];
+            Buffer = new T[Math.Max(Capacity, 10)];
             GapStart = 0;
             GapEnd = Capacity;
             Length = 0;
 
-            TIsReference = typeof(T).IsClass;
+            IsReference = RuntimeHelpers.IsReferenceOrContainsReferences<T>();
         }
+
 
         public T this[int Index]
         {
@@ -76,15 +79,7 @@ namespace Zion
 
         public void Add(IEnumerable<T> Values, int Count)
         {
-            EnsureCapacity(Length + Count);
-            MoveGapTo(Length);
-
-            foreach (T Item in Values.Limit(Count))
-            {
-                Buffer[GapStart] = Item;
-                GapStart++;
-                Length++;
-            }
+            Insert(Length, Values, Count);
         }
 
         public void Insert(int Index, T Item)
@@ -101,6 +96,14 @@ namespace Zion
 
         public void Insert(int Index, IEnumerable<T> Values, int Count)
         {
+            ArgumentOutOfRangeException.ThrowIfWithout(Index, Length);
+            ArgumentNullException.ThrowIfNull(Values);
+
+            if (Count == 0)
+            {
+                return;
+            }
+
             EnsureCapacity(Length + Count);
             MoveGapTo(Index);
 
@@ -111,6 +114,7 @@ namespace Zion
                 Length++;
             }
         }
+
 
         public int IndexOf(T Target)
         {
@@ -130,6 +134,7 @@ namespace Zion
         {
             return IndexOf(Target) >= 0;
         }
+
 
         public void CopyTo(T[] Array, int ArrayIndex)
         {
@@ -160,22 +165,6 @@ namespace Zion
             return Clone;
         }
 
-        public void RemoveAt(int Index)
-        {
-            if (Index < 0 || Index >= Length)
-            {
-                throw new ArgumentOutOfRangeException($"Index(={Index}) out of range 0, Count(={Count}");
-            }
-
-            MoveGapTo(Index + 1);
-            GapStart--;
-            Length--;
-
-            if (TIsReference)
-            {
-                Buffer[GapStart] = default;
-            }
-        }
 
         public bool Remove(T Item)
         {
@@ -188,25 +177,54 @@ namespace Zion
             return false;
         }
 
+        public void RemoveAt(int Index)
+        {
+            ArgumentOutOfRangeException.ThrowIfWithout(Index, Count);
+
+            MoveGapTo(Index + 1);
+            GapStart--;
+            Length--;
+
+            if (IsReference)
+            {
+                Buffer[GapStart] = default!;
+            }
+        }
+
         public void Clear()
         {
             GapStart = 0;
             GapEnd = Buffer.Length;
             Length = 0;
 
-            if (TIsReference)
+            if (IsReference)
             {
                 Array.Clear(Buffer, 0, Buffer.Length);
             }
         }
 
 
-        public void Resize(int NewCapacity)
+        private void EnsureCapacity(int Capacity)
         {
-            if (Buffer.Length >= NewCapacity) { return; }
-            EnsureCapacity(NewCapacity);
+            int CurrentCapacity = Buffer.Length - GapLength;
+            if (CurrentCapacity >= Capacity)
+            {
+                return;
+            }
+
+            int NewCapacity = Math.Max(Buffer.Length * 2, Capacity + GapLength);
+            int RightPartLength = Buffer.Length - GapEnd;
+            T[] NewBuffer = new T[NewCapacity];
+
+            Array.Copy(Buffer, 0, NewBuffer, 0, GapStart);
+            Array.Copy(Buffer, GapEnd, NewBuffer, NewCapacity - RightPartLength, RightPartLength);
+
+            Buffer = NewBuffer;
+            GapEnd = NewCapacity - RightPartLength;
         }
 
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         public IEnumerator<T> GetEnumerator()
         {
@@ -223,11 +241,6 @@ namespace Zion
             {
                 yield return Buffer[Index++];
             }
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
         }
 
 
@@ -254,24 +267,6 @@ namespace Zion
                 GapStart = Index;
                 GapEnd += Shift;
             }
-        }
-
-        private void EnsureCapacity(int TargetCapacity)
-        {
-            if (Buffer.Length >= TargetCapacity + GapLength)
-            {
-                return;
-            }
-
-            int NewCapacity = Math.Max(Buffer.Length * 2, TargetCapacity + GapLength);
-            int RightPartLength = Buffer.Length - GapEnd;
-            T[] NewBuffer = new T[NewCapacity];
-
-            Array.Copy(Buffer, 0, NewBuffer, 0, GapStart);
-            Array.Copy(Buffer, GapEnd, NewBuffer, NewCapacity - RightPartLength, RightPartLength);
-
-            Buffer = NewBuffer;
-            GapEnd = NewCapacity - RightPartLength;
         }
     }
 }

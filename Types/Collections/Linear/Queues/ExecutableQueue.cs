@@ -2,34 +2,48 @@
 
 namespace Zion
 {
-    public class ExecutableQueue<T> : IEnumerable<T>
+    public class ExecutableQueue<T> : IDisposable, IEnumerable<T>
     {
-        private readonly object LockObject = new object();
-        private bool TaskRunning = false;
-
-        private CancellationTokenSource CompletionCancellation = new CancellationTokenSource();
+        #region Data
+        private readonly Lock Lock = new Lock();
 
         private readonly Queue<T> Tasks;
         private readonly AsyncAction<T> Function;
 
-        public AsyncAction? Completion { get; init; }
+        private CancellationTokenSource CompletionCancellation
+        {
+            get;
+            set
+            {
+                field.Dispose();
+                field = value;
+            }
+        } = new();
 
-        private int _Delay { get; init; } = 1000;
-        private int _DelayToCompletion { get; init; } = 3000;
+        private bool TaskRunning = false;
+
+        #endregion
+
+        #region Properties
+        public AsyncAction? Completion { get; init; }
 
         public int Delay
         {
-            get => _Delay;
-            init => _Delay = Math.Max(value, 0);
-        }
+            get;
+            init => field = Math.Max(value, 0);
+        } = 1000;
+
         public int DelayToCompletion
         {
-            get => _DelayToCompletion;
-            init => _DelayToCompletion = Math.Max(value, 0);
-        }
+            get;
+            init => field = Math.Max(value, 0);
+        } = 3000;
 
         public int Count => Tasks.Count;
 
+        #endregion
+
+        #region Constructors
         public ExecutableQueue(Action<T> Action) : this(Action.ToAsync(), 5) { }
         public ExecutableQueue(AsyncAction<T> Action) : this(Action, 5) { }
 
@@ -47,9 +61,12 @@ namespace Zion
             Function = Action;
         }
 
+        #endregion
+
+        #region PublicMethods
         public void Add(T Item)
         {
-            lock (LockObject)
+            lock (Lock)
             {
                 Tasks.Enqueue(Item);
 
@@ -66,7 +83,7 @@ namespace Zion
 
         public void Clear()
         {
-            lock (LockObject)
+            lock (Lock)
             {
                 Tasks.Clear();
                 CompletionCancellation.Cancel();
@@ -75,19 +92,45 @@ namespace Zion
 
         public bool Contains(T Item)
         {
-            lock (LockObject)
+            lock (Lock)
             {
                 return Tasks.Contains(Item);
             }
         }
 
+        #endregion
+
+        #region IDisposable
+        public void Dispose()
+        {
+            CompletionCancellation.Dispose();
+        }
+
+        #endregion
+
+        #region IEnumerable
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        public IEnumerator<T> GetEnumerator()
+        {
+            T[] Items;
+            lock (Lock)
+            {
+                Items = Tasks.ToArray(Tasks.Count);
+            }
+            return Items.Enumerate();
+        }
+
+        #endregion
+
+        #region PrivateMethods
         private async Task ProcessQueue()
         {
             while (true)
             {
                 T CurrentTask;
 
-                lock (LockObject)
+                lock (Lock)
                 {
                     if (Tasks.Count == 0)
                     {
@@ -113,31 +156,26 @@ namespace Zion
 
         private async Task DelayAndCompleteAsync(CancellationToken CancellationToken)
         {
-            await Task.Delay(DelayToCompletion, CancellationToken);
-
-            if (!CancellationToken.IsCancellationRequested)
+            try
             {
-                await Completion!.Invoke();
+                await Task.Delay(DelayToCompletion, CancellationToken);
             }
-        }
-
-        public IEnumerator<T> GetEnumerator()
-        {
-            T[] Items;
-            lock (LockObject)
+            catch (TaskCanceledException)
             {
-                Items = Tasks.ToArray(Tasks.Count);
+                return;
             }
 
-            foreach (T item in Items)
+            lock (Lock)
             {
-                yield return item;
+                if (Tasks.Count > 0)
+                {
+                    return;
+                }
             }
+
+            await Completion!.Invoke();
         }
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
+        #endregion
     }
 }

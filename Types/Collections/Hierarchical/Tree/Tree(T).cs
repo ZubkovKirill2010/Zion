@@ -9,70 +9,76 @@ namespace Zion
     [Serializable]
     public class Tree<T> : IList<Tree<T>>, IBinarySerializable<Tree<T>, T>, IColorText
     {
-        private static InvalidOperationException IsParentException => new InvalidOperationException("Cannot add a parent structure to its child elements");
+        #region Data
+        [JsonPropertyName("Value") ] public  T             Value  { get; set; }
+        [JsonPropertyName("Parent")] public  Tree<T>?      Parent { get; private set; }
+        [JsonPropertyName("Childs")] private List<Tree<T>> Childs
+        {
+            get;
+            set
+            {
+                field?.ForEach(static Item => Item.Parent = null);
+                value. ForEach(Item => Item.Parent = this);
+                field = value.NotNull();
+            }
+        }
 
-        [JsonPropertyName("Value")] public T Value { get; set; }
-        [JsonPropertyName("Child")] private List<Tree<T>> Childs { get; set; }
-        [JsonPropertyName("Parent")] public Tree<T>? Parent { get; private set; }
+        #endregion
 
-        public Tree<T> Root => Parent is null ? this : Parent.Root;
+        #region Properties
+        public Tree<T> Root    => Parent is null ? this : Parent.Root;
 
-        public const string FileExtension = ".struct";
+        public int Count       => Childs.Count;
 
-        public int Count => Childs.Count;
+        public bool IsRoot     => Parent is null;
+        public bool IsEmpty    => Childs.Count == 0;
+        public bool IsReadOnly => false;
 
-        public bool IsRoot => Parent is null;
-        public bool IsEmpty => Childs.Count == 0;
-        public bool IsReadOnly => ((ICollection<Tree<T>>)Childs).IsReadOnly;
+        #endregion
 
-
+        #region Constructors
         public Tree(T Value)
-        {
-            this.Value = Value;
-            Childs = new List<Tree<T>>();
-            Parent = null;
-        }
+            : this(Value, new List<Tree<T>>(0), null) { }
+
         public Tree(T Value, Tree<T> Parent)
+            : this(Value, new List<Tree<T>>(0), Parent) { }
+
+        public Tree(T Value, IList<T> Childs, Tree<T>? Parent = null)
+            : this(Value, List.ConvertAll(Childs, ToTree), Parent) { }
+
+        public Tree(T Value, IList<Tree<T>> Childs, Tree<T>? Parent = null)
+            : this(Value, Childs.ToList(), Parent) { }
+
+        private Tree(T Value, List<Tree<T>> Childs, Tree<T>? Parent = null)
         {
             this.Value = Value;
+            this.Childs = Childs.NotNull();
             this.Parent = Parent;
-            Childs = new List<Tree<T>>();
-        }
-        public Tree(T Value, IList<T> Childs)
-        {
-            this.Value = Value;
-            Parent = null;
-            SetChilds(Childs);
-        }
-        public Tree(T Value, IList<Tree<T>> Childs)
-        {
-            this.Value = Value;
-            Parent = null;
-            SetChilds(Childs);
-        }
-        public Tree(T Value, IList<Tree<T>> Childs, Tree<T>? Parent)
-        {
-            this.Value = Value;
-            this.Parent = Parent;
-            SetChilds(Childs);
         }
 
-        Tree<T> IList<Tree<T>>.this[int Index]
+        #endregion
+
+        #region Indexers
+        public Tree<T> this[int Index]
         {
             get => Childs[Index];
             set
             {
-                value.Parent = this;
+                Childs[Index].Parent = null;
                 Childs[Index] = value;
+                value.Parent = this;
             }
         }
 
-
-        public override bool Equals(object? Object)
+        public Tree<T> this[Index Index]
         {
-            return Object is Tree<T> Tree && ReferenceEquals(this, Tree);
+            get => Childs[Index];
+            set => this[Index.GetOffset(Count)] = value;
         }
 
+        #endregion
+
+        #region OverrideMethods
         public override string ToString()
         {
             StringBuilder Result = new StringBuilder();
@@ -114,6 +120,7 @@ namespace Zion
                 Childs[i].BuildTreeString(Builder, Prefix, LastChild);
             }
         }
+
         private void BuildTreeColorString(StringBuilder Builder, string Prefix, bool IsLast, RGBColor LineColor)
         {
             Builder.Append(Prefix);
@@ -137,81 +144,26 @@ namespace Zion
             }
         }
 
+        #endregion
 
-        [MemberNotNull(nameof(Childs))]
+        #region Childs
         public void SetChilds(IList<Tree<T>> Childs)
         {
-            ArgumentNullException.ThrowIfNull(Childs);
-
-            List<Tree<T>> NewChilds = new List<Tree<T>>(Childs.Count);
-
-            foreach (Tree<T> Child in Childs.Where(Child => Child is not null))
-            {
-                if (IsAncestor(Child))
-                {
-                    throw IsParentException;
-                }
-                Child.Parent = this;
-                NewChilds.Add(Child);
-            }
-            this.Childs = NewChilds;
+            this.Childs = Childs.ToList();
         }
-        [MemberNotNull(nameof(Childs))]
+
         public void SetChilds(IList<T> Childs)
         {
-            SetChilds(Childs, Item => Item);
-        }
-        [MemberNotNull(nameof(Childs))]
-        public void SetChilds<I>(IList<I> Childs, Converter<I, T> Converter)
-        {
-            List<Tree<T>>? NewChilds = new List<Tree<T>>(Childs.Count);
-
-            foreach (I Child in Childs.Where(Child => Child is not null))
-            {
-                NewChilds.Add(new Tree<T>(Converter(Child), this));
-            }
-
-            this.Childs = NewChilds;
+            this.Childs = List.ConvertAll(Childs, ToTree);
         }
 
-        public void ForEach(Converter<T, T> Action)
+        public void SetChilds<I>(IList<I> Childs, Func<I, Tree<T>> Converter)
         {
-            for (int i = 0; i < Count; i++)
-            {
-                Childs[i].Value = Action(Childs[i].Value);
-            }
+            this.Childs = List.ConvertAll(Childs, Converter);
         }
 
-        public void InvokeForAll(Action<T> Action)
-        {
-            Action(Value);
-            foreach (Tree<T> Child in Childs)
-            {
-                Child.InvokeForAll(Action);
-            }
-        }
-        public void InvokeForAll(Action<int, T> Action)
-        {
-            InvokeForAll(Action, 0);
-        }
-        private void InvokeForAll(Action<int, T> Action, int Level)
-        {
-            Action(Level, Value);
-            foreach (Tree<T> Child in Childs)
-            {
-                Child.InvokeForAll(Action, Level + 1);
-            }
-        }
 
-        public Tree<T> AddIf(T Item, bool Condition)
-        {
-            if (Condition)
-            {
-                Add(Item);
-            }
-            return this;
-        }
-        public Tree<T> AddIf(Tree<T> Item, bool Condition)
+        public Tree<T> AddIf(bool Condition, T Item)
         {
             if (Condition)
             {
@@ -220,15 +172,17 @@ namespace Zion
             return this;
         }
 
-        public Tree<T> AddIf(T Item, Predicate<T> Condition)
+        public Tree<T> AddIf(bool Condition, Tree<T> Item)
         {
-            if (Condition(Item))
+            if (Condition)
             {
                 Add(Item);
             }
             return this;
         }
-        public Tree<T> AddIf(Tree<T> Item, Predicate<Tree<T>> Condition)
+
+
+        public Tree<T> AddIf(Predicate<T> Condition, T Item)
         {
             if (Condition(Item))
             {
@@ -237,7 +191,17 @@ namespace Zion
             return this;
         }
 
-        public Tree<T> AddWhere(Func<T, bool> Condition, params T[] Items)
+        public Tree<T> AddIf(Predicate<Tree<T>> Condition, Tree<T> Item)
+        {
+            if (Condition(Item))
+            {
+                Add(Item);
+            }
+            return this;
+        }
+
+
+        public Tree<T> AddWhere(Func<T, bool> Condition, params IEnumerable<T> Items)
         {
             foreach (T Item in Items.Where(Condition))
             {
@@ -245,7 +209,8 @@ namespace Zion
             }
             return this;
         }
-        public Tree<T> AddWhere(Func<Tree<T>, bool> Condition, params Tree<T>[] Items)
+
+        public Tree<T> AddWhere(Func<Tree<T>, bool> Condition, params IEnumerable<Tree<T>> Items)
         {
             foreach (Tree<T> Item in Items.Where(Condition))
             {
@@ -254,25 +219,13 @@ namespace Zion
             return this;
         }
 
+        #endregion
         public Tree<T>? GetParent(int Level)
         {
-            if (Level < 0) { return null; }
-            if (Level == 0) { return this; }
-
-            Tree<T>? Current = this;
-
-            for (int i = 0; i < Level; i++)
-            {
-                Current = Current.Parent;
-
-                if (Current is null)
-                {
-                    return null;
-                }
-            }
-
-            return Current;
+            TryGetParent(Level, out Tree<T>? Parent);
+            return Parent;
         }
+
         public bool TryGetParent(int Level, out Tree<T>? Parent)
         {
             if (Level < 0)
@@ -301,110 +254,6 @@ namespace Zion
             return true;
         }
 
-        public void Add(T Item)
-        {
-            ArgumentNullException.ThrowIfNull(Item);
-            Add(new Tree<T>(Item, this));
-        }
-        public void Add(Tree<T> Item)
-        {
-            ArgumentNullException.ThrowIfNull(Item);
-            if (IsAncestor(Item))
-            {
-                throw IsParentException;
-            }
-            Item.Parent = this;
-            Childs.Add(Item);
-        }
-        public void Insert(int Index, Tree<T> Item)
-        {
-            ArgumentNullException.ThrowIfNull(Item);
-            if (IsAncestor(Item))
-            {
-                throw IsParentException;
-            }
-            Item.Parent = this;
-            Childs.Insert(Index, Item);
-        }
-
-        public int IndexOf(Tree<T> Item)
-        {
-            ArgumentNullException.ThrowIfNull(Item);
-            return Childs.IndexOf(Item);
-        }
-        public bool Contains(Tree<T> Item)
-        {
-            ArgumentNullException.ThrowIfNull(Item);
-            return Childs.Contains(Item);
-        }
-        public void CopyTo(Tree<T>[] Array, int ArrayIndex)
-        {
-            ArgumentNullException.ThrowIfNull(Array);
-            Childs.CopyTo(Array, ArrayIndex);
-        }
-
-        public void Clear()
-        {
-            foreach (Tree<T> Child in Childs)
-            {
-                Child.Parent = null;
-            }
-            Childs.Clear();
-        }
-        public bool Remove(Tree<T> Item)
-        {
-            Item.Parent = null;
-            return Childs.Remove(Item);
-        }
-        public void RemoveAt(int Index)
-        {
-            Childs[Index].Parent = null;
-            Childs.RemoveAt(Index);
-        }
-
-
-        public IEnumerator<Tree<T>> GetEnumerator()
-        {
-            return Childs.GetEnumerator();
-        }
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
-
-
-        public void Write(BinaryWriter Writer, Action<T> Write)
-        {
-            Write(Value);
-            Writer.Write(Count);
-            foreach (Tree<T> Child in Childs)
-            {
-                Child.Write(Writer, Write);
-            }
-        }
-
-        public static Tree<T> Read(BinaryReader Reader, Func<T> Read)
-        {
-            return Read<T>(Reader, Read, null);
-        }
-        public static Tree<I> Read<I>(BinaryReader Reader, Func<I> Read, Tree<I>? Parent)
-        {
-            int Count = 0;
-            Tree<I> Result = new Tree<I>
-            (
-                Read(),
-                new List<Tree<I>>(Accessor.Set(out Count, Reader.ReadInt32())),
-                Parent
-            );
-
-            for (int i = 0; i < Count; i++)
-            {
-                Result.Add(Read<I>(Reader, Read, Result));
-            }
-
-            return Result;
-        }
-
 
         public bool IsAncestor(Tree<T> Tree)
         {
@@ -423,5 +272,179 @@ namespace Zion
 
             return false;
         }
+
+        #region Parent
+
+        #endregion
+
+        #region ForEach
+        public void ForEach(Action<T> Action)
+        {
+            ForEach((Tree<T> Tree) => Action(Tree.Value));
+        }
+
+        public void ForEach(Action<Tree<T>> Action)
+        {
+            Childs.ForEach(Action);
+        }
+
+
+        public void InvokeForAll(Action<T> Action)
+        {
+            Action(Value);
+            foreach (Tree<T> Child in Childs)
+            {
+                Child.InvokeForAll(Action);
+            }
+        }
+
+        public void InvokeForAll(Action<T, int> Action)
+        {
+            InvokeForAll(Action, 0);
+        }
+
+        private void InvokeForAll(Action<T, int> Action, int Level)
+        {
+            Action(Value, Level);
+            int NextLevel = Level + 1;
+            Childs.ForEach(Child => InvokeForAll(Action, NextLevel));
+        }
+
+        #endregion
+
+        #region
+        public void Add(T Item)
+        {
+            Add(ToTree(Item));
+        }
+
+        public void Add(Tree<T> Item)
+        {
+            ArgumentNullException.ThrowIfNull(Item);
+            if (IsAncestor(Item))
+            {
+                throw IsParentException();
+            }
+            Item.Parent = this;
+            Childs.Add(Item);
+        }
+
+        public void Insert(int Index, T Item)
+        {
+            Insert(Index, new Tree<T>(Item, this));
+        }
+
+        public void Insert(int Index, Tree<T> Item)
+        {
+            ArgumentNullException.ThrowIfNull(Item);
+            if (IsAncestor(Item))
+            {
+                throw IsParentException();
+            }
+            Item.Parent = this;
+            Childs.Insert(Index, Item);
+        }
+
+
+        public int IndexOf(Tree<T> Item)
+        {
+            ArgumentNullException.ThrowIfNull(Item);
+            return Childs.IndexOf(Item);
+        }
+
+        public bool Contains(Tree<T> Item)
+        {
+            ArgumentNullException.ThrowIfNull(Item);
+            return Childs.Contains(Item);
+        }
+
+
+        public void CopyTo(Tree<T>[] Array, int ArrayIndex)
+        {
+            ArgumentNullException.ThrowIfNull(Array);
+            Childs.CopyTo(Array, ArrayIndex);
+        }
+
+
+        public bool Remove(Tree<T> Item)
+        {
+            if (Childs.Remove(Item))
+            {
+                Item.Parent = null;
+                return true;
+            }
+            return false;
+        }
+
+        public void RemoveAt(int Index)
+        {
+            Childs[Index].Parent = null;
+            Childs.RemoveAt(Index);
+        }
+
+        public void Clear()
+        {
+            Childs.ForEach(static Item => Item.Parent = null);
+            Childs.Clear();
+        }
+
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        public IEnumerator<Tree<T>> GetEnumerator()
+        {
+            return Childs.GetEnumerator();
+        }
+
+        #endregion
+
+        #region IBinarySerializable
+        public void Write(BinaryWriter Writer, Action<T> Write)
+        {
+            Write(Value);
+            Writer.Write(Count);
+            foreach (Tree<T> Child in Childs)
+            {
+                Child.Write(Writer, Write);
+            }
+        }
+
+        public static Tree<T> Read(BinaryReader Reader, Func<T> Read)
+        {
+            return Read<T>(Reader, Read, null);
+        }
+
+        public static Tree<I> Read<I>(BinaryReader Reader, Func<I> Read, Tree<I>? Parent)
+        {
+            int Count = 0;
+            Tree<I> Result = new Tree<I>
+            (
+                Read(),
+                new List<Tree<I>>(Accessor.Set(out Count, Reader.ReadInt32())),
+                Parent
+            );
+
+            for (int i = 0; i < Count; i++)
+            {
+                Result.Add(Read<I>(Reader, Read, Result));
+            }
+
+            return Result;
+        }
+
+        #endregion
+
+        #region PrivateMethods
+        private static InvalidOperationException IsParentException()
+        {
+            return new InvalidOperationException("Cannot add a parent structure to its child elements");
+        }
+
+        private static Tree<I> ToTree<I>(I Item)
+        {
+            return new Tree<I>(Item);
+        }
+
+        #endregion
     }
 }

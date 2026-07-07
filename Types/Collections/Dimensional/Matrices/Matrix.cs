@@ -4,16 +4,22 @@ using Zion.Vectors;
 
 namespace Zion
 {
-    public class Matrix<T> : IMatrix<T>, IBinarySerializable<Matrix<T>, T>, IEnumerable<T>
+    public class Matrix<T> : IMatrix<T>, IBinarySerializable<Matrix<T>, T>
     {
+        #region Data
         private readonly T[,] Data;
 
         public Vector2Int Size { get; }
 
+        #endregion
+
+        #region Properties
         public int Width => Size.X;
         public int Height => Size.Y;
 
+        #endregion
 
+        #region Constructors
         public Matrix(int Side)
         {
             Data = new T[Side, Side];
@@ -56,11 +62,13 @@ namespace Zion
             Fill(GetValue);
         }
 
+        #endregion
 
-        public virtual T this[int x, int y]
+        #region Indexers
+        public virtual T this[int X, int Y]
         {
-            get => Data[x, y];
-            set => Data[x, y] = value;
+            get => Data[X, Y];
+            set => Data[X, Y] = value;
         }
         public T this[Vector2Int Position]
         {
@@ -68,45 +76,53 @@ namespace Zion
             set => this[Position.X, Position.Y] = value;
         }
 
+        #endregion
+
+        #region IMatrix
         public bool IsInside(Vector2Int Position)
         {
             return Position >= Vector2Int.Zero && Position < Size;
         }
-        public bool IsInside(int x, int y)
+
+        public bool IsInside(int X, int Y)
         {
-            return x >= 0 && y >= 0 && x < Size.X && y < Size.Y;
+            return X >= 0 && Y >= 0 && X < Size.X && Y < Size.Y;
         }
+
 
         public bool IsEdge(Vector2Int Position)
         {
             return IsEdge(Position.X, Position.Y);
         }
-        public bool IsEdge(int x, int y)
+
+        public bool IsEdge(int X, int Y)
         {
-            return x == 0 || (x == Size.X - 1 && y == 0) || y == Size.Y - 1;
+            return X == 0 || X == Width - 1 || Y == 0 || Y == Height - 1;
         }
+
 
         public Matrix<T> Clone()
         {
             Matrix<T> Result = new Matrix<T>(Size);
 
-            for (int x = 0; x < Size.X; x++)
+            for (int X = 0; X < Size.X; X++)
             {
-                for (int y = 0; y < Size.Y; y++)
+                for (int Y = 0; Y < Size.Y; Y++)
                 {
-                    Result[x, y] = this[x, y];
+                    Result[X, Y] = this[X, Y];
                 }
             }
 
             return Result;
         }
+
         public Matrix<T> GetSubMatrix(Vector2Int Start, Vector2Int End)
         {
             if (!IsInside(Start))
             {
                 throw new ArgumentOutOfRangeException($"Start(={Start}) is not inside of matrix(size={Size})");
             }
-            if (IsInside(End))
+            if (!IsInside(End))
             {
                 throw new ArgumentOutOfRangeException($"End(={End}) is not inside of matrix(size={Size})");
             }
@@ -118,11 +134,11 @@ namespace Zion
             Vector2Int MatrixSize = End - Start;
             Matrix<T> Result = new Matrix<T>(MatrixSize);
 
-            for (int x = 0; x < MatrixSize.X; x++)
+            for (int X = 0; X < MatrixSize.X; X++)
             {
-                for (int y = 0; y < MatrixSize.Y; y++)
+                for (int Y = 0; Y < MatrixSize.Y; Y++)
                 {
-                    Result[x, y] = this[Start.X + x, Start.Y + y];
+                    Result[X, Y] = this[Start.X + X, Start.Y + Y];
                 }
             }
 
@@ -133,57 +149,62 @@ namespace Zion
         {
             Matrix<T> Result = new Matrix<T>(NewSize);
 
-            foreach (int x in ZEnumerable.Range(0, Math.Min(Width, NewSize.X)))
+            foreach (int X in ZEnumerable.Range(0, Math.Min(Width, NewSize.X)))
             {
-                foreach (int y in ZEnumerable.Range(0, Math.Min(Height, NewSize.Y)))
+                foreach (int Y in ZEnumerable.Range(0, Math.Min(Height, NewSize.Y)))
                 {
-                    Result[x, y] = this[x, y];
+                    Result[X, Y] = this[X, Y];
                 }
             }
 
             return Result;
         }
 
+
         public void Fill(T Value)
         {
-            for (int x = 0; x < Size.X; x++)
+            for (int X = 0; X < Size.X; X++)
             {
-                for (int y = 0; y < Size.Y; y++)
+                for (int Y = 0; Y < Size.Y; Y++)
                 {
-                    this[x, y] = Value;
+                    this[X, Y] = Value;
                 }
             }
         }
+
         public void Fill(Func<T> Value)
         {
-            for (int x = 0; x < Size.X; x++)
+            for (int X = 0; X < Size.X; X++)
             {
-                for (int y = 0; y < Size.Y; y++)
+                for (int Y = 0; Y < Size.Y; Y++)
                 {
-                    this[x, y] = Value();
+                    this[X, Y] = Value();
                 }
             }
         }
+
         public void Fill(Func<int, int, T> Value)
         {
-            for (int x = 0; x < Size.X; x++)
+            for (int X = 0; X < Size.X; X++)
             {
-                for (int y = 0; y < Size.Y; y++)
+                for (int Y = 0; Y < Size.Y; Y++)
                 {
-                    this[x, y] = Value(x, y);
+                    this[X, Y] = Value(X, Y);
                 }
             }
         }
+
         public void FillChessPattern(T A, T B)
         {
-            for (int x = 0; x < Size.X; x++)
+            for (int X = 0; X < Size.X; X++)
             {
-                for (int y = 0; y < Size.Y; y++)
+                for (int Y = 0; Y < Size.Y; Y++)
                 {
-                    this[x, y] = (x + y).IsEven() ? A : B;
+                    this[X, Y] = (X + Y).IsEven() ? A : B;
                 }
             }
         }
+
 
         public void SetEdge(T Value)
         {
@@ -204,11 +225,11 @@ namespace Zion
 
         public void ForEach(Action<T> Action)
         {
-            for (int x = 0; x < Size.X; x++)
+            for (int X = 0; X < Size.X; X++)
             {
-                for (int y = 0; y < Size.Y; y++)
+                for (int Y = 0; Y < Size.Y; Y++)
                 {
-                    Action(this[x, y]);
+                    Action(this[X, Y]);
                 }
             }
         }
@@ -217,33 +238,20 @@ namespace Zion
         {
             Matrix<I> Result = new Matrix<I>(Size);
 
-            for (int x = 0; x < Size.X; x++)
+            for (int X = 0; X < Size.X; X++)
             {
-                for (int y = 0; y < Size.Y; y++)
+                for (int Y = 0; Y < Size.Y; Y++)
                 {
-                    Result[x, y] = Converter(this[x, y]);
+                    Result[X, Y] = Converter(this[X, Y]);
                 }
             }
 
             return Result;
         }
 
-        public IEnumerator<T> GetEnumerator()
-        {
-            for (int x = 0; x < Width; x++)
-            {
-                for (int y = 0; y < Height; y++)
-                {
-                    yield return this[x, y];
-                }
-            }
-        }
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
+        #endregion
 
-
+        #region IBinarySerializable
         public void Write(BinaryWriter Writer, Action<T> Write)
         {
             Writer.Write(Size);
@@ -252,6 +260,7 @@ namespace Zion
                 Write(Item);
             }
         }
+
         public static Matrix<T> Read(BinaryReader Reader, Func<T> Read)
         {
             return new Matrix<T>
@@ -260,5 +269,23 @@ namespace Zion
                 () => Read()
             );
         }
+
+        #endregion
+
+        #region IEnumerable
+        public IEnumerator<T> GetEnumerator()
+        {
+            for (int X = 0; X < Width; X++)
+            {
+                for (int Y = 0; Y < Height; Y++)
+                {
+                    yield return this[X, Y];
+                }
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        #endregion
     }
 }

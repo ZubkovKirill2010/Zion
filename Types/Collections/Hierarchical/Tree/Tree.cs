@@ -2,8 +2,10 @@
 {
     public static class Tree
     {
-        public static bool IsEmpty<T>(Tree<T> Tree) => Tree.IsEmpty;
-        public static bool IsNotEmpty<T>(Tree<T> Tree) => !Tree.IsEmpty;
+        public static bool IsNullOrEmpty<T>(Tree<T> Tree)
+        {
+            return Tree?.IsEmpty ?? true;
+        }
 
         public static Tree<string> Parse(string Text, char OffsetChar = '\t')
         {

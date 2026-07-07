@@ -17,16 +17,20 @@ namespace Zion
         {
             Data = new byte[(Length / 8f).RoundToInt(RoundMode.Ceiling)];
         }
-        private BitArray(byte[] Data, int Length)
+        public BitArray(byte[] Data, int Length)
         {
-            this.Length = Length;
-            this.Data = new byte[Data.Length];
 
-            for (int i = 0; i < Data.Length; i++)
-            {
-                this.Data[i] = Data[i];
-            }
         }
+        //private BitArray(byte[] Data, int Length)
+        //{
+        //    this.Length = Length;
+        //    this.Data = new byte[Data.Length];
+
+        //    for (int i = 0; i < Data.Length; i++)
+        //    {
+        //        this.Data[i] = Data[i];
+        //    }
+        //}
 
 
         public bool this[int Index]

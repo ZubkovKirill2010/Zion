@@ -12,7 +12,7 @@
             /// <returns>True if the bit is set, otherwise false.</returns>
             public bool GetBit(int Index)
             {
-                return (Value & (1L << Index)) != 0;
+                return (Value & (1 << Index)) != 0;
             }
 
             /// <summary>
@@ -24,8 +24,25 @@
             /// <returns>The modified short integer value.</returns>
             public short SetBit(int Index, bool Bit)
             {
-                return Bit ? (short)(Value | (1L << Index)) : (short)(Value & ~(1L << Index));
+                return Bit ? (short)(Value | (1 << Index)) : (short)(Value & ~(1 << Index));
             }
+
+
+            public IEnumerable<bool> EnumerateBits()
+            {
+                return EnumerateBits(16);
+            }
+
+            public IEnumerable<bool> EnumerateBits(int Count)
+            {
+                int CurrentBit = 1;
+                for (int i = 0; i < Count; i++)
+                {
+                    yield return (Value & CurrentBit) != 0;
+                    CurrentBit <<= 1;
+                }
+            }
+
 
             /// <summary>
             /// Checks if the short integer value is even.
@@ -67,7 +84,7 @@
             /// <returns>True if the bit is set, otherwise false.</returns>
             public bool GetBit(int Index)
             {
-                return (Value & (1L << Index)) != 0;
+                return (Value & (1 << Index)) != 0;
             }
 
             /// <summary>
@@ -79,8 +96,25 @@
             /// <returns>The modified unsigned short integer value.</returns>
             public ushort SetBit(int Index, bool Bit)
             {
-                return Bit ? (ushort)(Value | (1L << Index)) : (ushort)(Value & ~(1L << Index));
+                return Bit ? (ushort)(Value | (1 << Index)) : (ushort)(Value & ~(1 << Index));
             }
+
+
+            public IEnumerable<bool> EnumerateBits()
+            {
+                return EnumerateBits(16);
+            }
+
+            public IEnumerable<bool> EnumerateBits(int Count)
+            {
+                int CurrentBit = 1;
+                for (int i = 0; i < Count; i++)
+                {
+                    yield return (Value & CurrentBit) != 0;
+                    CurrentBit <<= 1;
+                }
+            }
+
 
             /// <summary>
             /// Checks if the unsigned short integer value is even.
@@ -89,12 +123,12 @@
             /// <returns>True if the value is even, otherwise false.</returns>
             public bool IsEven()
             {
-                return (Value & 1L) == 0;
+                return (Value & 1) == 0;
             }
 
             public bool IsPrime()
             {
-                if (Value <= 1L) { return false; }
+                if (Value <= 1) { return false; }
                 if (Value == 2) { return true; }
                 if (IsEven(Value)) { return false; }
 

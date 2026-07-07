@@ -89,6 +89,18 @@
             }
 
 
+            public List<T> ToList()
+            {
+                ArgumentNullException.ThrowIfNull(List);
+                List<T> Result = new List<T>(List.Count);
+                foreach (T Item in List)
+                {
+                    Result.Add(Item);
+                }
+                return Result;
+            }
+
+
             /// <summary>
             /// Generates a sequence that goes forward through the collection and then backward.
             /// For example: [1, 2, 3] -> 1, 2, 3, 2, 1

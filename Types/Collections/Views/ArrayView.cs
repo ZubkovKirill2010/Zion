@@ -18,14 +18,11 @@ namespace Zion
         public T this[Index Index] => Source[Index];
 
 
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
         public IEnumerator<T> GetEnumerator()
         {
             return ((ICollection<T>)Source).GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
         }
     }
 }

@@ -12,7 +12,7 @@
             /// <returns>True if the bit is set, otherwise false.</returns>
             public bool GetBit(int Index)
             {
-                return (Value & (1L << Index)) != 0;
+                return (Value & (1 << Index)) != 0;
             }
 
             /// <summary>
@@ -24,8 +24,32 @@
             /// <returns>The modified byte value.</returns>
             public byte SetBit(int Index, bool Bit)
             {
-                return Bit ? (byte)(Value | (1L << Index)) : (byte)(Value & ~(1L << Index));
+                return Bit ? (byte)(Value | (1 << Index)) : (byte)(Value & ~(1 << Index));
             }
+
+            
+            public IEnumerable<bool> EnumerateBits()
+            {
+                yield return (Value & 0b0000_0001) != 0;
+                yield return (Value & 0b0000_0010) != 0;
+                yield return (Value & 0b0000_0100) != 0;
+                yield return (Value & 0b0000_1000) != 0;
+                yield return (Value & 0b0001_0000) != 0;
+                yield return (Value & 0b0010_0000) != 0;
+                yield return (Value & 0b0100_0000) != 0;
+                yield return (Value & 0b1000_0000) != 0;
+            }
+
+            public IEnumerable<bool> EnumerateBits(int Count)
+            {
+                int CurrentBit = 1;
+                for (int i = 0; i < Count; i++)
+                {
+                    yield return (Value & CurrentBit) != 0;
+                    CurrentBit <<= 1;
+                }
+            }
+
 
             /// <summary>
             /// Checks if the byte value is even.
@@ -67,7 +91,7 @@
             /// <returns>True if the bit is set, otherwise false.</returns>
             public bool GetBit(int Index)
             {
-                return (Value & (1L << Index)) != 0;
+                return (Value & (1 << Index)) != 0;
             }
 
             /// <summary>
@@ -79,8 +103,32 @@
             /// <returns>The modified sbyte value.</returns>
             public sbyte SetBit(int Index, bool Bit)
             {
-                return Bit ? (sbyte)(Value | (sbyte)(1L << Index)) : (sbyte)(Value & ~(1L << Index));
+                return Bit ? (sbyte)(Value | (sbyte)(1 << Index)) : (sbyte)(Value & ~(1 << Index));
             }
+
+
+            public IEnumerable<bool> EnumerateBits()
+            {
+                yield return (Value & 0b0000_0001) != 0;
+                yield return (Value & 0b0000_0010) != 0;
+                yield return (Value & 0b0000_0100) != 0;
+                yield return (Value & 0b0000_1000) != 0;
+                yield return (Value & 0b0001_0000) != 0;
+                yield return (Value & 0b0010_0000) != 0;
+                yield return (Value & 0b0100_0000) != 0;
+                yield return (Value & 0b1000_0000) != 0;
+            }
+
+            public IEnumerable<bool> EnumerateBits(int Count)
+            {
+                int CurrentBit = 1;
+                for (int i = 0; i < Count; i++)
+                {
+                    yield return (Value & CurrentBit) != 0;
+                    CurrentBit <<= 1;
+                }
+            }
+
 
             /// <summary>
             /// Checks if the sbyte value is even.

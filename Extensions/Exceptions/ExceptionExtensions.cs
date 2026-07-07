@@ -22,7 +22,7 @@ namespace Zion
             {
                 if (Index < Min || Index >= Max)
                 {
-                    throw new ArgumentOutOfRangeException($"Index(={Index}) out of range [{Min} - {Max})]");
+                    throw new ArgumentOutOfRangeException($"Index(={Index}) out of range [{Min}..{Max})");
                 }
             }
 
@@ -38,7 +38,7 @@ namespace Zion
             {
                 if (Index < 0 || Index >= Count)
                 {
-                    throw new ArgumentOutOfRangeException($"Index(={Index}) out of range [0 - {Count})]");
+                    throw new ArgumentOutOfRangeException($"Index(={Index}) out of range [0..{Count})");
                 }
             }
 
@@ -46,7 +46,7 @@ namespace Zion
             {
                 if (Index < 0 || Index >= Collection.Count)
                 {
-                    throw new ArgumentOutOfRangeException($"Index(={Index}) out of range [0 - Collection.Count(={Collection.Count})]");
+                    throw new ArgumentOutOfRangeException($"Index(={Index}) out of range [0..{Collection.Count})");
                 }
             }
 
@@ -54,7 +54,7 @@ namespace Zion
             {
                 if (Index < 0 || Index >= Array.Length)
                 {
-                    throw new ArgumentOutOfRangeException($"Index(={Index}) out of range [0 - Array.Length(={Array.Length})]");
+                    throw new ArgumentOutOfRangeException($"Index(={Index}) out of range [0..{Array.Length})");
                 }
             }
 
@@ -63,7 +63,7 @@ namespace Zion
             {
                 if (!Matrix.IsInside(x, y))
                 {
-                    throw new ArgumentOutOfRangeException($"Position [{x}, {y}] out of range [ [0, 0] -  [{Matrix.Width}, {Matrix.Height}] ]");
+                    throw new ArgumentOutOfRangeException($"Position [{x}, {y}] out of range [[0; 0]..{Matrix.Size})");
                 }
             }
 
@@ -71,7 +71,7 @@ namespace Zion
             {
                 if (!Matrix.IsInside(Position))
                 {
-                    throw new ArgumentOutOfRangeException($"Position {Position} out of range [ [0, 0] -  [{Matrix.Width}], {Matrix.Height}] ]");
+                    throw new ArgumentOutOfRangeException($"Position {Position} out of range [[0; 0]..{Matrix.Size})");
                 }
             }
 
@@ -80,7 +80,7 @@ namespace Zion
             {
                 if (!Index.IsInRange(Min, Max))
                 {
-                    throw new ArgumentOutOfRangeException($"Index(={Index}) out of range [{Min} - {Max})]");
+                    throw new ArgumentOutOfRangeException($"Index(={Index}) out of range [{Min}..{Max})");
                 }
             }
         }

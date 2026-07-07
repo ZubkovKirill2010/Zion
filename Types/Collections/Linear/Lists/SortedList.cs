@@ -1,56 +1,57 @@
 ﻿using System.Collections;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using Zion.Serialization;
 
 namespace Zion
 {
-    public enum CompareMode : sbyte
+    public class SortedList<T> : IList<T>, IBinarySerializable<SortedList<T>, T> where T : IComparable<T>
     {
-        MinToMax = 1,
-        MaxToMin = -1
-    }
-
-    public class SortedList<T> : ICollection<T>, IBinarySerializable<SortedList<T>, T> where T : IComparable<T>
-    {
-        public CompareMode CompareMode { get; init; } = CompareMode.MinToMax;
-
+        #region Data
         private T[] Data;
-        private int Length;
 
         private readonly bool IsReference = RuntimeHelpers.IsReferenceOrContainsReferences<T>();
 
+        public int Count { get; private set; }
+
         public int Capacity => Data.Length;
-        public int Count => Length;
         public bool IsReadOnly => false;
 
+        #endregion
+
+        #region Constructors
         public SortedList() : this(16) { }
+
         public SortedList(int Capacity)
         {
             ArgumentOutOfRangeException.ThrowIfNegativeOrZero(Capacity);
 
             Data = new T[Capacity];
-            Length = 0;
+            Count = 0;
         }
-        private SortedList(T[] Data, int Count, int CompareMode)
+
+        private SortedList(T[] Data, int Count)
         {
             this.Data = Data;
-            Length = Count;
-            this.CompareMode = (CompareMode)CompareMode;
-            Update();
+            this.Count = Count;
+            Resort();
         }
 
+        #endregion
 
+        #region Indexers
         public T this[int Index]
         {
-            get => Data[Index];
+            get
+            {
+                return Data[Index];
+            }
             set
             {
-                ArgumentOutOfRangeException.ThrowIfWithout(Index, Length);
+                ArgumentOutOfRangeException.ThrowIfWithout(Index, Count);
 
-                int Multiplier = (int)CompareMode;
-
-                bool ValidLeft = Index == 0 || value.CompareTo(Data[Index - 1]) * Multiplier >= 0;
-                bool ValidRight = Index == Length - 1 || value.CompareTo(Data[Index + 1]) * Multiplier <= 0;
+                bool ValidLeft = Index == 0 || value.CompareTo(Data[Index - 1]) >= 0;
+                bool ValidRight = Index == Count - 1 || value.CompareTo(Data[Index + 1]) <= 0;
 
                 if (ValidLeft && ValidRight)
                 {
@@ -63,39 +64,26 @@ namespace Zion
                 }
             }
         }
+
         public T this[Index Index]
         {
-            get => Data[Index.GetOffset(Length)];
-            set
-            {
-                this[Index.GetOffset(Length)] = value;
-            }
+            get => this[Index.GetOffset(Count)];
+            set => this[Index.GetOffset(Count)] = value;
         }
-        public T[] this[Range Range] => Data[Range];
 
-
-        public static implicit operator T[](SortedList<T> RecordList)
+        public T[] this[Range Range]
         {
-            T[] Array = new T[RecordList.Count];
-            for (int i = 0; i < Array.Length; i++)
+            get
             {
-                Array[i] = RecordList[i];
+                ArgumentOutOfRangeException.ThrowIfWithout(Range.Start.GetOffset(Count), Count);
+                ArgumentOutOfRangeException.ThrowIfWithout(Range.End.GetOffset(Count), Count);
+                return Data[Range];
             }
-            return Array;
-        }
-        public static implicit operator List<T>(SortedList<T> RecordList)
-        {
-            List<T> List = new List<T>(RecordList.Count);
-
-            foreach (T Item in RecordList)
-            {
-                List.Add(Item);
-            }
-
-            return List;
         }
 
+        #endregion
 
+        #region OverrideMethods
         public override string ToString()
         {
             return StringFormatter.ToString(this);
@@ -103,103 +91,76 @@ namespace Zion
 
         public override bool Equals(object? Object)
         {
-            if (Object is null) { return false; }
-            if (Object is SortedList<T> RecordList)
-            {
-                if (RecordList.Count != Count)
-                {
-                    return false;
-                }
-                for (int i = 0; i < Count; i++)
-                {
-                    if (!RecordList.Data[i].Equals(Data[i]))
-                    {
-                        return false;
-                    }
-                }
-                return true;
-            }
-
-            return false;
+            return Object is SortedList<T> SortedList
+                && Count == SortedList.Count
+                && this.SequenceEqual(SortedList);
         }
 
         public override int GetHashCode()
         {
-            HashCode Hash = new HashCode();
-            foreach (T Item in Data)
-            {
-                Hash.Add(Item);
-            }
-            Hash.Add(CompareMode);
-            return Hash.ToHashCode();
+            return base.GetHashCode();
         }
 
+        #endregion
 
+        #region IList
         public void Add(T Item)
         {
-            EnsureCapacity(Length + 1);
-            int InsertIndex = GetInsertIndex(Item);
-            Insert(Item, InsertIndex);
+            EnsureCapacity(Count + 1);
+            Insert(Item, GetInsertIndex(Item));
         }
 
-        public void AddRange(params ICollection<T>[] Items)
+        public void AddRange(ICollection<T> Items)
         {
             ArgumentNullException.ThrowIfNull(Items);
 
-            int TotalItems = Items.Sum(collection => collection?.Count ?? 0);
-            EnsureCapacity(Length + TotalItems);
+            EnsureCapacity(Count + Items.Count);
 
-            foreach (ICollection<T>? Collection in Items)
+            foreach (T Item in Items)
             {
-                if (Collection is null) { continue; }
-
-                foreach (T Item in Collection)
-                {
-                    int InsertIndex = GetInsertIndex(Item);
-                    Insert(Item, InsertIndex);
-                }
+                ArgumentNullException.ThrowIfNull(Item);
+                Insert(Item, GetInsertIndex(Item));
             }
         }
 
-        public void Clear()
+        public void Insert(int TargetIndex, T Item)
         {
-            if (Length == 0)
+            ArgumentNullException.ThrowIfNull(Item);
+
+            if (TargetIndex < 0 || TargetIndex > Count)
             {
+                Add(Item);
                 return;
             }
 
-            if (IsReference)
+            bool ValidLeft  = TargetIndex == 0     || Item.CompareTo(Data[TargetIndex - 1]) >= 0;
+            bool ValidRight = TargetIndex == Count || Item.CompareTo(Data[TargetIndex])     <= 0;
+
+            if (ValidLeft && ValidRight)
             {
-                Array.Clear(Data, 0, Length);
+                Insert(Item, TargetIndex);
             }
-
-            Length = 0;
+            else
+            {
+                Add(Item);
+            }
         }
 
-        public bool Contains(T Item)
-        {
-            return IndexOf(Item) != -1;
-        }
 
         public int IndexOf(T Item)
         {
-            if (Length == 0)
+            if (Count == 0)
             {
                 return -1;
             }
 
             int Min = 0;
-            int Max = Length - 1;
+            int Max = Count - 1;
 
             while (Min <= Max)
             {
                 int Target = Min + ((Max - Min) >> 1);
                 int Comparing = Item.CompareTo(Data[Target]);
-
-                if (CompareMode == CompareMode.MaxToMin)
-                {
-                    Comparing = -Comparing;
-                }
 
                 if (Comparing == 0)
                 {
@@ -218,126 +179,108 @@ namespace Zion
             return -1;
         }
 
+        public bool Contains(T Item)
+        {
+            return IndexOf(Item) != -1;
+        }
+
+
         public void CopyTo(T[] Array, int ArrayIndex)
         {
             ArgumentNullException.ThrowIfNull(Array);
             ArgumentOutOfRangeException.ThrowIfNegative(ArrayIndex);
-            ArgumentException.ThrowIf(Array.Length - ArrayIndex < Length, "Target array is too small");
-
-            System.Array.Copy(Data, 0, Array, ArrayIndex, Length);
+            ArgumentException.ThrowIf(Array.Length - ArrayIndex < Count, "Target array is too small");
+            System.Array.Copy(Data, 0, Array, ArrayIndex, Count);
         }
+
 
         public bool Remove(T Item)
         {
             int Index = IndexOf(Item);
-            if (Index == -1) { return false; }
-
+            if (Index == -1)
+            {
+                return false;
+            }
             RemoveAt(Index);
-
             return true;
         }
 
         public void RemoveAt(int Index)
         {
-            if ((uint)Index >= (uint)Length)
-            {
-                throw new ArgumentOutOfRangeException(nameof(Index));
-            }
+            ArgumentOutOfRangeException.ThrowIfWithout(Index, Count);
 
-            for (int i = Index; i < Length - 1; i++)
+            for (int i = Index; i < Count - 1; i++)
             {
                 Data[i] = Data[i + 1];
             }
 
-            Length--;
+            Count--;
             if (IsReference)
             {
-                Data[Length] = default!;
+                Data[Count] = default!;
             }
         }
 
         public void RemoveRange(int Start, int Count)
         {
-            if (Start >= Length)
+            ArgumentException.ThrowIf(Start < 0 || Start > this.Count, $"Start(={Start}) out of range [0..{this.Count})");
+            ArgumentException.ThrowIf(Count < 0 || Start + Count > this.Count, $"Count(={Count}) out of range [0..{this.Count})");
+
+            if (Count == 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(Start));
-            }
-            if (Count < 0 || Start + Count > Length)
-            {
-                throw new ArgumentOutOfRangeException(nameof(Count));
+                return;
             }
 
             int End = Start + Count;
 
-            foreach (int i in ZEnumerable.Range(Length - End))
+            foreach (int i in ZEnumerable.Range(this.Count - End))
             {
                 Data[Start + i] = Data[End + i];
             }
 
+            this.Count -= Count;
+
             if (IsReference)
             {
-                Array.Clear(Data, Length - Count, Count);
+                Array.Clear(Data, this.Count, Count);
             }
-
-            Length -= Count;
         }
 
-
-        public int FirstAfter(T Item)
+        public void Clear()
         {
-            if (Length == 0) { return -1; }
-
-            int Index = GetInsertIndex(Item);
-            
-            if (Index < Length && Item.CompareTo(Data[Index]) == 0)
+            if (Count == 0)
             {
-                Index++;
+                return;
             }
 
-            return Index < Length ? Index : -1;
+            if (IsReference)
+            {
+                Array.Clear(Data, 0, Count);
+            }
+
+            Count = 0;
         }
 
 
-        public void EnsureCapacity(int MinCapacity)
-        {
-            if (MinCapacity <= Data.Length) return;
-
-            int NewCapacity = Math.Max(Data.Length * 2, MinCapacity);
-            Array.Resize(ref Data, NewCapacity);
-        }
-
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         public IEnumerator<T> GetEnumerator()
         {
-            for (int i = 0; i < Length; i++)
+            for (int i = 0; i < Count; i++)
             {
                 yield return Data[i];
             }
         }
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
+        #endregion
 
-
-        public void Update()
-        {
-            Array.Sort(Data, 0, Length);
-
-            if (CompareMode == CompareMode.MaxToMin)
-            {
-                Array.Reverse(Data, 0, Length);
-            }
-        }
-
-
+        #region BinarySerializable
         public void Write(BinaryWriter Writer, Action<T> Write)
         {
-            Writer.Write(Length);
-            Writer.Write((sbyte)CompareMode);
+            //TODO: SortedList<T>.Write
+            Writer.Write(Count);
 
-            for (int i = 0; i < Length; i++)
+            for (int i = 0; i < Count; i++)
             {
                 Write(Data[i]);
             }
@@ -345,29 +288,31 @@ namespace Zion
 
         public static SortedList<T> Read(BinaryReader Reader, Func<T> Read)
         {
-            int Length = Reader.ReadInt32();
-            int CompareModeValue = Reader.ReadSByte();
-            T[] Data = new T[Length];
+            //TODO: SortedList<T>.Read
+            int Count = Reader.ReadInt32();
+            T[] Data = new T[Count];
 
-            for (int i = 0; i < Length; i++)
+            for (int i = 0; i < Count; i++)
             {
                 Data[i] = Read();
             }
 
-            return new SortedList<T>(Data, Length, CompareModeValue);
+            return new SortedList<T>(Data, Count);
         }
 
+        #endregion
 
+        #region PublicMethods
         public T[] ToArray()
         {
-            T[] Array = new T[Length];
-            System.Array.Copy(Data, Array, Length);
+            T[] Array = new T[Count];
+            System.Array.Copy(Data, Array, Count);
             return Array;
         }
 
         public List<T> ToList()
         {
-            List<T> List = new List<T>(Length);
+            List<T> List = new List<T>(Count);
             foreach (T Item in this)
             {
                 List.Add(Item);
@@ -376,25 +321,55 @@ namespace Zion
         }
 
 
+        public int FirstAfter(T Item)
+        {
+            if (Count == 0) { return -1; }
+
+            int Index = GetInsertIndex(Item);
+            
+            if (Index < Count && Item.CompareTo(Data[Index]) == 0)
+            {
+                Index++;
+            }
+
+            return Index < Count ? Index : -1;
+        }
+
+
+        public void EnsureCapacity(int Capacity)
+        {
+            if (Capacity <= Data.Length)
+            {
+                return;
+            }
+
+            int NewCapacity = Math.Max(Data.Length * 2, Capacity);
+            Array.Resize(ref Data, NewCapacity);
+        }
+
+
+        public void Resort()
+        {
+            Array.Sort(Data, 0, Count);
+        }
+
+        #endregion
+
+        #region PrivateMethods
         private int GetInsertIndex(T Item)
         {
-            if (Length == 0)
+            if (Count == 0)
             {
                 return 0;
             }
 
             int Min = 0;
-            int Max = Length - 1;
+            int Max = Count - 1;
 
             while (Min <= Max)
             {
                 int Target = Min + ((Max - Min) >> 1);
                 int Comparing = Item.CompareTo(Data[Target]);
-
-                if (CompareMode == CompareMode.MaxToMin)
-                {
-                    Comparing = -Comparing;
-                }
 
                 if (Comparing == 0)
                 {
@@ -416,18 +391,20 @@ namespace Zion
 
         private void Insert(T Item, int Index)
         {
-            if (Length == Data.Length)
+            if (Count == Data.Length)
             {
-                EnsureCapacity(Length + 1);
+                EnsureCapacity(Count + 1);
             }
 
-            for (int i = Length; i > Index; i--)
+            for (int i = Count; i > Index; i--)
             {
                 Data[i] = Data[i - 1];
             }
 
             Data[Index] = Item;
-            Length++;
+            Count++;
         }
+
+        #endregion
     }
 }
