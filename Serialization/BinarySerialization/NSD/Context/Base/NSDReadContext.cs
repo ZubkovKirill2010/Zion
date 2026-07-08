@@ -16,7 +16,6 @@
             return new NSDBatchReader(this);
         }
 
-
         internal protected abstract void ReadAll(NSDBatchReader Batch);
     }
 }

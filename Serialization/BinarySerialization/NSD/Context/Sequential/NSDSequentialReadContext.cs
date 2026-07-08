@@ -1,13 +1,13 @@
-﻿    using System.Text;
+﻿using System.Text;
 
-    namespace Zion.Serialization.NSD
+namespace Zion.Serialization.NSD
+{
+    public sealed class NSDSequentialReadContext : NSDReadContext
     {
-        public sealed class NSDSequentialReadContext : NSDReadContext
+        public NSDSequentialReadContext(Stream Stream) : base(Stream)
         {
-            public NSDSequentialReadContext(Stream Stream) : base(Stream)
-            {
 
-            }
+        }
 
         internal protected override void ReadAll(NSDBatchReader Batch)
         {
@@ -39,4 +39,4 @@
             }
         }
     }
-    }
+}
