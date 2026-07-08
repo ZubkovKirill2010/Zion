@@ -29,7 +29,7 @@
             {
                 Write(() => ObjectWriter.Write(Writer, Value));
             }
-            else if (ObjectWriter is IBinaryWritable Writable)
+            else if (Value is IBinaryWritable Writable)
             {
                 WritePrimitiveSafe(Writable);
             }
@@ -48,7 +48,7 @@
             Write();
 
             long FinalPosition = Stream.Position;
-            long Size = FinalPosition - SizePosition;
+            long Size = FinalPosition - SizePosition - 4;
 
             Stream.Position = SizePosition;
             Writer.Write((uint)Size);

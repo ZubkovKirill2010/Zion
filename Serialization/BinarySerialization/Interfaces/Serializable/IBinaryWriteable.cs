@@ -8,6 +8,9 @@
         public void Write(BinaryWriter Writer);
     }
 
+    /// <summary>
+    /// Serializes the object to binary stream.
+    /// </summary>
     public interface IBinaryWritable<T>
     {
         public void Write(BinaryWriter Writer, Action<T> Write);

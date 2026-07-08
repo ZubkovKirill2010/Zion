@@ -1,62 +1,42 @@
-﻿using System.Text;
+﻿    using System.Text;
 
-namespace Zion.Serialization.NSD
-{
-    public sealed class NSDSequentialReadContext : NSDReadContext
+    namespace Zion.Serialization.NSD
     {
-        private readonly byte[] Buffer;
-        private readonly int Length;
-
-        public NSDSequentialReadContext(Stream Stream) : base(Stream)
+        public sealed class NSDSequentialReadContext : NSDReadContext
         {
-            using MemoryStream MemoryStream = new MemoryStream();
-            Stream.CopyTo(MemoryStream);
+            public NSDSequentialReadContext(Stream Stream) : base(Stream)
+            {
 
-            Buffer = MemoryStream.ToArray();
-            Length = Buffer.Length;
-        }
+            }
 
         internal protected override void ReadAll(NSDBatchReader Batch)
         {
-            using MemoryStream MemoryStream = new MemoryStream(Buffer);
-            using BinaryReader Reader       = new BinaryReader(MemoryStream, Encoding.UTF8, false);
+            BinaryReader Reader = new BinaryReader(Stream, Encoding.UTF8, true);
 
-            while (MemoryStream.Position < Length)
+            while (Stream.Position < Stream.Length)
             {
-                long RecordStart = MemoryStream.Position;
-
                 string Key = Reader.ReadString();
                 uint Length = Reader.ReadUInt32();
 
-                long DataStart = MemoryStream.Position;
-
-                if (!Batch.TryRead(Key, MemoryStream))
+                if (!Batch.TryRead(Key, Stream))
                 {
-                    MemoryStream.Seek(Length, SeekOrigin.Current);
-                }
-
-                if (MemoryStream.Position > DataStart + Length)
-                {
-                    throw new InvalidDataException
-                    (
-                        $"Read beyond data boundary for key '{Key}'. " +
-                        $"Expected {DataStart + Length}, got {MemoryStream.Position}"
-                    );
-                }
-
-                if (MemoryStream.Position < DataStart + Length)
-                {
-                    MemoryStream.Seek(DataStart + Length - MemoryStream.Position, SeekOrigin.Current);
-                }
-
-                if (MemoryStream.Position == RecordStart)
-                {
-                    throw new InvalidOperationException
-                    (
-                        $"No progress made while reading NSD file at position {RecordStart}"
-                    );
+                    if (Stream.CanSeek)
+                    {
+                        Stream.Seek(Length, SeekOrigin.Current);
+                    }
+                    else
+                    {
+                        byte[] Discard = new byte[Math.Min(Length, 81920)];
+                        long Remaining = Length;
+                        while (Remaining > 0)
+                        {
+                            int Read = Stream.Read(Discard, 0, (int)Math.Min(Remaining, Discard.Length));
+                            if (Read == 0) throw new EndOfStreamException();
+                            Remaining -= Read;
+                        }
+                    }
                 }
             }
         }
     }
-}
+    }
