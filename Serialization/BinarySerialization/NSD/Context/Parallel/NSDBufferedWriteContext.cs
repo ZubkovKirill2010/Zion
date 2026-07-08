@@ -1,11 +1,11 @@
 ﻿namespace Zion.Serialization.NSD
 {
-    public sealed class NSDParallelWriteContext : NSDWriteContext
+    public sealed class NSDBufferedWriteContext : NSDWriteContext
     {
         private readonly MemoryStream Buffer;
         private readonly BinaryWriter BufferWriter;
 
-        public NSDParallelWriteContext(Stream Stream) : base(Stream)
+        public NSDBufferedWriteContext(Stream Stream) : base(Stream)
         {
             Buffer = new MemoryStream();
             BufferWriter = new BinaryWriter(Buffer);
@@ -14,14 +14,14 @@
 
         protected override void WritePrimitiveSafe<T>(T Value)
         {
-            Write(() => Value.Write(BufferWriter));
+            Write(() => Value.Write(Writer));
         }
 
         protected override void WriteSafe<T>(T Value)
         {
             void WriteValue()
             {
-                using NSDParallelWriteContext Context = new NSDParallelWriteContext(Buffer);
+                using NSDBufferedWriteContext Context = new NSDBufferedWriteContext(Buffer);
                 Value.Write(Context);
             }
 
@@ -72,8 +72,6 @@
             Buffer.Position = StartPosition;
             BufferWriter.Write((uint)Size);
             Buffer.Position = FinalPosition;
-
-            FlushBuffer();
         }
 
         private void FlushBuffer()
