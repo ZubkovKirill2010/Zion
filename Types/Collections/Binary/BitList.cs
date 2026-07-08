@@ -122,10 +122,7 @@ namespace Zion
 
         public void Insert(int Index, bool Item)
         {
-            if (Index < 0 || Index > Count)
-            {
-                throw new ArgumentOutOfRangeException($"Index(={Index}) out of range [0..Count]");
-            }
+            ArgumentOutOfRangeException.ThrowIfBeyond(Index, Count);
 
             EnsureCapacity(++Count);
 
@@ -232,7 +229,7 @@ namespace Zion
         public void CopyTo(bool[] Array, int ArrayIndex)
         {
             ArgumentOutOfRangeException.ThrowIfWithout(ArrayIndex, Array);
-            ArgumentOutOfRangeException.ThrowIf(Count > Array.Length - ArrayIndex, "BitList.Count > Array.Length - ArrayIndex");
+            ArgumentOutOfRangeException.ThrowIfBeyond(Count, Array.Length - ArrayIndex);
 
             foreach (bool Item in this)
             {

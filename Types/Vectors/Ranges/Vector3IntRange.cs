@@ -14,7 +14,7 @@ namespace Zion.Vectors
 
         public Vector3IntRange(Vector3Int Start, Vector3Int End)
         {
-            ArgumentOutOfRangeException.ThrowIf(!(Start < End), $"(Start={Start}) can not >= End(={End})");
+            ArgumentOutOfRangeException.ThrowIf(!(Start < End), nameof(Start), $"(Start={Start}) can not >= End(={End})");
 
             this.Start = Start;
             this.End = End;

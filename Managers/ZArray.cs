@@ -38,7 +38,7 @@
         public static T[] Insert<T>(T[] Array, int Index, T Value)
         {
             ArgumentNullException.ThrowIfNull(Array);
-            ArgumentOutOfRangeException.ThrowIf(Index < 0 || Index > Array.Length, $"Index(={Index} out of range [0..{Array.Length}]");
+            ArgumentOutOfRangeException.ThrowIfBeyond(Index, Array.Length);
 
             T[] Result = new T[Array.Length + 1];
             Result[Index] = Value;

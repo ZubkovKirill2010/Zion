@@ -28,7 +28,7 @@ namespace Zion
         #region Constructors
         public BitMatrix(Vector2Int Size)
         {
-            ArgumentOutOfRangeException.ThrowIf(Vector2Int.IsNegative(Size), $"Size(={Size}) can not be negative");
+            ArgumentOutOfRangeException.ThrowIf(Vector2Int.IsNegative(Size), nameof(Size), $"Size(={Size}) can not be negative");
             
             this.Size = Size;
             this.Length = Size.X * Size.Y;

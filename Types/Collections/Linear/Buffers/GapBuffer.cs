@@ -84,7 +84,7 @@ namespace Zion
 
         public void Insert(int Index, T Item)
         {
-            ArgumentOutOfRangeException.ThrowIfWithout(Index, Length);
+            ArgumentOutOfRangeException.ThrowIfBeyond(Index, Length);
 
             EnsureCapacity(Length + 1);
             MoveGapTo(Index);
@@ -96,7 +96,7 @@ namespace Zion
 
         public void Insert(int Index, IEnumerable<T> Values, int Count)
         {
-            ArgumentOutOfRangeException.ThrowIfWithout(Index, Length);
+            ArgumentOutOfRangeException.ThrowIfBeyond(Index, Length);
             ArgumentNullException.ThrowIfNull(Values);
 
             if (Count == 0)

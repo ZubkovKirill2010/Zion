@@ -72,7 +72,11 @@ namespace Zion
 
         public static RGBColor operator *(RGBColor A, float B)
         {
-            return new RGBColor((byte)(A.R * B), (byte)(A.G * B), (byte)(A.B * B));
+            return new RGBColor
+            (
+                (byte)Math.Clamp(A.R * B, 0f, 255f),
+                (byte)Math.Clamp(A.G * B, 0f, 255f),
+                (byte)Math.Clamp(A.B * B, 0f, 255f));
         }
 
         public static implicit operator Color(RGBColor Color)

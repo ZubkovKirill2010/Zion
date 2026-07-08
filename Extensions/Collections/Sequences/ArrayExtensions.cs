@@ -20,7 +20,7 @@
             {
                 ArgumentOutOfRangeException.ThrowIfNegative(Start, nameof(Start));
                 ArgumentOutOfRangeException.ThrowIfNegative(Count, nameof(Count));
-                ArgumentOutOfRangeException.ThrowIf(Start + Count >= Array.Length, nameof(Count));
+                ArgumentOutOfRangeException.ThrowIfBeyond(Start + Count, Array.Length);
 
                 foreach (int Index in ZEnumerable.For(Start, Count))
                 {

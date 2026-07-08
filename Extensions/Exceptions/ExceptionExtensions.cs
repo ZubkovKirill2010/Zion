@@ -1,23 +1,31 @@
-﻿using Zion.FileSystem;
-using Zion.Vectors;
+﻿using Zion.Vectors;
 
 namespace Zion
 {
     public static class ExceptionExtensions
     {
-        extension(Exception Exception)
+        extension(ArgumentException)
         {
-            public static void ThrowIf(bool Condition, string Message)
+            public static void ThrowIf(bool Condition, string? Message)
             {
                 if (Condition)
                 {
-                    throw new Exception(Message);
+                    throw new ArgumentException(Message, innerException: null);
                 }
             }
         }
 
         extension(ArgumentOutOfRangeException)
         {
+            public static void ThrowIf(bool Condition, string? Parameter, string? Message)
+            {
+                if (Condition)
+                {
+                    throw new ArgumentException(Parameter, Message, null);
+                }
+            }
+
+
             public static void ThrowIfWithout(int Index, int Min, int Max)
             {
                 if (Index < Min || Index >= Max)
@@ -58,6 +66,14 @@ namespace Zion
                 }
             }
 
+            public static void ThrowIfBeyond(int Index, int Count)
+            {
+                if (Index < 0 || Index > Count)
+                {
+                    throw new ArgumentOutOfRangeException($"Index(={Index}) out of range [0..{Count}]");
+                }
+            }
+
 
             public static void ThrowIfWithout<T>(int x, int y, IMatrix<T> Matrix)
             {
@@ -89,19 +105,10 @@ namespace Zion
         {
             public static void ThrowIfNotExists(string FilePath)
             {
-                FileNotFoundException.ThrowIf
-                (
-                    !File.Exists(FilePath.NotNull()),
-                    $"File '{FilePath}' not exists"
-                );
-            }
-        }
-
-        extension(InvalidFileNameException)
-        {
-            public static void ThrowIfInvalid(string FileName)
-            {
-                InvalidFileNameException.ThrowIf(FilePath.IsInvalidFileName(FileName.NotNull()), $"FileName '{FileName}' is invalid");
+                if (!File.Exists(FilePath.NotNull()))
+                {
+                    throw new FileNotFoundException($"File '{FilePath}' not exists");
+                }
             }
         }
     }

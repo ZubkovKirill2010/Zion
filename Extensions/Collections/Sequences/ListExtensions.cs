@@ -134,7 +134,7 @@
             {
                 ArgumentOutOfRangeException.ThrowIfNegative(Start, nameof(Start));
                 ArgumentOutOfRangeException.ThrowIfNegative(Count, nameof(Count));
-                ArgumentOutOfRangeException.ThrowIf(Start + Count > List.Count, nameof(Count));
+                ArgumentOutOfRangeException.ThrowIfBeyond(Start + Count, List.Count);
 
                 foreach (int Index in ZEnumerable.For(Start, Count))
                 {

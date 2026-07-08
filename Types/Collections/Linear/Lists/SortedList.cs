@@ -125,6 +125,7 @@ namespace Zion
         public void Insert(int TargetIndex, T Item)
         {
             ArgumentNullException.ThrowIfNull(Item);
+            ArgumentOutOfRangeException.ThrowIfBeyond(TargetIndex, Count);
 
             if (TargetIndex < 0 || TargetIndex > Count)
             {
