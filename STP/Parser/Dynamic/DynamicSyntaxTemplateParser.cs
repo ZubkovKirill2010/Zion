@@ -29,9 +29,11 @@
         #endregion
 
         #region Data
-        public ParsingResult<Node> Result { get; private set; }
-
-        private ITokenContainer<TPointer> TokenContainer;
+        public ITokenContainer<TPointer> TokenContainer
+        {
+            private get;
+            init => field = value.NotNull();
+        } = new RelativeTokenContainer<TPointer>();
 
         #endregion
 
@@ -55,7 +57,7 @@
 
         }
 
-        
+
         public void Change(TextChange<TPointer> Change)
         {
 

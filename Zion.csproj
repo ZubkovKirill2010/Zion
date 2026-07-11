@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
@@ -23,6 +23,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="STP\Dynamic\Tokens\Container\Base\" />
+    <Folder Include="Extensions\Collections\Linear\" />
+    <Folder Include="Extensions\Collections\Dictionaries\" />
+    <Folder Include="Extensions\Collections\Buffers\" />
     <Folder Include="STP\Parser\Static\" />
     <Folder Include="STP\Parser\Dynamic\" />
     <Folder Include="STP\Semantic\Data\" />

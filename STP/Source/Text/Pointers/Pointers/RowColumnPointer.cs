@@ -4,54 +4,33 @@ namespace Zion.STP.Dynamic
 {
     public sealed class RowColumnPointer : TextPointer<RowColumnPointer>
     {
-        public int Row
-        {
-            get;
-            set
-            {
-                ArgumentOutOfRangeException.ThrowIfNegative(value);
-                field = value;
-            }
-        }
-        public int Column
-        {
-            get;
-            set
-            {
-                ArgumentOutOfRangeException.ThrowIfNegative(value);
-                field = value;
-            }
-        }
+        #region Data
+        public int Row;
+        public int Column;
 
+        #endregion
 
+        #region Properties
+        public override bool IsValid => Row >= 0 && Column >= 0;
+
+        #endregion
+
+        #region Constructors
         public RowColumnPointer(int Row, int Column)
         {
             this.Row = Row;
             this.Column = Column;
         }
+
         public RowColumnPointer(Vector2Int Position)
             : this(Position.Y, Position.X) { }
 
+        #endregion
 
-        public static bool operator ==(RowColumnPointer A, RowColumnPointer B)
-        {
-            return A.Row == B.Row && A.Column == B.Column;
-        }
-
-        public static bool operator !=(RowColumnPointer A, RowColumnPointer B)
-        {
-            return A.Row != B.Row || A.Column != B.Column;
-        }
-
-
+        #region OverrideMethods
         public override string ToString()
         {
             return $"[{Row}; {Column}]";
-        }
-
-        public override bool Equals(object? Object)
-        {
-            return Object is RowColumnPointer Pointer && this == Pointer;
         }
 
         public override int GetHashCode()
@@ -59,6 +38,11 @@ namespace Zion.STP.Dynamic
             return HashCode.Combine(Row, Column);
         }
 
+
+        public override bool Equals(RowColumnPointer? Other)
+        {
+            return Other is not null && Row == Other.Row && Column == Other.Column;
+        }
 
         public override int CompareTo(RowColumnPointer? Pointer)
         {
@@ -73,5 +57,18 @@ namespace Zion.STP.Dynamic
 
             return Column.CompareTo(Pointer.Column);
         }
+
+
+        public override RowColumnPointer Sum(RowColumnPointer Other)
+        {
+            return new RowColumnPointer(Row + Other.Row, Column + Other.Column);
+        }
+
+        public override RowColumnPointer Subtract(RowColumnPointer Other)
+        {
+            return new RowColumnPointer(Row - Other.Row, Column - Other.Column);
+        }
+
+        #endregion
     }
 }

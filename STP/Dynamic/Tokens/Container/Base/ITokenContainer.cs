@@ -4,12 +4,14 @@
     {
         public int Count { get; }
 
-        public void Add(Token Token);
+        public void Add(Token Token, TPointer Position);
+
+        public void Clear();
 
         public void Overwrite(TPointer Start, int RemovedTokens, IEnumerable<Token> Tokens);
 
         public TPointer GetTokenStart(TPointer Position);
 
-        public IEnumerable<Token> EnumeratorFrom(TPointer Start);
+        public IEnumerable<Token> EnumeratorFrom(TPointer Start, out TPointer TokenStart);
     }
 }

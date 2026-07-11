@@ -31,8 +31,11 @@ namespace Zion.STP
         public override char Current => _Current;
         public override bool IsEnd => _IsEnd;
 
+        public override IntPointer CurrentPosition => new IntPointer(Index);
+
 
         public StringTextSource(string Source) : this(Source, 0) { }
+
         public StringTextSource(string Source, int Start)
         {
             ArgumentOutOfRangeException.ThrowIfNegative(Start);
@@ -47,7 +50,7 @@ namespace Zion.STP
             return new StringTextSource(Source, Position.Position);
         }
 
-        public override TextSource BeginNew()
+        public override StringTextSource BeginNewDocument()
         {
             return new StringTextSource(Source, Index);
         }
