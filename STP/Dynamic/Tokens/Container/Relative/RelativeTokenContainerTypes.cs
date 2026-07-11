@@ -98,7 +98,7 @@ namespace Zion.STP.Dynamic
 
             public IEnumerable<Token> Range(int Start)
             {
-                return Tokens.Range<List<Token>, Token>(Start);
+                return Tokens.Range(Start);
             }
 
 
