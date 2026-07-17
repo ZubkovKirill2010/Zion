@@ -84,6 +84,11 @@ namespace Zion
             return System.Drawing.Color.FromArgb(Color.R, Color.G, Color.B);
         }
 
+        public static implicit operator uint(RGBColor Color)
+        {
+            return (uint)(Color.R << 16 | Color.G << 8 | Color.B);
+        }
+
 
         public override string ToString()
         {
