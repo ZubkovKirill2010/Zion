@@ -7,7 +7,8 @@
             get;
             init
             {
-                field = value > 0 ? value : throw new ArgumentOutOfRangeException($"Node.TokensCount(={TokensCount}) <= 0");
+                ArgumentOutOfRangeException.ThrowIfNegativeOrZero(value);
+                field = value;
             }
         }
 
@@ -24,7 +25,9 @@
             }
         }
 
+
         public event Action<Validation>? StatusChanged;
+
 
         public virtual Symbol? GetSymbol() => null;
 
