@@ -2,24 +2,24 @@
 
 namespace Zion
 {
-    public static class IntExtensions
+    public static class UShortExtensions
     {
-        public static IBinarySerializer<int> _Serializer = new BinarySerializer<int>
+        public static IBinarySerializer<ushort> _Serializer = new BinarySerializer<ushort>
         (
             static (Writer, Value) => Writer.Write(Value),
-            static Reader => Reader.ReadInt32()
+            static Reader => Reader.ReadUInt16()
         );
 
-        extension(int Value)
+        extension(ushort Value)
         {
-            public static IBinarySerializer<int> Serializer => _Serializer;
+            public static IBinarySerializer<ushort> Serializer => _Serializer;
 
 
             /// <summary>
-            /// Gets the state of a specific bit in the integer.
+            /// Gets the state of a specific bit in the unsigned short integer.
             /// </summary>
-            /// <param name="Value">The integer value.</param>
-            /// <param name="Index">The bit position (0-31).</param>
+            /// <param name="Value">The unsigned short integer value.</param>
+            /// <param name="Index">The bit position (0-15).</param>
             /// <returns>True if the bit is set, otherwise false.</returns>
             public bool GetBit(int Index)
             {
@@ -27,21 +27,21 @@ namespace Zion
             }
 
             /// <summary>
-            /// Sets or clears a specific bit in the integer.
+            /// Sets or clears a specific bit in the unsigned short integer.
             /// </summary>
-            /// <param name="Value">The integer value.</param>
-            /// <param name="Index">The bit position (0-31).</param>
+            /// <param name="Value">The unsigned short integer value.</param>
+            /// <param name="Index">The bit position (0-15).</param>
             /// <param name="Bit">True to set the bit, false to clear it.</param>
-            /// <returns>The modified integer value.</returns>
-            public int SetBit(int Index, bool Bit)
+            /// <returns>The modified unsigned short integer value.</returns>
+            public ushort SetBit(int Index, bool Bit)
             {
-                return Bit ? Value | (1 << Index) : Value & ~(1 << Index);
+                return Bit ? (ushort)(Value | (1 << Index)) : (ushort)(Value & ~(1 << Index));
             }
 
 
             public IEnumerable<bool> EnumerateBits()
             {
-                return EnumerateBits(32);
+                return EnumerateBits(16);
             }
 
             public IEnumerable<bool> EnumerateBits(int Count)
@@ -56,9 +56,9 @@ namespace Zion
 
 
             /// <summary>
-            /// Checks if the integer value is even.
+            /// Checks if the unsigned short integer value is even.
             /// </summary>
-            /// <param name="Value">The integer value.</param>
+            /// <param name="Value">The unsigned short integer value.</param>
             /// <returns>True if the value is even, otherwise false.</returns>
             public bool IsEven()
             {
@@ -71,7 +71,7 @@ namespace Zion
                 if (Value == 2) { return true; }
                 if (IsEven(Value)) { return false; }
 
-                int MaxValue = (int)Math.Sqrt(Value);
+                ushort MaxValue = (ushort)Math.Sqrt(Value);
 
                 for (int i = 3; i <= MaxValue; i += 2)
                 {
@@ -82,14 +82,6 @@ namespace Zion
                 }
 
                 return true;
-            }
-
-
-            public bool IsWithin<T>(ICollection<T> Collection)
-            {
-                ArgumentNullException.ThrowIfNull(Collection);
-
-                return Value >= 0 && Value < Collection.Count;
             }
         }
     }

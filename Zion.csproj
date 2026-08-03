@@ -23,6 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Serialization\BinarySerialization\Serializers\Object\" />
     <Folder Include="STP\Parser\Static\" />
     <Folder Include="STP\Parser\Dynamic\" />
     <Folder Include="STP\Semantic\Data\" />

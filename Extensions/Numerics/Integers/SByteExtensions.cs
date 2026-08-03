@@ -2,23 +2,23 @@
 
 namespace Zion
 {
-    public static class ByteExtensions
+    public static class SByteExtensions
     {
-        public static IBinarySerializer<byte> _Serializer = new BinarySerializer<byte>
+        public static IBinarySerializer<sbyte> _Serializer = new BinarySerializer<sbyte>
         (
             static (Writer, Value) => Writer.Write(Value),
-            static Reader => Reader.ReadByte()
+            static Reader => Reader.ReadSByte()
         );
 
-        extension(byte Value)
+        extension(sbyte Value)
         {
-            public static IBinarySerializer<byte> Serializer => _Serializer;
+            public static IBinarySerializer<sbyte> Serializer => _Serializer;
 
 
             /// <summary>
-            /// Gets the state of a specific bit in the byte.
+            /// Gets the state of a specific bit in the sbyte.
             /// </summary>
-            /// <param name="Value">The byte value.</param>
+            /// <param name="Value">The sbyte value.</param>
             /// <param name="Index">The bit position (0-7).</param>
             /// <returns>True if the bit is set, otherwise false.</returns>
             public bool GetBit(int Index)
@@ -27,18 +27,18 @@ namespace Zion
             }
 
             /// <summary>
-            /// Sets or clears a specific bit in the byte.
+            /// Sets or clears a specific bit in the sbyte.
             /// </summary>
-            /// <param name="Value">The byte value.</param>
+            /// <param name="Value">The sbyte value.</param>
             /// <param name="Index">The bit position (0-7).</param>
             /// <param name="Bit">True to set the bit, false to clear it.</param>
-            /// <returns>The modified byte value.</returns>
-            public byte SetBit(int Index, bool Bit)
+            /// <returns>The modified sbyte value.</returns>
+            public sbyte SetBit(int Index, bool Bit)
             {
-                return Bit ? (byte)(Value | (1 << Index)) : (byte)(Value & ~(1 << Index));
+                return Bit ? (sbyte)(Value | (sbyte)(1 << Index)) : (sbyte)(Value & ~(1 << Index));
             }
 
-            
+
             public IEnumerable<bool> EnumerateBits()
             {
                 yield return (Value & 0b0000_0001) != 0;
@@ -63,9 +63,9 @@ namespace Zion
 
 
             /// <summary>
-            /// Checks if the byte value is even.
+            /// Checks if the sbyte value is even.
             /// </summary>
-            /// <param name="Value">The byte value.</param>
+            /// <param name="Value">The sbyte value.</param>
             /// <returns>True if the value is even, otherwise false.</returns>
             public bool IsEven()
             {
@@ -78,7 +78,7 @@ namespace Zion
                 if (Value == 2) { return true; }
                 if (IsEven(Value)) { return false; }
 
-                byte MaxValue = (byte)Math.Sqrt(Value);
+                sbyte MaxValue = (sbyte)Math.Sqrt(Value);
 
                 for (int i = 3; i <= MaxValue; i += 2)
                 {

@@ -92,6 +92,77 @@
                     BinarySerializer.WriterNotFound<T>();
                 }
             }
+
+
+            public void WriteCollection(ICollection<bool> Collection)
+            {
+                WriteCollection(Writer, Collection, bool.Serializer);
+            }
+
+            public void WriteCollection(ICollection<byte> Collection)
+            {
+                WriteCollection(Writer, Collection, byte.Serializer);
+            }
+
+            public void WriteCollection(ICollection<sbyte> Collection)
+            {
+                WriteCollection(Writer, Collection, sbyte.Serializer);
+            }
+
+            public void WriteCollection(ICollection<char> Collection)
+            {
+                WriteCollection(Writer, Collection, char.Serializer);
+            }
+
+            public void WriteCollection(ICollection<decimal> Collection)
+            {
+                WriteCollection(Writer, Collection, decimal.Serializer);
+            }
+
+            public void WriteCollection(ICollection<double> Collection)
+            {
+                WriteCollection(Writer, Collection, double.Serializer);
+            }
+
+            public void WriteCollection(ICollection<float> Collection)
+            {
+                WriteCollection(Writer, Collection, float.Serializer);
+            }
+
+            public void WriteCollection(ICollection<int> Collection)
+            {
+                WriteCollection(Writer, Collection, int.Serializer);
+            }
+
+            public void WriteCollection(ICollection<uint> Collection)
+            {
+                WriteCollection(Writer, Collection, uint.Serializer);
+            }
+
+            public void WriteCollection(ICollection<long> Collection)
+            {
+                WriteCollection(Writer, Collection, long.Serializer);
+            }
+
+            public void WriteCollection(ICollection<ulong> Collection)
+            {
+                WriteCollection(Writer, Collection, ulong.Serializer);
+            }
+
+            public void WriteCollection(ICollection<short> Collection)
+            {
+                WriteCollection(Writer, Collection, short.Serializer);
+            }
+
+            public void WriteCollection(ICollection<ushort> Collection)
+            {
+                WriteCollection(Writer, Collection, ushort.Serializer);
+            }
+
+            public void WriteCollection(ICollection<string> Collection)
+            {
+                WriteCollection(Writer, Collection, string.Serializer);
+            }
         }
     }
 }
