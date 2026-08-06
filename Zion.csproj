@@ -8,11 +8,11 @@
 
   <ItemGroup>
     <Compile Remove="MathExpressions\**" />
-    <Compile Remove="Serialization\BinarySerialization\NSD\Serializer\File\**" />
+    <Compile Remove="Serialization\BinarySerialization\NSD\**" />
     <EmbeddedResource Remove="MathExpressions\**" />
-    <EmbeddedResource Remove="Serialization\BinarySerialization\NSD\Serializer\File\**" />
+    <EmbeddedResource Remove="Serialization\BinarySerialization\NSD\**" />
     <None Remove="MathExpressions\**" />
-    <None Remove="Serialization\BinarySerialization\NSD\Serializer\File\**" />
+    <None Remove="Serialization\BinarySerialization\NSD\**" />
   </ItemGroup>
 
   <ItemGroup>
