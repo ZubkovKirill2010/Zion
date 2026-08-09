@@ -4,6 +4,15 @@
     {
         private readonly Dictionary<string, DataPosition> Data;
 
+        private List<(string, DataPosition)>? Page { get; init; }
+        public bool PendingData
+        {
+            get  => Page is not null;
+            init => Page = value ? new(32) : null;
+        }
+
+        public int Count => Data.Count;
+
 
         public DataRegistry() : this(16) { }
 
@@ -16,6 +25,12 @@
         private DataRegistry(Dictionary<string, DataPosition> Data)
         {
             this.Data = Data.NotNull();
+        }
+
+
+        public void ResetPage()
+        {
+            Page?.Clear();
         }
 
 
