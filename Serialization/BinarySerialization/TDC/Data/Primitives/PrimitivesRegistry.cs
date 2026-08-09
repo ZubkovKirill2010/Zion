@@ -2,6 +2,8 @@
 {
     public sealed class PrimitivesRegistry : IBinarySerializable<PrimitivesRegistry>
     {
+        private const int SimplePrimitiveCount = 64;
+
         private readonly List<PrimitiveFormat> Data;
 
         public int Count => Data.Count;
@@ -25,8 +27,11 @@
         {
             get
             {
-                int Index = Id;
-                ArgumentOutOfRangeException.ThrowIfWithout(Index, Count);
+                int Index = Id - SimplePrimitiveCount;
+                if (Index < 0 || Index >= Count)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(Id), $"Index out of range [{SimplePrimitiveCount}..{Count - SimplePrimitiveCount})");
+                }
                 return Data[Index];
             }
         }

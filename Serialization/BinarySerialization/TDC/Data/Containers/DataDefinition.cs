@@ -12,7 +12,7 @@
         }
 
 
-        public DataDefinition New<T>(TypeIdTable TypeIdTable, ushort Id)
+        public DataDefinition New<T>(TypeIdRegistry TypeIdTable, ushort Id)
         {
             return new DataDefinition
             (

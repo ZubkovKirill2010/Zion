@@ -1,19 +1,23 @@
 ﻿namespace Zion.Serialization.TDC
 {
-    public class TDCWriter : IDisposable, IAsyncDisposable
+    public class TDCReader : IDisposable, IAsyncDisposable
     {
         #region Data
         private readonly Stream Stream;
 
+        private readonly TypeRegistry       TypeRegistry = new();
+        private readonly PrimitivesRegistry Primitives   = new();
+        private readonly ContainersRegistry Containers   = new();
+        private readonly DataRegistry       DataRegistry = new();
         #endregion
 
         #region Constructors
-        public TDCWriter(Stream Stream)
+        public TDCReader(Stream Stream)
         {
             ArgumentNullException.ThrowIfNull(Stream);
-            if (!Stream.CanWrite)
+            if (!Stream.CanRead)
             {
-                throw new ArgumentException("Stream can not write", nameof(Stream));
+                throw new ArgumentException("Stream can not read", nameof(Stream));
             }
 
             this.Stream = Stream;
@@ -22,11 +26,10 @@
         #endregion
 
         #region PublicMethods
-        public void Write<T>(T Value)
-        {
-            ArgumentNullException.ThrowIfNull(Value);
 
-        }
+        #endregion
+
+        #region PrivateMethods
 
         #endregion
 

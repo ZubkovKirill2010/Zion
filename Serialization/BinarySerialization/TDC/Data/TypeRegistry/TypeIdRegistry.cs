@@ -1,7 +1,7 @@
 ﻿namespace Zion.Serialization.TDC
 {
     //Type -> Id
-    public sealed class TypeIdTable
+    public sealed class TypeIdRegistry
     {
         private readonly Dictionary<Type, ushort> Data;
         private ushort LastId;

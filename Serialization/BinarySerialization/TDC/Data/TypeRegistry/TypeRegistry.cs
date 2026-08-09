@@ -1,7 +1,7 @@
 ﻿namespace Zion.Serialization.TDC
 {
     //Id -> Type
-    public sealed class TypeTable
+    public sealed class TypeRegistry
     {
         private readonly List<Type> Data;
     }
