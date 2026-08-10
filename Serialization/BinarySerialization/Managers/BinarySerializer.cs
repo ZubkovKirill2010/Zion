@@ -25,6 +25,8 @@ namespace Zion.Serialization
             AddSerializer(short.Serializer);
             AddSerializer(ushort.Serializer);
             AddSerializer(string.Serializer);
+            AddSerializer(Index.Serializer);
+            AddSerializer(Range.Serializer);
         }
 
 

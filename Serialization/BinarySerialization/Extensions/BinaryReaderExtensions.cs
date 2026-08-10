@@ -63,6 +63,21 @@
                 return Result;
             }
 
+            public Index ReadIndex()
+            {
+                int Value = Reader.ReadInt32();
+                return int.IsNegative(Value) ? new Index(-Value, true) : new Index(Value);
+            }
+
+            public Range ReadRange()
+            {
+                return new Range
+                (
+                    Reader.ReadIndex(),
+                    Reader.ReadIndex()
+                );
+            }
+
 
             public TCollection ReadCollection<TCollection, T>() where TCollection : ICollection<T>, new() where T : IBinaryReadable<T>
             {

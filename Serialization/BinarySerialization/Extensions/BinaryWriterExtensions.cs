@@ -53,6 +53,17 @@
                 while (Value > 0);
             }
 
+            public void Write(Index Value)
+            {
+                Writer.Write(Value.IsFromEnd ? -Value.Value : Value.Value);
+            }
+
+            public void Write(Range Value)
+            {
+                Writer.Write(Value.Start);
+                Writer.Write(Value.End);
+            }
+
 
             public void WriteCollection<T>(ICollection<T> Collection) where T : IBinaryWritable
             {
