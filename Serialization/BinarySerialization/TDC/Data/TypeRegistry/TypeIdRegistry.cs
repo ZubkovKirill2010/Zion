@@ -30,5 +30,16 @@
             Data[Type] = Id;
             return Id;
         }
+
+
+        public void Write(BinaryWriter Writer)
+        {
+
+        }
+
+        public void Read(BinaryReader Reader)
+        {
+
+        }
     }
 }

@@ -3,28 +3,25 @@
     public abstract class BaseTDCWriter : IDisposable, IAsyncDisposable
     {
         #region Data
-        protected readonly Stream Stream;
-
         protected readonly TypeIdRegistry TypeRegistry;
+        protected readonly MemoryStream Memory;
+        protected readonly BinaryWriter MemoryWriter;
+
         #endregion
 
         #region Constructors
-        public BaseTDCWriter(Stream Stream) : this(Stream, new()) { }
-
-        public BaseTDCWriter(BaseTDCWriter Base) : this(Base.Stream, Base.TypeRegistry) { }
-
-        public BaseTDCWriter(Stream Stream, TypeIdRegistry TypeRegistry)
+        public BaseTDCWriter()
         {
-            ArgumentNullException.ThrowIfNull(Stream);
-            if (!Stream.CanWrite)
-            {
-                throw new ArgumentException("Stream can not write", nameof(Stream));
-            }
+            TypeRegistry = new();
+            Memory = new();
+            MemoryWriter = new(Memory);
+        }
 
-            this.Stream = Stream;
-            this.TypeRegistry = TypeRegistry.NotNull();
-            this.Primitives = Primitives.NotNull();
-            this.Containers = Containers.NotNull();
+        public BaseTDCWriter(BaseTDCWriter Base)
+        {
+            TypeRegistry = Base.TypeRegistry;
+            Memory       = Base.Memory;
+            MemoryWriter = Base.MemoryWriter;
         }
 
         #endregion

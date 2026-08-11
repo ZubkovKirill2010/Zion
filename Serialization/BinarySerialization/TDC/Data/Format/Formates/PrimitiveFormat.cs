@@ -1,10 +1,20 @@
 ﻿namespace Zion.Serialization.TDC
 {
+    //TODO
     public readonly struct PrimitiveFormat : IFormat<PrimitiveFormat>
     {
-        public PrimitiveFormat()
+        public PrimitiveFormat(List<ushort> Sequence)
         {
+            
+        }
 
+
+        public ushort this[int Index]
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
         }
 
 

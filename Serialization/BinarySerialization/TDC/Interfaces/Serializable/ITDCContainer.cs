@@ -1,6 +1,6 @@
 ﻿namespace Zion.Serialization.TDC
 {
-    public interface ITDCContainer<T> where T : ITDCContainer<T>
+    public interface ITDCContainer<T>
     {
         public void Write(ContainerTDCWriter Writer);
 

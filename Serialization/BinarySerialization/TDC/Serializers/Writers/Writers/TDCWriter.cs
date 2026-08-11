@@ -2,8 +2,18 @@
 {
     public sealed class TDCWriter : NamedTDCWriter
     {
+        #region Data
+        private readonly Stream Stream;
+
+        #endregion
+
         #region Constructors
-        //public TDCWriter(Stream Stream) : base() { }
+        public TDCWriter(Stream Stream)
+        {
+            ArgumentException.ThrowIf(!Stream.CanWrite, "Stream can not Write");
+
+            this.Stream = Stream;
+        }
 
         #endregion
 

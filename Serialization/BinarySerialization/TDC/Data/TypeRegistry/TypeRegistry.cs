@@ -15,7 +15,7 @@
         }
 
 
-        public void WritePage(BinaryWriter Writer)
+        public void Write(BinaryWriter Writer)
         {
             var Data = this.Data;
             int Count = Data.Count;
@@ -32,7 +32,7 @@
             Writed = Count;
         }
 
-        public void ReadPage(BinaryReader Reader)
+        public void Read(BinaryReader Reader)
         {
             var Data = this.Data;
             int Count = Reader.ReadInt32();

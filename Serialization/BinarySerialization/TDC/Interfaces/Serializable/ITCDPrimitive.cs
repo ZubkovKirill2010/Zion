@@ -1,6 +1,6 @@
 ﻿namespace Zion.Serialization.TDC
 {
-    public interface ITDCPrimitive<T> where T : ITDCPrimitive<T>
+    public interface ITDCPrimitive<T>
     {
         public void Write(PrimitiveTDCWriter Writer);
 

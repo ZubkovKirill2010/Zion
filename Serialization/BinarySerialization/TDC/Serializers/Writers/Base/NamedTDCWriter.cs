@@ -9,18 +9,18 @@ namespace Zion.Serialization.TDC
     {
         #region Data
         protected readonly DataRegistry DataRegistry;
-        protected readonly MemoryStream Memory;
-        protected readonly BinaryWriter MemoryWriter;
 
         #endregion
 
         #region Constructors
-        public NamedTDCWriter(Stream Stream, TypeIdRegistry TypeRegistry)
-            : base(Stream, TypeRegistry)
+        public NamedTDCWriter() : base()
         {
             DataRegistry = new();
-            Memory = new();
-            MemoryWriter = new BinaryWriter(Memory);
+        }
+
+        public NamedTDCWriter(BaseTDCWriter Base) : base(Base)
+        {
+            DataRegistry = new();
         }
 
         #endregion
@@ -165,11 +165,6 @@ namespace Zion.Serialization.TDC
 
         #endregion
 
-        #region AbstractMethods
-        protected abstract void WriteSimplePrimitive<T>(string Key, T Value, Action<BinaryWriter> Write);
-
-        #endregion
-
         #region PrivateMethods
         private void Write<T>(string Key, SimplePrimitive Type, T Value, IBinaryWriter<T> Writer)
         {
@@ -194,7 +189,6 @@ namespace Zion.Serialization.TDC
 
             DataRegistry.Add(Key, new(Start, Length));
         }
-
 
         private void CheckKey(string Key)
         {
