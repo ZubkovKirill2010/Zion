@@ -6,8 +6,6 @@
         private readonly Stream Stream;
 
         private readonly TypeRegistry       TypeRegistry = new();
-        private readonly PrimitivesRegistry Primitives   = new();
-        private readonly ContainersRegistry Containers   = new();
         private readonly DataRegistry       DataRegistry = new();
         #endregion
 

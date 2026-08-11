@@ -1,42 +1,26 @@
 ﻿namespace Zion.Serialization.TDC
 {
-    public sealed class DataRegistry : IBinarySerializable<DataRegistry>
+    public sealed class DataRegistry
     {
         private readonly Dictionary<string, DataPosition> Data;
-
-        private List<(string, DataPosition)>? Page { get; init; }
-        public bool PendingData
-        {
-            get  => Page is not null;
-            init => Page = value ? new(32) : null;
-        }
+        private readonly List<(string, DataPosition)> Page;
 
         public int Count => Data.Count;
 
 
-        public DataRegistry() : this(16) { }
+        public DataRegistry() : this(32) { }
 
         public DataRegistry(int Capacity)
         {
             ArgumentOutOfRangeException.ThrowIfNegative(Capacity);
             Data = new(Capacity);
-        }
-
-        private DataRegistry(Dictionary<string, DataPosition> Data)
-        {
-            this.Data = Data.NotNull();
+            Page = new(Capacity);
         }
 
 
-        public void ResetPage()
+        public bool Contains(string Name)
         {
-            Page?.Clear();
-        }
-
-
-        public bool Contains(string Key)
-        {
-            return Data.ContainsKey(Key);
+            return Data.ContainsKey(Name);
         }
 
         public bool TryGetPosition(string Name, out DataPosition Position)
@@ -44,21 +28,39 @@
             return Data.TryGetValue(Name, out Position);
         }
 
+        
+        public void Add(string Name, DataPosition Position)
+        {
+            if (!Data.TryAdd(Name, Position))
+            {
+                throw new ArgumentException($"Parameter with name '{Name}' already exists");
+            }
+
+            Page?.Add((Name, Position));
+        }
+
 
         public void Write(BinaryWriter Writer)
         {
+            var Data = this.Page;
+
             Writer.Write(Data.Count);
-            foreach (var Item in Data)
+
+            foreach (var Pair in Data)
             {
-                Writer.Write(Item.Key);
-                Writer.Write(Item.Value);
+                Writer.Write(Pair.Item1);
+                Writer.Write(Pair.Item2);
             }
+
+            Data.Clear();
         }
 
-        public static DataRegistry Read(BinaryReader Reader)
+        public void Read(BinaryReader Reader)
         {
+            var Data = this.Data;
             int Count = Reader.ReadInt32();
-            Dictionary<string, DataPosition> Data = new(Count);
+
+            Data.EnsureCapacity(Data.Count + Count);
 
             for (int i = 0; i < Count; i++)
             {
@@ -66,10 +68,8 @@
                 (
                     Reader.ReadString(),
                     Reader.Read<DataPosition>()
-                );
+                );                
             }
-
-            return new(Data);
-        }        
+        }
     }
 }

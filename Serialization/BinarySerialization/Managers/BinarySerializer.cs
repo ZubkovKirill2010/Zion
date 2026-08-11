@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
+using System.Numerics;
 
 namespace Zion.Serialization
 {
@@ -27,6 +28,8 @@ namespace Zion.Serialization
             AddSerializer(string.Serializer);
             AddSerializer(Index.Serializer);
             AddSerializer(Range.Serializer);
+            AddSerializer(Half.Serializer);
+            AddSerializer(BigInteger.Serializer);
         }
 
 

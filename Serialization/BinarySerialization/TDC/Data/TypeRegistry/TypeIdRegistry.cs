@@ -6,6 +6,15 @@
         private readonly Dictionary<Type, ushort> Data;
         private ushort LastId;
 
+
+        public TypeIdRegistry() : this(32) { }
+
+        public TypeIdRegistry(int Capacity)
+        {
+            Data = new(Capacity);
+        }
+
+
         public ushort GetOrAdd<T>()
         {
             return GetOrAdd(typeof(T));

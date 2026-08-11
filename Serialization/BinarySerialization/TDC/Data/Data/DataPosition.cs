@@ -2,30 +2,36 @@
 {
     public readonly struct DataPosition : IBinarySerializable<DataPosition>
     {
-        public readonly long Position;
-        public readonly long Length;
+        public readonly ulong Start;
+        public readonly ulong Length;
 
-        public DataPosition(long Position, long Length)
+        public DataPosition(ulong Start, ulong Length)
         {
-            ArgumentOutOfRangeException.ThrowIfNegative(Position);
-            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(Length);
-            this.Position = Position;
+            this.Start = Start;
             this.Length   = Length;
+        }
+
+        public DataPosition(long Start, long Length)
+        {
+            ArgumentOutOfRangeException.ThrowIfNegative(Start);
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(Length);
+            this.Start  = (ulong)Start;
+            this.Length = (ulong)Length;
         }
 
 
         public void Write(BinaryWriter Writer)
         {
-            Writer.Write(Position);
-            Writer.Write(Length);
+            Writer.WriteVarInt(Start);
+            Writer.WriteVarInt(Length);
         }
 
         public static DataPosition Read(BinaryReader Reader)
         {
             return new DataPosition
             (
-                Reader.ReadInt64(),
-                Reader.ReadInt64()
+                Reader.ReadVarInt(),
+                Reader.ReadVarInt()
             );
         }
     }

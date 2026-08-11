@@ -1,9 +1,7 @@
 ﻿namespace Zion.Serialization.TDC
 {
-    public readonly struct PrimitiveFormat : IBinarySerializable<PrimitiveFormat>
+    public readonly struct PrimitiveFormat : IFormat<PrimitiveFormat>
     {
-        //Type sequence
-
         public PrimitiveFormat()
         {
 
@@ -12,12 +10,12 @@
 
         public void Write(BinaryWriter Writer)
         {
-
+            throw new NotImplementedException();
         }
 
         public static PrimitiveFormat Read(BinaryReader Reader)
         {
-            return default!;
+            throw new NotImplementedException();
         }
     }
 }

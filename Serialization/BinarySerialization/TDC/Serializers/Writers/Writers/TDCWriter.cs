@@ -3,7 +3,7 @@
     public sealed class TDCWriter : NamedTDCWriter
     {
         #region Constructors
-        //public MainTDCWriter(Stream Stream) : base(Stream) { }
+        //public TDCWriter(Stream Stream) : base() { }
 
         #endregion
 

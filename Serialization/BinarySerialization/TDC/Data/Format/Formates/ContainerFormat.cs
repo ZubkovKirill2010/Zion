@@ -1,6 +1,6 @@
 ﻿namespace Zion.Serialization.TDC
 {
-    public readonly struct ContainerFormat : IBinarySerializable<ContainerFormat>
+    public readonly struct ContainerFormat : IFormat<ContainerFormat>
     {
         private readonly Dictionary<string, DataDefinition> Data;
 
@@ -12,7 +12,7 @@
             Data = new(Capacity);
         }
 
-        
+
         public bool Contains(string Name)
         {
             return Data.ContainsKey(Name);

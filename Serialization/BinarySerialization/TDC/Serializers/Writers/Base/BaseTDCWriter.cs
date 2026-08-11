@@ -6,16 +6,14 @@
         protected readonly Stream Stream;
 
         protected readonly TypeIdRegistry TypeRegistry;
-        protected readonly PrimitivesRegistry Primitives;
-        protected readonly ContainersRegistry Containers;
         #endregion
 
         #region Constructors
-        public BaseTDCWriter(Stream Stream) : this(Stream, new(), new(), new()) { }
+        public BaseTDCWriter(Stream Stream) : this(Stream, new()) { }
 
-        public BaseTDCWriter(BaseTDCWriter Base) : this(Base.Stream, Base.TypeRegistry, Base.Primitives, Base.Containers) { }
+        public BaseTDCWriter(BaseTDCWriter Base) : this(Base.Stream, Base.TypeRegistry) { }
 
-        public BaseTDCWriter(Stream Stream, TypeIdRegistry TypeRegistry, PrimitivesRegistry Primitives, ContainersRegistry Contaienrs)
+        public BaseTDCWriter(Stream Stream, TypeIdRegistry TypeRegistry)
         {
             ArgumentNullException.ThrowIfNull(Stream);
             if (!Stream.CanWrite)
