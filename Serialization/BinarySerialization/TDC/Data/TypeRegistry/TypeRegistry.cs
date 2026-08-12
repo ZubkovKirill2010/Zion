@@ -1,10 +1,14 @@
-﻿namespace Zion.Serialization.TDC
+﻿using System.Collections;
+
+namespace Zion.Serialization.TDC
 {
     //Id -> Type
-    public sealed class TypeRegistry
+    public sealed class TypeRegistry : IEnumerable<TypeData>
     {
-        private readonly List<Type> Data;
+        private readonly ResizableArray<Type> Data;
         private int Writed;
+
+        public int Count { get; private set; }
 
 
         public TypeRegistry() : this(32) { }
@@ -15,18 +19,19 @@
         }
 
 
+
+
+
         public void Write(BinaryWriter Writer)
         {
-            var Data = this.Data;
-            int Count = Data.Count;
-            int SimplePrimitiveCount = SimplePrimitive.Count;
+            ResizableArray<Type> Data = this.Data;
+            int Count = this.Count;
 
             Writer.Write(Count - Writed);
 
             for (int i = Writed; i < Count; i++)
             {
-                Writer.Write((ushort)(SimplePrimitiveCount + i));
-                Writer.Write(Data[i].FullName.NotNull());
+
             }
 
             Writed = Count;
@@ -34,24 +39,34 @@
 
         public void Read(BinaryReader Reader)
         {
-            var Data = this.Data;
             int Count = Reader.ReadInt32();
-
-            Data.EnsureCapacity(Data.Count + Count);
 
             for (int i = 0; i < Count; i++)
             {
-                Data.Add(ReadType(Reader));
+                ushort TypeId = Reader.ReadUInt16();
+                Type Type   = ReadType(Reader);
+                IFormat Format = Reader.Read(IFormat.Serializer);
+
+                //TODO
             }
         }
 
 
-        private static Type ReadType(BinaryReader Reader)
+        internal static Type ReadType(BinaryReader Reader)
         {
             string TypeName = Reader.ReadString();
             Type? Item = Type.GetType(TypeName);
 
             return Item ?? throw new ArgumentNullException($"Type '{TypeName}' not found"); ;
+        }
+
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        public IEnumerator<TypeData> GetEnumerator()
+        {
+            //TODO
+            throw new NotImplementedException();
         }
     }
 }

@@ -4,6 +4,8 @@
     {
         public readonly int Length;
 
+        public byte FormatId { get; } = 2;
+
 
         public EnumFormat()
         {

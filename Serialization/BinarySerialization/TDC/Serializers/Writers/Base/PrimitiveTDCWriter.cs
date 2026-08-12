@@ -13,6 +13,59 @@ namespace Zion.Serialization.TDC
         #endregion
 
         #region PublicMethods
+        #region All
+        public void Write<T>(T Value)
+        {
+            if (Value is ITDCPrimitive<T> Primitive)
+            {
+                WritePrimitive(Primitive);
+            }
+            else if (Value is ITDCContainer<T> Container)
+            {
+                WriteContainer(Container);
+            }
+            else if (SimplePrimitive.Contains<T>(out SimplePrimitive Type))
+            {
+                WriteSimplePrimitive(Value, Type);
+            }
+            else
+            {
+                throw new InvalidOperationException($"Value ({typeof(T)}) is not ITDCPrimitive, ITDCContainer or simple primitive");
+            }
+        }
+
+        private void WritePrimitive<T>(ITDCPrimitive<T> Primitive)
+        {
+            Type Type = Primitive.GetType();
+            if (TypeRegistry.TryGetInfo(Type, out TypeInfo Info)
+                && Info.Format is PrimitiveFormat Format)
+            {
+                CheckingPrimitiveTDCWriter PrimitiveWriter = new(this, Format);
+                Primitive.Write(PrimitiveWriter);
+                OnWrited(Info.TypeId);
+            }
+            else
+            {
+                RecordPrimitiveTDCWriter PrimitiveWriter = new(this);
+                Primitive.Write(PrimitiveWriter);
+                TypeInfo NewPrimitiveInfo = TypeRegistry.Add(Type, PrimitiveWriter.GetFormat());
+                OnWrited(Info.TypeId);
+            }
+        }
+
+        private void WriteContainer<T>(ITDCContainer<T> Container)
+        {
+            //TODO
+        }
+
+        private void WriteSimplePrimitive<T>(T Value, SimplePrimitive Type)
+        {
+            Write(Type, Value, BinarySerializer.GetWriter<T>().NotNull());
+        }
+
+        #endregion
+
+        #region SimplePrimitives
         public void Write(bool Value)
         {
             Write(SimplePrimitive.Boolean, Value, bool.Serializer);
@@ -137,6 +190,8 @@ namespace Zion.Serialization.TDC
         {
             Write(SimplePrimitive.Vector3Int, Value);
         }
+
+        #endregion
 
         #endregion
 

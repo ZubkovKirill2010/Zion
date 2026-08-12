@@ -3,6 +3,9 @@
     //TODO
     public readonly struct PrimitiveFormat : IFormat<PrimitiveFormat>
     {
+        public byte FormatId { get; } = 0;
+
+
         public PrimitiveFormat(List<ushort> Sequence)
         {
             

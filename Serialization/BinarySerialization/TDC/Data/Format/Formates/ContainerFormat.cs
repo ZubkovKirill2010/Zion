@@ -2,31 +2,21 @@
 {
     public readonly struct ContainerFormat : IFormat<ContainerFormat>
     {
-        private readonly Dictionary<string, DataDefinition> Data;
+        public byte FormatId { get; } = 1;
+
 
         public ContainerFormat() : this(16) { }
 
         public ContainerFormat(int Capacity)
         {
             ArgumentOutOfRangeException.ThrowIfNegative(Capacity);
-            Data = new(Capacity);
+            //TODO
         }
 
 
         public bool Contains(string Name)
         {
-            return Data.ContainsKey(Name);
-        }
-
-
-        public void Add(string Name, ushort TypeId)
-        {
-            Add(Name, new DataDefinition((ushort)Data.Count, TypeId));
-        }
-
-        public void Add(string Name, DataDefinition Definition)
-        {
-            Data.Add(Name.NotNull(), Definition);
+            throw new NotImplementedException();
         }
 
 

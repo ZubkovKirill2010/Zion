@@ -1,9 +1,11 @@
-﻿namespace Zion.Serialization.TDC
+﻿using System.Collections;
+
+namespace Zion.Serialization.TDC
 {
     //Type -> Id
-    public sealed class TypeIdRegistry
+    public sealed class TypeIdRegistry : IEnumerable<TypeData>
     {
-        private readonly Dictionary<Type, ushort> Data;
+        private readonly Dictionary<Type, TypeInfo> Data;
         private ushort LastId;
 
 
@@ -15,20 +17,16 @@
         }
 
 
-        public ushort GetOrAdd<T>()
+        public bool TryGetInfo(Type Type, out TypeInfo Info)
         {
-            return GetOrAdd(typeof(T));
+            return Data.TryGetValue(Type, out Info);
         }
 
-        public ushort GetOrAdd(Type Type)
+        public TypeInfo Add(Type Type, IFormat Format)
         {
-            if (Data.TryGetValue(Type, out ushort Result))
-            {
-                return Result;
-            }
-            ushort Id = ++LastId;
-            Data[Type] = Id;
-            return Id;
+            TypeInfo Info = new TypeInfo(++LastId, Format);
+            Data.Add(Type, Info);
+            return Info;
         }
 
 
@@ -39,7 +37,24 @@
 
         public void Read(BinaryReader Reader)
         {
+            int Count = Reader.ReadInt32();
 
+            for (int i = 0; i < Count; i++)
+            {
+                ushort TypeId = Reader.ReadUInt16();
+                Type Type   = TypeRegistry.ReadType(Reader);
+                IFormat Format = Reader.Read(IFormat.Serializer);
+
+                //TODO
+            }
+        }
+
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        public IEnumerator<TypeData> GetEnumerator()
+        {
+            return Data.Select(static Pair => new TypeData(Pair)).GetEnumerator();
         }
     }
 }

@@ -29,12 +29,12 @@
         #region IDisposable
         public void Dispose()
         {
-            Stream.Dispose();
+            Memory.Dispose();
         }
 
         public async ValueTask DisposeAsync()
         {
-            await Stream.DisposeAsync();
+            await Memory.DisposeAsync();
         }
 
         #endregion

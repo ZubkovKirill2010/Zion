@@ -1,4 +1,9 @@
-﻿namespace Zion.Serialization.TDC
+﻿using System.Numerics;
+using Zion.Vectors;
+using Vector2 = Zion.Vectors.Vector2;
+using Vector3 = Zion.Vectors.Vector3;
+
+namespace Zion.Serialization.TDC
 {
     public enum SimplePrimitive : byte
     {
@@ -34,10 +39,45 @@
     internal static class PrimitiveTypesExtensions
     {
         private const int _Count = 64;
+        private static readonly Dictionary<Type, SimplePrimitive> PrimitivesInfo = new(24)
+        {
+            { typeof(bool), SimplePrimitive.Boolean },
+            { typeof(byte), SimplePrimitive.Byte },
+            { typeof(sbyte), SimplePrimitive.SByte },
+            { typeof(char), SimplePrimitive.Char },
+            { typeof(decimal), SimplePrimitive.Decimal },
+            { typeof(double), SimplePrimitive.Double },
+            { typeof(float), SimplePrimitive.Single },
+            { typeof(int), SimplePrimitive.Int32 },
+            { typeof(uint), SimplePrimitive.UInt32 },
+            { typeof(long), SimplePrimitive.Int64 },
+            { typeof(ulong), SimplePrimitive.UInt64 },
+            { typeof(short), SimplePrimitive.Int16 },
+            { typeof(ushort), SimplePrimitive.UInt16 },
+            { typeof(string), SimplePrimitive.String },
+
+            { typeof(Half), SimplePrimitive.Half },
+            { typeof(Index), SimplePrimitive.Index },
+            { typeof(Range), SimplePrimitive.Range },
+            { typeof(BigInteger), SimplePrimitive.BigInteger },
+
+            { typeof(RGBColor), SimplePrimitive.RGB },
+            { typeof(RGBAColor), SimplePrimitive.RGBA },
+
+            { typeof(Vector2), SimplePrimitive.Vector2 },
+            { typeof(Vector2Int), SimplePrimitive.Vector2Int },
+            { typeof(Vector3), SimplePrimitive.Vector3 },
+            { typeof(Vector3Int), SimplePrimitive.Vector3Int }
+        };
 
         extension(SimplePrimitive)
         {
             internal static int Count => _Count;
+
+            public static bool Contains<T>(out SimplePrimitive Type)
+            {
+                return PrimitivesInfo.TryGetValue(typeof(T), out Type);
+            }
         }
     }
 }
