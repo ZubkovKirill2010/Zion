@@ -3,6 +3,8 @@
     public sealed class ContainerTDCWriter : NamedTDCWriter
     {
         #region Constructors
+        public ContainerTDCWriter(BaseTDCWriter Base)
+            : base(Base) { }
 
         #endregion
 
@@ -11,7 +13,7 @@
         #endregion
 
         #region OverrideMethods
-        protected override void OnWrited()
+        protected override void OnWrited(string Key, ushort TypeId)
         {
             
         }

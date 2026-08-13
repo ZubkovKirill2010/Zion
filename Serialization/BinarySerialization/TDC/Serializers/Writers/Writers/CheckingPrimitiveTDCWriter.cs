@@ -29,11 +29,6 @@
             Current++;
         }
 
-        protected override PrimitiveFormat GetFormat()
-        {
-            return Format;
-        }
-
         #endregion
     }
 }

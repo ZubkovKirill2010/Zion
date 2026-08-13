@@ -34,7 +34,7 @@ namespace Zion.Serialization.TDC
 
         public void Write<T>(string Key, T Value) where T : ITDCPrimitive<T>
         {
-            Write(Key, Value, Value => WritePrimitive(Value, out _));
+            Write(Key, Value, WritePrimitive);
         }
 
         public void Write<T>(string Key, ITDCContainer<T> Value)
@@ -42,11 +42,11 @@ namespace Zion.Serialization.TDC
             CheckKey(Key);
 
             long Start = Memory.Position;
-            WriteContainer(Value);
+            WriteContainer(Value, out ushort TypeId);
             long Length = Memory.Position - Start;
 
             DataRegistry.Add(Key, new(Start, Length));
-            OnWrited();
+            OnWrited(Key, TypeId);
         }
 
 
@@ -176,21 +176,21 @@ namespace Zion.Serialization.TDC
         #endregion
 
         #region AbstractMethods
-        protected abstract void OnWrited();
+        protected abstract void OnWrited(string Key, ushort TypeId);
 
         #endregion
 
         #region PrivateMethods
-        private void Write<T>(string Key, T Value, Action<T> WriteAction)
+        private void Write<T>(string Key, T Value, WriteAction<T> WriteAction)
         {
             CheckKey(Key);
 
             long Start = Memory.Position;
-            WriteAction(Value);
+            WriteAction(Value, out ushort TypeId);
             long Length = Memory.Position - Start;
 
             DataRegistry.Add(Key, new(Start, Length));
-            OnWrited();
+            OnWrited(Key, TypeId);
         }
 
         private void CheckKey(string Key)

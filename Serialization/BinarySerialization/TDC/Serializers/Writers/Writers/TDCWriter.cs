@@ -55,7 +55,7 @@
         #endregion
 
         #region OverrideMethods
-        protected override void OnWrited()
+        protected override void OnWrited(string Key, ushort TypeId)
         {
             if (Memory.Length >= Options.MinPageSize)
             {

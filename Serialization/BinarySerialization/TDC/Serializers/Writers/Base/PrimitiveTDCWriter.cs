@@ -13,160 +13,128 @@ namespace Zion.Serialization.TDC
         #endregion
 
         #region PublicMethods
-        #region All
-        public void Write<T>(T Value)
-        {
-            if (Value is ITDCPrimitive<T> Primitive)
-            {
-                WritePrimitive(Primitive, out ushort TypeId);
-                OnWrited(TypeId);
-            }
-            else if (Value is ITDCContainer<T> Container)
-            {
-                WriteContainer(Container);
-            }
-            else if (SimplePrimitive.Contains<T>(out SimplePrimitive Type))
-            {
-                WriteSimplePrimitive(Value, Type);
-            }
-            else
-            {
-                throw new InvalidOperationException($"Value ({typeof(T)}) is not ITDCPrimitive, ITDCContainer or simple primitive");
-            }
-        }
-
-        private void WriteSimplePrimitive<T>(T Value, SimplePrimitive Type)
-        {
-            Write(Type, Value, BinarySerializer.GetWriter<T>().NotNull());
-        }
-
-        #endregion
-
-        #region SimplePrimitives
         public void Write(bool Value)
         {
-            WriteSimplePrimitive(Value);
+            Write(Value, WriteSimplePrimitive);
         }
 
         public void Write(byte Value)
         {
-            Write(SimplePrimitive.Byte, Value, byte.Serializer);
+            Write(Value, WriteSimplePrimitive);
         }
 
         public void Write(sbyte Value)
         {
-            Write(SimplePrimitive.SByte, Value, sbyte.Serializer);
+            Write(Value, WriteSimplePrimitive);
         }
 
         public void Write(char Value)
         {
-            Write(SimplePrimitive.Char, Value, char.Serializer);
+            Write(Value, WriteSimplePrimitive);
         }
 
         public void Write(decimal Value)
         {
-            Write(SimplePrimitive.Decimal, Value, decimal.Serializer);
+            Write(Value, WriteSimplePrimitive);
         }
 
         public void Write(double Value)
         {
-            Write(SimplePrimitive.Double, Value, double.Serializer);
+            Write(Value, WriteSimplePrimitive);
         }
 
         public void Write(float Value)
         {
-            Write(SimplePrimitive.Single, Value, float.Serializer);
+            Write(Value, WriteSimplePrimitive);
         }
 
         public void Write(int Value)
         {
-            Write(SimplePrimitive.Int32, Value, int.Serializer);
+            Write(Value, WriteSimplePrimitive);
         }
 
         public void Write(uint Value)
         {
-            Write(SimplePrimitive.UInt32, Value, uint.Serializer);
+            Write(Value, WriteSimplePrimitive);
         }
 
         public void Write(long Value)
         {
-            Write(SimplePrimitive.Int64, Value, long.Serializer);
+            Write(Value, WriteSimplePrimitive);
         }
 
         public void Write(ulong Value)
         {
-            Write(SimplePrimitive.UInt64, Value, ulong.Serializer);
+            Write(Value, WriteSimplePrimitive);
         }
 
         public void Write(short Value)
         {
-            Write(SimplePrimitive.Int16, Value, short.Serializer);
+            Write(Value, WriteSimplePrimitive);
         }
 
         public void Write(ushort Value)
         {
-            Write(SimplePrimitive.UInt16, Value, ushort.Serializer);
+            Write(Value, WriteSimplePrimitive);
         }
 
         public void Write(string Value)
         {
-            Write(SimplePrimitive.String, Value, string.Serializer);
+            Write(Value, WriteSimplePrimitive);
         }
 
 
         public void Write(Half Value)
         {
-            Write(SimplePrimitive.Half, Value, Half.Serializer);
+            Write(Value, WriteSimplePrimitive);
         }
 
         public void Write(Index Value)
         {
-            Write(SimplePrimitive.Index, Value, Index.Serializer);
+            Write(Value, WriteSimplePrimitive);
         }
 
         public void Write(Range Value)
         {
-            Write(SimplePrimitive.Range, Value, Range.Serializer);
+            Write(Value, WriteSimplePrimitive);
         }
 
         public void Write(BigInteger Value)
         {
-            Write(SimplePrimitive.BigInteger, Value, BigInteger.Serializer);
+            Write(Value, WriteSimplePrimitive);
         }
 
 
         public void Write(RGBColor Value)
         {
-            Write(SimplePrimitive.RGB, Value);
+            Write(Value, WriteSimplePrimitive);
         }
 
         public void Write(RGBAColor Value)
         {
-            Write(SimplePrimitive.RGBA, Value);
+            Write(Value, WriteSimplePrimitive);
         }
 
 
         public void Write(Vector2 Value)
         {
-            Write(SimplePrimitive.Vector2, Value);
+            Write(Value, WriteSimplePrimitive);
         }
 
         public void Write(Vector2Int Value)
         {
-            Write(SimplePrimitive.Vector2Int, Value);
+            Write(Value, WriteSimplePrimitive);
         }
 
         public void Write(Vector3 Value)
         {
-            Write(SimplePrimitive.Vector3, Value);
+            Write(Value, WriteSimplePrimitive);
         }
 
         public void Write(Vector3Int Value)
         {
-            Write(SimplePrimitive.Vector3Int, Value);
+            Write(Value, WriteSimplePrimitive);
         }
-
-        #endregion
 
         #endregion
 
@@ -176,18 +144,10 @@ namespace Zion.Serialization.TDC
         #endregion
 
         #region PrivateMethods
-        private void Write<T>(SimplePrimitive Type, T Value, IBinaryWriter<T> Writer)
+        private void Write<T>(T Value, WriteAction<T> WriteAction)
         {
-            ushort TypeId = (ushort)Type;
+            WriteAction(Value, out ushort TypeId);
             OnWrited(TypeId);
-            Writer.Write(MemoryWriter, Value);
-        }
-
-        private void Write<T>(SimplePrimitive Type, T Value) where T : IBinaryWritable
-        {
-            ushort TypeId = (ushort)Type;
-            OnWrited(TypeId);
-            MemoryWriter.Write(Value);
         }
 
         #endregion
