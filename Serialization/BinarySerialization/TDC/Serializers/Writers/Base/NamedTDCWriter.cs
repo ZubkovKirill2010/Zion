@@ -32,162 +32,165 @@ namespace Zion.Serialization.TDC
         }
 
 
+        public void Write<T>(string Key, T Value) where T : ITDCPrimitive<T>
+        {
+            Write(Key, Value, Value => WritePrimitive(Value, out _));
+        }
+
+        public void Write<T>(string Key, ITDCContainer<T> Value)
+        {
+            CheckKey(Key);
+
+            long Start = Memory.Position;
+            WriteContainer(Value);
+            long Length = Memory.Position - Start;
+
+            DataRegistry.Add(Key, new(Start, Length));
+            OnWrited();
+        }
+
+
         public void Write(string Key, bool Value)
         {
-            Write(Key, SimplePrimitive.Boolean, Value, bool.Serializer);
+            Write(Key, Value, WriteSimplePrimitive);
         }
 
         public void Write(string Key, byte Value)
         {
-            Write(Key, SimplePrimitive.Byte, Value, byte.Serializer);
+            Write(Key, Value, WriteSimplePrimitive);
         }
 
         public void Write(string Key, sbyte Value)
         {
-            Write(Key, SimplePrimitive.SByte, Value, sbyte.Serializer);
+            Write(Key, Value, WriteSimplePrimitive);
         }
 
         public void Write(string Key, char Value)
         {
-            Write(Key, SimplePrimitive.Char, Value, char.Serializer);
+            Write(Key, Value, WriteSimplePrimitive);
         }
 
         public void Write(string Key, decimal Value)
         {
-            Write(Key, SimplePrimitive.Decimal, Value, decimal.Serializer);
+            Write(Key, Value, WriteSimplePrimitive);
         }
 
         public void Write(string Key, double Value)
         {
-            Write(Key, SimplePrimitive.Double, Value, double.Serializer);
+            Write(Key, Value, WriteSimplePrimitive);
         }
 
         public void Write(string Key, float Value)
         {
-            Write(Key, SimplePrimitive.Single, Value, float.Serializer);
+            Write(Key, Value, WriteSimplePrimitive);
         }
 
         public void Write(string Key, int Value)
         {
-            Write(Key, SimplePrimitive.Int32, Value, int.Serializer);
+            Write(Key, Value, WriteSimplePrimitive);
         }
 
         public void Write(string Key, uint Value)
         {
-            Write(Key, SimplePrimitive.UInt32, Value, uint.Serializer);
+            Write(Key, Value, WriteSimplePrimitive);
         }
 
         public void Write(string Key, long Value)
         {
-            Write(Key, SimplePrimitive.Int64, Value, long.Serializer);
+            Write(Key, Value, WriteSimplePrimitive);
         }
 
         public void Write(string Key, ulong Value)
         {
-            Write(Key, SimplePrimitive.UInt64, Value, ulong.Serializer);
+            Write(Key, Value, WriteSimplePrimitive);
         }
 
         public void Write(string Key, short Value)
         {
-            Write(Key, SimplePrimitive.Int16, Value, short.Serializer);
+            Write(Key, Value, WriteSimplePrimitive);
         }
 
         public void Write(string Key, ushort Value)
         {
-            Write(Key, SimplePrimitive.UInt16, Value, ushort.Serializer);
+            Write(Key, Value, WriteSimplePrimitive);
         }
 
         public void Write(string Key, string Value)
         {
-            Write(Key, SimplePrimitive.String, Value, string.Serializer);
+            Write(Key, Value, WriteSimplePrimitive);
         }
 
 
         public void Write(string Key, Half Value)
         {
-            Write(Key, SimplePrimitive.Half, Value, Half.Serializer);
+            Write(Key, Value, WriteSimplePrimitive);
         }
-
 
         public void Write(string Key, Index Value)
         {
-            Write(Key, SimplePrimitive.Index, Value, Index.Serializer);
+            Write(Key, Value, WriteSimplePrimitive);
         }
 
         public void Write(string Key, Range Value)
         {
-            Write(Key, SimplePrimitive.Range, Value, Range.Serializer);
+            Write(Key, Value, WriteSimplePrimitive);
         }
-
 
         public void Write(string Key, BigInteger Value)
         {
-            Write(Key, SimplePrimitive.BigInteger, Value, BigInteger.Serializer);
+            Write(Key, Value, WriteSimplePrimitive);
         }
 
 
         public void Write(string Key, RGBColor Value)
         {
-            Write(Key, SimplePrimitive.RGB, Value);
+            Write(Key, Value, WriteSimplePrimitive);
         }
 
         public void Write(string Key, RGBAColor Value)
         {
-            Write(Key, SimplePrimitive.RGBA, Value);
+            Write(Key, Value, WriteSimplePrimitive);
         }
 
 
         public void Write(string Key, Vector2 Value)
         {
-            Write(Key, SimplePrimitive.Vector2, Value);
+            Write(Key, Value, WriteSimplePrimitive);
         }
 
         public void Write(string Key, Vector2Int Value)
         {
-            Write(Key, SimplePrimitive.Vector2Int, Value);
+            Write(Key, Value, WriteSimplePrimitive);
         }
 
         public void Write(string Key, Vector3 Value)
         {
-            Write(Key, SimplePrimitive.Vector3, Value);
+            Write(Key, Value, WriteSimplePrimitive);
         }
 
         public void Write(string Key, Vector3Int Value)
         {
-            Write(Key, SimplePrimitive.Vector3Int, Value);
+            Write(Key, Value, WriteSimplePrimitive);
         }
 
+        #endregion
 
-
-        public void Write<T>(string Key, ITDCPrimitive<T> Value) where T : ITDCPrimitive<T> { }
-
-        public void Write<T>(string Key, ITDCContainer<T> Value) where T : ITDCContainer<T> { }
+        #region AbstractMethods
+        protected abstract void OnWrited();
 
         #endregion
 
         #region PrivateMethods
-        private void Write<T>(string Key, SimplePrimitive Type, T Value, IBinaryWriter<T> Writer)
+        private void Write<T>(string Key, T Value, Action<T> WriteAction)
         {
             CheckKey(Key);
 
             long Start = Memory.Position;
-            MemoryWriter.Write((ushort)Type);
-            Writer.Write(MemoryWriter, Value);
+            WriteAction(Value);
             long Length = Memory.Position - Start;
 
             DataRegistry.Add(Key, new(Start, Length));
-        }
-
-        private void Write<T>(string Key, SimplePrimitive Type, T Value) where T : IBinaryWritable
-        {
-            CheckKey(Key);
-
-            long Start = Memory.Position;
-            MemoryWriter.Write((ushort)Type);
-            MemoryWriter.Write(Value);
-            long Length = Memory.Position - Start;
-
-            DataRegistry.Add(Key, new(Start, Length));
+            OnWrited();
         }
 
         private void CheckKey(string Key)

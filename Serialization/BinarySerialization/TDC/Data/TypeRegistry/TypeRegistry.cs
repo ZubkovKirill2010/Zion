@@ -1,14 +1,14 @@
 ﻿using System.Collections;
+using System.ComponentModel;
 
 namespace Zion.Serialization.TDC
 {
     //Id -> Type
     public sealed class TypeRegistry : IEnumerable<TypeData>
     {
-        private readonly ResizableArray<Type> Data;
-        private int Writed;
+        private readonly Dictionary<ushort, (Type, IFormat)> Data;
 
-        public int Count { get; private set; }
+        public int Count => Data.Count;
 
 
         public TypeRegistry() : this(32) { }
@@ -19,45 +19,24 @@ namespace Zion.Serialization.TDC
         }
 
 
-
-
-
-        public void Write(BinaryWriter Writer)
+        public void Add(TypeData Item)
         {
-            ResizableArray<Type> Data = this.Data;
-            int Count = this.Count;
-
-            Writer.Write(Count - Writed);
-
-            for (int i = Writed; i < Count; i++)
-            {
-
-            }
-
-            Writed = Count;
+            //TODO
         }
+
 
         public void Read(BinaryReader Reader)
         {
+            var Data = this.Data;
             int Count = Reader.ReadInt32();
+
+            Data.EnsureCapacity(Data.Count + Count);
 
             for (int i = 0; i < Count; i++)
             {
-                ushort TypeId = Reader.ReadUInt16();
-                Type Type   = ReadType(Reader);
-                IFormat Format = Reader.Read(IFormat.Serializer);
-
-                //TODO
+                TypeData Item = Reader.Read<TypeData>();
+                Add(Item);
             }
-        }
-
-
-        internal static Type ReadType(BinaryReader Reader)
-        {
-            string TypeName = Reader.ReadString();
-            Type? Item = Type.GetType(TypeName);
-
-            return Item ?? throw new ArgumentNullException($"Type '{TypeName}' not found"); ;
         }
 
 

@@ -18,7 +18,8 @@ namespace Zion.Serialization.TDC
         {
             if (Value is ITDCPrimitive<T> Primitive)
             {
-                WritePrimitive(Primitive);
+                WritePrimitive(Primitive, out ushort TypeId);
+                OnWrited(TypeId);
             }
             else if (Value is ITDCContainer<T> Container)
             {
@@ -34,30 +35,6 @@ namespace Zion.Serialization.TDC
             }
         }
 
-        private void WritePrimitive<T>(ITDCPrimitive<T> Primitive)
-        {
-            Type Type = Primitive.GetType();
-            if (TypeRegistry.TryGetInfo(Type, out TypeInfo Info)
-                && Info.Format is PrimitiveFormat Format)
-            {
-                CheckingPrimitiveTDCWriter PrimitiveWriter = new(this, Format);
-                Primitive.Write(PrimitiveWriter);
-                OnWrited(Info.TypeId);
-            }
-            else
-            {
-                RecordPrimitiveTDCWriter PrimitiveWriter = new(this);
-                Primitive.Write(PrimitiveWriter);
-                TypeInfo NewPrimitiveInfo = TypeRegistry.Add(Type, PrimitiveWriter.GetFormat());
-                OnWrited(Info.TypeId);
-            }
-        }
-
-        private void WriteContainer<T>(ITDCContainer<T> Container)
-        {
-            //TODO
-        }
-
         private void WriteSimplePrimitive<T>(T Value, SimplePrimitive Type)
         {
             Write(Type, Value, BinarySerializer.GetWriter<T>().NotNull());
@@ -68,7 +45,7 @@ namespace Zion.Serialization.TDC
         #region SimplePrimitives
         public void Write(bool Value)
         {
-            Write(SimplePrimitive.Boolean, Value, bool.Serializer);
+            WriteSimplePrimitive(Value);
         }
 
         public void Write(byte Value)
@@ -142,7 +119,6 @@ namespace Zion.Serialization.TDC
             Write(SimplePrimitive.Half, Value, Half.Serializer);
         }
 
-
         public void Write(Index Value)
         {
             Write(SimplePrimitive.Index, Value, Index.Serializer);
@@ -152,7 +128,6 @@ namespace Zion.Serialization.TDC
         {
             Write(SimplePrimitive.Range, Value, Range.Serializer);
         }
-
 
         public void Write(BigInteger Value)
         {

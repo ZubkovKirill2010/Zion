@@ -6,7 +6,11 @@ namespace Zion.Serialization.TDC
     public sealed class TypeIdRegistry : IEnumerable<TypeData>
     {
         private readonly Dictionary<Type, TypeInfo> Data;
+        private readonly List<TypeData> Page;
+
         private ushort LastId;
+
+        public int Count => Data.Count;
 
 
         public TypeIdRegistry() : this(32) { }
@@ -14,6 +18,7 @@ namespace Zion.Serialization.TDC
         public TypeIdRegistry(int Capacity)
         {
             Data = new(Capacity);
+            Page = new(Capacity);
         }
 
 
@@ -26,27 +31,15 @@ namespace Zion.Serialization.TDC
         {
             TypeInfo Info = new TypeInfo(++LastId, Format);
             Data.Add(Type, Info);
+            Page.Add(new TypeData(Type, Info));
             return Info;
         }
 
 
         public void Write(BinaryWriter Writer)
         {
-
-        }
-
-        public void Read(BinaryReader Reader)
-        {
-            int Count = Reader.ReadInt32();
-
-            for (int i = 0; i < Count; i++)
-            {
-                ushort TypeId = Reader.ReadUInt16();
-                Type Type   = TypeRegistry.ReadType(Reader);
-                IFormat Format = Reader.Read(IFormat.Serializer);
-
-                //TODO
-            }
+            Writer.WriteCollection(Page);
+            Page.Clear();
         }
 
 
