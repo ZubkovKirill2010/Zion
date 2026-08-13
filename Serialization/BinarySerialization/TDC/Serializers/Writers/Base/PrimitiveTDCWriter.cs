@@ -13,6 +13,18 @@ namespace Zion.Serialization.TDC
         #endregion
 
         #region PublicMethods
+        public void Write<T>(T Value) where T : ITDCPrimitive<T>
+        {
+            Write(Value, WritePrimitive);
+        }
+
+        public void Write<T>(ITDCContainer<T> Value)
+        {
+            WriteContainer(Value, out ushort TypeId);
+            OnWrited(TypeId);
+        }
+
+
         public void Write(bool Value)
         {
             Write(Value, WriteSimplePrimitive);

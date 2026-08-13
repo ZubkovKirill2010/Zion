@@ -17,7 +17,9 @@
             ArgumentException.ThrowIf(!Stream.NotNull().CanWrite, "Stream can not Write");
             this.Stream = Stream;
             this.Options = Options.NotNull();
-            
+
+            StreamWriter = new BinaryWriter(Stream);
+
             if (Options.WriteHeader)
             {
                 WriteHeader();
@@ -28,28 +30,20 @@
 
         #region PublicMethods
         public void Flush()
-        {
-            var Writer = StreamWriter;
-            TypeRegistry.Write(StreamWriter);
-            DataRegistry.Write(StreamWriter);
-
+        {            
             var Memory = this.Memory;
+            var Length = Memory.Length;
+
+            if (Length == 0L) { return; }
+
+            var Writer = StreamWriter;
             var Buffer = Memory.GetBuffer();
-            var Length = (int)Memory.Length;
-            Stream.Write(Buffer, 0, Length);
+
+            TypeRegistry.Write(Writer);
+            DataRegistry.Write(Writer);
+            Stream.Write(Buffer, 0, (int)Length);
 
             Memory.SetLength(0L);
-        }
-
-
-        public void Write<T>(T Value, ITDCPrimitiveSerializer<T>? Writer)
-        {
-            CheckNullable(Value);
-        }
-
-        public void Write<T>(T Value) where T : ITDCPrimitive<T>
-        {
-            CheckNullable(Value);
         }
 
         #endregion
