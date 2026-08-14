@@ -147,9 +147,55 @@
             }
 
 
+            public TCollection ReadCollection<TCollection, T>(Func<T> Read) where TCollection : ICollection<T>, new()
+            {
+                return ReadCollection(Reader, static Count => new TCollection(), Read);
+            }
+
+            public TCollection ReadCollection<TCollection, T>(Func<int, TCollection> NewCollection, Func<T> Read) where TCollection : ICollection<T>
+            {
+                int Count = Reader.ReadInt32();
+                TCollection Collection = NewCollection(Count);
+
+                if (Count == 0)
+                {
+                    return Collection;
+                }
+
+                for (int i = 0; i < Count; i++)
+                {
+                    Collection.Add(Read());
+                }
+
+                return Collection;
+            }
+
+            public TCollection ReadCollection<TCollection, T>(TCollection Collection, Func<T> Read) where TCollection : ICollection<T>
+            {
+                int Count = Reader.ReadInt32();
+
+                if (Count == 0)
+                {
+                    return Collection;
+                }
+
+                for (int i = 0; i < Count; i++)
+                {
+                    Collection.Add(Read());
+                }
+
+                return Collection;
+            }
+
+
             public List<T> ReadList<T>() where T : IBinaryReadable<T>
             {
                 return ReadCollection<List<T>, T>(Reader, static Count => new List<T>(Count));
+            }
+
+            public List<T> ReadList<T>(Func<T> Read)
+            {
+                return ReadCollection(Reader, static Count => new List<T>(Count), Read);
             }
 
             public List<T> ReadList<T>(IBinaryReader<T>? ObjectReader = null)
