@@ -30,6 +30,24 @@ namespace Zion
             Values = new();
         }
 
+        public TypeDirectory(T Header)
+            : this()
+        {
+            this.Header = Header;
+        }
+
+        public TypeDirectory(IEnumerable<TypeDirectory<T, I>> Childs, IEnumerable<I> Values)
+        {
+            this.Childs = Childs.WhereNotNull().ToList();
+            this.Values = Values.ToList();
+        }
+
+        public TypeDirectory(T Header, IEnumerable<TypeDirectory<T, I>> Childs, IEnumerable<I> Values)
+            : this(Childs, Values)
+        {
+            this.Header = Header;
+        }
+
         #endregion
 
         #region Indexers
