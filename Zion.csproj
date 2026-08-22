@@ -9,10 +9,13 @@
   <ItemGroup>
     <Compile Remove="MathExpressions\**" />
     <Compile Remove="Serialization\BinarySerialization\NSD\**" />
+    <Compile Remove="Types\Collections\Hierarchical\Trie\**" />
     <EmbeddedResource Remove="MathExpressions\**" />
     <EmbeddedResource Remove="Serialization\BinarySerialization\NSD\**" />
+    <EmbeddedResource Remove="Types\Collections\Hierarchical\Trie\**" />
     <None Remove="MathExpressions\**" />
     <None Remove="Serialization\BinarySerialization\NSD\**" />
+    <None Remove="Types\Collections\Hierarchical\Trie\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -23,6 +26,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Serialization\BinarySerialization\ADF\IO\Writing\" />
+    <Folder Include="Serialization\BinarySerialization\ADF\IO\Reading\" />
+    <Folder Include="Serialization\BinarySerialization\ADF\IO\Options\" />
+    <Folder Include="Serialization\BinarySerialization\ADF\Serialization\" />
+    <Folder Include="Serialization\BinarySerialization\ADF\Format\" />
+    <Folder Include="Serialization\BinarySerialization\ADF\Structure\Pages\Page\" />
     <Folder Include="Serialization\BinarySerialization\Serializers\Object\" />
     <Folder Include="STP\Parser\Static\" />
     <Folder Include="STP\Parser\Dynamic\" />
