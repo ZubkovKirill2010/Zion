@@ -4,16 +4,17 @@ using Zion.Serialization;
 
 namespace Zion
 {
-    public class SortedList<T> : IList<T>, IBinarySerializable<SortedList<T>, T> where T : IComparable<T>
+    public class SortedList<T> : IList<T>, IBinarySerializable<SortedList<T>, T>
     {
         #region Data
-        private T[] Data;
-
         private readonly bool IsReference = RuntimeHelpers.IsReferenceOrContainsReferences<T>();
+        private readonly IComparer<T> Comparer;
+
+        private T[] Data;
 
         public int Count { get; private set; }
 
-        public int Capacity => Data.Length;
+        public int Capacity    => Data.Length;
         public bool IsReadOnly => false;
 
         #endregion
@@ -21,16 +22,20 @@ namespace Zion
         #region Constructors
         public SortedList() : this(16) { }
 
-        public SortedList(int Capacity)
+        public SortedList(IComparer<T> Comparer) : this(16, Comparer) { }
+
+        public SortedList(int Capacity) : this(Capacity, Comparer<T>.Default) { }
+
+        public SortedList(int Capacity, IComparer<T> Comparer)
         {
             ArgumentOutOfRangeException.ThrowIfNegativeOrZero(Capacity);
-
-            Data = new T[Capacity];
-            Count = 0;
+            this.Comparer = Comparer ?? Comparer<T>.Default;
+            this.Data     = new T[Capacity];
         }
 
         private SortedList(T[] Data, int Count)
         {
+            this.Comparer = Comparer<T>.Default;
             this.Data = Data;
             this.Count = Count;
             Resort();
@@ -49,8 +54,8 @@ namespace Zion
             {
                 ArgumentOutOfRangeException.ThrowIfWithout(Index, Count);
 
-                bool ValidLeft = Index == 0 || value.CompareTo(Data[Index - 1]) >= 0;
-                bool ValidRight = Index == Count - 1 || value.CompareTo(Data[Index + 1]) <= 0;
+                bool ValidLeft = Index == 0 || Compare(value, Data[Index - 1]) >= 0;
+                bool ValidRight = Index == Count - 1 || Compare(value, Data[Index + 1]) <= 0;
 
                 if (ValidLeft && ValidRight)
                 {
@@ -133,8 +138,8 @@ namespace Zion
                 return;
             }
 
-            bool ValidLeft  = TargetIndex == 0     || Item.CompareTo(Data[TargetIndex - 1]) >= 0;
-            bool ValidRight = TargetIndex == Count || Item.CompareTo(Data[TargetIndex])     <= 0;
+            bool ValidLeft  = TargetIndex == 0     || Compare(Item, Data[TargetIndex - 1]) >= 0;
+            bool ValidRight = TargetIndex == Count || Compare(Item, Data[TargetIndex])     <= 0;
 
             if (ValidLeft && ValidRight)
             {
@@ -160,7 +165,7 @@ namespace Zion
             while (Min <= Max)
             {
                 int Target = Min + ((Max - Min) >> 1);
-                int Comparing = Item.CompareTo(Data[Target]);
+                int Comparing = Compare(Item, Data[Target]);
 
                 if (Comparing == 0)
                 {
@@ -323,7 +328,7 @@ namespace Zion
 
             int Index = GetInsertIndex(Item);
             
-            if (Index < Count && Item.CompareTo(Data[Index]) == 0)
+            if (Index < Count && Compare(Item, Data[Index]) == 0)
             {
                 Index++;
             }
@@ -352,6 +357,11 @@ namespace Zion
         #endregion
 
         #region PrivateMethods
+        private int Compare(T A, T B)
+        {
+            return Comparer.Compare(A, B);
+        }
+
         private int GetInsertIndex(T Item)
         {
             if (Count == 0)
@@ -365,7 +375,7 @@ namespace Zion
             while (Min <= Max)
             {
                 int Target = Min + ((Max - Min) >> 1);
-                int Comparing = Item.CompareTo(Data[Target]);
+                int Comparing = Compare(Item, Data[Target]);
 
                 if (Comparing == 0)
                 {
