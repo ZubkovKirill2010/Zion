@@ -60,11 +60,39 @@ namespace Zion
         }
 
 
-        private ArenaSpan<T> Allocate(int Size)
+        public ArenaSpan<T> Allocate(int Size)
         {
             ArgumentOutOfRangeException.ThrowIfNegative(Size);
             //TODO
             throw new NotImplementedException();
+        }
+
+
+        public ReadOnlySpan<T> AsSpan()
+        {
+            return new ReadOnlySpan<T>(Data);
+        }
+
+        public ReadOnlySpan<T> AsSpan(int Start, int Length)
+        {
+            return new ReadOnlySpan<T>(Data, Start, Length);
+        }
+
+
+        public T[] ToArray()
+        {
+            return ZArray.Clone(Data);
+        }
+
+        public T[] ToArray(int Start, int Length)
+        {
+            return ZArray.GetSubArray(Data, Start, Length);
+        }
+
+
+        internal Span<T> GetSpan(int Start, int Count)
+        {
+            return new Span<T>(Data, Start, Count);
         }
 
 
@@ -75,7 +103,6 @@ namespace Zion
             //TODO
             throw new NotImplementedException();
         }
-
 
         internal IEnumerator<T> GetEnumerator(int Start, int Count)
         {

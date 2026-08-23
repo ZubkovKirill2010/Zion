@@ -51,6 +51,31 @@ namespace Zion
         }
 
 
+        public Span<T> AsSpan()
+        {
+            ThrowIfDisposed();
+            return Source.GetSpan(Start, Count);
+        }
+
+        public Span<T> AsSpan(int Start, int Length)
+        {
+            ThrowIfDisposed();
+            ArgumentOutOfRangeException.ThrowIfWithout(Start, Count);
+            ArgumentOutOfRangeException.ThrowIfWithout(Start + Length, Count);
+
+            return Source.GetSpan(this.Start + Start, Length);
+        }
+
+        public T[] ToArray(int Start, int Length)
+        {
+            ThrowIfDisposed();
+            ArgumentOutOfRangeException.ThrowIfWithout(Start, Count);
+            ArgumentOutOfRangeException.ThrowIfWithout(Start + Length, Count);
+
+            return Source.ToArray(this.Start + Start, Length);
+        }
+
+
         public bool IsWithout(int Index)
         {
             ThrowIfDisposed();
@@ -79,6 +104,15 @@ namespace Zion
         {
             Source.Release(this);
             Source = null;
+        }
+
+
+        public IEnumerator<T> GetEnumerator(int Index, int Count)
+        {
+            ArgumentOutOfRangeException.ThrowIfWithout(Index, this.Count);
+            ArgumentOutOfRangeException.ThrowIfWithout(Index + Count, this.Count);
+
+            return Source.GetEnumerator(Start, Count);
         }
 
 
