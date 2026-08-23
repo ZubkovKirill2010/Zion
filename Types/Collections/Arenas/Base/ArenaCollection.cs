@@ -6,6 +6,9 @@ namespace Zion
     {
         protected ArenaSpan<T> Data { get; private set; }
 
+        public bool IsDisposed => Data.IsDisposed;
+
+
         public ArenaCollection(ArenaSpan<T> Data)
         {
             this.Data = Data.NotNull();

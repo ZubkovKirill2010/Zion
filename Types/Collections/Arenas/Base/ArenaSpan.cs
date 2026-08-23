@@ -2,12 +2,14 @@
 
 namespace Zion
 {
-    public sealed class ArenaSpan<T> : IDisposable, IEnumerable<T>
+    public sealed class ArenaSpan<T> : IDisposable, IComparable<ArenaSpan<T>>, IEnumerable<T>
     {
-        private Arena<T> Source;
+        private  readonly Arena<T> Source;
 
-        private readonly int Start;
-        public  readonly int Count;
+        public readonly int Start;
+        public readonly int Count;
+
+        public bool IsDisposed { get; private set; }
 
 
         public ArenaSpan(Arena<T> Source, int Start, int Size)
@@ -57,6 +59,11 @@ namespace Zion
             return Index < 0 || Index >= Count;
         }
 
+        public bool IsFrom(Arena<T> Arena)
+        {
+            return ReferenceEquals(Source, Arena);
+        }
+
 
         public ArenaSpan<T> Expand(int Capacity)
         {
@@ -76,19 +83,19 @@ namespace Zion
             return Source.ToArray(this.Start + Start, Length);
         }
 
-        public Span<T> AsSpan()
+        public ReadOnlySpan<T> AsSpan()
         {
             ThrowIfDisposed();
-            return Source.GetSpan(Start, Count);
+            return Source.AsSpan(Start, Count);
         }
 
-        public Span<T> AsSpan(int Start, int Length)
+        public ReadOnlySpan<T> AsSpan(int Start, int Length)
         {
             ThrowIfDisposed();
             ArgumentOutOfRangeException.ThrowIfWithout(Start, Count);
             ArgumentOutOfRangeException.ThrowIfWithout(Start + Length, Count);
 
-            return Source.GetSpan(this.Start + Start, Length);
+            return Source.AsSpan(this.Start + Start, Length);
         }
 
 
@@ -112,10 +119,17 @@ namespace Zion
 
         public void Dispose()
         {
-            if (Source is null) { return; }
+            if (!IsDisposed)
+            {
+                Source.Release(this);
+                IsDisposed = true;
+            }
+        }
 
-            Source.Release(this);
-            Source = null;
+
+        public int CompareTo(ArenaSpan<T>? Other)
+        {
+            return Start.CompareTo(Other.NotNull().Start);
         }
 
 
@@ -129,7 +143,7 @@ namespace Zion
 
         private void ThrowIfDisposed()
         {
-            if (Source is null)
+            if (IsDisposed)
             {
                 throw new ObjectDisposedException(nameof(ArenaSpan<>));
             }
