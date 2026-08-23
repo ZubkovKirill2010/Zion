@@ -62,7 +62,7 @@ namespace Zion
         public ArenaSpan<T> Allocate(int Size)
         {
             ArgumentOutOfRangeException.ThrowIfNegative(Size);
-            //TODO
+            //TODO: Выделить новый Span, указанного размера.
             throw new NotImplementedException();
         }
 
@@ -88,6 +88,15 @@ namespace Zion
             return new ReadOnlySpan<T>(Data, Start, Length);
         }
 
+
+        internal ArenaSpan<T> Expand(ArenaSpan<T> Span, int Count)
+        {
+            //TODO
+            //Если справа от Span есть место,
+            //то расширяем cуществующий,
+            //иначе создаём новый Span и удаляем старый
+            return Span;
+        }
 
         internal Span<T> GetSpan(int Start, int Count)
         {

@@ -5,9 +5,9 @@ namespace Zion
     public sealed class ArenaSpan<T> : IDisposable, IEnumerable<T>
     {
         private Arena<T> Source;
-        private int Start;
 
-        public int Count { get; private set; }
+        private readonly int Start;
+        public  readonly int Count;
 
 
         public ArenaSpan(Arena<T> Source, int Start, int Size)
@@ -55,6 +55,15 @@ namespace Zion
         {
             ThrowIfDisposed();
             return Index < 0 || Index >= Count;
+        }
+
+
+        public ArenaSpan<T> Expand(int Capacity)
+        {
+            ThrowIfDisposed();
+            return Capacity > Count
+                ? Source.Expand(this, Capacity)
+                : this;
         }
 
 

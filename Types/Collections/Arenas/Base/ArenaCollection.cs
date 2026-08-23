@@ -4,7 +4,7 @@ namespace Zion
 {
     public abstract class ArenaCollection<T> : IDisposable, IEnumerable<T>
     {
-        protected readonly ArenaSpan<T> Data;
+        protected ArenaSpan<T> Data { get; private set; }
 
         public ArenaCollection(ArenaSpan<T> Data)
         {
@@ -21,6 +21,15 @@ namespace Zion
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         public abstract IEnumerator<T> GetEnumerator();
+
+
+        public void Expand(int Capacity)
+        {
+            if (Capacity > Data.Count)
+            {
+                Data = Data.Expand(Capacity);
+            }
+        }
 
 
         public void Dispose()

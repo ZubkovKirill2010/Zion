@@ -288,7 +288,7 @@ namespace Zion
 
         public void EnsureCapacity(int Capacity)
         {
-
+            Expand(Capacity);
         }
 
         public void Reserve(int Capacity)
