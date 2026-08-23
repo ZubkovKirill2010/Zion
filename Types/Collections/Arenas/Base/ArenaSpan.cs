@@ -51,6 +51,22 @@ namespace Zion
         }
 
 
+        public bool IsWithout(int Index)
+        {
+            ThrowIfDisposed();
+            return Index < 0 || Index >= Count;
+        }
+
+
+        public T[] ToArray(int Start, int Length)
+        {
+            ThrowIfDisposed();
+            ArgumentOutOfRangeException.ThrowIfWithout(Start, Count);
+            ArgumentOutOfRangeException.ThrowIfWithout(Start + Length, Count);
+
+            return Source.ToArray(this.Start + Start, Length);
+        }
+
         public Span<T> AsSpan()
         {
             ThrowIfDisposed();
@@ -66,55 +82,6 @@ namespace Zion
             return Source.GetSpan(this.Start + Start, Length);
         }
 
-        public T[] ToArray(int Start, int Length)
-        {
-            ThrowIfDisposed();
-            ArgumentOutOfRangeException.ThrowIfWithout(Start, Count);
-            ArgumentOutOfRangeException.ThrowIfWithout(Start + Length, Count);
-
-            return Source.ToArray(this.Start + Start, Length);
-        }
-
-
-        public bool IsWithout(int Index)
-        {
-            ThrowIfDisposed();
-            return Index < 0 || Index >= Count;
-        }
-
-        public void ThrowIfWithout(int Index)
-        {
-            if (IsWithout(Index))
-            {
-                throw new ArgumentOutOfRangeException($"Index(={Index}) out of range [0..{Count})");
-            }
-        }
-
-        public void ThrowIfDisposed()
-        {
-            if (Source is null)
-            {
-                throw new ObjectDisposedException(nameof(ArenaSpan<>));
-            }
-        }
-
-
-
-        public void Dispose()
-        {
-            Source.Release(this);
-            Source = null;
-        }
-
-
-        public IEnumerator<T> GetEnumerator(int Index, int Count)
-        {
-            ArgumentOutOfRangeException.ThrowIfWithout(Index, this.Count);
-            ArgumentOutOfRangeException.ThrowIfWithout(Index + Count, this.Count);
-
-            return Source.GetEnumerator(Start, Count);
-        }
-
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
@@ -122,6 +89,41 @@ namespace Zion
         {
             ThrowIfDisposed();
             return Source.GetEnumerator(Start, Count);
+        }
+
+        public IEnumerator<T> GetEnumerator(int Start, int Length)
+        {
+            ThrowIfDisposed();
+            ArgumentOutOfRangeException.ThrowIfWithout(Start, Count);
+            ArgumentOutOfRangeException.ThrowIfWithout(Start + Length, Count);
+
+            return Source.GetEnumerator(this.Start, Length);
+        }
+
+
+        public void Dispose()
+        {
+            if (Source is null) { return; }
+
+            Source.Release(this);
+            Source = null;
+        }
+
+
+        private void ThrowIfWithout(int Index)
+        {
+            if (IsWithout(Index))
+            {
+                throw new ArgumentOutOfRangeException($"Index(={Index}) out of range [0..{Count})");
+            }
+        }
+
+        private void ThrowIfDisposed()
+        {
+            if (Source is null)
+            {
+                throw new ObjectDisposedException(nameof(ArenaSpan<>));
+            }
         }
     }
 }

@@ -41,28 +41,6 @@
             }
 
 
-            public ulong ReadVarInt()
-            {
-                ulong Result = 0;
-                int Shift = 0;
-                byte Byte;
-
-                do
-                {
-                    if (Shift >= 70)
-                    {
-                        throw new InvalidDataException("VarInt exceeded maximum length (10 bytes)");
-                    }
-
-                    Byte = Reader.ReadByte();
-                    Result |= (ulong)(Byte & 0x7F) << Shift;
-                    Shift += 7;
-                }
-                while ((Byte & 0x80) != 0);
-
-                return Result;
-            }
-
             public Index ReadIndex()
             {
                 int Value = Reader.ReadInt32();

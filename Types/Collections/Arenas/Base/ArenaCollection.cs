@@ -6,7 +6,6 @@ namespace Zion
     {
         protected readonly ArenaSpan<T> Data;
 
-
         public ArenaCollection(ArenaSpan<T> Data)
         {
             this.Data = Data.NotNull();
@@ -19,14 +18,14 @@ namespace Zion
         }
 
 
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        public abstract IEnumerator<T> GetEnumerator();
+
+
         public void Dispose()
         {
             Data.Dispose();
         }
-
-
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
-        public abstract IEnumerator<T> GetEnumerator();
     }
 }

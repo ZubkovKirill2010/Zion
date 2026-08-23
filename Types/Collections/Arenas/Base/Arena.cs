@@ -59,23 +59,11 @@ namespace Zion
             return new(Allocate(Size));
         }
 
-
         public ArenaSpan<T> Allocate(int Size)
         {
             ArgumentOutOfRangeException.ThrowIfNegative(Size);
             //TODO
             throw new NotImplementedException();
-        }
-
-
-        public ReadOnlySpan<T> AsSpan()
-        {
-            return new ReadOnlySpan<T>(Data);
-        }
-
-        public ReadOnlySpan<T> AsSpan(int Start, int Length)
-        {
-            return new ReadOnlySpan<T>(Data, Start, Length);
         }
 
 
@@ -90,11 +78,21 @@ namespace Zion
         }
 
 
+        public ReadOnlySpan<T> AsSpan()
+        {
+            return new ReadOnlySpan<T>(Data);
+        }
+
+        public ReadOnlySpan<T> AsSpan(int Start, int Length)
+        {
+            return new ReadOnlySpan<T>(Data, Start, Length);
+        }
+
+
         internal Span<T> GetSpan(int Start, int Count)
         {
             return new Span<T>(Data, Start, Count);
         }
-
 
         internal void Release(ArenaSpan<T> Span)
         {

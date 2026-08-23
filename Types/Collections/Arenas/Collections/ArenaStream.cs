@@ -8,6 +8,8 @@ namespace Zion
 {
     public sealed class ArenaStream : ArenaCollection<byte>
     {
+        public int Length { get; private set; }
+
         public int Position
         {
             get;
@@ -18,7 +20,6 @@ namespace Zion
                 field = value;
             }
         }
-        public int Length { get; private set; }
 
 
         public ArenaStream(ArenaSpan<byte> Data) : base(Data) { }
@@ -51,6 +52,7 @@ namespace Zion
 
         public void Write(byte Value)
         {
+            Reserve(1);
             this[Position++] = Value;
         }
 
@@ -66,12 +68,14 @@ namespace Zion
 
         public void Write(decimal Value)
         {
+            Span<int> Buffer = stackalloc int[4];
+            decimal.GetBits(Value, Buffer);
+            
             Reserve(sizeof(decimal));
-            int[] Bits = decimal.GetBits(Value);
-            Write(Bits[0]);
-            Write(Bits[1]);
-            Write(Bits[2]);
-            Write(Bits[3]);
+            Write(Buffer[0]);
+            Write(Buffer[1]);
+            Write(Buffer[2]);
+            Write(Buffer[3]);
         }
 
         public void Write(double Value)
@@ -216,15 +220,27 @@ namespace Zion
 
         public void Write(Span<byte> Buffer)
         {
-            foreach (byte Byte in Buffer)
-            {
-                Write(Byte);
-            }
+            Reserve(Buffer.Length);
+            Buffer.CopyTo(Data.AsSpan(Position, Buffer.Length));
+            UpdateLengthFromPosition(Position + Buffer.Length);
         }
 
         public void Write7BitEncodedInt(int Value)
         {
             uint UInt = (uint)Value;
+
+            while (UInt >= 0x80)
+            {
+                Write((byte)(UInt | 0x80));
+                UInt >>= 7;
+            }
+
+            Write((byte)UInt);
+        }
+
+        public void Write7BitEncodedInt64(long Value)
+        {
+            ulong UInt = (ulong)Value;
 
             while (UInt >= 0x80)
             {
@@ -252,10 +268,27 @@ namespace Zion
             return Data.ToArray(0, Length);
         }
 
+        public Span<byte> AsSpan()
+        {
+            return Data.AsSpan(0, Length);
+        }
+
+
+        public void CopyTo(Span<byte> Destination)
+        {
+            AsSpan().CopyTo(Destination);
+        }
+
+        public void CopyTo(Stream Stream)
+        {
+            ArgumentNullException.ThrowIfNull(Stream);
+            Stream.Write(AsSpan());
+        }
+
 
         public void EnsureCapacity(int Capacity)
         {
-            //TODO
+
         }
 
         public void Reserve(int Capacity)

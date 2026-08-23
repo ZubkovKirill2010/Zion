@@ -36,23 +36,6 @@
             }
 
 
-            public void WriteVarInt(ulong Value)
-            {
-                do
-                {
-                    byte Byte = (byte)(Value & 0x7F);
-                    Value >>= 7;
-
-                    if (Value > 0)
-                    {
-                        Byte |= 0x80;
-                    }
-
-                    Writer.Write(Byte);
-                }
-                while (Value > 0);
-            }
-
             public void Write(Index Value)
             {
                 Writer.Write(Value.IsFromEnd ? -Value.Value : Value.Value);
