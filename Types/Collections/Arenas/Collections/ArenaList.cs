@@ -4,16 +4,9 @@ namespace Zion
 {
     public sealed class ArenaList<T> : ArenaCollection<T>, IList<T>
     {
-        public int Count { get
-{
+        public int Count { get; private set; }
 
-} private set
-{
-
-} }
-
-        public bool IsReadOnly => false
-
+        public bool IsReadOnly => false;
 
 
         public ArenaList(ArenaSpan<T> Data) : base(Data) { }
@@ -23,25 +16,13 @@ namespace Zion
         {
             get
             {
-                ThrowIfWithout(Index)
-{
-
-}
-                return Data[Index]
-{
-
-}
+                ThrowIfWithout(Index);
+                return Data[Index];
             }
             set
             {
-                ThrowIfWithout(Index)
-{
-
-}
-                Data[Index] = value
-{
-
-}
+                ThrowIfWithout(Index);
+                Data[Index] = value;
             }
 
         }
@@ -50,25 +31,13 @@ namespace Zion
         {
             get
             {
-                ThrowIfWithout(Index.GetOffset(Count))
-{
-
-}
-                return Data[Index]
-{
-
-}
+                ThrowIfWithout(Index.GetOffset(Count));
+                return Data[Index];
             }
             set
             {
-                ThrowIfWithout(Index.GetOffset(Count))
-{
-
-}
-                Data[Index] = value
-{
-
-}
+                ThrowIfWithout(Index.GetOffset(Count));
+                Data[Index] = value;
             }
 
         }
@@ -76,10 +45,7 @@ namespace Zion
 
         public void Add(T Item)
         {
-            throw new NotImplementedException()
-{
-
-}
+            throw new NotImplementedException();
         }
 
         public void AddRange()
@@ -89,10 +55,7 @@ namespace Zion
 
         public void Insert(int Index, T Item)
         {
-            throw new NotImplementedException()
-{
-
-}
+            throw new NotImplementedException();
         }
 
         public void InsertRange(int Index, IEnumerable<T> collection)
@@ -104,10 +67,7 @@ namespace Zion
 
         public int IndexOf(T Item)
         {
-            throw new NotImplementedException()
-{
-
-}
+            throw new NotImplementedException();
         }
 
         public int IndexOf(T Item, int Index)
@@ -192,10 +152,7 @@ namespace Zion
 
         public bool Contains(T Item)
         {
-            throw new NotImplementedException()
-{
-
-}
+            throw new NotImplementedException();
         }
 
 
@@ -206,10 +163,7 @@ namespace Zion
 
         public void CopyTo(T[] Array, int ArrayIndex)
         {
-            throw new NotImplementedException()
-{
-
-}
+            throw new NotImplementedException();
         }
 
         public void CopyTo(int Index, T[] Array, int ArrayIndex, int Count)
@@ -220,10 +174,7 @@ namespace Zion
 
         public void RemoveAt(int Index)
         {
-            throw new NotImplementedException()
-{
-
-}
+            throw new NotImplementedException();
         }
 
         public void RemoveRange(int Index, int Count)
@@ -233,10 +184,7 @@ namespace Zion
 
         public bool Remove(T Item)
         {
-            throw new NotImplementedException()
-{
-
-}
+            throw new NotImplementedException();
         }
 
         public int RemoveAll(Predicate<T> Match)
@@ -246,10 +194,7 @@ namespace Zion
 
         public void Clear()
         {
-            throw new NotImplementedException()
-{
-
-}
+            throw new NotImplementedException();
         }
 
 

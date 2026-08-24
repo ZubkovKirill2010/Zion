@@ -71,8 +71,75 @@ namespace Zion
 
         #endregion
 
-        #region PublicMethods
+        #region Operators
+        public static bool operator ==(BitArray A, BitArray B)
+        {
+            if (object.CompareReferences(A, B, out bool ReferenceComprasion))
+            {
+                return ReferenceComprasion;
+            }
+            if (A.Length != B.Length)
+            {
+                return false;
+            }
 
+            int Count = A.Length & 0b111;
+            byte[] ABuffer = A.Data;
+            byte[] BBuffer = B.Data;
+
+            for (int i = 0; i < Count; i++)
+            {
+                if (ABuffer[i] != BBuffer[i])
+                {
+                    return false;
+                }
+            }
+
+            int LastByteOffset = 8 - A.GetLastByteLength();
+            return ABuffer[^1] >> LastByteOffset == ABuffer[^1] >> LastByteOffset;
+        }
+
+        public static bool operator !=(BitArray A, BitArray B)
+        {
+            return !(A == B);
+        }
+
+
+        public static BitArray operator &(BitArray A, BitArray B)
+        {
+            return ConvertBits(A, B, static (A, B) => (byte)(A & B));
+        }
+
+        public static BitArray operator |(BitArray A, BitArray B)
+        {
+            return ConvertBits(A, B, static (A, B) => (byte)(A | B));
+        }
+
+        public static BitArray operator ^(BitArray A, BitArray B)
+        {
+            return ConvertBits(A, B, static (A, B) => (byte)(A ^ B));
+
+        }
+
+        public static BitArray operator ~(BitArray Value)
+        {
+            ArgumentNullException.ThrowIfNull(Value);
+
+            byte[] Source = Value.Data;
+            byte[] Result = new byte[Source.Length];
+            int Length = Value.Length;
+
+            for (int i = 0; i < Length; i++)
+            {
+                Result[i] = (byte)~Source[i];
+            }
+
+            return new BitArray(Length, Result);
+        }
+
+        #endregion
+
+        #region PublicMethods
         public BitArray Clone()
         {
             return new BitArray(Data, Length);
@@ -81,6 +148,34 @@ namespace Zion
         public BitList ToBitList()
         {
             return new BitList(Data, Length);
+        }
+
+
+        public Span<byte> AsSpan()
+        {
+            return Data.AsSpan();
+        }
+
+        public byte[] ToByteArray()
+        {
+            return ZArray.Clone(Data);
+        }
+
+        public bool[] ToBooleanArray()
+        {
+            bool[] Result = new bool[Length];
+            int Index = 0;
+
+            foreach (bool Bit in this)
+            {
+                if (Bit)
+                {
+                    Result[Index] = true;
+                }
+                Index++;
+            }
+
+            return Result;
         }
 
         #endregion
@@ -149,9 +244,33 @@ namespace Zion
         #endregion
 
         #region PrivateMethods
+        private int GetLastByteLength()
+        {
+            return Data.Length - Length;
+        }
+
         private static int GetByteCount(int Count)
         {
             return (Count + 7) >> 3;
+        }
+
+        private static BitArray ConvertBits(BitArray A, BitArray B, Func<byte, byte, byte> Convert)
+        {
+            ArgumentNullException.ThrowIfNull(A);
+            ArgumentNullException.ThrowIfNull(B);
+
+            int MinLength = Math.Min(A.Data.Length, B.Data.Length);
+            int MaxLength = Math.Max(A.Data.Length, B.Data.Length);
+            byte[] Result = new byte[MaxLength];
+            Span<byte> ASpan = A.AsSpan();
+            Span<byte> BSpan = B.AsSpan();
+
+            for (int i = 0; i < MinLength; i++)
+            {
+                Result[i] = Convert(ASpan[i], BSpan[i]);
+            }
+
+            return new BitArray(MaxLength, Result);
         }
 
         #endregion
