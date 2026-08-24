@@ -12,7 +12,7 @@ namespace Zion
         public bool IsDisposed { get; private set; }
 
 
-        public ArenaSpan(Arena<T> Source, int Start, int Size)
+        internal ArenaSpan(Arena<T> Source, int Start, int Size)
         {
             ArgumentNullException.ThrowIfNull(Source);
             ArgumentOutOfRangeException.ThrowIfWithout(Start, Source.Capacity);

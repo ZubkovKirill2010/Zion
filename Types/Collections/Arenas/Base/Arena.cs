@@ -2,12 +2,16 @@ namespace Zion
 {
     public sealed class Arena<T>
     {
-        private const int BinaryGroupSize = 4;
-        private const int GroupSize = 1 << BinaryGroupSize; //8
+        internal const int BinaryGroupSize = 4;
+        internal const int GroupSize = 1 << BinaryGroupSize;
+
+        internal const int BinaryBufferAccuracry = 9;
+        internal const int BufferAccuracry = 1 << BinaryBufferAccuracry;
+
 
         private T[] Data;
         private BitArray BitMap;
-        private int NextFree;
+        private int Count;
 
         public int Capacity
         {
@@ -16,7 +20,9 @@ namespace Zion
             {
                 if (value > Data.Length)
                 {
+                    value = RoundToBufferSize(value);
                     Array.Resize(ref Data, value);
+                    BitArray.Resize(ref BitMap, value >> BinaryGroupSize);
                 }
             }
         }
@@ -26,8 +32,7 @@ namespace Zion
 
         public Arena(int Capacity)
         {
-            Capacity = Math.Max(64, Capacity);
-            this.Capacity = Capacity;
+            Capacity = RoundToBufferSize(Math.Max(1024, Capacity));
             this.Data     = new T[Capacity];
             this.BitMap   = new (RoundToGroup(Capacity));
         }
@@ -65,17 +70,17 @@ namespace Zion
         {
             return new(Allocate(RoundToGroup(Size)));
         }
-        //TODO: Искать пустое пространство через BitMap
+
         public ArenaSpan<T> Allocate(int Size)
         {
             ArgumentOutOfRangeException.ThrowIfNegative(Size);
 
-            ArenaSpan<T> Span = new ArenaSpan<T>(this, NextFree, Size);
+            int Start = GetFreeArea(Size);
+            MarkArea(Start, Size, true);
 
-            MarkArea(NextFree, Size, true);
-            NextFree = RoundToGroup(NextFree + Size);
+            UpdateCount(Start + Size);
 
-            return Span;
+            return new ArenaSpan<T>(this, Start, Size);
         }
 
 
@@ -108,30 +113,23 @@ namespace Zion
 
             if (IsLastSpan(Span))
             {
-                NextFree = Span.Start;
+                Count = Span.Start;
             }
         }
 
         internal ArenaSpan<T> Expand(ArenaSpan<T> Span, int Count)
         {
-            //TODO
-            //Если справа от Span есть пустое место, то возвращаем тот же участок
-            //Если нет то копируем данные на новое место и возвращаем новый участок
-
-            throw new NotImplementedException();
-
-            if (IsLastSpan(Span))
+            if (TryExpand(Span, Count, out ArenaSpan<T> Expanded))
             {
-                Capacity = Span.Start + Count;
-                return new ArenaSpan<T>(this, Span.Start, Count);
+                return Expanded;
             }
 
-            MarkArea(Span.Start, Span.Count, false);
+            ArenaSpan<T> Allocated = Allocate(Count);
+            CopyTo(Span, Allocated);
 
-            ArenaSpan<T> New = Allocate(Count);
-            Array.Copy(Data, Span.Start, Data, New.Start, Span.Count);
+            MarkArea(Span, false);
 
-            return New;
+            return Allocated;
         }
 
         internal IEnumerator<T> GetEnumerator(int Start, int Count)
@@ -151,33 +149,82 @@ namespace Zion
             if (!Span.IsFrom(this)) { throw new InvalidOperationException("Arena not contains this span"); }
         }
 
-        private void MarkArea(int Start, int Count, bool Busy)
+        private void UpdateCount(int NewCount)
         {
-            BitMap.Fill(Start >> BinaryGroupSize, Count, Busy);
+            if (NewCount > Count)
+            {
+                Count = RoundToGroup(NewCount);
+            }
         }
 
-        private int GetFreeArea(int Count)
+        private void MarkArea(ArenaSpan<T> Span, bool Busy)
         {
-            ArgumentOutOfRangeException.ThrowIfNegative(Count);
-            if (Count == 0)
-            {
-                return NextFree;
-            }
+            MarkArea(Span.Start, Span.Count, Busy);
+        }
 
-            //TODO: Вернуть начальную позицию для ArenaSpan размером Count
+        private void MarkArea(int Start, int Count, bool Busy)
+        {
+            BitMap.Fill(FloorToGroup(Start), RoundToGroup(Count), Busy);
+        }
 
-            return -1;
+        private void CopyTo(ArenaSpan<T> Source, ArenaSpan<T> Destination)
+        {
+            Data.AsSpan(Source.Start, Source.Count)
+                .CopyTo(Data.AsSpan(Destination.Start, Source.Count));
         }
 
         private bool IsLastSpan(ArenaSpan<T> Span)
         {
-            return Span.Start + Span.Count == NextFree;
+            return Span.Start + Span.Count == Count;
+        }
+
+        private bool TryExpand(ArenaSpan<T> Span, int Additional, out ArenaSpan<T> Expanded)
+        {
+            int SpanEnd = Span.Start + Span.Count;
+            int Start = RoundToGroup(SpanEnd);
+            int End = RoundToGroup(SpanEnd + Additional);
+              
+            if (Start == End || !BitMap.Contains(Start, End - Start, true))
+            {
+                Expanded = new ArenaSpan<T>(this, Span.Start, SpanEnd + Additional);
+                return true;
+            }
+
+            Expanded = null!;
+            return false;
+        }
+
+        private int GetFreeArea(int Size)
+        {
+            ArgumentOutOfRangeException.ThrowIfNegative(Size);
+            if (Size == 0)
+            {
+                return this.Count;
+            }
+
+            if (BitMap.TryFindShortestSequence(RoundToGroup(Size), false, out int Sequence))
+            {
+                return Sequence;
+            }
+
+            Capacity += Size;
+            return Count;
         }
 
 
         private static int RoundToGroup(int Count)
         {
             return (Count + GroupSize - 1) >> BinaryGroupSize;
+        }
+
+        private static int FloorToGroup(int Count)
+        {
+            return Count >> BinaryGroupSize;
+        }
+
+        private static int RoundToBufferSize(int Count)
+        {
+            return (Count + BufferAccuracry - 1) & ~(BufferAccuracry - 1);
         }
     }
 }
