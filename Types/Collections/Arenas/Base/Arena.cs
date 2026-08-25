@@ -22,7 +22,7 @@ namespace Zion
                 {
                     value = RoundToBufferSize(value);
                     Array.Resize(ref Data, value);
-                    BitArray.Resize(ref BitMap, value >> BinaryGroupSize);
+                    BitMap = BitArray.Resize(BitMap, value >> BinaryGroupSize);
                 }
             }
         }
@@ -199,10 +199,10 @@ namespace Zion
             ArgumentOutOfRangeException.ThrowIfNegative(Size);
             if (Size == 0)
             {
-                return this.Count;
+                return Count;
             }
 
-            if (BitMap.TryFindShortestSequence(RoundToGroup(Size), false, out int Sequence))
+            if (BitMap.TryFindShortestSequence(RoundToGroup(Size), false, Count, out int Sequence))
             {
                 return Sequence;
             }

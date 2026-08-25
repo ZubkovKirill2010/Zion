@@ -11,9 +11,10 @@ namespace Zion
         #endregion
 
         #region Data
+        public static readonly BitArray Empty = new BitArray(0);
+
         private readonly byte[] Data;
-        
-        public readonly int Length;
+        public  readonly int    Length;
 
         #endregion
 
@@ -139,6 +140,102 @@ namespace Zion
 
         #endregion
 
+        #region OverrideMethods
+        public override string ToString()
+        {
+            int BitCount = Length;
+
+            if (BitCount <= 0)
+            {
+                return "[]";
+            }
+
+            int ByteCount = (BitCount + 7) >> 3;
+            int StringLength = 1 + BitCount + (ByteCount - 1) + 1;
+
+            return string.Create
+            (
+                StringLength,
+                (Data, Length),
+                static (Span, State) =>
+                {
+                    var Data = State.Data;
+                    int TotalBits = State.Length;
+
+                    Span[0] = '[';
+                    Span[^1] = ']';
+
+                    int DestinationIndex = 1;
+                    int FullBytes = TotalBits >> 3;
+
+                    for (int ByteIndex = 0; ByteIndex < FullBytes; ByteIndex++)
+                    {
+                        if (ByteIndex > 0)
+                        {
+                            Span[DestinationIndex++] = '_';
+                        }
+
+                        byte B = Data[ByteIndex];
+                        Span[DestinationIndex++] = (char)('0' + ((B >> 7) & 1));
+                        Span[DestinationIndex++] = (char)('0' + ((B >> 6) & 1));
+                        Span[DestinationIndex++] = (char)('0' + ((B >> 5) & 1));
+                        Span[DestinationIndex++] = (char)('0' + ((B >> 4) & 1));
+                        Span[DestinationIndex++] = (char)('0' + ((B >> 3) & 1));
+                        Span[DestinationIndex++] = (char)('0' + ((B >> 2) & 1));
+                        Span[DestinationIndex++] = (char)('0' + ((B >> 1) & 1));
+                        Span[DestinationIndex++] = (char)('0' + (B & 1));
+                    }
+
+                    int RemainingBits = TotalBits & 7;
+                    if (RemainingBits > 0)
+                    {
+                        if (FullBytes > 0)
+                        {
+                            Span[DestinationIndex++] = '_';
+                        }
+
+                        byte Bit = Data[FullBytes];
+                        for (int BitIndex = 0; BitIndex < RemainingBits; BitIndex++)
+                        {
+                            int Shift = 7 - BitIndex;
+                            Span[DestinationIndex++] = (char)('0' + ((Bit >> Shift) & 1));
+                        }
+                    }
+                }
+            );
+        }
+
+        public override bool Equals(object? Object)
+        {
+            return Object is BitArray BitArray && this == BitArray;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Data, Length);
+        }
+
+        #endregion
+
+        #region StaticMethods
+        public static BitArray Resize(BitArray Source, int NewLength)
+        {
+            ArgumentNullException.ThrowIfNull(Source);
+
+            if (NewLength <= 0)
+            {
+                Source = Empty;
+            }
+
+            byte[] Result = new byte[GetByteCount(NewLength)];
+
+            Array.Copy(Source.Data, Result, Math.Min(Source.Length, NewLength));
+
+            return new BitArray(NewLength, Result);
+        }
+
+        #endregion
+
         #region PublicMethods
         public BitArray Clone()
         {
@@ -148,6 +245,34 @@ namespace Zion
         public BitList ToBitList()
         {
             return new BitList(Data, Length);
+        }
+
+        public bool Contains(int Start, int Count, bool Target)
+        {
+
+        }
+
+        public void Fill(int Start, int Count, bool Value)
+        {
+
+        }
+
+        public bool TryFindShortestSequence(int BitCount, bool TargetBit, out int SequenceStart)
+        {
+            return TryFindShortestSequence(BitCount, TargetBit, 0, Length, out SequenceStart);
+        }
+
+        public bool TryFindShortestSequence(int BitCount, bool TargetBit, int Count, out int SequenceStart)
+        {
+            return TryFindShortestSequence(Length, TargetBit, 0, Count, out SequenceStart);
+        }
+
+        public bool TryFindShortestSequence(int Length, bool TargetBit, int Start, int Count, out int SequenceStart)
+        {
+            //TODO
+            //Найти кратчайшую последовательсоть битов и вернуть позицию начала этой последовательности
+            SequenceStart = -1;
+            return false;
         }
 
 
