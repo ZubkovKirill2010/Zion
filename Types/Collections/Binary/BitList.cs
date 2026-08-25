@@ -3,20 +3,11 @@ using Zion.Serialization;
 
 namespace Zion
 {
-    public class BitList : IList<bool>, IBinarySerializable<BitList>
+    public sealed class BitList : BitCollection, IList<bool>, IBinarySerializable<BitList>
     {
-        #region Constants
-        private const int Filter = 0b111;
-
-        #endregion
-
-        #region Data
-        private byte[] Data;
-
-        #endregion
-
         #region Properties
-        public int Count { get; private set; }
+        private int _Count;
+        public override int Count => _Count;
 
         public int Capacity => Data.Length << 3;
 
@@ -39,13 +30,13 @@ namespace Zion
             ArgumentOutOfRangeException.ThrowIfWithout(Count >> 3, Data.Length);
 
             this.Data = ZArray.Clone(Data);
-            this.Count = Count;
+            this._Count = Count;
         }
 
         private BitList(int Count, byte[] Data)
         {
             this.Data = Data.NotNull();
-            this.Count = Count;
+            this._Count = Count;
         }
 
         #endregion
@@ -59,7 +50,7 @@ namespace Zion
                 {
                     throw new ArgumentOutOfRangeException($"Index(={Index}) out of range [0..{Count})");
                 }
-                return Data[Index >> 3].GetBit(Index & Filter);
+                return Data[Index >> 3].GetBit(Index & 0b111);
             }
             set
             {
@@ -68,7 +59,7 @@ namespace Zion
                     throw new ArgumentOutOfRangeException($"Index(={Index}) out of range [0..{Count})");
                 }
                 int ByteIndex = Index >> 3;
-                Data[ByteIndex] = Data[ByteIndex].SetBit(Index & Filter, value);
+                Data[ByteIndex] = Data[ByteIndex].SetBit(Index & 0b111, value);
             }
         }
 
@@ -80,92 +71,15 @@ namespace Zion
 
         #endregion
 
-        #region OverrideMethods
-        public override string ToString()
-        {
-            int BitCount = Count;
-
-            if (BitCount <= 0)
-            {
-                return "[]";
-            }
-
-            int ByteCount = (BitCount + 7) >> 3;
-            int StringLength = 1 + BitCount + (ByteCount - 1) + 1;
-
-            return string.Create
-            (
-                StringLength,
-                (Data, Count),
-                static (Span, State) =>
-                {
-                    var Data = State.Data;
-                    int TotalBits = State.Count;
-
-                    Span[0] = '[';
-                    Span[^1] = ']';
-
-                    int DestinationIndex = 1;
-                    int FullBytes = TotalBits >> 3;
-
-                    for (int ByteIndex = 0; ByteIndex < FullBytes; ByteIndex++)
-                    {
-                        if (ByteIndex > 0)
-                        {
-                            Span[DestinationIndex++] = '_';
-                        }
-
-                        byte B = Data[ByteIndex];
-                        Span[DestinationIndex++] = (char)('0' + ((B >> 7) & 1));
-                        Span[DestinationIndex++] = (char)('0' + ((B >> 6) & 1));
-                        Span[DestinationIndex++] = (char)('0' + ((B >> 5) & 1));
-                        Span[DestinationIndex++] = (char)('0' + ((B >> 4) & 1));
-                        Span[DestinationIndex++] = (char)('0' + ((B >> 3) & 1));
-                        Span[DestinationIndex++] = (char)('0' + ((B >> 2) & 1));
-                        Span[DestinationIndex++] = (char)('0' + ((B >> 1) & 1));
-                        Span[DestinationIndex++] = (char)('0' + (B & 1));
-                    }
-
-                    int RemainingBits = TotalBits & 7;
-                    if (RemainingBits > 0)
-                    {
-                        if (FullBytes > 0)
-                        {
-                            Span[DestinationIndex++] = '_';
-                        }
-
-                        byte Bit = Data[FullBytes];
-                        for (int BitIndex = 0; BitIndex < RemainingBits; BitIndex++)
-                        {
-                            int Shift = 7 - BitIndex;
-                            Span[DestinationIndex++] = (char)('0' + ((Bit >> Shift) & 1));
-                        }
-                    }
-                }
-            );
-        }
-
-        public override bool Equals(object? Object)
-        {
-            return Object is BitList BitList && this == BitList;
-        }
-
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(Data, Count);
-        }
-
-        #endregion
-
         #region IList
         public void Add(bool Item)
         {
             int Index = Count;
-            EnsureCapacity(++Count);
+            EnsureCapacity(++_Count);
             if (Item)
             {
                 int ByteIndex = Index >> 3;
-                Data[ByteIndex] = Data[ByteIndex].SetBit(Index & Filter, Item);
+                Data[ByteIndex] = Data[ByteIndex].SetBit(Index & 0b111, Item);
             }
         }
 
@@ -173,18 +87,18 @@ namespace Zion
         {
             ArgumentOutOfRangeException.ThrowIfBeyond(Index, Count);
 
-            EnsureCapacity(++Count);
+            EnsureCapacity(++_Count);
 
             int LastByte = (Count - 1) >> 3;
             int InsertByte = Index >> 3;
-            int InsertBit = Index & Filter;
+            int InsertBit = Index & 0b111;
 
             bool Carry = Item;
 
             for (int ByteIndex = InsertByte; ByteIndex <= LastByte; ByteIndex++)
             {
                 int StartBit = (ByteIndex == InsertByte) ? InsertBit : 0;
-                int EndBit = (ByteIndex == LastByte) ? ((Count - 1) & Filter) : 7;
+                int EndBit = (ByteIndex == LastByte) ? ((Count - 1) & 0b111) : 7;
 
                 (Data[ByteIndex], Carry) = InsertBitShift(Data[ByteIndex], StartBit, EndBit, Carry);
             }
@@ -228,7 +142,7 @@ namespace Zion
                 }
             }
 
-            int LastByteLength = Count & Filter;
+            int LastByteLength = Count & 0b111;
             if (LastByteLength != 0)
             {
                 byte LastByte = Data[FullBytes];
@@ -260,7 +174,7 @@ namespace Zion
                 }
             }
 
-            int LastByteLength = Count & Filter;
+            int LastByteLength = Count & 0b111;
             if (LastByteLength != 0)
             {
                 byte LastByte = Data[FullBytes];
@@ -316,22 +230,22 @@ namespace Zion
 
             int LastByte = (Count - 1) >> 3;
             int RemoveByte = Index >> 3;
-            int RemoveBit = Index & Filter;
+            int RemoveBit = Index & 0b111;
 
             bool Carry = false;
 
             for (int ByteIndex = LastByte; ByteIndex >= RemoveByte; ByteIndex--)
             {
                 int StartBit = (ByteIndex == RemoveByte) ? RemoveBit : 0;
-                int EndBit = (ByteIndex == LastByte) ? ((Count - 1) & Filter) : 7;
+                int EndBit = (ByteIndex == LastByte) ? ((Count - 1) & 0b111) : 7;
 
                 (Data[ByteIndex], Carry) = RemoveBitShift(Data[ByteIndex], StartBit, EndBit, Carry);
             }
 
-            Count--;
+            _Count--;
 
             int ClearByte = Count >> 3;
-            int ClearBit = Count & Filter;
+            int ClearBit = Count & 0b111;
             Data[ClearByte] = Data[ClearByte].SetBit(ClearBit, false);
         }
 
@@ -360,7 +274,7 @@ namespace Zion
                 yield return (Current & 0b1000_0000) != 0;
             }
 
-            int LastByteLength = Count & Filter;
+            int LastByteLength = Count & 0b111;
             if (LastByteLength != 0)
             {
                 byte Current = Data[FullBytes];

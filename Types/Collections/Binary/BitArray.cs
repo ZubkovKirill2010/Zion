@@ -1,20 +1,13 @@
-﻿using System.Collections;
-using Zion.Serialization;
+﻿using Zion.Serialization;
 
 namespace Zion
 {
-    public class BitArray : IBinarySerializable<BitArray>, IEnumerable<bool>
+    public sealed class BitArray : BitCollection, IBinarySerializable<BitArray>
     {
-        #region Constants
-        private const int Filter = 0b111;
-
-        #endregion
-
         #region Data
         public static readonly BitArray Empty = new BitArray(0);
 
-        private readonly byte[] Data;
-        public  readonly int    Length;
+        public override int Count { get; }
 
         #endregion
 
@@ -22,7 +15,7 @@ namespace Zion
         public BitArray(int Length)
         {
             this.Data = new byte[GetByteCount(Length)];
-            this.Length = Length;
+            this.Count = Length;
         }
 
         public BitArray(byte[] Data, int Length)
@@ -31,43 +24,13 @@ namespace Zion
             ArgumentOutOfRangeException.ThrowIfWithout(Length >> 3, Data.Length);
 
             this.Data   = ZArray.Clone(Data);
-            this.Length = Length;
+            this.Count = Length;
         }
 
         private BitArray(int Length, byte[] Data)
         {
-            this.Length = Length;
+            this.Count = Length;
             this.Data = Data;
-        }
-
-        #endregion
-
-        #region Indexers
-        public bool this[int Index]
-        {
-            get
-            {
-                if (Index < 0 || Index >= Length)
-                {
-                    throw new ArgumentOutOfRangeException($"Index(={Index}) out of range [0..{Length})");
-                }
-                return Data[Index >> 3].GetBit(Index & Filter);
-            }
-            set
-            {
-                if (Index < 0 || Index >= Length)
-                {
-                    throw new ArgumentOutOfRangeException($"Index(={Index}) out of range [0..{Length})");
-                }
-                int ByteIndex = Index >> 3;
-                Data[ByteIndex] = Data[ByteIndex].SetBit(Index & Filter, value);
-            }
-        }
-
-        public bool this[Index Index]
-        {
-            get => this[Index.GetOffset(Length)];
-            set => this[Index.GetOffset(Length)] = value;
         }
 
         #endregion
@@ -79,12 +42,12 @@ namespace Zion
             {
                 return ReferenceComprasion;
             }
-            if (A.Length != B.Length)
+            if (A.Count != B.Count)
             {
                 return false;
             }
 
-            int Count = A.Length & 0b111;
+            int Count = A.Count & 0b111;
             byte[] ABuffer = A.Data;
             byte[] BBuffer = B.Data;
 
@@ -128,7 +91,7 @@ namespace Zion
 
             byte[] Source = Value.Data;
             byte[] Result = new byte[Source.Length];
-            int Length = Value.Length;
+            int Length = Value.Count;
 
             for (int i = 0; i < Length; i++)
             {
@@ -136,83 +99,6 @@ namespace Zion
             }
 
             return new BitArray(Length, Result);
-        }
-
-        #endregion
-
-        #region OverrideMethods
-        public override string ToString()
-        {
-            int BitCount = Length;
-
-            if (BitCount <= 0)
-            {
-                return "[]";
-            }
-
-            int ByteCount = (BitCount + 7) >> 3;
-            int StringLength = 1 + BitCount + (ByteCount - 1) + 1;
-
-            return string.Create
-            (
-                StringLength,
-                (Data, Length),
-                static (Span, State) =>
-                {
-                    var Data = State.Data;
-                    int TotalBits = State.Length;
-
-                    Span[0] = '[';
-                    Span[^1] = ']';
-
-                    int DestinationIndex = 1;
-                    int FullBytes = TotalBits >> 3;
-
-                    for (int ByteIndex = 0; ByteIndex < FullBytes; ByteIndex++)
-                    {
-                        if (ByteIndex > 0)
-                        {
-                            Span[DestinationIndex++] = '_';
-                        }
-
-                        byte B = Data[ByteIndex];
-                        Span[DestinationIndex++] = (char)('0' + ((B >> 7) & 1));
-                        Span[DestinationIndex++] = (char)('0' + ((B >> 6) & 1));
-                        Span[DestinationIndex++] = (char)('0' + ((B >> 5) & 1));
-                        Span[DestinationIndex++] = (char)('0' + ((B >> 4) & 1));
-                        Span[DestinationIndex++] = (char)('0' + ((B >> 3) & 1));
-                        Span[DestinationIndex++] = (char)('0' + ((B >> 2) & 1));
-                        Span[DestinationIndex++] = (char)('0' + ((B >> 1) & 1));
-                        Span[DestinationIndex++] = (char)('0' + (B & 1));
-                    }
-
-                    int RemainingBits = TotalBits & 7;
-                    if (RemainingBits > 0)
-                    {
-                        if (FullBytes > 0)
-                        {
-                            Span[DestinationIndex++] = '_';
-                        }
-
-                        byte Bit = Data[FullBytes];
-                        for (int BitIndex = 0; BitIndex < RemainingBits; BitIndex++)
-                        {
-                            int Shift = 7 - BitIndex;
-                            Span[DestinationIndex++] = (char)('0' + ((Bit >> Shift) & 1));
-                        }
-                    }
-                }
-            );
-        }
-
-        public override bool Equals(object? Object)
-        {
-            return Object is BitArray BitArray && this == BitArray;
-        }
-
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(Data, Length);
         }
 
         #endregion
@@ -229,7 +115,7 @@ namespace Zion
 
             byte[] Result = new byte[GetByteCount(NewLength)];
 
-            Array.Copy(Source.Data, Result, Math.Min(Source.Length, NewLength));
+            Array.Copy(Source.Data, Result, Math.Min(Source.Count, NewLength));
 
             return new BitArray(NewLength, Result);
         }
@@ -239,12 +125,12 @@ namespace Zion
         #region PublicMethods
         public BitArray Clone()
         {
-            return new BitArray(Data, Length);
+            return new BitArray(Data, Count);
         }
 
         public BitList ToBitList()
         {
-            return new BitList(Data, Length);
+            return new BitList(Data, Count);
         }
 
         public bool Contains(int Start, int Count, bool Target)
@@ -259,12 +145,12 @@ namespace Zion
 
         public bool TryFindShortestSequence(int BitCount, bool TargetBit, out int SequenceStart)
         {
-            return TryFindShortestSequence(BitCount, TargetBit, 0, Length, out SequenceStart);
+            return TryFindShortestSequence(BitCount, TargetBit, 0, Count, out SequenceStart);
         }
 
         public bool TryFindShortestSequence(int BitCount, bool TargetBit, int Count, out int SequenceStart)
         {
-            return TryFindShortestSequence(Length, TargetBit, 0, Count, out SequenceStart);
+            return TryFindShortestSequence(this.Count, TargetBit, 0, Count, out SequenceStart);
         }
 
         public bool TryFindShortestSequence(int Length, bool TargetBit, int Start, int Count, out int SequenceStart)
@@ -288,7 +174,7 @@ namespace Zion
 
         public bool[] ToBooleanArray()
         {
-            bool[] Result = new bool[Length];
+            bool[] Result = new bool[Count];
             int Index = 0;
 
             foreach (bool Bit in this)
@@ -308,8 +194,8 @@ namespace Zion
         #region IBinarySerializable
         public void Write(BinaryWriter Writer)
         {
-            Writer.Write(Length);
-            Writer.Write(Data, 0, GetByteCount(Length));
+            Writer.Write(Count);
+            Writer.Write(Data, 0, GetByteCount(Count));
         }
 
         public static BitArray Read(BinaryReader Reader)
@@ -322,56 +208,10 @@ namespace Zion
 
         #endregion
 
-        #region IEnumerable
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
-        public IEnumerator<bool> GetEnumerator()
-        {
-            int FullBytes = Length >> 3;
-
-            for (int i = 0; i < FullBytes; i++)
-            {
-                byte Current = Data[i];
-                yield return (Current & 0b0000_0001) != 0;
-                yield return (Current & 0b0000_0010) != 0;
-                yield return (Current & 0b0000_0100) != 0;
-                yield return (Current & 0b0000_1000) != 0;
-                yield return (Current & 0b0001_0000) != 0;
-                yield return (Current & 0b0010_0000) != 0;
-                yield return (Current & 0b0100_0000) != 0;
-                yield return (Current & 0b1000_0000) != 0;
-            }
-
-            int LastByteLength = Length & Filter;
-            if (LastByteLength != 0)
-            {
-                byte Current = Data[FullBytes];
-                int BitIndex = 0;
-                if (++BitIndex > LastByteLength) { yield break; }
-                yield return (Current & 0b0000_0001) != 0;
-                if (++BitIndex > LastByteLength) { yield break; }
-                yield return (Current & 0b0000_0010) != 0;
-                if (++BitIndex > LastByteLength) { yield break; }
-                yield return (Current & 0b0000_0100) != 0;
-                if (++BitIndex > LastByteLength) { yield break; }
-                yield return (Current & 0b0000_1000) != 0;
-                if (++BitIndex > LastByteLength) { yield break; }
-                yield return (Current & 0b0001_0000) != 0;
-                if (++BitIndex > LastByteLength) { yield break; }
-                yield return (Current & 0b0010_0000) != 0;
-                if (++BitIndex > LastByteLength) { yield break; }
-                yield return (Current & 0b0100_0000) != 0;
-                if (++BitIndex > LastByteLength) { yield break; }
-                yield return (Current & 0b1000_0000) != 0;
-            }
-        }
-
-        #endregion
-
         #region PrivateMethods
         private int GetLastByteLength()
         {
-            return Data.Length - Length;
+            return Data.Length - Count;
         }
 
         private static int GetByteCount(int Count)
