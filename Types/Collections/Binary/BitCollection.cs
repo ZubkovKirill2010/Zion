@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Numerics;
 using System.Runtime.InteropServices;
-using Zion.MathExpressions;
 
 namespace Zion
 {
@@ -253,13 +252,13 @@ namespace Zion
 
             int EndBit = Start + Count;
 
-            int FirstWordIndex = Start >> BinaryGroupSize;
-            int LastWordIndex  = (EndBit - 1) >> BinaryGroupSize;
-            int FirstBitOffset = Start & RemainderFilter;
-            int LastBitCount   = EndBit & RemainderFilter;
+            int FirstWordIndex  = Start >> BinaryGroupSize;
+            int LastWordIndex   = (EndBit - 1) >> BinaryGroupSize;
+            int FirstBitOffset  = Start & RemainderFilter;
+            int LastGroupLength = EndBit & RemainderFilter;
 
             ulong FirstMask = ~0UL << FirstBitOffset;
-            ulong LastMask = LastBitCount == 0 ? ~0UL : (1UL << LastBitCount) - 1;
+            ulong LastMask = LastGroupLength == 0 ? ~0UL : (1UL << LastGroupLength) - 1;
 
             if (FirstWordIndex == LastWordIndex)
             {
@@ -350,17 +349,17 @@ namespace Zion
             }
         }
 
-        public bool TryFindShortestSequence(int BitCount, bool TargetBit, out int SequenceStart, out int SequenceLength)
+        public bool TryFindShortestSequence(int BitCount, bool TargetBit, out Segment Sequence)
         {
-            return TryFindShortestSequence(BitCount, TargetBit, Count, out SequenceStart, out SequenceLength);
+            return TryFindShortestSequence(BitCount, TargetBit, Count, out Sequence);
         }
 
-        public bool TryFindShortestSequence(int BitCount, bool TargetBit, int Count, out int SequenceStart, out int SequenceLength)
+        public bool TryFindShortestSequence(int BitCount, bool TargetBit, int Count, out Segment Sequence)
         {
-            return TryFindShortestSequence(BitCount, TargetBit, 0, Count, out SequenceStart, out SequenceLength);
+            return TryFindShortestSequence(BitCount, TargetBit, 0, Count, out Sequence);
         }
 
-        public bool TryFindShortestSequence(int BitCount, bool TargetBit, int Start, int Count, out int SequenceStart, out int SequenceLength)
+        public bool TryFindShortestSequence(int BitCount, bool TargetBit, int Start, int Count, out Segment Sequence)
         {
             int CollectionLength = this.Count;
 
@@ -368,8 +367,7 @@ namespace Zion
             ArgumentOutOfRangeException.ThrowIfWithout(Start, CollectionLength);
             ArgumentOutOfRangeException.ThrowIfWithout(Start + Count, CollectionLength);
 
-            SequenceStart = 0;
-            SequenceLength = 0;
+            Sequence = Segment.Empty;
 
             if (BitCount == 0)
             {
@@ -380,10 +378,10 @@ namespace Zion
 
             int EndBit = Start + Count;
 
-            int FirstWordIndex = Start        >> BinaryGroupSize;
-            int LastWordIndex  = (EndBit - 1) >> BinaryGroupSize;
-            int FirstBitOffset = Start  & RemainderFilter;
-            int LastBitCount   = EndBit & RemainderFilter;
+            int FirstWordIndex = Start >> BinaryGroupSize;
+            int LastWordIndex = (EndBit - 1) >> BinaryGroupSize;
+            int FirstBitOffset = Start & RemainderFilter;
+            int LastBitCount = EndBit & RemainderFilter;
 
             if (LastBitCount == 0)
             {
@@ -391,7 +389,7 @@ namespace Zion
             }
 
             ulong FirstMask = ~0UL << FirstBitOffset;
-            ulong LastMask  = (1UL << LastBitCount) - 1;
+            ulong LastMask = (1UL << LastBitCount) - 1;
 
             int CurrentStart = -1;
             int CurrentLength = 0;
@@ -399,52 +397,52 @@ namespace Zion
             int BestStart = -1;
             int BestLength = int.MaxValue;
 
+            bool TryUpdateBest()
+            {
+                if (CurrentLength >= BitCount && CurrentLength < BestLength)
+                {
+                    BestLength = CurrentLength;
+                    BestStart = CurrentStart;
+
+                    if (BestLength == BitCount)
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            void ResetCurrent()
+            {
+                CurrentLength = 0;
+                CurrentStart = -1;
+            }
+
             for (int WordIndex = FirstWordIndex; WordIndex <= LastWordIndex; WordIndex++)
             {
                 ulong Word = Data[WordIndex];
 
-                if (WordIndex == FirstWordIndex)
-                {
-                    Word &= FirstMask;
-                }
-                if (WordIndex == LastWordIndex)
-                {
-                    Word &= LastMask;
-                }
+                if (WordIndex == FirstWordIndex) Word &= FirstMask;
+                if (WordIndex == LastWordIndex) Word &= LastMask;
 
-
-                if (!TargetBit)
-                {
-                    Word = ~Word;
-                }
+                if (!TargetBit) Word = ~Word;
 
                 if (Word == 0)
                 {
                     if (CurrentLength > 0)
                     {
-                        if (CurrentLength >= SequenceLength)
+                        if (TryUpdateBest())
                         {
-                            if (CurrentLength < BestLength)
-                            {
-                                BestLength = CurrentLength;
-                                BestStart = CurrentStart;
-
-                                if (BestLength == SequenceLength)
-                                {
-                                    SequenceStart = BestStart;
-                                    SequenceLength = BestLength;
-                                    return true;
-                                }
-                            }
+                            Sequence = new Segment(BestStart, BestLength);
+                            return true;
                         }
-                        CurrentLength = 0;
-                        CurrentStart = -1;
+                        ResetCurrent();
                     }
                     continue;
                 }
 
-                int WordStartBit = WordIndex << 6;
-                ulong Remaining = Word;
+                var WordStartBit = WordIndex << BinaryGroupSize;
+                var Remaining = Word;
 
                 while (Remaining != 0)
                 {
@@ -462,63 +460,28 @@ namespace Zion
                         CurrentLength = SegmentLength;
                     }
 
-                    if (CurrentLength >= SequenceLength)
+                    if (TryUpdateBest())
                     {
-                        if (CurrentLength < BestLength)
-                        {
-                            BestLength = CurrentLength;
-                            BestStart = CurrentStart;
-
-                            if (BestLength == SequenceLength)
-                            {
-                                SequenceStart = BestStart;
-                                SequenceLength = BestLength;
-                                return true;
-                            }
-                        }
+                        Sequence = new Segment(BestStart, BestLength);
+                        return true;
                     }
 
                     int TotalShift = SegmentOffset + SegmentLength;
-                    if (TotalShift >= 64)
-                    {
-                        if (SegmentOffset == 0)
-                        {
-                            Remaining = 0;
-                        }
-                        else
-                        {
-                            Remaining = 0;
-                        }
-                    }
-                    else
-                    {
-                        Remaining >>= TotalShift;
-                    }
+                    Remaining = TotalShift >= 64 ? 0 : Remaining >> TotalShift;
                 }
 
                 if ((Word & 1UL) == 0 && CurrentLength > 0)
                 {
-                    if (CurrentLength >= SequenceLength)
+                    if (TryUpdateBest())
                     {
-                        if (CurrentLength < BestLength)
-                        {
-                            BestLength = CurrentLength;
-                            BestStart = CurrentStart;
-
-                            if (BestLength == SequenceLength)
-                            {
-                                SequenceStart = BestStart;
-                                SequenceLength = BestLength;
-                                return true;
-                            }
-                        }
+                        Sequence = new Segment(BestStart, BestLength);
+                        return true;
                     }
-                    CurrentLength = 0;
-                    CurrentStart = -1;
+                    ResetCurrent();
                 }
             }
 
-            if (CurrentLength >= SequenceLength && CurrentLength < BestLength)
+            if (CurrentLength >= BitCount && CurrentLength < BestLength)
             {
                 BestLength = CurrentLength;
                 BestStart = CurrentStart;
@@ -526,14 +489,13 @@ namespace Zion
 
             if (BestStart != -1)
             {
-                SequenceStart = BestStart;
-                SequenceLength = BestLength;
+                Sequence = new Segment(BestStart, BestLength);
                 return true;
             }
 
-
             return false;
         }
+
 
 
         public byte[] ToByteArray()

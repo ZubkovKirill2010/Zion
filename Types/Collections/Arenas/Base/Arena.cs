@@ -76,8 +76,8 @@ namespace Zion
             ArgumentOutOfRangeException.ThrowIfNegative(Size);
 
             int Start = GetFreeArea(Size);
-            MarkArea(Start, Size, true);
 
+            MarkArea(Start, Size, true);
             UpdateCount(Start + Size);
 
             return new ArenaSpan<T>(this, Start, Size);
@@ -202,9 +202,9 @@ namespace Zion
                 return Count;
             }
 
-            if (BitMap.TryFindShortestSequence(RoundToGroup(Size), false, Count, out int Sequence))
+            if (BitMap.TryFindShortestSequence(RoundToGroup(Size), false, Count, out Segment Sequence))
             {
-                return Sequence;
+                return Sequence.Start;
             }
 
             Capacity += Size;
