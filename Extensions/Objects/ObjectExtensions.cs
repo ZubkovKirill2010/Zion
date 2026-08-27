@@ -68,7 +68,7 @@
             }
 
 
-            public static bool CompareReferences<T>(T A, T B, out bool Result) where T : class
+            public static bool CompareReferences<T>(T? A, T? B, out bool Result) where T : class
             {
                 if (ReferenceEquals(A, B))
                 {
