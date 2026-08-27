@@ -4,7 +4,7 @@ namespace Zion
 {
     public sealed class ArenaSpan<T> : IDisposable, IComparable<ArenaSpan<T>>, IEnumerable<T>
     {
-        private  readonly Arena<T> Source;
+        private readonly Arena<T> Source;
 
         public readonly int Start;
         public readonly int Count;
@@ -72,6 +72,34 @@ namespace Zion
                 ? Source.Expand(this, Capacity)
                 : this;
         }
+
+        public void Move(int SourceIndex, int DestinationIndex, int Count)
+        {
+            if (Count <= 0 || SourceIndex == DestinationIndex)
+            {
+                return;
+            }
+
+            int MinIndex = Math.Min(SourceIndex, DestinationIndex);
+            int MaxIndex = Math.Max(SourceIndex + Count, DestinationIndex + Count);
+
+            ThrowIfWithout(MinIndex);
+            ThrowIfWithout(MaxIndex);
+
+            Arena<T> Arena = Source;
+
+            int TotalWindowSize = MaxIndex - MinIndex;
+            Span<T> TotalSpan   = Arena.GetSpan(Start + MinIndex, TotalWindowSize);
+
+            int LocalSourceStart = SourceIndex - MinIndex;
+            int LocalDestStart   = DestinationIndex - MinIndex;
+
+            var SourceSlice      = TotalSpan.Slice(LocalSourceStart, Count);
+            var DestinationSlice = TotalSpan.Slice(LocalDestStart, Count);
+
+            SourceSlice.CopyTo(DestinationSlice);
+        }
+
 
 
         public T[] ToArray(int Start, int Length)

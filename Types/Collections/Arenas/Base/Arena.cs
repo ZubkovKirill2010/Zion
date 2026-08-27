@@ -106,6 +106,11 @@ namespace Zion
         }
 
 
+        internal Span<T> GetSpan(int Start, int Count)
+        {
+            return Data.AsSpan(Start, Count);
+        }
+
         internal void Release(ArenaSpan<T> Span)
         {
             CheckSpan(Span);
