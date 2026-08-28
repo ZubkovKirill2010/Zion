@@ -26,11 +26,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Serialization\BinarySerialization\ADF\IO\Writing\" />
     <Folder Include="Serialization\BinarySerialization\ADF\IO\Reading\" />
-    <Folder Include="Serialization\BinarySerialization\ADF\IO\Options\" />
     <Folder Include="Serialization\BinarySerialization\ADF\Serialization\" />
-    <Folder Include="Serialization\BinarySerialization\ADF\Format\" />
+    <Folder Include="Serialization\BinarySerialization\ADF\Structure\Pages\Metadata\" />
     <Folder Include="Serialization\BinarySerialization\ADF\Structure\Pages\Page\" />
     <Folder Include="Serialization\BinarySerialization\Serializers\Object\" />
     <Folder Include="STP\Parser\Static\" />
