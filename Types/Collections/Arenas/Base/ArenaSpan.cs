@@ -1,16 +1,24 @@
-﻿using System.Collections;
-
-namespace Zion
+﻿namespace Zion
 {
-    public sealed class ArenaSpan<T> : IDisposable, IComparable<ArenaSpan<T>>, IEnumerable<T>
+    public struct ArenaSpan<T> : IDisposable//, IEnumerable<T>
     {
-        private readonly Arena<T> Source;
+        #region Data
+        private readonly ReaderWriterLockSlim Lock = new(LockRecursionPolicy.SupportsRecursion);
+
+        internal readonly Arena<T> Source;
 
         public readonly int Start;
         public readonly int Count;
 
         public bool IsDisposed { get; private set; }
 
+        #endregion
+
+        #region Constructors
+        public ArenaSpan()
+        {
+            IsDisposed = true;
+        }
 
         internal ArenaSpan(Arena<T> Source, int Start, int Size)
         {
@@ -23,20 +31,38 @@ namespace Zion
             this.Count = Size;
         }
 
+        #endregion
 
+        #region Indexers
         public T this[int Index]
         {
             get
             {
                 ThrowIfDisposed();
                 ThrowIfWithout(Index);
-                return Source[Start + Index];
+                Lock.EnterReadLock();
+                try
+                {
+                    return Source[Start + Index];
+                }
+                finally
+                {
+                    Lock.ExitReadLock();
+                }
             }
             set
             {
                 ThrowIfDisposed();
                 ThrowIfWithout(Index);
-                Source[Start + Index] = value;
+                Lock.EnterReadLock();
+                try
+                {
+                    Source[Start + Index] = value;
+                }
+                finally
+                {
+                    Lock.ExitReadLock();
+                }                
             }
         }
 
@@ -52,54 +78,188 @@ namespace Zion
             }
         }
 
+        #endregion
 
-        public bool IsWithout(int Index)
+        #region PublicMethods
+        public void Use(Action<Span<T>> Action)
         {
             ThrowIfDisposed();
-            return Index < 0 || Index >= Count;
+            Lock.EnterReadLock();
+            try
+            {
+                Span<T> Span = Source.AsSpan(this);
+                Action.Invoke(Span);
+            }
+            finally
+            {
+                Lock.ExitReadLock();
+            }
         }
 
-        public bool IsFrom(Arena<T> Arena)
+        public void Use(int Count, Action<Span<T>> Action)
         {
-            return ReferenceEquals(Source, Arena);
+            Use(0, Count, Action);
+        }
+
+        public void Use(int Start, int Count, Action<Span<T>> Action)
+        {
+            ThrowIfDisposed();
+            Lock.EnterReadLock();
+            try
+            {
+                Span<T> Span = Source.AsSpan(this, Start, Count);
+                Action.Invoke(Span);
+            }
+            finally
+            {
+                Lock.ExitReadLock();
+            }
+        }
+
+        public I Use<I>(Func<Span<T>, I> Function)
+        {
+            ThrowIfDisposed();
+            Lock.EnterReadLock();
+            try
+            {
+                Span<T> Span = Source.AsSpan(this);
+                return Function.Invoke(Span);
+            }
+            finally
+            {
+                Lock.ExitReadLock();
+            }
+        }
+
+        public I Use<I>(int Count, Func<Span<T>, I> Function)
+        {
+            return Use(0, Count, Function);
+        }
+
+        public I Use<I>(int Start, int Count, Func<Span<T>, I> Function)
+        {
+            ThrowIfDisposed();
+            Lock.EnterReadLock();
+            try
+            {
+                Span<T> Span = Source.AsSpan(this, Start, Count);
+                return Function.Invoke(Span);
+            }
+            finally
+            {
+                Lock.ExitReadLock();
+            }
         }
 
 
         public ArenaSpan<T> Expand(int Capacity)
         {
             ThrowIfDisposed();
-            return Capacity > Count
-                ? Source.Expand(this, Capacity)
-                : this;
+
+            if (Capacity <= Count)
+            {
+                return this;
+            }
+
+            Lock.EnterWriteLock();
+            try
+            {
+                return Source.Expand(this, Capacity);
+            }
+            finally
+            {
+                Lock.ExitWriteLock();
+            }
         }
 
         public void Move(int SourceIndex, int DestinationIndex, int Count)
         {
-            if (Count <= 0 || SourceIndex == DestinationIndex)
+            ThrowIfDisposed();
+            if (Count <= 0 || SourceIndex == DestinationIndex) return;
+
+            ThrowIfWithout(SourceIndex);
+            ThrowIfWithout(SourceIndex + Count - 1);
+            ThrowIfWithout(DestinationIndex);
+            ThrowIfWithout(DestinationIndex + Count - 1);
+
+            Lock.EnterWriteLock();
+            try
             {
-                return;
+                Span<T> TotalSpan = Source.AsSpan(this);
+
+                if (DestinationIndex > SourceIndex)
+                {
+                    if (SourceIndex + Count <= DestinationIndex)
+                    {
+                        TotalSpan.Slice(SourceIndex, Count)
+                                 .CopyTo(TotalSpan.Slice(DestinationIndex, Count));
+                    }
+                    else
+                    {
+                        for (int i = Count - 1; i >= 0; i--)
+                        {
+                            TotalSpan[DestinationIndex + i] = TotalSpan[SourceIndex + i];
+                        }
+                    }
+                }
+                else
+                {
+                    if (DestinationIndex + Count <= SourceIndex)
+                    {
+                        TotalSpan.Slice(SourceIndex, Count)
+                            .CopyTo(TotalSpan.Slice(DestinationIndex, Count));
+                    }
+                    else
+                    {
+                        for (int i = 0; i < Count; i++)
+                        {
+                            TotalSpan[DestinationIndex + i] = TotalSpan[SourceIndex + i];
+                        }
+                    }
+                }
             }
-
-            int MinIndex = Math.Min(SourceIndex, DestinationIndex);
-            int MaxIndex = Math.Max(SourceIndex + Count, DestinationIndex + Count);
-
-            ThrowIfWithout(MinIndex);
-            ThrowIfWithout(MaxIndex);
-
-            Arena<T> Arena = Source;
-
-            int TotalWindowSize = MaxIndex - MinIndex;
-            Span<T> TotalSpan   = Arena.GetSpan(Start + MinIndex, TotalWindowSize);
-
-            int LocalSourceStart = SourceIndex - MinIndex;
-            int LocalDestStart   = DestinationIndex - MinIndex;
-
-            var SourceSlice      = TotalSpan.Slice(LocalSourceStart, Count);
-            var DestinationSlice = TotalSpan.Slice(LocalDestStart, Count);
-
-            SourceSlice.CopyTo(DestinationSlice);
+            finally
+            {
+                Lock.ExitWriteLock();
+            }
         }
 
+        public void CopyTo(Span<T> Destination)
+        {
+            Lock.EnterWriteLock();
+            try
+            {
+                Source.AsSpan(this).CopyTo(Destination);
+            }
+            finally
+            {
+                Lock.ExitWriteLock();
+            }
+        }
+
+        public void CopyTo(int Start, int Count, Span<T> Destination)
+        {
+            Lock.EnterWriteLock();
+            try
+            {
+                Source.AsSpan(this, Start, Count).CopyTo(Destination);
+            }
+            finally
+            {
+                Lock.ExitWriteLock();
+            }
+        }
+
+
+        public bool IsWithin(int Index)
+        {
+            return Index >= 0 && Index < Count;
+        }
+
+        public bool IsWithout(int Index)
+        {
+            return Index < 0 || Index >= Count;
+        }
 
 
         public T[] ToArray(int Start, int Length)
@@ -111,56 +271,69 @@ namespace Zion
             return Source.ToArray(this.Start + Start, Length);
         }
 
-        public ReadOnlySpan<T> AsSpan()
-        {
-            ThrowIfDisposed();
-            return Source.AsSpan(Start, Count);
-        }
+        #endregion
 
-        public ReadOnlySpan<T> AsSpan(int Start, int Length)
-        {
-            ThrowIfDisposed();
-            ArgumentOutOfRangeException.ThrowIfWithout(Start, Count);
-            ArgumentOutOfRangeException.ThrowIfWithout(Start + Length, Count);
+        //#region IEnumerable
+        //IEnumerator IEnumerable.GetEnumerator()
+        //{
+        //    return GetEnumerator();
+        //}
 
-            return Source.AsSpan(this.Start + Start, Length);
-        }
+        //public IEnumerator<T> GetEnumerator()
+        //{
+        //    ThrowIfDisposed();
+        //    Lock.EnterReadLock();
+        //    try
+        //    {
+        //        return Source.GetEnumerator(Start, Count);
+        //    }
+        //    finally
+        //    {
+        //        Lock.ExitReadLock();
+        //    }
+        //}
 
+        //public IEnumerator<T> GetEnumerator(int Start, int Length)
+        //{
+        //    ThrowIfDisposed();
+        //    ArgumentOutOfRangeException.ThrowIfWithout(Start, Count);
+        //    ArgumentOutOfRangeException.ThrowIfWithout(Start + Length, Count);
 
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+        //    Lock.EnterReadLock();
+        //    try
+        //    {
+        //        return Source.GetEnumerator(this.Start, Length);
+        //    }
+        //    finally
+        //    {
+        //        Lock.ExitReadLock();
+        //    }            
+        //}
 
-        public IEnumerator<T> GetEnumerator()
-        {
-            ThrowIfDisposed();
-            return Source.GetEnumerator(Start, Count);
-        }
+        //#endregion
 
-        public IEnumerator<T> GetEnumerator(int Start, int Length)
-        {
-            ThrowIfDisposed();
-            ArgumentOutOfRangeException.ThrowIfWithout(Start, Count);
-            ArgumentOutOfRangeException.ThrowIfWithout(Start + Length, Count);
-
-            return Source.GetEnumerator(this.Start, Length);
-        }
-
-
+        #region IDisposable
         public void Dispose()
         {
-            if (!IsDisposed)
+            if (IsDisposed) { return; }
+
+            Lock.EnterWriteLock();
+            try
             {
                 Source.Release(this);
                 IsDisposed = true;
             }
+            finally
+            {
+                Lock.ExitWriteLock();
+            }
+
+            Lock.Dispose();
         }
 
+        #endregion
 
-        public int CompareTo(ArenaSpan<T>? Other)
-        {
-            return Start.CompareTo(Other.NotNull().Start);
-        }
-
-
+        #region PrivateMethods
         private void ThrowIfWithout(int Index)
         {
             if (IsWithout(Index))
@@ -176,5 +349,7 @@ namespace Zion
                 throw new ObjectDisposedException(nameof(ArenaSpan<>));
             }
         }
+
+        #endregion
     }
 }

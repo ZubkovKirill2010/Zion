@@ -1,5 +1,4 @@
 ﻿using System.Runtime.InteropServices;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Zion
 {
@@ -24,6 +23,7 @@ namespace Zion
 
         public void Push(T Item)
         {
+            var Data = this.Data;
             Data[Count++] = Item;
         }
 
@@ -68,42 +68,61 @@ namespace Zion
 
         public bool Contains(T Item)
         {
-            var Span = Data.AsSpan();
-            var Comparer = EqualityComparer<T>.Default;
-
-            for (int i = Count - 1; i >= 0; i--)
-            {
-                if (Comparer.Equals(Span[i], Item))
+            return Data.Use
+            (
+                Span =>
                 {
-                    return true;
-                }
-            }
+                    var Comparer = EqualityComparer<T>.Default;
 
-            return false;
+                    for (int i = Span.Length - 1; i >= 0; i--)
+                    {
+                        if (Comparer.Equals(Span[i], Item))
+                        {
+                            return true;
+                        }
+                    }
+
+                    return false;
+                }
+            );
         }
 
         public void CopyTo(T[] Array, int ArrayIndex)
         {
-            Data.AsSpan(0, Count).CopyTo(Array.AsSpan(ArrayIndex));
+            Data.Use
+            (
+                Count,
+                Span =>
+                {
+                    var Destination = Array.AsSpan(ArrayIndex);
+                    Span.CopyTo(Destination);
+                }
+            );
         }
 
         public bool Remove(T Item)
         {
-            var Count = this.Count;
-            var Span = Data.AsSpan(0, Count);
-            var Comparer = EqualityComparer<T>.Default;
-
-            for (int i = 0; i < Count; i++)
-            {
-                if (Comparer.Equals(Span[i], Item))
+            return Data.Use
+            (
+                Count,
+                Span =>
                 {
-                    Data.Move(i + 1, i, Count - i - 1);
-                    this.Count--;
-                    return true;
-                }
-            }
+                    var Count = this.Count;
+                    var Comparer = EqualityComparer<T>.Default;
 
-            return false;
+                    for (int i = 0; i < Count; i++)
+                    {
+                        if (Comparer.Equals(Span[i], Item))
+                        {
+                            Data.Move(i + 1, i, Count - i - 1);
+                            this.Count--;
+                            return true;
+                        }
+                    }
+
+                    return false;
+                }
+            );            
         }
 
         public void Clear()
@@ -114,23 +133,28 @@ namespace Zion
 
         public T[] ToArray()
         {
-            T[] Result = new T[this.Count];
+            T[] Result = new T[Count];
             CopyTo(Result, 0);
             return Result;
         }
 
         public Stack<T> ToStack()
         {
-            var Count = this.Count;
-            var Span  = Data.AsSpan(0, Count);
-            var Stack = new Stack<T>(Count);
+            return Data.Use
+            (
+                Count,
+                Span =>
+                {
+                    var Stack = new Stack<T>(Span.Length);
 
-            for (int i = Count - 1; i >= 0; i++)
-            {
-                Stack.Push(Span[i]);
-            }
+                    for (int i = Span.Length - 1; i >= 0; i++)
+                    {
+                        Stack.Push(Span[i]);
+                    }
 
-            return Stack;
+                    return Stack;
+                }
+            );            
         }
 
         public List<T> ToList()
@@ -141,25 +165,26 @@ namespace Zion
                 return new List<T>();
             }
 
-            var Span = Data.AsSpan(0, Count);
-            var List = new List<T>(Count);
+            return Data.Use
+            (
+                Count,
+                Span =>
+                {
+                    var Result = new List<T>(Count);
 
-            CollectionsMarshal.SetCount(List, Count);
+                    CollectionsMarshal.SetCount(Result, Count);
+                    Span.CopyTo(CollectionsMarshal.AsSpan(Result));
 
-            var BackingSpan = CollectionsMarshal.AsSpan(List);
-            Span.CopyTo(BackingSpan);
-
-            return List;
+                    return Result;
+                }
+            );            
         }
 
 
         public override IEnumerator<T> GetEnumerator()
         {
-            var Span = Data.AsSpan(0, Count);
-            for (int i = Count - 1; i >= 0; i++)
-            {
-                yield return Span[i];
-            }
+            //TODO
+            throw new NotImplementedException();
         }
     }
 }

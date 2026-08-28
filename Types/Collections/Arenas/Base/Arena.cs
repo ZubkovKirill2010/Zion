@@ -95,20 +95,22 @@ namespace Zion
         }
 
 
-        public ReadOnlySpan<T> AsSpan()
+        internal Span<T> AsSpan(ArenaSpan<T> ArenaSpan)
         {
-            return new ReadOnlySpan<T>(Data);
+            CheckSpan(ArenaSpan);
+            return Data.AsSpan(ArenaSpan.Start, ArenaSpan.Count);
         }
 
-        public ReadOnlySpan<T> AsSpan(int Start, int Length)
+        internal Span<T> AsSpan(ArenaSpan<T> ArenaSpan, int Start, int Count)
         {
-            return new ReadOnlySpan<T>(Data, Start, Length);
-        }
+            CheckSpan(ArenaSpan);
 
+            int ArenaLength = ArenaSpan.Count;
 
-        internal Span<T> GetSpan(int Start, int Count)
-        {
-            return Data.AsSpan(Start, Count);
+            ArgumentOutOfRangeException.ThrowIfWithout(Start, ArenaLength);
+            ArgumentOutOfRangeException.ThrowIfWithout(Start + Count, ArenaLength);
+
+            return Data.AsSpan(ArenaSpan.Start + Start, Count);
         }
 
         internal void Release(ArenaSpan<T> Span)
@@ -149,9 +151,14 @@ namespace Zion
 
         private void CheckSpan(ArenaSpan<T> Span)
         {
-            if (Span is null) { throw new ArgumentNullException(nameof(Span)); }
-            if (Span.IsDisposed) { throw new ObjectDisposedException(nameof(Span)); }
-            if (!Span.IsFrom(this)) { throw new InvalidOperationException("Arena not contains this span"); }
+            if (!ReferenceEquals(this, Span.Source))
+            {
+                throw new InvalidOperationException("Arena not contains this ArenaSpan");
+            }
+            if (Span.IsDisposed)
+            {
+                throw new ObjectDisposedException(nameof(Span));
+            }
         }
 
         private void UpdateCount(int NewCount)
@@ -195,7 +202,7 @@ namespace Zion
                 return true;
             }
 
-            Expanded = null!;
+            Expanded = default!;
             return false;
         }
 

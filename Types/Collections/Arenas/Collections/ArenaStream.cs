@@ -1,8 +1,10 @@
 ﻿using System.Numerics;
 using System.Text;
+using System.Runtime.InteropServices;
 using Zion.Vectors;
 using Vector2 = Zion.Vectors.Vector2;
 using Vector3 = Zion.Vectors.Vector3;
+using static System.Buffers.Binary.BinaryPrimitives;
 
 namespace Zion
 {
@@ -10,14 +12,14 @@ namespace Zion
     {
         public int Length { get; private set; }
 
+        private int _Position;
         public int Position
         {
-            get;
+            get => _Position;
             set
             {
-                if (field == value) { return; }
                 ArgumentOutOfRangeException.ThrowIfNegative(value);
-                field = value;
+                _Position = value;
             }
         }
 
@@ -30,8 +32,9 @@ namespace Zion
             get => Data[Index];
             set
             {
+                var Data = this.Data;
                 Data[Index] = value;
-                if (Index > Length)
+                if (Index >= Length)
                 {
                     Length = Index + 1;
                 }
@@ -53,7 +56,8 @@ namespace Zion
         public void Write(byte Value)
         {
             Reserve(1);
-            this[Position++] = Value;
+            this[Position] = Value;
+            UpdateLengthFromPosition(Position + 1);
         }
 
         public void Write(sbyte Value)
@@ -68,68 +72,57 @@ namespace Zion
 
         public void Write(decimal Value)
         {
-            Span<int> Buffer = stackalloc int[4];
-            decimal.GetBits(Value, Buffer);
-            
             Reserve(sizeof(decimal));
-            Write(Buffer[0]);
-            Write(Buffer[1]);
-            Write(Buffer[2]);
-            Write(Buffer[3]);
+            Data.Use
+            (
+                _Position,
+                Span =>
+                {
+                    Span<int> Destination = MemoryMarshal.Cast<byte, int>(Span);
+                    decimal.GetBits(Value, Destination);
+                    UpdateLengthFromPosition(_Position + sizeof(decimal));
+                }
+            );
         }
 
         public void Write(double Value)
         {
-            Write(BitConverter.DoubleToUInt64Bits(Value));
+            Write(Value, sizeof(double), WriteDoubleLittleEndian);
         }
 
         public void Write(float Value)
         {
-            Write(BitConverter.SingleToUInt32Bits(Value));
+            Write(Value, sizeof(float), WriteSingleLittleEndian);
         }
 
         public void Write(int Value)
         {
-            Write((uint)Value);
+            Write(Value, sizeof(int), WriteInt32LittleEndian);
         }
 
         public void Write(uint Value)
         {
-            Reserve(sizeof(uint));
-            Write((byte)(Value >> 24));
-            Write((byte)(Value >> 16));
-            Write((byte)(Value >> 8));
-            Write((byte)Value);
+            Write(Value, sizeof(uint), WriteUInt32LittleEndian);
         }
 
         public void Write(long Value)
         {
-            Write((ulong)Value);
+            Write(Value, sizeof(long), WriteInt64LittleEndian);
         }
 
         public void Write(ulong Value)
         {
-            Reserve(sizeof(ulong));
-            Write((byte)(Value >> 56));
-            Write((byte)(Value >> 48));
-            Write((byte)(Value >> 40));
-            Write((byte)(Value >> 32));
-            Write((byte)(Value >> 24));
-            Write((byte)(Value >> 16));
-            Write((byte)(Value >> 8));
-            Write((byte)Value);
+            Write(Value, sizeof(ulong), WriteUInt64LittleEndian);
         }
 
         public void Write(short Value)
         {
-            Write((ushort)Value);
+            Write(Value, sizeof(short), WriteInt16LittleEndian);
         }
 
         public void Write(ushort Value)
         {
-            Reserve(sizeof(ushort));
-            Write((byte)(Value >> 8));
-            Write((byte)Value);
+            Write(Value, sizeof(ushort), WriteUInt16LittleEndian);
         }
 
         public void Write(string Value)
@@ -141,125 +134,215 @@ namespace Zion
             Write7BitEncodedInt(Length);
             Reserve(Length);
 
-            Encoding.UTF8.GetBytes(Value, Data.AsSpan(Position, Length));
+            Data.Use
+            (
+                _Position,
+                Span => Encoding.UTF8.GetBytes(Value, Span)
+            );
+
             UpdateLengthFromPosition(Position + Length);
         }
 
 
         public void Write(Half Value)
         {
-            Write(BitConverter.HalfToUInt16Bits(Value));
+            Write(Value, 2, WriteHalfLittleEndian);
         }
 
         public void Write(Index Value)
         {
-            Write(Value.IsFromEnd);
-            Write(Value.Value);
+            Reserve(sizeof(bool) + sizeof(int));
+            WriteIndex(Value);
         }
 
         public void Write(Range Value)
         {
-            Write(Value.Start);
-            Write(Value.End);
+            Reserve(2 * (sizeof(bool) + sizeof(int)));
+            WriteIndex(Value.Start);
+            WriteIndex(Value.End);
         }
 
         public void Write(BigInteger Value)
         {
+            int Position = _Position;
             int Length = Value.GetByteCount();
 
             Reserve(Length + 4);
-            Write(Length);
-
-            Value.TryWriteBytes(Data.AsSpan(Position, Length), out _);
-            UpdateLengthFromPosition(Position + Length);
+            Data.Use
+            (
+                _Position,
+                Span =>
+                {
+                    WriteInt32LittleEndian(Span, Length);
+                    Value.TryWriteBytes(Span.Slice(4), out _);   
+                }
+            );
+            UpdateLengthFromPosition(Position + Length + 4);
         }
 
 
         public void Write(RGBColor Value)
         {
-            Write(Value.R);
-            Write(Value.G);
-            Write(Value.B);
+            Reserve(3);
+            Data.Use
+            (
+                _Position,
+                Span =>
+                {
+                    Span[0] = Value.R;
+                    Span[1] = Value.G;
+                    Span[2] = Value.B;
+                }
+            );
+            UpdateLengthFromPosition(_Position + 3);
         }
 
         public void Write(RGBAColor Value)
         {
-            Write(Value.R);
-            Write(Value.G);
-            Write(Value.B);
-            Write(Value.A);
+            Reserve(4);
+            Data.Use
+            (
+                _Position,
+                Span =>
+                {
+                    Span[0] = Value.R;
+                    Span[1] = Value.G;
+                    Span[2] = Value.B;
+                    Span[3] = Value.A;
+                }
+            );
+            UpdateLengthFromPosition(_Position + 4);
         }
 
 
         public void Write(Vector2 Value)
         {
-            Write(Value.X);
-            Write(Value.Y);
+            Reserve(8);
+            Data.Use
+            (
+                _Position,
+                Span =>
+                {
+                    WriteSingleLittleEndian(Span, Value.X);
+                    WriteSingleLittleEndian(Span.Slice(4), Value.Y);
+                }
+            );
+            UpdateLengthFromPosition(_Position + 8);
         }
 
         public void Write(Vector2Int Value)
         {
-            Write(Value.X);
-            Write(Value.Y);
+            Reserve(8);
+            Data.Use
+            (
+                _Position,
+                Span =>
+                {
+                    WriteInt32LittleEndian(Span, Value.X);
+                    WriteInt32LittleEndian(Span.Slice(4), Value.Y);
+                }
+            );
+            UpdateLengthFromPosition(_Position + 8);
         }
 
         public void Write(Vector3 Value)
         {
-            Write(Value.X);
-            Write(Value.Y);
-            Write(Value.Z);
+            Reserve(12);
+            Data.Use
+            (
+                _Position,
+                Span =>
+                {
+                    WriteSingleLittleEndian(Span, Value.X);
+                    WriteSingleLittleEndian(Span.Slice(4), Value.Y);
+                    WriteSingleLittleEndian(Span.Slice(8), Value.Z);
+                }
+            );
+            UpdateLengthFromPosition(_Position + 12);
         }
 
         public void Write(Vector3Int Value)
         {
-            Write(Value.X);
-            Write(Value.Y);
-            Write(Value.Z);
+            Reserve(12);
+            Data.Use
+            (
+                _Position,
+                Span =>
+                {
+                    WriteInt32LittleEndian(Span, Value.X);
+                    WriteInt32LittleEndian(Span.Slice(4), Value.Y);
+                    WriteInt32LittleEndian(Span.Slice(8), Value.Z);
+                }
+            );
+            UpdateLengthFromPosition(_Position + 12);
         }
 
-
-        public void Write(Span<byte> Buffer)
-        {
-            Reserve(Buffer.Length);
-            Buffer.CopyTo(Data.AsSpan(Position, Buffer.Length));
-            UpdateLengthFromPosition(Position + Buffer.Length);
-        }
 
         public void Write7BitEncodedInt(int Value)
         {
-            uint UInt = (uint)Value;
+            Reserve(5);
+            var UInt = (uint)Value;
+            var Index = 0;
 
-            while (UInt >= 0x80)
-            {
-                Write((byte)(UInt | 0x80));
-                UInt >>= 7;
-            }
+            Data.Use
+            (
+                _Position,
+                Span =>
+                {
+                    while (UInt >= 0x80)
+                    {
+                        Span[Index++] = (byte)(UInt | 0x80);
+                        UInt >>= 7;
+                    }
+                    Span[Index++] = (byte)UInt;
+                }
+            );
 
-            Write((byte)UInt);
+            UpdateLengthFromPosition(_Position + Index);
         }
 
         public void Write7BitEncodedInt64(long Value)
         {
-            ulong UInt = (ulong)Value;
+            Reserve(10);
+            var UInt = (ulong)Value;
+            var Index = 0;
 
-            while (UInt >= 0x80)
-            {
-                Write((byte)(UInt | 0x80));
-                UInt >>= 7;
-            }
+            Data.Use
+            (
+                _Position,
+                Span =>
+                {
+                    while (UInt >= 0x80)
+                    {
+                        Span[Index++] = (byte)(UInt | 0x80);
+                        UInt >>= 7;
+                    }
+                    Span[Index++] = (byte)UInt;
+                }
+            );
 
-            Write((byte)UInt);
+            UpdateLengthFromPosition(_Position + Index);
         }
 
 
-        public void Write(int Value, int Index)
+        private void Write<T>(T Value, int Size, Action<Span<byte>, T> Write)
         {
-            int Start = Position;
+            Reserve(Size);
+            Data.Use
+            (
+                _Position,
+                Span =>
+                {
+                    Write(Span, Value);
+                }
+            );
+            UpdateLengthFromPosition(_Position + Size);
+        }
 
-            Position = Index;
-            Write(Value);
-
-            Position = Start;
+        private void WriteIndex(Index Value)
+        {
+            this[_Position++] = Value.IsFromEnd ? (byte)1 : (byte)0;
+            Write(Value.Value, sizeof(int), WriteInt32LittleEndian);
         }
 
 
@@ -268,45 +351,39 @@ namespace Zion
             return Data.ToArray(0, Length);
         }
 
-        public Span<byte> AsSpan()
-        {
-            return Data.AsSpan(0, Length);
-        }
-
 
         public void CopyTo(Span<byte> Destination)
         {
-            AsSpan().CopyTo(Destination);
+            Data.CopyTo(0, Length, Destination);
         }
 
         public void CopyTo(Stream Stream)
         {
             ArgumentNullException.ThrowIfNull(Stream);
-            Stream.Write(AsSpan());
+            Data.Use(Span => Stream.Write(Span.Slice(0, Length)));
         }
 
-
-        public void EnsureCapacity(int Capacity)
-        {
-            Expand(Capacity);
-        }
 
         public void Reserve(int Capacity)
         {
-            EnsureCapacity(Position + Capacity);
+            Expand(_Position + Capacity);
         }
 
 
         public override IEnumerator<byte> GetEnumerator()
         {
-            return Data.GetEnumerator(0, Length);
+            //TODO
+            throw new NotImplementedException();
         }
 
 
         private void UpdateLengthFromPosition(int Position)
         {
-            this.Position = Position;
-            this.Length = Math.Max(this.Length, Position + 1);
+            _Position = Position;
+            if (Position > Length)
+            {
+                Length = Position;
+            }
         }
     }
 }
