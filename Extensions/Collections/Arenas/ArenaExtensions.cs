@@ -6,7 +6,13 @@
         {
             public ArenaStream GetStream(int Size)
             {
-                return new ArenaStream(Arena.Allocate(Size));
+                return new ArenaStream
+                (
+                    Arena.Allocate
+                    (
+                        Arena<byte>.RoundToGroup(Size)
+                    )
+                );
             }
         }
     }

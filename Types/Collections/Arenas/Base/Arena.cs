@@ -224,17 +224,17 @@ namespace Zion
         }
 
 
-        private static int RoundToGroup(int Count)
+        public static int RoundToGroup(int Count)
         {
             return (Count + GroupSize - 1) >> BinaryGroupSize;
         }
 
-        private static int FloorToGroup(int Count)
+        public static int FloorToGroup(int Count)
         {
             return Count >> BinaryGroupSize;
         }
 
-        private static int RoundToBufferSize(int Count)
+        public static int RoundToBufferSize(int Count)
         {
             return (Count + BufferAccuracry - 1) & ~(BufferAccuracry - 1);
         }

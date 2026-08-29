@@ -364,9 +364,18 @@ namespace Zion
         }
 
 
-        public void Reserve(int Capacity)
+        public void Reserve(int Size)
         {
-            Expand(_Position + Capacity);
+            int Required = _Position + Size;
+
+            if (Required > Data.Count)
+            {
+                int NewSize = Data.Count < 256
+                    ? Math.Max(Data.Count * 2, Required)
+                    : Math.Max(Data.Count + 256, Required);
+
+                Expand(NewSize);
+            }
         }
 
 
