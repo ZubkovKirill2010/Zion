@@ -27,7 +27,7 @@
 
   <ItemGroup>
     <Folder Include="Serialization\BinarySerialization\ADF\IO\Reading\" />
-    <Folder Include="Serialization\BinarySerialization\ADF\Registries\Registries\" />
+    <Folder Include="Serialization\BinarySerialization\ADF\Registries\Registries\FormatRegistries\" />
     <Folder Include="Serialization\BinarySerialization\ADF\Serialization\" />
     <Folder Include="Serialization\BinarySerialization\ADF\Structure\Pages\Metadata\" />
     <Folder Include="Serialization\BinarySerialization\ADF\Structure\Pages\Page\" />

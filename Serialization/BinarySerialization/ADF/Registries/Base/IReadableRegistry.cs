@@ -1,6 +1,6 @@
 ﻿namespace Zion.Serialization.ADF
 {
-    public interface IADFRegistryReadable
+    public interface IReadableRegistry
     {
 
     }

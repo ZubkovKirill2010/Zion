@@ -7,6 +7,12 @@
         private readonly ArenaStream Stream;
         private readonly List<ADFObjectWriter> References;
 
+        protected readonly ADFWritingOptions Options;
+        protected readonly WritableRegistries Registries;
+
+        protected StringIdRegistry StringRegistry => Registries.StringRegistry;
+        protected FormatIdRegistry FormatRegistry => Registries.FormatRegistry;
+
         #endregion
 
         #region Properties
@@ -25,11 +31,25 @@
         #endregion
 
         #region Constructors
+        public BaseADFWriter(BaseADFWriter Base) : this(Base.Arena)
+        {
+            Registries = Base.Registries;
+            Options = Base.Options;
+        }
+
         public BaseADFWriter(Arena<byte> Arenas)
         {
-            Arena  = Arenas;
+            Arena = Arenas.NotNull();
             Stream = Arena.GetStream(64);
             References = new(0);
+            Registries = new();
+            Options = ADFWritingOptions.Default;
+        }
+
+        public BaseADFWriter(Arena<byte> Arenas, ADFWritingOptions? Options)
+            : this(Arenas)
+        {
+            this.Options = Options ?? ADFWritingOptions.Default;
         }
 
         #endregion
@@ -46,7 +66,8 @@
 
         #endregion
 
-        #region Writing
+        #region AbstractMethods
+        protected abstract void OnDisposed();
 
         #endregion
 
@@ -61,6 +82,19 @@
             }
 
             TotalLength = Length;
+
+            OnDisposed();
+        }
+
+        #endregion
+
+        #region PrivateMethods
+        private void ThrowIfDisposed()
+        {
+            if (IsDisposed)
+            {
+                throw new ObjectDisposedException(nameof(BaseADFWriter));
+            }
         }
 
         #endregion
