@@ -31,13 +31,13 @@
         #endregion
 
         #region Constructors
-        public BaseADFWriter(BaseADFWriter Base) : this(Base.Arena)
+        internal BaseADFWriter(BaseADFWriter Base) : this(Base.Arena)
         {
             Registries = Base.Registries;
             Options = Base.Options;
         }
 
-        public BaseADFWriter(Arena<byte> Arenas)
+        internal BaseADFWriter(Arena<byte> Arenas)
         {
             Arena = Arenas.NotNull();
             Stream = Arena.GetStream(64);
@@ -46,7 +46,7 @@
             Options = ADFWritingOptions.Default;
         }
 
-        public BaseADFWriter(Arena<byte> Arenas, ADFWritingOptions? Options)
+        internal BaseADFWriter(Arena<byte> Arenas, ADFWritingOptions? Options)
             : this(Arenas)
         {
             this.Options = Options ?? ADFWritingOptions.Default;
