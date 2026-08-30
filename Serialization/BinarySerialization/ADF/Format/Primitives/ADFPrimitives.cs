@@ -1,4 +1,4 @@
-﻿using Id = ushort;
+﻿using Id = uint;
 
 namespace Zion.Serialization.ADF
 {
@@ -11,12 +11,12 @@ namespace Zion.Serialization.ADF
             new (sizeof(byte)),  //Byte
             new (sizeof(sbyte)), //SByte
 
-            new (sizeof(Int16 )), //Int16
-            new (sizeof(Int32 )), //Int32
-            new (sizeof(Int64 )), //Int64
-            new (sizeof(UInt16)), //UInt16
-            new (sizeof(UInt32)), //UInt32
-            new (sizeof(UInt64)), //UInt64
+            new (sizeof(short )), //Int16
+            new (sizeof(int )),   //Int32
+            new (sizeof(long)),   //Int64
+            new (sizeof(ushort)), //UInt16
+            new (sizeof(uint)),   //UInt32
+            new (sizeof(ulong)),  //UInt64
 
             new (sizeof(char)),    //Char
             new (sizeof(float)),   //Single
