@@ -2,13 +2,18 @@
 {
     public sealed class ADFWriter : BaseADFWriter
     {
+        #region Data
         public readonly Stream BaseStream;
-
         private readonly BinaryWriter Writer;
 
         private bool IsFirstPage;
 
+        private uint CurrentPage = 0;
+        private int LastPosition = 0;
 
+        #endregion
+
+        #region Constructors
         public ADFWriter(Stream Stream, ADFWritingOptions? Options = null)
             : base(new Arena<byte>(2048), Options)
         {
@@ -21,14 +26,9 @@
             IsFirstPage = true;
         }
 
+        #endregion
 
-        protected override void OnDisposed()
-        {
-            Flush();
-            Writer.Write(false);
-        }
-
-
+        #region PublicMethods
         public void Flush()
         {
             if (IsFirstPage)
@@ -39,7 +39,35 @@
             WritePage();
         }
 
+        #endregion
 
+        #region OverrideMethods
+        protected override void OnWrited(string Name, in uint NameId, in uint FormatId)
+        {
+            if (DataRegistry.Contains(NameId))
+            {
+                throw new ADFRepeatedNameException(Name);
+            }
+
+            DataDefinition Definition = new DataDefinition
+            (
+                FormatId,
+                CurrentPage,
+                LastPosition
+            );
+            LastPosition = CurrentPosition;
+            DataRegistry.Add(Name, NameId, Definition);
+        }
+
+        protected override void OnDisposed()
+        {
+            Flush();
+            Writer.Write(false);
+        }
+
+        #endregion
+
+        #region PrivateMethods
         private void WriteHeader()
         {
             if (!Options.WriteHeader) { return; }
@@ -65,5 +93,7 @@
 
             Flush(BaseStream);
         }
+
+        #endregion
     }
 }

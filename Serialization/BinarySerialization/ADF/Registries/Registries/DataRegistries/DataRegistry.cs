@@ -25,9 +25,21 @@
             }
         }
 
+        public void Add(string Name, uint NameId, DataDefinition Definition)
+        {
+            if (!TryAdd(NameId, Definition))
+            {
+                throw new ADFRepeatedNameException(Name);
+            }
+        }
+
         public bool TryAdd(string Name, DataDefinition Definition)
         {
-            uint NameId = StringRegistry.GetOrAdd(Name);
+            return TryAdd(StringRegistry.GetOrAdd(Name), Definition);
+        }
+
+        public bool TryAdd(uint NameId, DataDefinition Definition)
+        {
             if (!Parameters.TryAdd(NameId, Definition))
             {
                 return false;
@@ -36,11 +48,18 @@
             return true;
         }
 
+
         public bool Contains(string Name)
         {
             return StringRegistry.TryGetId(Name, out uint Id)
                 && Parameters.ContainsKey(Id);
         }
+
+        public bool Contains(uint NameId)
+        {
+            return Parameters.ContainsKey(NameId);
+        }
+
 
         public bool TryGetDefinition(string Name, out DataDefinition Definition)
         {
