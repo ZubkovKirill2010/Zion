@@ -72,7 +72,7 @@
         {
             if (!Options.WriteHeader) { return; }
 
-            //TODO: Write header
+            //TODO: WritePrimitive header
         }
 
         private void WritePage()
@@ -84,7 +84,7 @@
                 if (Registry.Registry.NewItemsCount > 0)
                 {
                     Writer.Write(Registry.Id);
-                    //TODO: Write registry
+                    //TODO: WritePrimitive registry
                 }
             }
 

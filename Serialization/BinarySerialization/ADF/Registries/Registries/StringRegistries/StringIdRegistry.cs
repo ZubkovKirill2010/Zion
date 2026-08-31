@@ -13,7 +13,7 @@
         }
 
 
-        public uint GetOrAdd(string String)
+        public uint GetOrAdd(string? String)
         {
             if (String is null)
             {
@@ -27,7 +27,7 @@
             return LastId++;
         }
 
-        public bool TryGetId(string String, out uint Id)
+        public bool TryGetId(string? String, out uint Id)
         {
             if (String is null)
             {

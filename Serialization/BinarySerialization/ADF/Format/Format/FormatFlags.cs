@@ -8,6 +8,6 @@
         IsDynamic  = 1 << 0,
         IsNullable = 1 << 1,
         IsAbstract = 1 << 2,
-        HasParent  = 1 << 3
+        IsClass    = 1 << 3
     }
 }

@@ -4,5 +4,12 @@
     {
         public ADFRecordObjectWriter(BaseADFWriter Base)
             : base(Base) { }
+
+
+        protected override ArenaStream GetStream(in uint NameId)
+        {
+            //Если пишется объект, который идёт после ожидаемого, то мы его пишем в временный поток
+            return base.GetStream(in NameId);
+        }
     }
 }

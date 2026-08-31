@@ -15,14 +15,17 @@ namespace Zion.Serialization.ADF
         #region Data
         private readonly Arena<byte> Arena;
         private readonly ArenaStream Stream;
-        private readonly List<ADFObjectWriter> References;
+        private readonly List<ADFObjectWriter> Childs;
 
         protected readonly ADFWritingOptions Options;
         protected readonly WritableRegistries Registries;
 
+        protected ReferenceIdsRegistry References => Registries.References;
         protected DataRegistry     DataRegistry   => Registries.DataRegistry;
         protected StringIdRegistry StringRegistry => Registries.StringRegistry;
         protected FormatIdRegistry FormatRegistry => Registries.FormatRegistry;
+
+        private int ChildPosition = 0;
 
         #endregion
 
@@ -54,7 +57,7 @@ namespace Zion.Serialization.ADF
         {
             Arena = Arenas.NotNull();
             Stream = Arena.GetStream(64);
-            References = new(0);
+            Childs = new(0);
             Registries = new();
             Options = ADFWritingOptions.Default;
         }
@@ -71,7 +74,7 @@ namespace Zion.Serialization.ADF
         public void Flush(Stream Destination)
         {
             Stream.CopyTo(Destination);
-            foreach (ADFObjectWriter Reference in References)
+            foreach (ADFObjectWriter Reference in Childs)
             {
                 Reference.Flush(Destination);
             }
@@ -83,7 +86,7 @@ namespace Zion.Serialization.ADF
         #region Primitives
         public void Write(string Name, bool Value)
         {
-            Write
+            WritePrimitive
             (
                 Name, ADFPrimitives.Boolean, in Value,
                 static (S, V) => S.Write(V)
@@ -92,7 +95,7 @@ namespace Zion.Serialization.ADF
 
         public void Write(string Name, byte Value)
         {
-            Write
+            WritePrimitive
             (
                 Name, ADFPrimitives.Byte, in Value,
                 static (S, V) => S.Write(V)
@@ -101,7 +104,7 @@ namespace Zion.Serialization.ADF
 
         public void Write(string Name, sbyte Value)
         {
-            Write
+            WritePrimitive
             (
                 Name, ADFPrimitives.SByte, in Value,
                 static (S, V) => S.Write(V)
@@ -111,7 +114,7 @@ namespace Zion.Serialization.ADF
 
         public void Write(string Name, short Value)
         {
-            Write
+            WritePrimitive
             (
                 Name, ADFPrimitives.Int16, in Value,
                 static (S, V) => S.Write(V)
@@ -120,7 +123,7 @@ namespace Zion.Serialization.ADF
 
         public void Write(string Name, int Value)
         {
-            Write
+            WritePrimitive
             (
                 Name, ADFPrimitives.Int32, in Value,
                 static (S, V) => S.Write(V),
@@ -130,7 +133,7 @@ namespace Zion.Serialization.ADF
 
         public void Write(string Name, long Value)
         {
-            Write
+            WritePrimitive
             (
                 Name, ADFPrimitives.Int64, in Value,
                 static (S, V) => S.Write(V),
@@ -140,7 +143,7 @@ namespace Zion.Serialization.ADF
 
         public void Write(string Name, ushort Value)
         {
-            Write
+            WritePrimitive
             (
                 Name, ADFPrimitives.UInt16, in Value,
                 static (S, V) => S.Write(V)        
@@ -149,7 +152,7 @@ namespace Zion.Serialization.ADF
 
         public void Write(string Name, uint Value)
         {
-            Write
+            WritePrimitive
             (
                 Name, ADFPrimitives.UInt32, in Value,
                 static (S, V) => S.Write(V),
@@ -159,7 +162,7 @@ namespace Zion.Serialization.ADF
 
         public void Write(string Name, ulong Value)
         {
-            Write
+            WritePrimitive
             (
                 Name, ADFPrimitives.UInt64, in Value,
                 static (S, V) => S.Write(V),
@@ -170,7 +173,7 @@ namespace Zion.Serialization.ADF
 
         public void Write(string Name, char Value)
         {
-            Write
+            WritePrimitive
             (
                 Name, ADFPrimitives.Char, in Value,
                 static (S, V) => S.Write(V)        
@@ -179,7 +182,7 @@ namespace Zion.Serialization.ADF
 
         public void Write(string Name, float Value)
         {
-            Write
+            WritePrimitive
             (
                 Name, ADFPrimitives.Single, in Value,
                 static (S, V) => S.Write(V)    
@@ -188,7 +191,7 @@ namespace Zion.Serialization.ADF
 
         public void Write(string Name, double Value)
         {
-            Write
+            WritePrimitive
             (
                 Name, ADFPrimitives.Double, in Value,
                 static (S, V) => S.Write(V)
@@ -198,7 +201,7 @@ namespace Zion.Serialization.ADF
 
         public void Write(string Name, decimal Value)
         {
-            Write
+            WritePrimitive
             (
                 Name, ADFPrimitives.Decimal, in Value,
                 static (S, V) => S.Write(V)
@@ -208,7 +211,7 @@ namespace Zion.Serialization.ADF
 
         public void Write(string Name, string Value)
         {
-            Write
+            WritePrimitive
             (
                 Name, ADFPrimitives.String, in Value,
                 (S, V) => S.Write(StringRegistry.GetOrAdd(V)),
@@ -219,7 +222,7 @@ namespace Zion.Serialization.ADF
 
         public void Write(string Name, Half Value)
         {
-            Write
+            WritePrimitive
             (
                 Name, ADFPrimitives.Half, in Value,
                 static (S, V) => S.Write(V)
@@ -228,7 +231,7 @@ namespace Zion.Serialization.ADF
 
         public void Write(string Name, Index Value)
         {
-            Write
+            WritePrimitive
             (
                 Name, ADFPrimitives.Index, in Value,
                 static (S, V) => S.Write(V),
@@ -238,7 +241,7 @@ namespace Zion.Serialization.ADF
 
         public void Write(string Name, Range Value)
         {
-            Write
+            WritePrimitive
             (
                 Name, ADFPrimitives.Range, in Value,
                 static (S, V) => S.Write(V),
@@ -252,8 +255,8 @@ namespace Zion.Serialization.ADF
 
         public void Write(string Name, BigInteger Value)
         {
-            //TODO: Write BigInteger
-            Write
+            //TODO: WritePrimitive BigInteger
+            WritePrimitive
             (
                 Name, ADFPrimitives.Range, in Value,
                 static (S, V) => throw new NotImplementedException()
@@ -263,7 +266,7 @@ namespace Zion.Serialization.ADF
 
         public void Write(string Name, RGBColor Value)
         {
-            Write
+            WritePrimitive
             (
                 Name, ADFPrimitives.RGB, in Value,
                 static (S, V) => S.Write(V)
@@ -272,7 +275,7 @@ namespace Zion.Serialization.ADF
 
         public void Write(string Name, RGBAColor Value)
         {
-            Write
+            WritePrimitive
             (
                 Name, ADFPrimitives.RGBA, in Value,
                 static (S, V) => S.Write(V)
@@ -282,7 +285,7 @@ namespace Zion.Serialization.ADF
 
         public void Write(string Name, Vector2 Value)
         {
-            Write
+            WritePrimitive
             (
                 Name, ADFPrimitives.Vector2, in Value,
                 static (S, V) => S.Write(V)
@@ -292,7 +295,7 @@ namespace Zion.Serialization.ADF
 
         public void Write(string Name, Vector2Int Value)
         {
-            Write
+            WritePrimitive
             (
                 Name, ADFPrimitives.Vector2Int, in Value,
                 static (S, V) => S.Write(V),
@@ -306,7 +309,7 @@ namespace Zion.Serialization.ADF
 
         public void Write(string Name, Vector3 Value)
         {
-            Write
+            WritePrimitive
             (
                 Name, ADFPrimitives.Vector3, in Value,
                 static (S, V) => S.Write(V)
@@ -316,7 +319,7 @@ namespace Zion.Serialization.ADF
 
         public void Write(string Name, Vector3Int Value)
         {
-            Write
+            WritePrimitive
             (
                 Name, ADFPrimitives.Vector3Int, in Value,
                 static (S, V) => S.Write(V),
@@ -330,16 +333,127 @@ namespace Zion.Serialization.ADF
         }
 
 
-        private void Write<T>(string Name, uint FormatId, in T Value, WriteAction<T> Write)
+        private bool TryWritePrimitive<T>(string Name, T Value)
         {
-            Write<T>(Name, FormatId, in Value, Write, Write);
+            switch (Value)
+            {
+                case bool       V: Write(Name, V); return true;
+                case byte       V: Write(Name, V); return true;
+                case sbyte      V: Write(Name, V); return true;
+
+                case short      V: Write(Name, V); return true;
+                case ushort     V: Write(Name, V); return true;
+                case int        V: Write(Name, V); return true;
+                case uint       V: Write(Name, V); return true;
+                case long       V: Write(Name, V); return true;
+                case ulong      V: Write(Name, V); return true;
+
+                case char       V: Write(Name, V); return true;
+                case float      V: Write(Name, V); return true;
+                case double     V: Write(Name, V); return true;
+                case decimal    V: Write(Name, V); return true;
+                case string     V: Write(Name, V); return true;
+
+                case Half       V: Write(Name, V); return true;
+                case Index      V: Write(Name, V); return true;
+                case Range      V: Write(Name, V); return true;
+                case BigInteger V: Write(Name, V); return true;
+
+                case RGBColor   V: Write(Name, V); return true;
+                case RGBAColor  V: Write(Name, V); return true;
+
+                case Vector2    V: Write(Name, V); return true;
+                case Vector3    V: Write(Name, V); return true;
+                case Vector2Int V: Write(Name, V); return true;
+                case Vector3Int V: Write(Name, V); return true;
+
+                default: return false;
+            }
         }
 
-        private void Write<T>(string Name, uint FormatId, in T Value, WriteAction<T> WriteFull, WriteAction<T> WriteConcise)
+        private void WritePrimitive<T>(string Name, uint FormatId, in T Value, WriteAction<T> Write)
+        {
+            WritePrimitive(Name, FormatId, in Value, Write, Write);
+        }
+
+        private void WritePrimitive<T>(string Name, in uint FormatId, in T Value, WriteAction<T> WriteFull, WriteAction<T> WriteConcise)
         {
             ThrowIfDisposed();
-            //TODO
+
+            var NameId = StringRegistry.GetOrAdd(Name.NotNull());
+            var Stream = GetStream(in NameId);
+
+            var WriteAction = Options.Compression ? WriteConcise : WriteFull;
+
+            WriteAction(Stream, Value);
+
+            OnWrited(Name, in NameId, in FormatId);
         }
+
+        #endregion
+
+        #region Objects
+        public void Write<T>(string Name, T? Value)
+        {
+            ThrowIfDisposed();
+
+            uint NameId = StringRegistry.GetOrAdd(Name.NotNull());
+
+            if (Value is null)
+            {
+                var Stream = GetStream(in NameId);
+                if (Options.Compression)
+                {
+                    Stream.Write((byte)0);
+                }
+                else
+                {
+                    Stream.Write(0u);
+                }
+                OnWrited(Name, in NameId, 0u);
+                return;
+            }
+
+            if (TryWritePrimitive(Name, Value))
+            {
+                return;
+            }
+
+            WriteComplex(Name, in NameId, Value);
+        }
+
+
+        private void WriteComplex<T>(string Name, in uint NameId, T Value)
+        {
+            var Type = Value.GetType();
+            var Stream = GetStream(in NameId);
+            
+            if (Type.IsClass)
+            {
+                if (References.TryGetReference(Value, out var Reference))
+                {
+                    Stream.Write(Reference.Id);
+                    OnWrited(Name, in NameId, in Reference.Definition.FormatId);
+                }
+                else
+                {
+                    //TODO
+                    //Пишем ссылку на новый объект (относительную позицию от конца этой структуры (ChildPosition)
+                    //После записи получаем FormatId и вызываем OnWrited
+                    //Добавляем ссылку в References
+                }
+                return;
+            }
+
+            //TODO
+            //Value - структура.
+            //Узнаём как сериализовать структуру и записываем её в тот же поток
+            //После записи получаем FormatId и вызываем OnWrited
+        }
+
+        #endregion
+
+        #region Sequences
 
         #endregion
 
@@ -359,7 +473,7 @@ namespace Zion.Serialization.ADF
         {
             long Length = Stream.Length;
 
-            foreach (var Reference in References)
+            foreach (var Reference in Childs)
             {
                 Length += Reference.TotalLength;
             }
