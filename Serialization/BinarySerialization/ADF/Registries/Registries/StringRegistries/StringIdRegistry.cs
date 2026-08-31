@@ -3,7 +3,7 @@
     public sealed class StringIdRegistry : IWritableRegistry
     {
         private readonly Dictionary<string, uint> Data;
-        private ushort LastId;
+        private uint LastId = 1;
 
         public int NewItemsCount { get; private set; }
 
@@ -15,7 +15,11 @@
 
         public uint GetOrAdd(string String)
         {
-            if (Data.TryGetValue(String.NotNull(), out uint Id))
+            if (String is null)
+            {
+                return 0u;
+            }
+            if (Data.TryGetValue(String, out uint Id))
             {
                 return Id;
             }
@@ -25,6 +29,11 @@
 
         public bool TryGetId(string String, out uint Id)
         {
+            if (String is null)
+            {
+                Id = 0u;
+                return true;
+            }
             return Data.TryGetValue(String, out Id);
         }
     }

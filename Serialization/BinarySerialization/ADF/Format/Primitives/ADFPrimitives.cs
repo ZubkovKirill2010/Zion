@@ -22,12 +22,12 @@ namespace Zion.Serialization.ADF
             new (sizeof(float)),   //Single
             new (sizeof(double)),  //Double
             new (sizeof(decimal)), //Decimal
-            new (2),               //String
+            new (sizeof(uint)),     //String
 
             new (2),  //Half
             new (5),  //Index
             new (10), //Range
-            new (-1), //BigInteger
+            new (-1), //BigInteger?
 
             new (3), //RGB
             new (4), //RGBA

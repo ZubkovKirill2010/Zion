@@ -153,7 +153,7 @@ namespace Zion.Serialization.ADF
             (
                 Name, ADFPrimitives.UInt32, in Value,
                 static (S, V) => S.Write(V),
-                static (S, V) => S.Write7BitEncodedInt(V)        
+                static (S, V) => S.Write7BitEncodedUInt(V)        
             );
         }
 
@@ -163,7 +163,7 @@ namespace Zion.Serialization.ADF
             (
                 Name, ADFPrimitives.UInt64, in Value,
                 static (S, V) => S.Write(V),
-                static (S, V) => S.Write7BitEncodedInt64(V)       
+                static (S, V) => S.Write7BitEncodedUInt64(V)       
             );
         }
 
@@ -211,10 +211,8 @@ namespace Zion.Serialization.ADF
             Write
             (
                 Name, ADFPrimitives.String, in Value,
-                static (S, V) =>
-                {
-                    
-                }/
+                (S, V) => S.Write(StringRegistry.GetOrAdd(V)),
+                (S, V) => S.Write7BitEncodedUInt(StringRegistry.GetOrAdd(V))
             );
         }
 
@@ -234,10 +232,7 @@ namespace Zion.Serialization.ADF
             (
                 Name, ADFPrimitives.Index, in Value,
                 static (S, V) => S.Write(V),
-                static (S, V) =>
-                {
-
-                }/
+                static (S, V) => S.Write7BitEncodedIndex(V)
             );
         }
 
@@ -249,8 +244,19 @@ namespace Zion.Serialization.ADF
                 static (S, V) => S.Write(V),
                 static (S, V) =>
                 {
+                    S.Write7BitEncodedIndex(V.Start);
+                    S.Write7BitEncodedIndex(V.End);
+                }
+            );
+        }
 
-                }/
+        public void Write(string Name, BigInteger Value)
+        {
+            //TODO: Write BigInteger
+            Write
+            (
+                Name, ADFPrimitives.Range, in Value,
+                static (S, V) => throw new NotImplementedException()
             );
         }
 

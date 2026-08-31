@@ -280,8 +280,17 @@ namespace Zion
 
         public void Write7BitEncodedInt(int Value)
         {
+            Write7BitEncodedUInt((uint)((Value << 1) ^ (Value >> 31)));
+        }
+
+        public void Write7BitEncodedInt64(long Value)
+        {
+            Write7BitEncodedUInt64((ulong)((Value << 1) ^ (Value >> 63)));
+        }
+
+        public void Write7BitEncodedUInt(uint Value)
+        {
             Reserve(5);
-            var UInt = (uint)Value;
             var Index = 0;
 
             Data.Use
@@ -289,22 +298,21 @@ namespace Zion
                 _Position,
                 Span =>
                 {
-                    while (UInt >= 0x80)
+                    while (Value >= 0x80)
                     {
-                        Span[Index++] = (byte)(UInt | 0x80);
-                        UInt >>= 7;
+                        Span[Index++] = (byte)(Value | 0x80);
+                        Value >>= 7;
                     }
-                    Span[Index++] = (byte)UInt;
+                    Span[Index++] = (byte)Value;
                 }
             );
 
             UpdateLengthFromPosition(_Position + Index);
         }
 
-        public void Write7BitEncodedInt64(long Value)
+        public void Write7BitEncodedUInt64(ulong Value)
         {
             Reserve(10);
-            var UInt = (ulong)Value;
             var Index = 0;
 
             Data.Use
@@ -312,12 +320,58 @@ namespace Zion
                 _Position,
                 Span =>
                 {
-                    while (UInt >= 0x80)
+                    while (Value >= 0x80)
                     {
-                        Span[Index++] = (byte)(UInt | 0x80);
-                        UInt >>= 7;
+                        Span[Index++] = (byte)(Value | 0x80);
+                        Value >>= 7;
                     }
-                    Span[Index++] = (byte)UInt;
+                    Span[Index++] = (byte)Value;
+                }
+            );
+
+            UpdateLengthFromPosition(_Position + Index);
+        }
+
+        public void Write7BitEncodedIndex(Index Value)
+        {
+            uint Encoded = (uint)((Value.Value << 1) ^ (Value.Value >> 31));
+
+            Reserve(5);
+            var Index = 0;
+
+            Data.Use
+            (
+                _Position,
+                Span =>
+                {
+                    byte FirstByte = (byte)(Encoded & 0x3F);
+                    Encoded >>= 6;
+
+                    if (Value.IsFromEnd)
+                    {
+                        FirstByte |= 0x40;
+                    }
+
+                    if (Encoded > 0)
+                    {
+                        FirstByte |= 0x80;
+                    }
+
+                    Span[Index++] = FirstByte;
+
+                    while (Encoded > 0)
+                    {
+                        if (Encoded >= 0x80)
+                        {
+                            Span[Index++] = (byte)(Encoded | 0x80);
+                            Encoded >>= 7;
+                        }
+                        else
+                        {
+                            Span[Index++] = (byte)Encoded;
+                            break;
+                        }
+                    }
                 }
             );
 
