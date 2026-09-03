@@ -6,7 +6,7 @@ namespace Zion.Serialization.ADF
     {
         public static readonly DataFormat Object = new DataFormat
         (
-            [], FormatFlags.IsNullable | FormatFlags.IsAbstract | FormatFlags.IsClass
+            [], FormatFlags.IsNullable | FormatFlags.IsAbstract | FormatFlags.IsReference
         );
 
         private readonly Parameter[] Parameters;
@@ -17,7 +17,7 @@ namespace Zion.Serialization.ADF
         public bool IsDynamic  => Flags.HasFlag(FormatFlags.IsDynamic);
         public bool IsNullable => Flags.HasFlag(FormatFlags.IsNullable);
         public bool IsAbstract => Flags.HasFlag(FormatFlags.IsAbstract);
-        public bool IsClass    => Flags.HasFlag(FormatFlags.IsClass);
+        public bool IsClass    => Flags.HasFlag(FormatFlags.IsReference);
 
         public int ParametersCount => Parameters.Length;
 

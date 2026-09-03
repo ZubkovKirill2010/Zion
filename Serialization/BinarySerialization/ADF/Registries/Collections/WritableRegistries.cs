@@ -6,6 +6,7 @@ namespace Zion.Serialization.ADF
     {
         private readonly Dictionary<string, WritableRegistryInfo> Registries;
 
+        public readonly TypeAssociation     TypeAssociation;
         public readonly ReferenceIdsRegistry References;
         public readonly FormatIdRegistry     FormatRegistry;
         public readonly StringIdRegistry     StringRegistry;
@@ -16,6 +17,7 @@ namespace Zion.Serialization.ADF
 
         public WritableRegistries()
         {
+            TypeAssociation = new();
             References     = new();
             FormatRegistry = new();
             StringRegistry = new();
