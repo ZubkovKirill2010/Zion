@@ -271,6 +271,12 @@
             return Source.ToArray(this.Start + Start, Length);
         }
 
+
+        public bool IsFrom(Arena<T> Arena)
+        {
+            return ReferenceEquals(Source, Arena);
+        }
+
         #endregion
 
         //#region IEnumerable

@@ -21,11 +21,6 @@ namespace Zion
         }
 
 
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
-        public abstract IEnumerator<T> GetEnumerator();
-
-
         public void Expand(int Capacity)
         {
             if (Capacity > Data.Count)
@@ -34,10 +29,20 @@ namespace Zion
             }
         }
 
+        public bool IsFrom(Arena<T> Arena)
+        {
+            return Data.IsFrom(Arena);
+        }
+
 
         public void Dispose()
         {
             Data.Dispose();
         }
+
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        public abstract IEnumerator<T> GetEnumerator();
     }
 }

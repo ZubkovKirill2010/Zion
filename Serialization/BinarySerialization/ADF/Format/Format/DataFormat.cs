@@ -41,6 +41,28 @@ namespace Zion.Serialization.ADF
         public Parameter this[Index Index] => Parameters[Index];
 
 
+        public int IndexOf(uint NameId)
+        {
+            var Span = Parameters.AsSpan();
+            var Count = Span.Length;
+
+            for (int i = 0; i < Count; i++)
+            {
+                if (Span[i].NameId == NameId)
+                {
+                    return i;
+                }
+            }
+
+            return -1;
+        }
+
+        public bool Contains(uint NameId)
+        {
+            return IndexOf(NameId) != -1;
+        }
+
+
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         public IEnumerator<Parameter> GetEnumerator()

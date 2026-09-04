@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Numerics;
+﻿using System.Numerics;
 using Zion.Vectors;
 using Vector2 = Zion.Vectors.Vector2;
 using Vector3 = Zion.Vectors.Vector3;
@@ -21,17 +20,17 @@ namespace Zion.Serialization.ADF
         protected readonly ADFWritingOptions Options;
         protected readonly WritableRegistries Registries;
 
+        private int ChildPosition = 0;
+
+        #endregion
+
+        #region Properties
         protected TypeAssociation TypeAssociation => Registries.TypeAssociation;
         protected ReferenceIdsRegistry References => Registries.References;
         protected DataRegistry       DataRegistry => Registries.DataRegistry;
         protected StringIdRegistry StringRegistry => Registries.StringRegistry;
         protected FormatIdRegistry FormatRegistry => Registries.FormatRegistry;
 
-        private int ChildPosition = 0;
-
-        #endregion
-
-        #region Properties
         public long TotalLength
         {
             get;
@@ -49,24 +48,31 @@ namespace Zion.Serialization.ADF
         #endregion
 
         #region Constructors
-        internal BaseADFWriter(BaseADFWriter Base) : this(Base.Arena)
-        {
-            Registries = Base.Registries;
-            Options = Base.Options;
-        }
-
-        internal BaseADFWriter(Arena<byte> Arenas)
+        internal BaseADFWriter(Arena<byte> Arenas, ADFWritingOptions? Options)
+            : this(Options: null)
         {
             Arena = Arenas.NotNull();
             Stream = Arena.GetStream(64);
-            Childs = new(0);
             Registries = new();
-            Options = ADFWritingOptions.Default;
         }
 
-        internal BaseADFWriter(Arena<byte> Arenas, ADFWritingOptions? Options)
-            : this(Arenas)
+        internal BaseADFWriter(BaseADFWriter Base)
+            : this(Base.NotNull().Arena, Base.Options) { }
+
+        internal BaseADFWriter(BaseADFWriter Base, ArenaStream Stream)
+            : this(Base)
         {
+            if (!Stream.NotNull().IsFrom(Arena))
+            {
+                throw new ArgumentException("The stream must be from the transferred Arena");
+            }
+
+            this.Stream = Stream;
+        }
+
+        private BaseADFWriter(ADFWritingOptions? Options)
+        {
+            this.Childs = new(0);
             this.Options = Options ?? ADFWritingOptions.Default;
         }
 
@@ -421,113 +427,99 @@ namespace Zion.Serialization.ADF
                 return;
             }
 
-            WriteComplex(Name, in NameId, Value);
+            if (Value.GetType().IsValueType)
+            {
+                WriteStruct(Name, in NameId, Value);
+            }
+            else
+            {
+                WriteClass(Name, in NameId, Value);
+            }
         }
 
 
-        private void WriteComplex<T>(string Name, in uint NameId, T Value)
+        private void WriteStruct<T>(string Name, in uint NameId, T Value)
         {
-            //TODO: Записывать в формат typeof(T), писать T (для сохранения абстракции)
-            var Type = Value.GetType();
+            var Type   = typeof(T);
             var Stream = GetStream(in NameId);
 
-            if (Type.IsClass)
+            void WriteAuto(ADFObjectWriter Writer)
             {
-                if (References.TryGetReference(Value, out var Reference))
-                {
-                    Stream.Write(Reference.Id);
-                    OnWrited(Name, in NameId, in Reference.Definition.FormatId);
-                }
-                else
-                {
-                    //TODO:
-                    //Пишем ссылку на новый объект (относительную позицию от конца этой структуры (ChildPosition)
-                    //После записи получаем FormatId и вызываем OnWrited
-                    //Добавляем ссылку в References
-                    //Пишем по приоритетам:
-                    //IADFWritable
-                    //IADFWriter
-                    //TypeSchema
-                    //Reflection
-                }
-                return;
+                AutoADFSerializer.GetWriter<T>(Type).Write(Writer, Value);
+            }
+
+            Action<ADFObjectWriter>? WriteAction = Value is IADFWritable Writable
+                ? Writable.Write
+                :
+                (
+                    ADFSerializer.TryGetWriter(Value, out var Serializer)
+                    ? WriteAction = Writer => Serializer.Write(Writer, Value)
+                    : WriteAuto
+                );
+            
+
+            if (TypeAssociation.TryGetFormatId(Type, out uint FormatId))
+            {
+                DataFormat Format = FormatRegistry[FormatId];
+
+                //TODO
+                var CheckingWriter = new ADFCheckingObjectWriter
+                (
+                    Stream, // Нужно: писать в тот же поток
+                    FormatId, // Нужно: ожидаемый формат
+                    Options
+                );
+
+                WriteAction(CheckingWriter);
+                OnWrited(Name, NameId, FormatId);
+            }
+            else
+            {
+                //TODO
+                var RecordWriter = new ADFRecordObjectWriter
+                (
+                    Stream, // Нужно: писать в тот же поток
+                    FormatRegistry, // Нужно: реестр форматов для создания
+                    Type, // Нужно: тип для создания формата
+                    Options
+                );
+
+                WriteAction(RecordWriter);
+
+                var CreatedFormat = RecordWriter.BuildFormat();
+                var CreatedFormatId = FormatRegistry.Add(CreatedFormat);
+
+                TypeAssociation.Add(Type, CreatedFormatId);
+
+                OnWrited(Name, NameId, CreatedFormatId);
+            }
+        }
+
+        private void WriteClass<T>(string Name, in uint NameId, T Value)
+        {
+            //TODO: Записывать в формат typeof(T), писать T (для сохранения абстракции)
+            var Type = typeof(T);
+            var ValueType = Value.GetType();
+            var Stream = GetStream(in NameId);
+
+            if (References.TryGetReference(Value, out var Reference))
+            {
+                Stream.Write(Reference.Id);
+                OnWrited(Name, in NameId, in Reference.Definition.FormatId);
             }
             else
             {
                 //TODO:
-                //Value - структура.
-                //Узнаём как сериализовать структуру и записываем её в тот же поток
+                //Пишем ссылку на новый объект (относительную позицию от конца этой структуры (ChildPosition)
                 //После записи получаем FormatId и вызываем OnWrited
+                //Добавляем ссылку в References
                 //Пишем по приоритетам:
                 //IADFWritable
                 //IADFWriter
                 //TypeSchema
                 //Reflection
-
-                Action<ADFObjectWriter>? WriteAction = Value is IADFWritable Writable
-                    ? Writable.Write
-                    :
-                    (
-                        ADFSerializer.TryGetWriter(Value, out var Serializer)
-                        ? WriteAction = Writer => Serializer.Write(Writer, Value)
-                        : null
-                    );
-
-                void WriteAuto(ADFObjectWriter Writer)
-                {
-                    var Serializer = AutoADFSerializer.GetWriter<T>(Type);
-                    Serializer.Write(Writer, Value);
-                }
-
-                if (TypeAssociation.TryGetFormatId(Type, out uint FormatId))
-                {
-                    //TODO
-                    var CheckingWriter = new ADFCheckingObjectWriter
-                    (
-                        Stream, // Нужно: писать в тот же поток
-                        FormatId, // Нужно: ожидаемый формат
-                        Options
-                    );
-
-                    if (WriteAction is not null)
-                    {
-                        WriteAction(CheckingWriter);
-                    }
-                    else
-                    {
-                        WriteAuto(CheckingWriter);
-                    }
-
-                    OnWrited(Name, NameId, FormatId);
-                }
-                else
-                {
-                    //TODO
-                    var RecordWriter = new ADFRecordObjectWriter
-                    (
-                        Stream, // Нужно: писать в тот же поток
-                        FormatRegistry, // Нужно: реестр форматов для создания
-                        Type, // Нужно: тип для создания формата
-                        Options
-                    );
-
-                    if (WriteAction is not null)
-                    {
-                        WriteAction(RecordWriter);
-                    }
-                    else
-                    {
-                        WriteAuto(RecordWriter);
-                    }
-
-                    var CreatedFormat = RecordWriter.BuildFormat();
-                    var CreatedFormatId = FormatRegistry.Add(CreatedFormat);
-
-                    TypeAssociation.Add(Type, CreatedFormatId);
-
-                    OnWrited(Name, NameId, CreatedFormatId);
-                }
             }
+            return;
         }
 
         #endregion

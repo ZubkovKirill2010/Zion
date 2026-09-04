@@ -36,5 +36,26 @@
             }
             return Data.TryGetValue(String, out Id);
         }
+
+
+        public string? GetString(in uint Id)
+        {
+            if (Id == 0u) { return null; }
+
+            if (Id >= LastId)
+            {
+                throw new KeyNotFoundException($"String with id '{Id}' not exists");
+            }
+
+            foreach (var Pair in Data)
+            {
+                if (Pair.Value == Id)
+                {
+                    return Pair.Key;
+                }
+            }
+
+            throw new KeyNotFoundException($"String with id '{Id}' not exists");
+        }
     }
 }
