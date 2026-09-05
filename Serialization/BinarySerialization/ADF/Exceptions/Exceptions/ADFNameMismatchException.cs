@@ -2,7 +2,7 @@
 {
     public sealed class ADFNameMismatchException : ADFMismatchException
     {
-        public ADFNameMismatchException(string Name, string TargetName)
-            : base($"Name mismatch: Name: '{Name}', Target: '{TargetName}'") { }
+        public ADFNameMismatchException(string? Name, string? TargetName)
+            : base($"Name mismatch: Name: '{Name ?? "null"}', Target: '{TargetName ?? "null"}'") { }
     }
 }

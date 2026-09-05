@@ -278,6 +278,17 @@ namespace Zion
         }
 
 
+        public void Write(ArenaStream Value)
+        {
+            int Length = Value.Length;
+            Reserve(Length);
+
+            Data.Use(_Position, Value.CopyTo);
+            
+            UpdateLengthFromPosition(_Position + Length);
+        }
+
+
         public void Write7BitEncodedInt(int Value)
         {
             Write7BitEncodedUInt((uint)((Value << 1) ^ (Value >> 31)));

@@ -41,12 +41,12 @@ namespace Zion.Serialization.ADF
         public Parameter this[Index Index] => Parameters[Index];
 
 
-        public int IndexOf(uint NameId)
+        public int IndexOf(uint NameId, int Start)
         {
             var Span = Parameters.AsSpan();
             var Count = Span.Length;
 
-            for (int i = 0; i < Count; i++)
+            for (int i = Start; i < Count; i++)
             {
                 if (Span[i].NameId == NameId)
                 {
@@ -55,6 +55,11 @@ namespace Zion.Serialization.ADF
             }
 
             return -1;
+        }
+
+        public int IndexOf(uint NameId)
+        {
+            return IndexOf(NameId, 0);
         }
 
         public bool Contains(uint NameId)

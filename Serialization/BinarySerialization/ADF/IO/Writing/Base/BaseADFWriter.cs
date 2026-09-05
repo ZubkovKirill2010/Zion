@@ -90,6 +90,19 @@ namespace Zion.Serialization.ADF
 
         #endregion
 
+        #region ProtectedMethods
+        protected ArenaStream GetNewStream(int Size)
+        {
+            return Arena.GetStream(Size);
+        }
+
+        protected ArenaStream GetBaseStream()
+        {
+            return Stream;
+        }
+
+        #endregion
+
         #region Writing
         #region Primitives
         public void Write(string Name, bool Value)
@@ -389,12 +402,10 @@ namespace Zion.Serialization.ADF
             ThrowIfDisposed();
 
             var NameId = StringRegistry.GetOrAdd(Name.NotNull());
-            var Stream = GetStream(in NameId);
-
             var WriteAction = Options.Compression ? WriteConcise : WriteFull;
+            var Stream = GetStream(Name, in NameId, in FormatId);
 
             WriteAction(Stream, Value);
-
             OnWrited(Name, in NameId, in FormatId);
         }
 
@@ -410,6 +421,7 @@ namespace Zion.Serialization.ADF
             if (Value is null)
             {
                 var Stream = GetStream(in NameId);
+                BeforeWrite(Name, in NameId, 0u);
                 if (Options.Compression)
                 {
                     Stream.Write((byte)0);
@@ -440,8 +452,7 @@ namespace Zion.Serialization.ADF
 
         private void WriteStruct<T>(string Name, in uint NameId, T Value)
         {
-            var Type   = typeof(T);
-            var Stream = GetStream(in NameId);
+            var Type = typeof(T);
 
             void WriteAuto(ADFObjectWriter Writer)
             {
@@ -456,70 +467,56 @@ namespace Zion.Serialization.ADF
                     ? WriteAction = Writer => Serializer.Write(Writer, Value)
                     : WriteAuto
                 );
-            
 
             if (TypeAssociation.TryGetFormatId(Type, out uint FormatId))
             {
-                DataFormat Format = FormatRegistry[FormatId];
+                var Format = FormatRegistry[FormatId];
+                var Stream = GetStream(Name, in NameId, in FormatId);
+                using var Writer = new ADFCheckingObjectWriter(this, Stream, Format);
 
-                //TODO
-                var CheckingWriter = new ADFCheckingObjectWriter
-                (
-                    Stream, // Нужно: писать в тот же поток
-                    FormatId, // Нужно: ожидаемый формат
-                    Options
-                );
+                WriteAction(Writer);
 
-                WriteAction(CheckingWriter);
                 OnWrited(Name, NameId, FormatId);
             }
             else
             {
-                //TODO
-                var RecordWriter = new ADFRecordObjectWriter
-                (
-                    Stream, // Нужно: писать в тот же поток
-                    FormatRegistry, // Нужно: реестр форматов для создания
-                    Type, // Нужно: тип для создания формата
-                    Options
-                );
+                var Writer = new ADFRecordObjectWriter(this, Stream, Type);
 
-                WriteAction(RecordWriter);
+                WriteAction(Writer);
+                Writer.Dispose();
 
-                var CreatedFormat = RecordWriter.BuildFormat();
-                var CreatedFormatId = FormatRegistry.Add(CreatedFormat);
+                FormatId = FormatRegistry.Add(Writer.Format);
 
-                TypeAssociation.Add(Type, CreatedFormatId);
-
-                OnWrited(Name, NameId, CreatedFormatId);
+                TypeAssociation.Add(Type, FormatId);
+                OnWrited(Name, NameId, FormatId);
             }
         }
 
         private void WriteClass<T>(string Name, in uint NameId, T Value)
         {
             //TODO: Записывать в формат typeof(T), писать T (для сохранения абстракции)
-            var Type = typeof(T);
-            var ValueType = Value.GetType();
-            var Stream = GetStream(in NameId);
+            //var Type = typeof(T);
+            //var ValueType = Value.GetType();
+            //var Stream = GetStream(Name, in NameId);
 
-            if (References.TryGetReference(Value, out var Reference))
-            {
-                Stream.Write(Reference.Id);
-                OnWrited(Name, in NameId, in Reference.Definition.FormatId);
-            }
-            else
-            {
-                //TODO:
-                //Пишем ссылку на новый объект (относительную позицию от конца этой структуры (ChildPosition)
-                //После записи получаем FormatId и вызываем OnWrited
-                //Добавляем ссылку в References
-                //Пишем по приоритетам:
-                //IADFWritable
-                //IADFWriter
-                //TypeSchema
-                //Reflection
-            }
-            return;
+            //if (References.TryGetReference(Value, out var Reference))
+            //{
+            //    Stream.Write(Reference.Id);
+            //    OnWrited(Name, in NameId, in Reference.Definition.FormatId);
+            //}
+            //else
+            //{
+            //    //TODO:
+            //    //Пишем ссылку на новый объект (относительную позицию от конца этой структуры (ChildPosition)
+            //    //После записи получаем FormatId и вызываем OnWrited
+            //    //Добавляем ссылку в References
+            //    //Пишем по приоритетам:
+            //    //IADFWritable
+            //    //IADFWriter
+            //    //TypeSchema
+            //    //Reflection
+            //}
+            //return;
         }
 
         #endregion
@@ -531,12 +528,12 @@ namespace Zion.Serialization.ADF
         #endregion
 
         #region AbstractMethods
-        protected virtual ArenaStream GetStream(in uint NameId) => Stream;
+        protected virtual ArenaStream GetStream(string Name, in uint NameId, in uint FormatId) => Stream;
+
+        protected virtual void OnDisposed() { }
 
         protected abstract void OnWrited(string Name, in uint NameId, in uint FormatId);
         
-        protected abstract void OnDisposed();
-
         #endregion
 
         #region IDisposable
@@ -557,7 +554,7 @@ namespace Zion.Serialization.ADF
         #endregion
 
         #region PrivateMethods
-        private void ThrowIfDisposed()
+        protected void ThrowIfDisposed()
         {
             if (IsDisposed)
             {
