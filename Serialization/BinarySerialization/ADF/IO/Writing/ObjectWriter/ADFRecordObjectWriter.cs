@@ -3,6 +3,7 @@
     public sealed class ADFRecordObjectWriter : ADFObjectWriter
     {
         private readonly Type Type;
+        private readonly FormatFlags Flags;
         private readonly List<Parameter> Parameters;
 
         public DataFormat Format { get; private set; } = DataFormat.Object;
@@ -11,8 +12,9 @@
         public ADFRecordObjectWriter(BaseADFWriter Base, ArenaStream Stream, Type Type)
             : base(Base, Stream)
         {
-            this.Type = Type.NotNull();
-            this.Parameters = new();
+            this.Type = Type;
+            Flags = FormatFlags.FromType(Type);
+            Parameters = new();
         }
 
 
@@ -36,8 +38,15 @@
 
         private DataFormat BuildFormat()
         {
-            throw new NotImplementedException();
-            //TODO
+            Type? BaseType = Type.BaseType;
+            uint BaseFormat = 0u;
+
+            if (BaseType is not null)
+            {
+                BaseFormat = TypeAssociation.GetOrAdd(BaseType);
+            }
+
+            return new DataFormat(Parameters, Flags, BaseFormat);
         }
     }
 }

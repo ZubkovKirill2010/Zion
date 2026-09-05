@@ -4,20 +4,36 @@
     {
         extension(FormatFlags)
         {
-            public static FormatFlags FromType(Type Type, bool IsDynamic = false)
+            public static FormatFlags FromType(Type Type)
             {
                 ArgumentNullException.ThrowIfNull(Type);
 
                 FormatFlags Flags = FormatFlags.None;
+                
+                if (Type.IsArray)
+                {
+                    Flags |= FormatFlags.IsArray;
+                }
+
+                if (!Type.IsValueType)
+                {
+                    Flags |= FormatFlags.IsReference;
+                }
 
                 if (Type.IsAbstract)
-                    { Flags |= FormatFlags.IsAbstract; }
+                {
+                    Flags |= FormatFlags.IsAbstract;
+                }
 
-                if (Type.IsClass)
-                    { Flags |= FormatFlags.IsReference; }
+                if (Type.IsNullable)
+                {
+                    Flags |= FormatFlags.IsNullable;
+                }
 
-                if (!Type.IsNullable)
-                    { Flags |= FormatFlags.IsNullable; }
+                if (Type.IsEnum)
+                {
+                    Flags |= FormatFlags.IsEnum;
+                }
 
                 return Flags;
             }

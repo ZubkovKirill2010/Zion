@@ -5,9 +5,10 @@
     {
         None = 0,
 
-        IsDynamic   = 1 << 0,
-        IsNullable  = 1 << 1,
-        IsAbstract  = 1 << 2,
-        IsReference = 1 << 3
+        IsArray     = 1 << 0,
+        IsReference = 1 << 1,
+        IsAbstract  = (1 << 1) | (1 << 2),
+        IsNullable  = 1 << 3,
+        IsEnum      = 1 << 4
     }
 }

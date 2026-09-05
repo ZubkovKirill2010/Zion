@@ -4,24 +4,26 @@ namespace Zion.Serialization.ADF
 {
     public readonly struct DataFormat : IEnumerable<Parameter>
     {
-        public static readonly DataFormat Object = new DataFormat
-        (
-            [], FormatFlags.IsNullable | FormatFlags.IsAbstract | FormatFlags.IsReference
-        );
-
+        #region Data
         private readonly Parameter[] Parameters;
-        private readonly FormatFlags Flags;
-
+        
+        public readonly FormatFlags Flags;
         public readonly uint BaseFormat;
 
-        public bool IsDynamic  => Flags.HasFlag(FormatFlags.IsDynamic);
-        public bool IsNullable => Flags.HasFlag(FormatFlags.IsNullable);
-        public bool IsAbstract => Flags.HasFlag(FormatFlags.IsAbstract);
-        public bool IsClass    => Flags.HasFlag(FormatFlags.IsReference);
+        #endregion
+
+        #region Properties
+        public bool IsArray     => Flags.HasFlag(FormatFlags.IsArray);
+        public bool IsReference => Flags.HasFlag(FormatFlags.IsReference);
+        public bool IsAbstract  => Flags.HasFlag(FormatFlags.IsAbstract);
+        public bool IsNullable  => Flags.HasFlag(FormatFlags.IsNullable);
+        public bool IsEnum      => Flags.HasFlag(FormatFlags.IsEnum);
 
         public int ParametersCount => Parameters.Length;
 
+        #endregion
 
+        #region Constructors
         public DataFormat(IEnumerable<Parameter> Parameters, FormatFlags Flags)
         {
             this.Parameters = Parameters.NotNull().ToArray();
@@ -35,12 +37,16 @@ namespace Zion.Serialization.ADF
             this.BaseFormat = BaseFormat;
         }
 
+        #endregion
 
+        #region Indexers
         public Parameter this[int   Index] => Parameters[Index];
         
         public Parameter this[Index Index] => Parameters[Index];
 
+        #endregion
 
+        #region PublicMethods
         public int IndexOf(uint NameId, int Start)
         {
             var Span = Parameters.AsSpan();
@@ -67,12 +73,16 @@ namespace Zion.Serialization.ADF
             return IndexOf(NameId) != -1;
         }
 
+        #endregion
 
+        #region IEnumerable
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         public IEnumerator<Parameter> GetEnumerator()
         {
             return Parameters.Enumerate();
         }
+
+        #endregion
     }
 }
