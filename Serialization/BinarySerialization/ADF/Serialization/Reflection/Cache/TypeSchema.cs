@@ -57,25 +57,40 @@ namespace Zion.Serialization.ADF
         private static Field[] GetAllFields(Type Type)
         {
             const BindingFlags Flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly;
+            
             FieldInfo[] Fields = Type.GetFields(Flags);
             List<Field> Result = new(Fields.Length);
 
             foreach (FieldInfo Info in Fields)
             {
-                if (!Info.IsStatic && IsSerializableField(Info))
+                if (Info.IsStatic)
                 {
-                    Result.Add(new Field(Info));
+                    continue;
                 }
+
+                string Name = Info.Name;
+                bool IsNotAutoField = Info.Name[0] != '<';
+
+                foreach (var Attribute in Info.GetCustomAttributes())
+                {
+                    if (Attribute is ADFIgnoreAttribute ||
+                        (IsNotAutoField && Attribute is CompilerGeneratedAttribute))
+                    {
+                        goto NextField;
+                    }
+                    
+                    if (Attribute is ADFNameAttribute NameAttribute)
+                    {
+                        Name = NameAttribute.Name;
+                    }
+                }
+
+                Result.Add(new(Info, Name));
+
+                NextField:;
             }
 
             return Result.ToArray();
-        }
-
-        private static bool IsSerializableField(FieldInfo Field)
-        {
-            return !Field.IsDefined(typeof(ADFIgnoreAttribute), false)
-               && (!Field.IsDefined(typeof(CompilerGeneratedAttribute), false)
-               ||   Field.Name.Contains("k__BackingField"));
         }
 
         #endregion

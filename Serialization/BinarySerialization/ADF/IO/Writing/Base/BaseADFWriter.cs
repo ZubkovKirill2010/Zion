@@ -420,8 +420,10 @@ namespace Zion.Serialization.ADF
 
             if (Value is null)
             {
-                var Stream = GetStream(in NameId);
-                BeforeWrite(Name, in NameId, 0u);
+                //TODO: Реализовать уточнение типа при первой записи не Null параметра
+
+                var Stream = GetStream(Name, in NameId, 0u);
+
                 if (Options.Compression)
                 {
                     Stream.Write((byte)0);
@@ -452,7 +454,7 @@ namespace Zion.Serialization.ADF
 
         private void WriteStruct<T>(string Name, in uint NameId, T Value)
         {
-            var Type = typeof(T);
+            var Type = Value.GetType();
 
             void WriteAuto(ADFObjectWriter Writer)
             {
