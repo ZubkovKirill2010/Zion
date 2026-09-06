@@ -2,142 +2,256 @@ namespace Zion
 {
     public sealed class ArenaBuffer<T> : ArenaCollection<T>
     {
-        public int Capacity { get; }
-
         public int Count { get; private set; }
+
+        public int Capacity => Data.Count;
 
 
         public ArenaBuffer(ArenaSpan<T> Data) : base(Data) { }
         
         
-        //public T this[int Index]
-        //{
-        //    get => Data[Index];
-        //    set => Data[Index] = value;
-        //}
+        public T this[int Index]
+        {
+            get => Data[Index];
+            set
+            {
+                var Span = Data;
+                Span[Index] = value;
+            }
+        }
 
-        //public T this[Index Index]
-        //{
-        //    get => Data[Index];
-        //    set => Data[Index] = value;
-        //}
+        public T this[Index Index]
+        {
+            get => this[Index.GetOffset(Count)];
+            set => this[Index.GetOffset(Count)] = value;
+        }
 
 
         public void Add(T Item)
         {
-            throw new NotImplementedException(); //TODO
-        }
-
-        public bool TryAdd(T Item)
-        {
-            throw new NotImplementedException(); //TODO
+            int Index = Count;
+            EnsurceCapacity(++Count);
+            this[Index] = Item;
         }
 
         public void AddRange(IEnumerable<T> Items)
         {
-            throw new NotImplementedException(); //TODO
+            ArgumentNullException.ThrowIfNull(Items);
+
+            int Count = this.Count;
+
+            if (Items.TryGetNonEnumeratedCount(out int ItemsCount))
+            {
+                int TotalCount = Count + ItemsCount;
+                Data.Expand(TotalCount);
+                Data.Use
+                (
+                    Count, ItemsCount, Span =>
+                    {
+                        int Index = 0;
+
+                        foreach (T Item in Items)
+                        {
+                            Span[Index++] = Item;
+                        }
+                    }
+                );
+                this.Count = TotalCount;
+            }
+            else
+            {
+                InsertItems(Count, Items, out int NewCount);
+                this.Count = NewCount;
+            }
         }
 
         public void AddRange(ReadOnlySpan<T> Items)
         {
-            throw new NotImplementedException(); //TODO
+            int ItemsCount = Items.Length;
+            int TotalCount = Count + Items.Length;
+
+            Data.Expand(TotalCount);
+            Data.Use
+            (
+                Count, ItemsCount, Items,
+                (Span, Other) =>
+                {
+                    for (int i = 0; i < ItemsCount; i++)
+                    {
+                        Span[i] = Other[i];
+                    }
+                }
+            );
+            Count = TotalCount;
         }
 
 
         public bool Remove(T Item)
         {
-            throw new NotImplementedException(); //TODO
+            int Index = IndexOf(Item);
+            
+            if (Index == -1)
+            {
+                return false;
+            }
+
+            RemoveAt(Index);
+            return true;
         }
 
         public void RemoveAt(int Index)
         {
-            throw new NotImplementedException(); //TODO
+            ArgumentOutOfRangeException.ThrowIfWithout(Index, Count);
+
+            Data.Move(Index + 1, Index, Count - Index - 1);
+            Count--;
         }
 
         public void RemoveRange(int Index, int Count)
         {
-            throw new NotImplementedException(); //TODO
+            ArgumentOutOfRangeException.ThrowIfWithout(Index, this.Count);
+            ArgumentOutOfRangeException.ThrowIfWithout(Index + Count, this.Count);
+
+            Data.Move(Index + Count, Index, this.Count - Count - Index);
+            this.Count -= Count;
         }
 
         public void Clear()
         {
-            throw new NotImplementedException(); //TODO
+            Data.Use(Count, static Span => Span.Clear());
         }
 
-
-        public T Peek()
-        {
-            throw new NotImplementedException(); //TODO
-        }
 
         public T First()
         {
-            throw new NotImplementedException(); //TODO
+            return Data[0];
         }
 
         public T Last()
         {
-            throw new NotImplementedException(); //TODO
+            return Data[Count - 1];
         }
 
 
-        public int IndexOf(T Item)
+        public int IndexOf(T Item, IEqualityComparer<T>? Comparer = null)
         {
-            throw new NotImplementedException(); //TODO
+            return Data.Use(Count, Span => Span.IndexOf(Item, Comparer));
         }
 
-        public bool Contains(T Item)
+        public bool Contains(T Item, IEqualityComparer<T>? Comparer = null)
         {
-            throw new NotImplementedException(); //TODO
+            return Data.Use(Count, Span => Span.Contains(Item, Comparer));
         }
 
 
         public void Insert(int Index, T Item)
         {
-            throw new NotImplementedException(); //TODO
+            ArgumentOutOfRangeException.ThrowIfBeyond(Index, Count);
+
+            Data.Move(Index, Index + 1, Count - Index);
+            this[Index] = Item;
+            Count++;
         }
 
         public void InsertRange(int Index, IEnumerable<T> Items)
         {
-            throw new NotImplementedException(); //TODO
+            ArgumentNullException.ThrowIfNull(Items);
+            ArgumentOutOfRangeException.ThrowIfBeyond(Index, Count);
+
+            if (Items.TryGetNonEnumeratedCount(out int ItemsCount))
+            {
+                if (ItemsCount == 0)
+                {
+                    return;
+                }
+
+                int TotalCount = Count + ItemsCount;
+                Data.Expand(TotalCount);
+
+                if (Index < Count)
+                {
+                    Data.Move(Index, Index + ItemsCount, Count - Index);
+                }
+
+                Data.Use
+                (
+                    Index, ItemsCount, Span =>
+                    {
+                        int SpanIndex = 0;
+                        foreach (T Item in Items)
+                        {
+                            Span[SpanIndex++] = Item;
+                        }
+                    }
+                );
+
+                Count = TotalCount;
+            }
+            else
+            {
+                int TailLength = Count - Index;
+                using var Tail = Data.Source.GetArray(TailLength);
+
+                if (TailLength > 0)
+                {
+                    Tail.UseSpan(Span => Data.CopyTo(Index, Count - Index, Span));
+                }
+
+                InsertItems(Index, Items, out int TotalCount);
+
+                Data.Expand(TotalCount + TailLength);
+                Data.Use(TotalCount, TailLength, Tail.CopyTo);
+
+                Count = TotalCount + TailLength;
+            }
         }
 
         public void Reverse()
         {
-            throw new NotImplementedException(); //TODO
+            Data.Use(static Span => Span.Reverse());
         }
 
         public void Sort()
         {
-            throw new NotImplementedException(); //TODO
+            Data.Use(static Span => Span.Sort());
         }
 
 
+        public void UseSpan(Action<Span<T>> Action)
+        {
+            Data.Use(Action);
+        }
+
         public T[] ToArray()
         {
-            throw new NotImplementedException(); //TODO
+            return Data.ToArray(0, Count);
         }
 
 
         public void CopyTo(T[] Array, int ArrayIndex)
         {
-            throw new NotImplementedException(); //TODO
+            CopyTo(Array.AsSpan(ArrayIndex));
         }
 
         public void CopyTo(ArenaBuffer<T> Destination)
         {
-            throw new NotImplementedException(); //TODO
+            Destination.UseSpan(Data.CopyTo);
+        }
+
+        public void CopyTo(Span<T> Destination)
+        {
+            Data.CopyTo(Destination);
         }
 
 
         public void EnsurceCapacity(int Capacity)
         {
-            throw new NotImplementedException(); //TODO
+            Data.Expand(Capacity);
         }
 
         public void Resize(int NewSize)
         {
-            throw new NotImplementedException(); //TODO
+            Count = Math.Max(0, NewSize);
         }
 
         public void TrimExcess()
@@ -149,6 +263,52 @@ namespace Zion
         public override IEnumerator<T> GetEnumerator()
         {
             throw new NotImplementedException(); //TODO
+        }
+
+
+        private void InsertItems(int Index, IEnumerable<T> Items, out int Count)
+        {
+            const int BufferSize = 0x20;
+
+            T[] Buffer = new T[BufferSize];
+            int LocalIndex = 0;
+            int TotalIndex = Index;
+
+            void Flush()
+            {
+                if (LocalIndex == 0)
+                {
+                    return;
+                }
+
+                Data.Expand(TotalIndex + LocalIndex);
+                Data.Use
+                (
+                    TotalIndex, LocalIndex, Span =>
+                    {
+                        for (int i = 0; i < LocalIndex; i++)
+                        {
+                            Span[i] = Buffer[i];
+                        }
+                    }
+                );
+
+                TotalIndex += LocalIndex;
+                LocalIndex = 0;
+            }
+
+            foreach (T Item in Items)
+            {
+                Buffer[LocalIndex++] = Item;
+
+                if (LocalIndex >= BufferSize)
+                {
+                    Flush();
+                }
+            }
+
+            Flush();
+            Count = TotalIndex;
         }
     }
 }

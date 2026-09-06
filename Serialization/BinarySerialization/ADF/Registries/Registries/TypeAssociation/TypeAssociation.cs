@@ -2,6 +2,12 @@
 {
     public sealed class TypeAssociation
     {
+        public uint this[Type Type]
+        {
+            get;//TODO: GetFormatId
+        }
+
+
         public bool TryGetFormatId(Type Type, out uint FormatId)
         {
             //TODO

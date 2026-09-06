@@ -116,6 +116,37 @@
             }
         }
 
+        public void Use(int Start, int Count, Span<T> Other, Action<Span<T>, Span<T>> Action)
+        {
+            ThrowIfDisposed();
+            Lock.EnterReadLock();
+            try
+            {
+                Span<T> Span = Source.AsSpan(this, Start, Count);
+                Action.Invoke(Span, Other);
+            }
+            finally
+            {
+                Lock.ExitReadLock();
+            }
+        }
+
+        public void Use(int Start, int Count, ReadOnlySpan<T> Other, Action<Span<T>, ReadOnlySpan<T>> Action)
+        {
+            ThrowIfDisposed();
+            Lock.EnterReadLock();
+            try
+            {
+                Span<T> Span = Source.AsSpan(this, Start, Count);
+                Action.Invoke(Span, Other);
+            }
+            finally
+            {
+                Lock.ExitReadLock();
+            }
+        }
+
+
         public I Use<I>(Func<Span<T>, I> Function)
         {
             ThrowIfDisposed();
@@ -144,6 +175,36 @@
             {
                 Span<T> Span = Source.AsSpan(this, Start, Count);
                 return Function.Invoke(Span);
+            }
+            finally
+            {
+                Lock.ExitReadLock();
+            }
+        }
+
+        public I Use<I>(int Start, int Count, Span<T> Other, Func<Span<T>, Span<T>, I> Function)
+        {
+            ThrowIfDisposed();
+            Lock.EnterReadLock();
+            try
+            {
+                Span<T> Span = Source.AsSpan(this, Start, Count);
+                return Function.Invoke(Span, Other);
+            }
+            finally
+            {
+                Lock.ExitReadLock();
+            }
+        }
+
+        public I Use<I>(int Start, int Count, ReadOnlySpan<T> Other, Func<Span<T>, ReadOnlySpan<T>, I> Function)
+        {
+            ThrowIfDisposed();
+            Lock.EnterReadLock();
+            try
+            {
+                Span<T> Span = Source.AsSpan(this, Start, Count);
+                return Function.Invoke(Span, Other);
             }
             finally
             {

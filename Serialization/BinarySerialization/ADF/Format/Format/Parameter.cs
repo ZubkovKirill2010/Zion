@@ -45,5 +45,15 @@ namespace Zion.Serialization.ADF
         {
             return HashCode.Combine(NameId, FormatId);
         }
+
+
+        public static Parameter Create(Field Field, WritableRegistries Registries)
+        {
+            return new Parameter
+            (
+                NameId  : Registries.StringRegistry.GetOrAdd(Field.Name),
+                FormatId: Registries.TypeAssociation[Field.Type]
+            );
+        }
     }
 }

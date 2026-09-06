@@ -2,80 +2,95 @@ namespace Zion
 {
     public sealed class ArenaArray<T> : ArenaCollection<T>
     {
-        public ArenaArray(ArenaSpan<T> Data) : base(Data) { }
+        public readonly int Length;
 
 
-        //public T this[int Index]
-        //{
-        //    get => Data[Index];
-        //    set => Data[Index] = value;
-        //}
-
-        //public T this[Index Index]
-        //{
-        //    get => Data[Index];
-        //    set => Data[Index] = value;
-        //}
-
-
-        public T Peek()
+        public ArenaArray(ArenaSpan<T> Data) : base(Data)
         {
-            throw new NotImplementedException(); //TODO
+            Length = Data.Count;
         }
+
+
+        public T this[int Index]
+        {
+            get => Data[Index];
+            set
+            {
+                var Span = Data;
+                Span[Index] = value;
+            }
+        }
+
+        public T this[Index Index]
+        {
+            get => this[Index.GetOffset(Length)];
+            set => this[Index.GetOffset(Length)] = value;
+        }
+
 
         public T First()
         {
-            throw new NotImplementedException(); //TODO
+            return Data[0];
         }
 
         public T Last()
         {
-            throw new NotImplementedException(); //TODO
+            return Data[Length - 1];
         }
 
 
-        public int IndexOf(T Item)
+        public int IndexOf(T Item, IEqualityComparer<T>? Comparer = null)
         {
-            throw new NotImplementedException(); //TODO
+            return Data.Use(Span => Span.IndexOf(Item, Comparer));
         }
 
-        public bool Contains(T Item)
+        public bool Contains(T Item, IEqualityComparer<T>? Comparer = null)
         {
-            throw new NotImplementedException(); //TODO
+            return Data.Use(Span => Span.Contains(Item, Comparer));
         }
 
 
         public void Clear()
         {
-            throw new NotImplementedException(); //TODO
+            Data.Use(static Span => Span.Clear());
         }
 
 
         public void Reverse()
         {
-            throw new NotImplementedException(); //TODO
+            Data.Use(static Span => Span.Reverse());
         }
 
         public void Sort()
         {
-            throw new NotImplementedException(); //TODO
+            Data.Use(static Span => Span.Sort());
         }
 
 
+        public void UseSpan(Action<Span<T>> Action)
+        {
+            Data.Use(Action);
+        }
+
         public T[] ToArray()
         {
-            throw new NotImplementedException(); //TODO
+            return Data.Use(static Span => Span.ToArray());
         }
 
 
         public void CopyTo(T[] Array, int ArrayIndex)
         {
-            throw new NotImplementedException(); //TODO
+            Data.CopyTo(Array.AsSpan(ArrayIndex));
         }
 
-        public void CopyTo(ArenaBuffer<T> Destination)
+        public void CopyTo(ArenaArray<T> Destination)
         {
-            throw new NotImplementedException(); //TODO
+            Destination.Data.Use(Data.CopyTo);
+        }
+
+        public void CopyTo(Span<T> Destination)
+        {
+            Data.CopyTo(Destination);
         }
 
 
