@@ -10,7 +10,15 @@ namespace Zion
 {
     public sealed class ArenaStream : ArenaCollection<byte>
     {
-        public int Length { get; private set; }
+        public int Length
+        {
+            get;
+            private set
+            {
+                Data.Modify();
+                field = value;
+            }
+        }
 
         private int _Position;
         public int Position
@@ -19,6 +27,7 @@ namespace Zion
             set
             {
                 ArgumentOutOfRangeException.ThrowIfNegative(value);
+                Data.Modify();
                 _Position = value;
             }
         }

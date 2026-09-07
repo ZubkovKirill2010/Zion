@@ -2,7 +2,15 @@ namespace Zion
 {
     public sealed class ArenaBuffer<T> : ArenaCollection<T>
     {
-        public int Count { get; private set; }
+        public int Count
+        {
+            get;
+            private set
+            {
+                field = value;
+                Data.Modify();
+            }
+        }
 
         public int Capacity => Data.Count;
 

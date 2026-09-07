@@ -12,6 +12,7 @@ namespace Zion
             private set
             {
                 ArgumentOutOfRangeException.ThrowIfNegative(value);
+                Data.Modify();
                 Expand(value);
                 field = value;
             }
