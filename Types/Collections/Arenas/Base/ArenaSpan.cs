@@ -448,7 +448,6 @@ namespace Zion
         public void CopyTo(Span<T> Destination)
         {
             Lock.EnterWriteLock();
-            Modify();
             try
             {
                 Source.AsSpan(this).CopyTo(Destination);
@@ -462,7 +461,6 @@ namespace Zion
         public void CopyTo(int Start, int Count, Span<T> Destination)
         {
             Lock.EnterWriteLock();
-            Modify();
             try
             {
                 Source.AsSpan(this, Start, Count).CopyTo(Destination);
