@@ -73,7 +73,7 @@ namespace Zion
         public void Write(decimal Value)
         {
             Reserve(sizeof(decimal));
-            Data.Use
+            Data.UseSpan
             (
                 _Position,
                 Span =>
@@ -134,7 +134,7 @@ namespace Zion
             Write7BitEncodedInt(Length);
             Reserve(Length);
 
-            Data.Use
+            Data.UseSpan
             (
                 _Position,
                 Span => Encoding.UTF8.GetBytes(Value, Span)
@@ -168,7 +168,7 @@ namespace Zion
             int Length = Value.GetByteCount();
 
             Reserve(Length + 4);
-            Data.Use
+            Data.UseSpan
             (
                 _Position,
                 Span =>
@@ -184,7 +184,7 @@ namespace Zion
         public void Write(RGBColor Value)
         {
             Reserve(3);
-            Data.Use
+            Data.UseSpan
             (
                 _Position,
                 Span =>
@@ -200,7 +200,7 @@ namespace Zion
         public void Write(RGBAColor Value)
         {
             Reserve(4);
-            Data.Use
+            Data.UseSpan
             (
                 _Position,
                 Span =>
@@ -218,7 +218,7 @@ namespace Zion
         public void Write(Vector2 Value)
         {
             Reserve(8);
-            Data.Use
+            Data.UseSpan
             (
                 _Position,
                 Span =>
@@ -233,7 +233,7 @@ namespace Zion
         public void Write(Vector2Int Value)
         {
             Reserve(8);
-            Data.Use
+            Data.UseSpan
             (
                 _Position,
                 Span =>
@@ -248,7 +248,7 @@ namespace Zion
         public void Write(Vector3 Value)
         {
             Reserve(12);
-            Data.Use
+            Data.UseSpan
             (
                 _Position,
                 Span =>
@@ -264,7 +264,7 @@ namespace Zion
         public void Write(Vector3Int Value)
         {
             Reserve(12);
-            Data.Use
+            Data.UseSpan
             (
                 _Position,
                 Span =>
@@ -283,7 +283,7 @@ namespace Zion
             int Length = Value.Length;
             Reserve(Length);
 
-            Data.Use(_Position, Value.CopyTo);
+            Data.UseSpan(_Position, Value.CopyTo);
             
             UpdateLengthFromPosition(_Position + Length);
         }
@@ -304,7 +304,7 @@ namespace Zion
             Reserve(5);
             var Index = 0;
 
-            Data.Use
+            Data.UseSpan
             (
                 _Position,
                 Span =>
@@ -326,7 +326,7 @@ namespace Zion
             Reserve(10);
             var Index = 0;
 
-            Data.Use
+            Data.UseSpan
             (
                 _Position,
                 Span =>
@@ -350,7 +350,7 @@ namespace Zion
             Reserve(5);
             var Index = 0;
 
-            Data.Use
+            Data.UseSpan
             (
                 _Position,
                 Span =>
@@ -393,7 +393,7 @@ namespace Zion
         private void Write<T>(T Value, int Size, Action<Span<byte>, T> Write)
         {
             Reserve(Size);
-            Data.Use
+            Data.UseSpan
             (
                 _Position,
                 Span =>
@@ -425,7 +425,7 @@ namespace Zion
         public void CopyTo(Stream Stream)
         {
             ArgumentNullException.ThrowIfNull(Stream);
-            Data.Use(Span => Stream.Write(Span.Slice(0, Length)));
+            Data.UseSpan(Span => Stream.Write(Span.Slice(0, Length)));
         }
 
 
@@ -444,10 +444,13 @@ namespace Zion
         }
 
 
-        public override IEnumerator<byte> GetEnumerator()
+        protected override IEnumerator<int> GetIndexEnumerator()
         {
-            //TODO
-            throw new NotImplementedException();
+            int Count = Length;
+            for (int i = 0; i < Count; i++)
+            {
+                yield return i;
+            }
         }
 
 

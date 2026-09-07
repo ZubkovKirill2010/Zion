@@ -1,6 +1,9 @@
-﻿namespace Zion
+﻿using System.Collections;
+using System.Diagnostics.CodeAnalysis;
+
+namespace Zion
 {
-    public struct ArenaSpan<T> : IDisposable//, IEnumerable<T>
+    public struct ArenaSpan<T> : IDisposable
     {
         #region Data
         private readonly ReaderWriterLockSlim Lock = new(LockRecursionPolicy.SupportsRecursion);
@@ -9,6 +12,8 @@
 
         public readonly int Start;
         public readonly int Count;
+
+        private int Version;
 
         public bool IsDisposed { get; private set; }
 
@@ -55,6 +60,7 @@
                 ThrowIfDisposed();
                 ThrowIfWithout(Index);
                 Lock.EnterReadLock();
+                Modify();
                 try
                 {
                     Source[Start + Index] = value;
@@ -80,11 +86,54 @@
 
         #endregion
 
+        #region Operators
+        public static bool operator ==(ArenaSpan<T> A, ArenaSpan<T> B)
+        {
+            if (A.IsDisposed == B.IsDisposed)
+            {
+                return true;
+            }
+            else if (A.IsDisposed || B.IsDisposed)
+            {
+                return false;
+            }
+
+            return ReferenceEquals(A.Source, B.Source) && A.Start == B.Start && A.Count == B.Count;
+        }
+
+        public static bool operator !=(ArenaSpan<T> A, ArenaSpan<T> B)
+        {
+            return !(A == B);
+        }
+
+        #endregion
+
+        #region OverrideMethods
+        public override string ToString()
+        {
+            return IsDisposed
+                ? "[Disposed]"
+                : $"[Start: {Start}; Count: {Count}]";
+        }
+
+        public override bool Equals([NotNullWhen(true)] object? Object)
+        {
+            return Object is ArenaSpan<T> ArenaSpan && this == ArenaSpan;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Source, Start, Count);
+        }
+
+        #endregion
+
         #region PublicMethods
-        public void Use(Action<Span<T>> Action)
+        public void UseSpan(Action<Span<T>> Action)
         {
             ThrowIfDisposed();
             Lock.EnterReadLock();
+            Modify();
             try
             {
                 Span<T> Span = Source.AsSpan(this);
@@ -96,15 +145,16 @@
             }
         }
 
-        public void Use(int Count, Action<Span<T>> Action)
+        public void UseSpan(int Count, Action<Span<T>> Action)
         {
-            Use(0, Count, Action);
+            UseSpan(0, Count, Action);
         }
 
-        public void Use(int Start, int Count, Action<Span<T>> Action)
+        public void UseSpan(int Start, int Count, Action<Span<T>> Action)
         {
             ThrowIfDisposed();
             Lock.EnterReadLock();
+            Modify();
             try
             {
                 Span<T> Span = Source.AsSpan(this, Start, Count);
@@ -116,10 +166,11 @@
             }
         }
 
-        public void Use(int Start, int Count, Span<T> Other, Action<Span<T>, Span<T>> Action)
+        public void UseSpan(int Start, int Count, Span<T> Other, Action<Span<T>, Span<T>> Action)
         {
             ThrowIfDisposed();
             Lock.EnterReadLock();
+            Modify();
             try
             {
                 Span<T> Span = Source.AsSpan(this, Start, Count);
@@ -131,10 +182,11 @@
             }
         }
 
-        public void Use(int Start, int Count, ReadOnlySpan<T> Other, Action<Span<T>, ReadOnlySpan<T>> Action)
+        public void UseSpan(int Start, int Count, ReadOnlySpan<T> Other, Action<Span<T>, ReadOnlySpan<T>> Action)
         {
             ThrowIfDisposed();
             Lock.EnterReadLock();
+            Modify();
             try
             {
                 Span<T> Span = Source.AsSpan(this, Start, Count);
@@ -147,10 +199,62 @@
         }
 
 
-        public I Use<I>(Func<Span<T>, I> Function)
+        public void UseReadOnlySpan(Action<ReadOnlySpan<T>> Action)
         {
             ThrowIfDisposed();
             Lock.EnterReadLock();
+            try
+            {
+                ReadOnlySpan<T> ReadOnlySpan = Source.AsSpan(this);
+                Action.Invoke(ReadOnlySpan);
+            }
+            finally
+            {
+                Lock.ExitReadLock();
+            }
+        }
+
+        public void UseReadOnlySpan(int Count, Action<ReadOnlySpan<T>> Action)
+        {
+            UseReadOnlySpan(0, Count, Action);
+        }
+
+        public void UseReadOnlySpan(int Start, int Count, Action<ReadOnlySpan<T>> Action)
+        {
+            ThrowIfDisposed();
+            Lock.EnterReadLock();
+            try
+            {
+                ReadOnlySpan<T> ReadOnlySpan = Source.AsSpan(this, Start, Count);
+                Action.Invoke(ReadOnlySpan);
+            }
+            finally
+            {
+                Lock.ExitReadLock();
+            }
+        }
+
+        public void UseReadOnlySpan(int Start, int Count, ReadOnlySpan<T> Other, Action<ReadOnlySpan<T>, ReadOnlySpan<T>> Action)
+        {
+            ThrowIfDisposed();
+            Lock.EnterReadLock();
+            try
+            {
+                ReadOnlySpan<T> ReadOnlySpan = Source.AsSpan(this, Start, Count);
+                Action.Invoke(ReadOnlySpan, Other);
+            }
+            finally
+            {
+                Lock.ExitReadLock();
+            }
+        }
+
+
+        public I UseSpan<I>(Func<Span<T>, I> Function)
+        {
+            ThrowIfDisposed();
+            Lock.EnterReadLock();
+            Modify();
             try
             {
                 Span<T> Span = Source.AsSpan(this);
@@ -162,15 +266,16 @@
             }
         }
 
-        public I Use<I>(int Count, Func<Span<T>, I> Function)
+        public I UseSpan<I>(int Count, Func<Span<T>, I> Function)
         {
-            return Use(0, Count, Function);
+            return UseSpan(0, Count, Function);
         }
 
-        public I Use<I>(int Start, int Count, Func<Span<T>, I> Function)
+        public I UseSpan<I>(int Start, int Count, Func<Span<T>, I> Function)
         {
             ThrowIfDisposed();
             Lock.EnterReadLock();
+            Modify();
             try
             {
                 Span<T> Span = Source.AsSpan(this, Start, Count);
@@ -182,10 +287,11 @@
             }
         }
 
-        public I Use<I>(int Start, int Count, Span<T> Other, Func<Span<T>, Span<T>, I> Function)
+        public I UseSpan<I>(int Start, int Count, Span<T> Other, Func<Span<T>, Span<T>, I> Function)
         {
             ThrowIfDisposed();
             Lock.EnterReadLock();
+            Modify();
             try
             {
                 Span<T> Span = Source.AsSpan(this, Start, Count);
@@ -197,14 +303,66 @@
             }
         }
 
-        public I Use<I>(int Start, int Count, ReadOnlySpan<T> Other, Func<Span<T>, ReadOnlySpan<T>, I> Function)
+        public I UseSpan<I>(int Start, int Count, ReadOnlySpan<T> Other, Func<Span<T>, ReadOnlySpan<T>, I> Function)
+        {
+            ThrowIfDisposed();
+            Lock.EnterReadLock();
+            Modify();
+            try
+            {
+                Span<T> Span = Source.AsSpan(this, Start, Count);
+                return Function.Invoke(Span, Other);
+            }
+            finally
+            {
+                Lock.ExitReadLock();
+            }
+        }
+
+
+        public I UseReadOnlySpan<I>(Func<ReadOnlySpan<T>, I> Function)
         {
             ThrowIfDisposed();
             Lock.EnterReadLock();
             try
             {
-                Span<T> Span = Source.AsSpan(this, Start, Count);
-                return Function.Invoke(Span, Other);
+                ReadOnlySpan<T> ReadOnlySpan = Source.AsSpan(this);
+                return Function.Invoke(ReadOnlySpan);
+            }
+            finally
+            {
+                Lock.ExitReadLock();
+            }
+        }
+
+        public I UseReadOnlySpan<I>(int Count, Func<ReadOnlySpan<T>, I> Function)
+        {
+            return UseReadOnlySpan(0, Count, Function);
+        }
+
+        public I UseReadOnlySpan<I>(int Start, int Count, Func<ReadOnlySpan<T>, I> Function)
+        {
+            ThrowIfDisposed();
+            Lock.EnterReadLock();
+            try
+            {
+                ReadOnlySpan<T> ReadOnlySpan = Source.AsSpan(this, Start, Count);
+                return Function.Invoke(ReadOnlySpan);
+            }
+            finally
+            {
+                Lock.ExitReadLock();
+            }
+        }
+
+        public I UseReadOnlySpan<I>(int Start, int Count, ReadOnlySpan<T> Other, Func<ReadOnlySpan<T>, ReadOnlySpan<T>, I> Function)
+        {
+            ThrowIfDisposed();
+            Lock.EnterReadLock();
+            try
+            {
+                ReadOnlySpan<T> ReadOnlySpan = Source.AsSpan(this, Start, Count);
+                return Function.Invoke(ReadOnlySpan, Other);
             }
             finally
             {
@@ -223,6 +381,7 @@
             }
 
             Lock.EnterWriteLock();
+            Modify();
             try
             {
                 return Source.Expand(this, Capacity);
@@ -236,7 +395,7 @@
         public void Move(int SourceIndex, int DestinationIndex, int Count)
         {
             ThrowIfDisposed();
-            if (Count <= 0 || SourceIndex == DestinationIndex) return;
+            if (Count <= 0 || SourceIndex == DestinationIndex) { return; }
 
             ThrowIfWithout(SourceIndex);
             ThrowIfWithout(SourceIndex + Count - 1);
@@ -244,6 +403,7 @@
             ThrowIfWithout(DestinationIndex + Count - 1);
 
             Lock.EnterWriteLock();
+            Modify();
             try
             {
                 Span<T> TotalSpan = Source.AsSpan(this);
@@ -288,6 +448,7 @@
         public void CopyTo(Span<T> Destination)
         {
             Lock.EnterWriteLock();
+            Modify();
             try
             {
                 Source.AsSpan(this).CopyTo(Destination);
@@ -301,6 +462,7 @@
         public void CopyTo(int Start, int Count, Span<T> Destination)
         {
             Lock.EnterWriteLock();
+            Modify();
             try
             {
                 Source.AsSpan(this, Start, Count).CopyTo(Destination);
@@ -309,6 +471,12 @@
             {
                 Lock.ExitWriteLock();
             }
+        }
+
+
+        public void Modify()
+        {
+            Version++;
         }
 
 
@@ -340,44 +508,14 @@
 
         #endregion
 
-        //#region IEnumerable
-        //IEnumerator IEnumerable.GetEnumerator()
-        //{
-        //    return GetEnumerator();
-        //}
+        #region IEnumerable
+        public IEnumerator<T> GetEnumerator(IEnumerator<int> IndexEnumerator)
+        {
+            ThrowIfDisposed();
+            return new Enumerator(this, IndexEnumerator);
+        }
 
-        //public IEnumerator<T> GetEnumerator()
-        //{
-        //    ThrowIfDisposed();
-        //    Lock.EnterReadLock();
-        //    try
-        //    {
-        //        return Source.GetEnumerator(Start, Count);
-        //    }
-        //    finally
-        //    {
-        //        Lock.ExitReadLock();
-        //    }
-        //}
-
-        //public IEnumerator<T> GetEnumerator(int Start, int Length)
-        //{
-        //    ThrowIfDisposed();
-        //    ArgumentOutOfRangeException.ThrowIfWithout(Start, Count);
-        //    ArgumentOutOfRangeException.ThrowIfWithout(Start + Length, Count);
-
-        //    Lock.EnterReadLock();
-        //    try
-        //    {
-        //        return Source.GetEnumerator(this.Start, Length);
-        //    }
-        //    finally
-        //    {
-        //        Lock.ExitReadLock();
-        //    }            
-        //}
-
-        //#endregion
+        #endregion
 
         #region IDisposable
         public void Dispose()
@@ -385,6 +523,7 @@
             if (IsDisposed) { return; }
 
             Lock.EnterWriteLock();
+            Modify();
             try
             {
                 Source.Release(this);
@@ -414,6 +553,65 @@
             if (IsDisposed)
             {
                 throw new ObjectDisposedException(nameof(ArenaSpan<>));
+            }
+        }
+
+        #endregion
+
+        #region Enumerator
+        public struct Enumerator : IEnumerator<T>
+        {
+            private readonly IEnumerator<int> IndexEnumerator;
+            private readonly ArenaSpan<T> Source;
+            private readonly Memory<T> Memory;
+            private readonly int Version;
+
+            object? IEnumerator.Current => Current;
+
+            public T Current { get; private set; }
+
+
+            public Enumerator(ArenaSpan<T> Span, IEnumerator<int> IndexEnumerator)
+            {
+                this.IndexEnumerator = IndexEnumerator.NotNull();
+                this.Source = Span;
+                this.Memory = Span.Source.AsMemory(Span);
+                this.Version = Span.Version;
+            }
+
+
+            public bool MoveNext()
+            {
+                CheckVersion();
+                Source.ThrowIfDisposed();
+
+                if (IndexEnumerator.MoveNext())
+                {
+                    int Index = IndexEnumerator.Current;
+                    Current = Memory.Span[Index];
+                    return true;
+                }
+
+                return false;
+            }
+
+            public void Reset()
+            {
+                IndexEnumerator.Reset();
+            }
+
+            public void Dispose()
+            {
+
+            }
+
+
+            private void CheckVersion()
+            {
+                if (Source.Version != Version)
+                {
+                    throw new InvalidOperationException("Collection was modified; enumeration operation may not execute.");
+                }
             }
         }
 

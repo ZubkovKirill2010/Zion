@@ -44,7 +44,7 @@ namespace Zion
             {
                 int TotalCount = Count + ItemsCount;
                 Data.Expand(TotalCount);
-                Data.Use
+                Data.UseSpan
                 (
                     Count, ItemsCount, Span =>
                     {
@@ -71,7 +71,7 @@ namespace Zion
             int TotalCount = Count + Items.Length;
 
             Data.Expand(TotalCount);
-            Data.Use
+            Data.UseSpan
             (
                 Count, ItemsCount, Items,
                 (Span, Other) =>
@@ -118,7 +118,7 @@ namespace Zion
 
         public void Clear()
         {
-            Data.Use(Count, static Span => Span.Clear());
+            Data.UseSpan(Count, static Span => Span.Clear());
         }
 
 
@@ -135,12 +135,12 @@ namespace Zion
 
         public int IndexOf(T Item, IEqualityComparer<T>? Comparer = null)
         {
-            return Data.Use(Count, Span => Span.IndexOf(Item, Comparer));
+            return Data.UseSpan(Count, Span => Span.IndexOf(Item, Comparer));
         }
 
         public bool Contains(T Item, IEqualityComparer<T>? Comparer = null)
         {
-            return Data.Use(Count, Span => Span.Contains(Item, Comparer));
+            return Data.UseSpan(Count, Span => Span.Contains(Item, Comparer));
         }
 
 
@@ -173,7 +173,7 @@ namespace Zion
                     Data.Move(Index, Index + ItemsCount, Count - Index);
                 }
 
-                Data.Use
+                Data.UseSpan
                 (
                     Index, ItemsCount, Span =>
                     {
@@ -200,7 +200,7 @@ namespace Zion
                 InsertItems(Index, Items, out int TotalCount);
 
                 Data.Expand(TotalCount + TailLength);
-                Data.Use(TotalCount, TailLength, Tail.CopyTo);
+                Data.UseSpan(TotalCount, TailLength, Tail.CopyTo);
 
                 Count = TotalCount + TailLength;
             }
@@ -208,18 +208,18 @@ namespace Zion
 
         public void Reverse()
         {
-            Data.Use(static Span => Span.Reverse());
+            Data.UseSpan(static Span => Span.Reverse());
         }
 
         public void Sort()
         {
-            Data.Use(static Span => Span.Sort());
+            Data.UseSpan(static Span => Span.Sort());
         }
 
 
         public void UseSpan(Action<Span<T>> Action)
         {
-            Data.Use(Action);
+            Data.UseSpan(Action);
         }
 
         public T[] ToArray()
@@ -260,9 +260,13 @@ namespace Zion
         }
 
 
-        public override IEnumerator<T> GetEnumerator()
+        protected override IEnumerator<int> GetIndexEnumerator()
         {
-            throw new NotImplementedException(); //TODO
+            int Count = this.Count;
+            for (int i = 0; i < Count; i++)
+            {
+                yield return i;
+            }
         }
 
 
@@ -282,7 +286,7 @@ namespace Zion
                 }
 
                 Data.Expand(TotalIndex + LocalIndex);
-                Data.Use
+                Data.UseSpan
                 (
                     TotalIndex, LocalIndex, Span =>
                     {

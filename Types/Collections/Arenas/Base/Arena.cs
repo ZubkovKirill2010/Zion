@@ -113,6 +113,12 @@ namespace Zion
             return Data.AsSpan(ArenaSpan.Start + Start, Count);
         }
 
+        internal Memory<T> AsMemory(ArenaSpan<T> ArenaSpan)
+        {
+            CheckSpan(ArenaSpan);
+            return Data.AsMemory(ArenaSpan.Start, ArenaSpan.Count);
+        }
+
         internal void Release(ArenaSpan<T> Span)
         {
             CheckSpan(Span);
@@ -137,15 +143,6 @@ namespace Zion
             MarkArea(Span, false);
 
             return Allocated;
-        }
-
-        internal IEnumerator<T> GetEnumerator(int Start, int Count)
-        {
-            int End = Start + Count;
-            for (int i = Start; i < End; i++)
-            {
-                yield return Data[i];
-            }
         }
 
 

@@ -41,40 +41,40 @@ namespace Zion
 
         public int IndexOf(T Item, IEqualityComparer<T>? Comparer = null)
         {
-            return Data.Use(Span => Span.IndexOf(Item, Comparer));
+            return Data.UseSpan(Span => Span.IndexOf(Item, Comparer));
         }
 
         public bool Contains(T Item, IEqualityComparer<T>? Comparer = null)
         {
-            return Data.Use(Span => Span.Contains(Item, Comparer));
+            return Data.UseSpan(Span => Span.Contains(Item, Comparer));
         }
 
 
         public void Clear()
         {
-            Data.Use(static Span => Span.Clear());
+            Data.UseSpan(static Span => Span.Clear());
         }
 
 
         public void Reverse()
         {
-            Data.Use(static Span => Span.Reverse());
+            Data.UseSpan(static Span => Span.Reverse());
         }
 
         public void Sort()
         {
-            Data.Use(static Span => Span.Sort());
+            Data.UseSpan(static Span => Span.Sort());
         }
 
 
         public void UseSpan(Action<Span<T>> Action)
         {
-            Data.Use(Action);
+            Data.UseSpan(Action);
         }
 
         public T[] ToArray()
         {
-            return Data.Use(static Span => Span.ToArray());
+            return Data.UseSpan(static Span => Span.ToArray());
         }
 
 
@@ -85,7 +85,7 @@ namespace Zion
 
         public void CopyTo(ArenaArray<T> Destination)
         {
-            Destination.Data.Use(Data.CopyTo);
+            Destination.Data.UseSpan(Data.CopyTo);
         }
 
         public void CopyTo(Span<T> Destination)
@@ -94,9 +94,13 @@ namespace Zion
         }
 
 
-        public override IEnumerator<T> GetEnumerator()
+        protected override IEnumerator<int> GetIndexEnumerator()
         {
-            throw new NotImplementedException(); //TODO
+            int Count = Length;
+            for (int i = 0; i < Count; i++)
+            {
+                yield return i;
+            }
         }
     }
 }

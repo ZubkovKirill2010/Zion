@@ -68,7 +68,7 @@ namespace Zion
 
         public bool Contains(T Item)
         {
-            return Data.Use
+            return Data.UseSpan
             (
                 Span =>
                 {
@@ -89,7 +89,7 @@ namespace Zion
 
         public void CopyTo(T[] Array, int ArrayIndex)
         {
-            Data.Use
+            Data.UseSpan
             (
                 Count,
                 Span =>
@@ -102,7 +102,7 @@ namespace Zion
 
         public bool Remove(T Item)
         {
-            return Data.Use
+            return Data.UseSpan
             (
                 Count,
                 Span =>
@@ -140,7 +140,7 @@ namespace Zion
 
         public Stack<T> ToStack()
         {
-            return Data.Use
+            return Data.UseSpan
             (
                 Count,
                 Span =>
@@ -165,7 +165,7 @@ namespace Zion
                 return new List<T>();
             }
 
-            return Data.Use
+            return Data.UseSpan
             (
                 Count,
                 Span =>
@@ -181,10 +181,12 @@ namespace Zion
         }
 
 
-        public override IEnumerator<T> GetEnumerator()
+        protected override IEnumerator<int> GetIndexEnumerator()
         {
-            //TODO
-            throw new NotImplementedException();
+            for (int i = Count - 1; i >= 0; i--)
+            {
+                yield return i;
+            }
         }
     }
 }
