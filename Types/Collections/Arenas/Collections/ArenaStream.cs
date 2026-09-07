@@ -87,7 +87,7 @@ namespace Zion
                 _Position,
                 Span =>
                 {
-                    Span<int> Destination = MemoryMarshal.Cast<byte, int>(Span);
+                    var Destination = MemoryMarshal.Cast<byte, int>(Span);
                     decimal.GetBits(Value, Destination);
                     UpdateLengthFromPosition(_Position + sizeof(decimal));
                 }
@@ -434,7 +434,7 @@ namespace Zion
         public void CopyTo(Stream Stream)
         {
             ArgumentNullException.ThrowIfNull(Stream);
-            Data.UseSpan(Span => Stream.Write(Span.Slice(0, Length)));
+            Data.UseReadOnlySpan(Span => Stream.Write(Span.Slice(0, Length)));
         }
 
 

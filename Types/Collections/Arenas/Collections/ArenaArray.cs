@@ -41,12 +41,12 @@ namespace Zion
 
         public int IndexOf(T Item, IEqualityComparer<T>? Comparer = null)
         {
-            return Data.UseSpan(Span => Span.IndexOf(Item, Comparer));
+            return Data.UseReadOnlySpan(Span => Span.IndexOf(Item, Comparer));
         }
 
         public bool Contains(T Item, IEqualityComparer<T>? Comparer = null)
         {
-            return Data.UseSpan(Span => Span.Contains(Item, Comparer));
+            return Data.UseReadOnlySpan(Span => Span.Contains(Item, Comparer));
         }
 
 
@@ -72,9 +72,14 @@ namespace Zion
             Data.UseSpan(Action);
         }
 
+        public void UseReadOnlySpan(Action<ReadOnlySpan<T>> Action)
+        {
+            Data.UseReadOnlySpan(Action);
+        }
+
         public T[] ToArray()
         {
-            return Data.UseSpan(static Span => Span.ToArray());
+            return Data.UseReadOnlySpan(static Span => Span.ToArray());
         }
 
 

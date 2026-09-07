@@ -69,7 +69,7 @@ namespace Zion
 
         public bool Contains(T Item)
         {
-            return Data.UseSpan
+            return Data.UseReadOnlySpan
             (
                 Span =>
                 {
@@ -90,7 +90,7 @@ namespace Zion
 
         public void CopyTo(T[] Array, int ArrayIndex)
         {
-            Data.UseSpan
+            Data.UseReadOnlySpan
             (
                 Count,
                 Span =>
@@ -103,7 +103,7 @@ namespace Zion
 
         public bool Remove(T Item)
         {
-            return Data.UseSpan
+            return Data.UseReadOnlySpan
             (
                 Count,
                 Span =>
@@ -141,7 +141,7 @@ namespace Zion
 
         public Stack<T> ToStack()
         {
-            return Data.UseSpan
+            return Data.UseReadOnlySpan
             (
                 Count,
                 Span =>
@@ -166,7 +166,7 @@ namespace Zion
                 return new List<T>();
             }
 
-            return Data.UseSpan
+            return Data.UseReadOnlySpan
             (
                 Count,
                 Span =>

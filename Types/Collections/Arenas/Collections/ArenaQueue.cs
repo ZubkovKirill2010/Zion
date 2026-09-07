@@ -2,9 +2,20 @@
 {
     public sealed class ArenaQueue<T> : ArenaCollection<T>, ICollection<T>
     {
-        public bool IsReadOnly => false;
+        private int Start;
+        private int End;
 
-        public int Count { get; private set; }
+        public int Count
+        {
+            get;
+            private set
+            {
+                Data.Modify();
+                field = value;
+            }
+        }
+
+        public bool IsReadOnly => false;
 
 
         public ArenaQueue(ArenaSpan<T> Data) : base(Data) { }
@@ -12,12 +23,16 @@
 
         public void Enqueue(T Item)
         {
-            throw new NotImplementedException(); //TODO
+            Add(Item);
         }
 
         public T Peek()
         {
-            throw new NotImplementedException(); //TODO
+            if (TryPeek(out T Item))
+            {
+                return Item;
+            }
+            throw new IndexOutOfRangeException("Queue is empty");
         }
 
         public T Dequeue()
@@ -28,6 +43,12 @@
 
         public bool TryPeek(out T Item)
         {
+            int Index = Count - 1;
+            if (Count == -1)
+            {
+                Item = default!;
+                return false;
+            }
             throw new NotImplementedException(); //TODO
         }
 
@@ -35,22 +56,11 @@
         {
             throw new NotImplementedException(); //TODO
         }
-        
-
-        public void TrimExcess()
-        {
-            throw new NotImplementedException(); //TODO
-        }
-
-        public void TrimExcess(int Capacity)
-        {
-            throw new NotImplementedException(); //TODO
-        }
 
 
         public void Add(T Item)
         {
-            throw new NotImplementedException(); //TODO
+            Enqueue(Item);
         }
 
         public bool Contains(T Item)
@@ -70,13 +80,8 @@
 
         public void Clear()
         {
-            throw new NotImplementedException(); //TODO
-        }
-
-
-        public void EnsureCapacity(int NewCapacity)
-        {
-            throw new NotImplementedException(); //TODO
+            Start = 0;
+            End = 0;
         }
 
 
@@ -85,18 +90,13 @@
             throw new NotImplementedException(); //TODO
         }
 
-        public Stack<T> ToQueue()
-        {
-            throw new NotImplementedException(); //TODO
-        }
-
-        public List<T> ToList()
+        public Queue<T> ToQueue()
         {
             throw new NotImplementedException(); //TODO
         }
 
 
-        public override IEnumerator<T> GetEnumerator()
+        protected override IEnumerator<int> GetIndexEnumerator()
         {
             throw new NotImplementedException(); //TODO
         }
