@@ -27,7 +27,7 @@ namespace Zion.Serialization.ADF
             new (2),  //Half
             new (5),  //Index
             new (10), //Range
-            new (-1), //BigInteger?
+            new (4),  //BigInteger
 
             new (3), //RGB
             new (4), //RGBA

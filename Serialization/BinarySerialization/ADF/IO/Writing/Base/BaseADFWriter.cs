@@ -101,6 +101,14 @@ namespace Zion.Serialization.ADF
             return Stream;
         }
 
+        protected void ThrowIfDisposed()
+        {
+            if (IsDisposed)
+            {
+                throw new ObjectDisposedException(nameof(BaseADFWriter));
+            }
+        }
+
         #endregion
 
         #region Writing
@@ -276,11 +284,19 @@ namespace Zion.Serialization.ADF
 
         public void Write(string Name, BigInteger Value)
         {
-            //TODO: WritePrimitive BigInteger
             WritePrimitive
             (
-                Name, ADFPrimitives.Range, in Value,
-                static (S, V) => throw new NotImplementedException()
+                Name, ADFPrimitives.BigInteger, in Value,
+                (S, V) =>
+                {
+                    S.Write(ChildPosition);
+                    WriteBigIntegerValue(Value);
+                },
+                (S, V) =>
+                {
+                    S.Write7BitEncodedInt(ChildPosition);
+                    WriteBigIntegerValue(Value);
+                }
             );
         }
 
@@ -556,12 +572,15 @@ namespace Zion.Serialization.ADF
         #endregion
 
         #region PrivateMethods
-        protected void ThrowIfDisposed()
+        private void WriteBigIntegerValue(BigInteger Value)
         {
-            if (IsDisposed)
-            {
-                throw new ObjectDisposedException(nameof(BaseADFWriter));
-            }
+            var Stream = Arena.GetStream(0);
+            var Writer = new ADFBlockedWriter(this, Stream);
+            
+            Stream.Write(Value);
+
+            Childs.Add(Writer);
+            ChildPosition += Stream.Length;
         }
 
         #endregion
