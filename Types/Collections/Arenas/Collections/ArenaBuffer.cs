@@ -267,11 +267,6 @@ namespace Zion
             Count = Math.Max(0, NewSize);
         }
 
-        public void TrimExcess()
-        {
-            throw new NotImplementedException(); //TODO
-        }
-
 
         protected override IEnumerator<int> GetIndexEnumerator()
         {
