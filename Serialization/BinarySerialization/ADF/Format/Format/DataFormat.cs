@@ -6,7 +6,8 @@ namespace Zion.Serialization.ADF
     {
         #region Data
         private readonly Parameter[] Parameters;
-        
+        private readonly uint[] Generics = [];
+
         public readonly FormatFlags Flags;
         public readonly uint BaseFormat;
 
@@ -18,6 +19,7 @@ namespace Zion.Serialization.ADF
         public bool IsAbstract  => Flags.HasFlag(FormatFlags.IsAbstract);
         public bool IsNullable  => Flags.HasFlag(FormatFlags.IsNullable);
         public bool IsEnum      => Flags.HasFlag(FormatFlags.IsEnum);
+        public bool IsGeneric   => Flags.HasFlag(FormatFlags.IsGeneric);
 
         public int ParametersCount => Parameters.Length;
 
@@ -31,10 +33,15 @@ namespace Zion.Serialization.ADF
         }
 
         public DataFormat(IEnumerable<Parameter> Parameters, FormatFlags Flags, uint BaseFormat)
+            : this(Parameters, Flags)
         {
-            this.Parameters = Parameters.NotNull().ToArray();
-            this.Flags = Flags;
             this.BaseFormat = BaseFormat;
+        }
+
+        public DataFormat(IEnumerable<Parameter> Parameters, IEnumerable<uint> Generics, FormatFlags Flags, uint BaseFormat)
+            : this(Parameters, Flags, BaseFormat)
+        {
+            this.Generics = Generics.NotNull().ToArray();
         }
 
         #endregion

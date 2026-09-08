@@ -432,109 +432,100 @@ namespace Zion.Serialization.ADF
         {
             ThrowIfDisposed();
 
-            uint NameId = StringRegistry.GetOrAdd(Name.NotNull());
-
-            if (Value is null)
-            {
-                //TODO: Реализовать уточнение типа при первой записи не Null параметра
-
-                var Stream = GetStream(Name, in NameId, 0u);
-
-                if (Options.Compression)
-                {
-                    Stream.Write((byte)0);
-                }
-                else
-                {
-                    Stream.Write(0u);
-                }
-                OnWrited(Name, in NameId, 0u);
-                return;
-            }
-
-            if (TryWritePrimitive(Name, Value))
-            {
-                return;
-            }
-
-            if (Value.GetType().IsValueType)
-            {
-                WriteStruct(Name, in NameId, Value);
-            }
-            else
-            {
-                WriteClass(Name, in NameId, Value);
-            }
-        }
-
-
-        private void WriteStruct<T>(string Name, in uint NameId, T Value)
-        {
-            var Type = Value.GetType();
-
-            void WriteAuto(ADFObjectWriter Writer)
-            {
-                AutoADFSerializer.GetWriter<T>(Type).Write(Writer, Value);
-            }
-
-            Action<ADFObjectWriter>? WriteAction = Value is IADFWritable Writable
-                ? Writable.Write
-                :
-                (
-                    ADFSerializer.TryGetWriter(Value, out var Serializer)
-                    ? WriteAction = Writer => Serializer.Write(Writer, Value)
-                    : WriteAuto
-                );
-
+            var NameId = StringRegistry.GetOrAdd(Name.NotNull());
+            var Type   = typeof(T);
+            
             if (TypeAssociation.TryGetFormatId(Type, out uint FormatId))
             {
                 var Format = FormatRegistry[FormatId];
                 var Stream = GetStream(Name, in NameId, in FormatId);
-                using var Writer = new ADFCheckingObjectWriter(this, Stream, Format);
+                var IsNull = false;
+                
+                void WriteNullReference()
+                {
+                    if (Options.Compression)
+                    {
+                        Stream.Write((byte)0);
+                    }
+                    else
+                    {
+                        Stream.Write(0u);
+                    }
+                }
 
-                WriteAction(Writer);
+                if (Value is null)
+                {
+                    IsNull = true;
+                    if (!Format.IsNullable)
+                    {
+                        throw new ADFObjectIsNullException(Name);
+                    }
+                }
 
-                OnWrited(Name, NameId, FormatId);
+                if (Format.IsReference)
+                {
+                    if (IsNull)
+                    {
+                        WriteNullReference();
+                        OnWrited(Name, in NameId, in FormatId);
+                        return;
+                    }
+                    WriteExistingClass(Name, NameId, Format, Stream, Value);
+                    OnWrited(Name, in NameId, in FormatId);
+                }
+                else
+                {
+                    if (IsNull)
+                    {
+                        Stream.Write(false);
+                        OnWrited(Name, in NameId, in FormatId);
+                        return;
+                    }
+                    if (Format.IsNullable)
+                    {
+                        Stream.Write(true);
+                    }
+                    WriteExistingStruct(Name, NameId, FormatId, Format, Stream, Value);
+                    OnWrited(Name, in NameId, in FormatId);
+                }
             }
             else
             {
-                var Writer = new ADFRecordObjectWriter(this, Stream, Type);
+                if (Value is null && !CanWriteNull())
+                {
+                    throw new ADFObjectIsNullException(Name);
+                }
 
-                WriteAction(Writer);
-                Writer.Dispose();
-
-                FormatId = FormatRegistry.Add(Writer.Format);
-
-                TypeAssociation.Add(Type, FormatId);
-                OnWrited(Name, NameId, FormatId);
+                if (Type.IsValueType)
+                {
+                    WriteNewStruct(Name, NameId, Stream, Value);
+                }
+                else
+                {
+                    WriteNewClass(Name, NameId, Stream, Value);
+                }
             }
         }
 
-        private void WriteClass<T>(string Name, in uint NameId, T Value)
-        {
-            //TODO: Записывать в формат typeof(T), писать T (для сохранения абстракции)
-            //var Type = typeof(T);
-            //var ValueType = Value.GetType();
-            //var Stream = GetStream(Name, in NameId);
 
-            //if (References.TryGetReference(Value, out var Reference))
-            //{
-            //    Stream.Write(Reference.Id);
-            //    OnWrited(Name, in NameId, in Reference.Definition.FormatId);
-            //}
-            //else
-            //{
-            //    //TODO:
-            //    //Пишем ссылку на новый объект (относительную позицию от конца этой структуры (ChildPosition)
-            //    //После записи получаем FormatId и вызываем OnWrited
-            //    //Добавляем ссылку в References
-            //    //Пишем по приоритетам:
-            //    //IADFWritable
-            //    //IADFWriter
-            //    //TypeSchema
-            //    //Reflection
-            //}
-            //return;
+        private void WriteExistingStruct<T>(string Name, uint NameId, uint FormatId, DataFormat Format, ArenaStream Stream, T Value)
+        {
+            //TODO: WriteExistingStruct
+        }
+
+        private void WriteExistingClass<T>(string Name, uint NameId, DataFormat? Format, ArenaStream Stream, T Value)
+        {
+            //TODO: WriteExistingClass
+        }
+
+        private void WriteNewStruct<T>(string Name, uint NameId, ArenaStream Stream, T Value)
+        {
+            //TODO: WriteNewStruct
+        }
+
+        private void WriteNewClass<T>(string Name, uint NameId, ArenaStream Stream, T Value)
+        {
+            //TODO: WriteNewClass
         }
 
         #endregion
@@ -549,6 +540,8 @@ namespace Zion.Serialization.ADF
         protected virtual ArenaStream GetStream(string Name, in uint NameId, in uint FormatId) => Stream;
 
         protected virtual void OnDisposed() { }
+
+        protected abstract bool CanWriteNull();
 
         protected abstract void OnWrited(string Name, in uint NameId, in uint FormatId);
         

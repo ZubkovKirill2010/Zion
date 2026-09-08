@@ -2,20 +2,26 @@
 {
     public sealed class TypeAssociation
     {
-        public uint this[Type Type]
+        private readonly Dictionary<Type, uint> Formats;
+
+
+        public TypeAssociation()
         {
-            get;//TODO: GetFormatId
+            Formats = new();
         }
+
+
+        public uint this[Type Type] => Formats[Type];
 
 
         public bool TryGetFormatId(Type Type, out uint FormatId)
         {
-            //TODO
+            return Formats.TryGetValue(Type, out FormatId);
         }
 
-        public void Add(Type Type, uint FormatId)
+        public bool Add(Type Type, uint FormatId)
         {
-            //TODO
+            return Formats.TryAdd(Type, FormatId);
         }
     }
 }

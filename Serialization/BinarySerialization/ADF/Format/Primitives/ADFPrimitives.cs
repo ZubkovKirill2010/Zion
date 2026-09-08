@@ -77,6 +77,27 @@ namespace Zion.Serialization.ADF
 
         public const Id Reference = 24;
 
+        public const Id T1  = 127;
+        public const Id T2  = 126;
+        public const Id T3  = 125;
+        public const Id T4  = 124;
+        public const Id T5  = 123;
+        public const Id T6  = 122;
+        public const Id T7  = 121;
+        public const Id T8  = 120;
+        public const Id T9  = 119;
+        public const Id T10 = 118;
+        public const Id T11 = 117;
+        public const Id T12 = 116;
+        public const Id T13 = 115;
+        public const Id T14 = 114;
+        public const Id T15 = 113;
+        public const Id T16 = 112;
+        public const Id T17 = 111;
+        public const Id T18 = 110;
+        public const Id T19 = 109;
+        public const Id T20 = 108;
+
         #endregion
 
         #region PublicMethods
@@ -87,6 +108,10 @@ namespace Zion.Serialization.ADF
 
         public static int SizeOf(Id PrimitiveId)
         {
+            if (PrimitiveId >= 108)
+            {
+                return 4;
+            }
             return PrimitivesInfo[PrimitiveId].Size;
         }
 
