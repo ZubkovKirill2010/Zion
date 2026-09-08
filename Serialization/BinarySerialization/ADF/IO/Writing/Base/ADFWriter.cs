@@ -89,7 +89,7 @@
             }
 
             Writer.Write((ushort)0);
-            Writer.Write(TotalLength);
+            Writer.Write(TotalLength);//TODO: Пишется общая позиция а не длина страницы
 
             Flush(BaseStream);
         }

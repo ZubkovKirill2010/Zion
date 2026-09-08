@@ -14,11 +14,11 @@ namespace Zion.Serialization.ADF
 
         #region Data
         private readonly Arena<byte> Arena;
-        private readonly ArenaStream Stream;
-        private readonly List<ADFObjectWriter> Childs;
 
-        protected readonly ADFWritingOptions Options;
+        protected readonly ADFWritingOptions  Options;
         protected readonly WritableRegistries Registries;
+
+        private StreamGroup Data;
 
         private int ChildPosition = 0;
 
@@ -31,49 +31,37 @@ namespace Zion.Serialization.ADF
         protected StringIdRegistry StringRegistry => Registries.StringRegistry;
         protected FormatIdRegistry FormatRegistry => Registries.FormatRegistry;
 
-        public long TotalLength
-        {
-            get;
-            private set
-            {
-                ArgumentOutOfRangeException.ThrowIfNegative(value);
-                field = value;
-            }
-        } = -1L;
+        public bool IsDisposed { get; private set; }
 
-        public bool IsDisposed => TotalLength < 0;
+        public long TotalLength => Data.Length;
 
-        public int CurrentPosition => Stream.Position;
+        public int CurrentPosition => Data.BaseStream.Position;
 
         #endregion
 
         #region Constructors
-        internal BaseADFWriter(Arena<byte> Arenas, ADFWritingOptions? Options)
-            : this(Options: null)
+        internal BaseADFWriter(Arena<byte> Arenas, ADFWritingOptions? WriteOptions)
         {
-            Arena = Arenas.NotNull();
-            Stream = Arena.GetStream(64);
+            Options    = WriteOptions ?? ADFWritingOptions.Default;
+            Arena      = Arenas.NotNull();
             Registries = new();
+            Data       = new(Arena.GetStream(64));
         }
 
         internal BaseADFWriter(BaseADFWriter Base)
-            : this(Base.NotNull().Arena, Base.Options) { }
+            : this(Base, Base.Data.BaseStream) { { } }
 
-        internal BaseADFWriter(BaseADFWriter Base, ArenaStream Stream)
-            : this(Base)
+        internal BaseADFWriter(BaseADFWriter Base, ArenaStream BaseStream)
         {
-            if (!Stream.NotNull().IsFrom(Arena))
+            if (!BaseStream.NotNull().IsFrom(Base.Arena))
             {
                 throw new ArgumentException("The stream must be from the transferred Arena");
             }
 
-            this.Stream = Stream;
-        }
-
-        private BaseADFWriter(ADFWritingOptions? Options)
-        {
-            this.Childs = new(0);
-            this.Options = Options ?? ADFWritingOptions.Default;
+            Options    = Base.Options;
+            Arena      = Base.Arena;
+            Registries = Base.Registries;
+            Data       = new(BaseStream);
         }
 
         #endregion
@@ -81,10 +69,9 @@ namespace Zion.Serialization.ADF
         #region PublicMethods
         public void Flush(Stream Destination)
         {
-            Stream.CopyTo(Destination);
-            foreach (ADFObjectWriter Reference in Childs)
+            foreach (var Stream in Data)
             {
-                Reference.Flush(Destination);
+                Stream.CopyTo(Destination);
             }
         }
 
@@ -98,7 +85,17 @@ namespace Zion.Serialization.ADF
 
         protected ArenaStream GetBaseStream()
         {
-            return Stream;
+            return Data.BaseStream;
+        }
+
+        protected void AddChild(ArenaStream Stream)
+        {
+            Data = Data.Add(new(Stream));
+        }
+
+        protected void AddChild(StreamGroup Group)
+        {
+            Data = Data.Add(Group);
         }
 
         protected void ThrowIfDisposed()
@@ -432,6 +429,11 @@ namespace Zion.Serialization.ADF
         {
             ThrowIfDisposed();
 
+            if (TryWritePrimitive(Name, Value))
+            {
+                return;
+            }
+
             var NameId = StringRegistry.GetOrAdd(Name.NotNull());
             var Type   = typeof(T);
             
@@ -496,6 +498,8 @@ namespace Zion.Serialization.ADF
                     throw new ADFObjectIsNullException(Name);
                 }
 
+                var Stream = GetStream(Name, in NameId, in FormatId);
+
                 if (Type.IsValueType)
                 {
                     WriteNewStruct(Name, NameId, Stream, Value);
@@ -537,7 +541,7 @@ namespace Zion.Serialization.ADF
         #endregion
 
         #region AbstractMethods
-        protected virtual ArenaStream GetStream(string Name, in uint NameId, in uint FormatId) => Stream;
+        protected virtual ArenaStream GetStream(string Name, in uint NameId, in uint FormatId) => Data.BaseStream;
 
         protected virtual void OnDisposed() { }
 
@@ -550,15 +554,7 @@ namespace Zion.Serialization.ADF
         #region IDisposable
         public void Dispose()
         {
-            long Length = Stream.Length;
-
-            foreach (var Reference in Childs)
-            {
-                Length += Reference.TotalLength;
-            }
-
-            TotalLength = Length;
-
+            IsDisposed = true;
             OnDisposed();
         }
 
@@ -567,13 +563,9 @@ namespace Zion.Serialization.ADF
         #region PrivateMethods
         private void WriteBigIntegerValue(BigInteger Value)
         {
-            var Stream = Arena.GetStream(0);
-            var Writer = new ADFBlockedWriter(this, Stream);
-            
+            var Stream = Arena.GetStream(0);            
             Stream.Write(Value);
-
-            Childs.Add(Writer);
-            ChildPosition += Stream.Length;
+            AddChild(Stream);
         }
 
         #endregion
