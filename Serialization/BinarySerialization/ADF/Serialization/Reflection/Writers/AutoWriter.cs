@@ -1,6 +1,6 @@
 ﻿namespace Zion.Serialization.ADF
 {
-    public readonly struct AutoWriter<T> : IADFWriter<T>
+    public readonly struct AutoWriter<T>
     {
         private readonly TypeSchema Schema;
 
@@ -17,9 +17,9 @@
             this.Schema = Schema;
         }
 
-        public void Write(ADFObjectWriter Writer, T Value)
+        public void Write(ArenaStream Stream, T Value)
         {
-
+            //TODO: AutoWriter.Write
         }
     }
 }

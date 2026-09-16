@@ -420,6 +420,13 @@ namespace Zion
         }
 
 
+        public void UseSpan(int Size, Action<Span<byte>> Action)
+        {
+            Reserve(Size);
+            Data.UseSpan(_Position, Size, Action);
+        }
+
+
         public byte[] ToArray()
         {
             return Data.ToArray(0, Length);

@@ -1,4 +1,6 @@
 ﻿using System.Numerics;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Zion.Vectors;
 using Vector2 = Zion.Vectors.Vector2;
 using Vector3 = Zion.Vectors.Vector3;
@@ -13,10 +15,7 @@ namespace Zion.Serialization.ADF
         #endregion
 
         #region Data
-        private readonly Arena<byte> Arena;
-
-        protected readonly ADFWritingOptions  Options;
-        protected readonly WritableRegistries Registries;
+        protected readonly ADFWritingContext Context;
 
         private StreamGroup Data;
 
@@ -25,6 +24,10 @@ namespace Zion.Serialization.ADF
         #endregion
 
         #region Properties
+
+        protected ADFWritingOptions     Options => Context.Options;
+        protected WritableRegistries Registries => Context.Registries;
+
         protected TypeAssociation TypeAssociation => Registries.TypeAssociation;
         protected ReferenceIdsRegistry References => Registries.References;
         protected DataRegistry       DataRegistry => Registries.DataRegistry;
@@ -40,28 +43,16 @@ namespace Zion.Serialization.ADF
         #endregion
 
         #region Constructors
-        internal BaseADFWriter(Arena<byte> Arenas, ADFWritingOptions? WriteOptions)
+        internal BaseADFWriter(BaseADFWriter Base) : this(Base.Context) { }
+
+        internal BaseADFWriter(BaseADFWriter Base, ArenaStream BaseStream) : this(Base.Context, BaseStream) { }
+
+        internal BaseADFWriter(ADFWritingContext Context) : this(Context, Context?.Arena?.GetStream(64)!) { }
+
+        internal BaseADFWriter(ADFWritingContext Context, ArenaStream BaseStream)
         {
-            Options    = WriteOptions ?? ADFWritingOptions.Default;
-            Arena      = Arenas.NotNull();
-            Registries = new();
-            Data       = new(Arena.GetStream(64));
-        }
-
-        internal BaseADFWriter(BaseADFWriter Base)
-            : this(Base, Base.Data.BaseStream) { { } }
-
-        internal BaseADFWriter(BaseADFWriter Base, ArenaStream BaseStream)
-        {
-            if (!BaseStream.NotNull().IsFrom(Base.Arena))
-            {
-                throw new ArgumentException("The stream must be from the transferred Arena");
-            }
-
-            Options    = Base.Options;
-            Arena      = Base.Arena;
-            Registries = Base.Registries;
-            Data       = new(BaseStream);
+            this.Context = Context.NotNull();
+            this.Data = new(BaseStream.NotNull());
         }
 
         #endregion
@@ -80,7 +71,7 @@ namespace Zion.Serialization.ADF
         #region ProtectedMethods
         protected ArenaStream GetNewStream(int Size)
         {
-            return Arena.GetStream(Size);
+            return Context.Arena.GetStream(Size);
         }
 
         protected ArenaStream GetBaseStream()
@@ -435,101 +426,88 @@ namespace Zion.Serialization.ADF
             }
 
             var NameId = StringRegistry.GetOrAdd(Name.NotNull());
-            var Type   = typeof(T);
-            
-            if (TypeAssociation.TryGetFormatId(Type, out uint FormatId))
+
+            if (Value is null)
             {
-                var Format = FormatRegistry[FormatId];
-                var Stream = GetStream(Name, in NameId, in FormatId);
-                var IsNull = false;
-                
-                void WriteNullReference()
+                var Stream = GetStreamForNull(Name, in NameId);
+                if (Options.Compression)
                 {
-                    if (Options.Compression)
-                    {
-                        Stream.Write((byte)0);
-                    }
-                    else
-                    {
-                        Stream.Write(0u);
-                    }
-                }
-
-                if (Value is null)
-                {
-                    IsNull = true;
-                    if (!Format.IsNullable)
-                    {
-                        throw new ADFObjectIsNullException(Name);
-                    }
-                }
-
-                if (Format.IsReference)
-                {
-                    if (IsNull)
-                    {
-                        WriteNullReference();
-                        OnWrited(Name, in NameId, in FormatId);
-                        return;
-                    }
-                    WriteExistingClass(Name, NameId, Format, Stream, Value);
-                    OnWrited(Name, in NameId, in FormatId);
+                    Stream.Write((byte)0);
                 }
                 else
                 {
-                    if (IsNull)
-                    {
-                        Stream.Write(false);
-                        OnWrited(Name, in NameId, in FormatId);
-                        return;
-                    }
-                    if (Format.IsNullable)
-                    {
-                        Stream.Write(true);
-                    }
-                    WriteExistingStruct(Name, NameId, FormatId, Format, Stream, Value);
-                    OnWrited(Name, in NameId, in FormatId);
+                    Stream.Write(0u);
                 }
+            }
+
+            var Type = Value!.GetType();
+
+            if (Type.IsEnum)
+            {
+                WriteEnum(Name, in NameId, Type, Value);
+                return;
+            }
+
+            if (TypeAssociation.TryGetFormatId(Type, out uint FormatId))
+            {
+                var Stream = GetStream(Name, in NameId, in FormatId);
+                var Format = FormatRegistry[FormatId];
+                WriteExistingObject(Name, in NameId, in FormatId, in Format, Stream, Value);
+
+                var ParameterType = typeof(T);
+                var ParameterFormatId = ParameterType == Type ? FormatId : TypeAssociation[ParameterType];
+                OnWrited(Name, in NameId, in ParameterFormatId);
             }
             else
             {
-                if (Value is null && !CanWriteNull())
-                {
-                    throw new ADFObjectIsNullException(Name);
-                }
-
-                var Stream = GetStream(Name, in NameId, in FormatId);
-
-                if (Type.IsValueType)
-                {
-                    WriteNewStruct(Name, NameId, Stream, Value);
-                }
-                else
-                {
-                    WriteNewClass(Name, NameId, Stream, Value);
-                }
+                WriteNewObject(Name, in NameId, Value);
+                //TODO
             }
         }
 
 
-        private void WriteExistingStruct<T>(string Name, uint NameId, uint FormatId, DataFormat Format, ArenaStream Stream, T Value)
+        private void WriteEnum<T>(string Name, in uint NameId, Type Type, T Value)
         {
-            //TODO: WriteExistingStruct
+            if (!TypeAssociation.TryGetFormatId(Type, out uint FormatId))
+            {
+                FormatId = FormatRegistry.Add(DataFormat.GetEnumFormat<T>());
+                TypeAssociation.Add(Type, FormatId);
+            }
+
+            var Stream = GetStream(Name, in NameId, in FormatId);
+
+            Stream.UseSpan
+            (
+                Unsafe.SizeOf<T>(),
+                Span =>
+                {
+                    Unsafe.WriteUnaligned(ref Span[0], Value);
+                }
+            );
         }
 
-        private void WriteExistingClass<T>(string Name, uint NameId, DataFormat? Format, ArenaStream Stream, T Value)
+        private void WriteExistingObject<T>(string Name, in uint NameId, in uint FormatId, in DataFormat Format, ArenaStream Stream, T Value)
         {
-            //TODO: WriteExistingClass
+            var Type = Value!.GetType();
+
+            if (Type != typeof(T))
+            {
+                //Уточнить тип (абстракция)
+            }
+
+            if (IsRootType(Type))
+            {
+                
+            }
+            else
+            {
+                //Писать по уровням
+            }
         }
 
-        private void WriteNewStruct<T>(string Name, uint NameId, ArenaStream Stream, T Value)
+        private void WriteNewObject<T>(string Name, in uint NameId, T Value)
         {
             //TODO: WriteNewStruct
-        }
-
-        private void WriteNewClass<T>(string Name, uint NameId, ArenaStream Stream, T Value)
-        {
-            //TODO: WriteNewClass
         }
 
         #endregion
@@ -543,9 +521,9 @@ namespace Zion.Serialization.ADF
         #region AbstractMethods
         protected virtual ArenaStream GetStream(string Name, in uint NameId, in uint FormatId) => Data.BaseStream;
 
-        protected virtual void OnDisposed() { }
+        protected virtual ArenaStream GetStreamForNull(string Name, in uint NameId) => Data.BaseStream;
 
-        protected abstract bool CanWriteNull();
+        protected virtual void OnDisposed() { }
 
         protected abstract void OnWrited(string Name, in uint NameId, in uint FormatId);
         
@@ -563,9 +541,19 @@ namespace Zion.Serialization.ADF
         #region PrivateMethods
         private void WriteBigIntegerValue(BigInteger Value)
         {
-            var Stream = Arena.GetStream(0);            
+            var Stream = Context.Arena.GetStream(0);            
             Stream.Write(Value);
             AddChild(Stream);
+        }
+
+        private static bool IsRootType(Type Type)
+        {
+            if (Type.IsValueType)
+            {
+                return true;
+            }
+            var BaseType = Type.BaseType;
+            return BaseType is null || BaseType == typeof(object);
         }
 
         #endregion

@@ -11,7 +11,7 @@
         public ADFRecordObjectWriter(BaseADFWriter Base, ArenaStream Stream, Type Type)
             : base(Base, Stream)
         {
-            Flags = FormatFlags.FromType(Type);
+            Flags = FormatFlags.FromType(Type);//TODO: Generics...
             Parameters = new();
         }
 

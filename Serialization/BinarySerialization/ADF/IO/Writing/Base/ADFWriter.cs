@@ -3,7 +3,7 @@
     public sealed class ADFWriter : BaseADFWriter
     {
         #region Data
-        public readonly Stream BaseStream;
+        public  readonly Stream BaseStream;
         private readonly BinaryWriter Writer;
 
         private bool IsFirstPage;
@@ -14,8 +14,7 @@
         #endregion
 
         #region Constructors
-        public ADFWriter(Stream Stream, ADFWritingOptions? Options = null)
-            : base(new Arena<byte>(2048), Options)
+        public ADFWriter(Stream Stream, ADFWritingOptions? Options = null) : base(new ADFWritingContext(Options))
         {
             if (!Stream.NotNull().CanWrite)
             {

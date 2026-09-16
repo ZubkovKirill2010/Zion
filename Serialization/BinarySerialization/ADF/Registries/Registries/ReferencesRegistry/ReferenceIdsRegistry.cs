@@ -2,6 +2,8 @@
 {
     public sealed class ReferenceIdsRegistry : IWritableRegistry
     {
+        private static readonly Reference Null = new Reference(0, new(0, 0, -1));
+
         private readonly Dictionary<object, Reference> References;
 
         public int NewItemsCount { get; private set; }

@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Runtime.CompilerServices;
 
 namespace Zion.Serialization.ADF
 {
@@ -19,9 +20,12 @@ namespace Zion.Serialization.ADF
         public bool IsAbstract  => Flags.HasFlag(FormatFlags.IsAbstract);
         public bool IsNullable  => Flags.HasFlag(FormatFlags.IsNullable);
         public bool IsEnum      => Flags.HasFlag(FormatFlags.IsEnum);
-        public bool IsGeneric   => Flags.HasFlag(FormatFlags.IsGeneric);
+        public bool IsGenerated => Flags.HasFlag(FormatFlags.IsGenerated);
+
+        public bool IsGeneric   => Generics.Length > 0;
 
         public int ParametersCount => Parameters.Length;
+        public int GenericsCount   => Generics.Length;
 
         #endregion
 
@@ -54,6 +58,33 @@ namespace Zion.Serialization.ADF
         #endregion
 
         #region PublicMethods
+        public static DataFormat GetEnumFormat<T>()
+        {
+            if (!typeof(T).IsEnum)
+            {
+                throw new InvalidCastException("T is not Enum");
+            }
+
+            return new DataFormat
+            (
+                [],
+                Unsafe.SizeOf<T>() switch
+                {
+                    1 => FormatFlags.IsEnum8,
+                    2 => FormatFlags.IsEnum16,
+                    4 => FormatFlags.IsEnum32,
+                    8 => FormatFlags.IsEnum64,
+                    _ => throw new Exception()
+                }
+            );
+        }
+
+        public static int GetEnumSize(FormatFlags Flags)
+        {
+            return ((int)Flags & 0b11000000) << 3;
+        }
+
+
         public int IndexOf(uint NameId, int Start)
         {
             var Span = Parameters.AsSpan();

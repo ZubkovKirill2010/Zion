@@ -5,7 +5,7 @@
         internal ADFObjectWriter(BaseADFWriter Base)
             : base(Base) { }
 
-        internal ADFObjectWriter(BaseADFWriter Base, ArenaStream Stream)
-            : base(Base, Stream) { }
+        internal ADFObjectWriter(BaseADFWriter Base, ArenaStream BaseStream)
+            : base(Base, BaseStream) { }
     }
 }
