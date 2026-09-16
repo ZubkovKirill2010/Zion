@@ -2,7 +2,7 @@
 {
     public static class ADFSerializer
     {
-        public static bool TryGetWriter<T>(T Value, out IADFSerializer<T> Writer)
+        public static bool TryGetSerializer<T>(T Value, out IADFSerializer<T> Serializer)
         {
             throw new NotImplementedException(); //TODO
         }

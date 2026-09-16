@@ -82,6 +82,7 @@ namespace Zion.Serialization.ADF
         protected void AddChild(ArenaStream Stream)
         {
             Data = Data.Add(new(Stream));
+            ChildPosition += Stream.Length;
         }
 
         protected void AddChild(StreamGroup Group)
@@ -360,6 +361,8 @@ namespace Zion.Serialization.ADF
 
         private bool TryWritePrimitive<T>(string Name, T Value)
         {
+            if (Value is null) { return false; }
+
             switch (Value)
             {
                 case bool       V: Write(Name, V); return true;
@@ -448,21 +451,47 @@ namespace Zion.Serialization.ADF
                 return;
             }
 
+            if (!TryWriteExistingObject(Name, in NameId, Type, in Value))
+            {
+                //TODO
+                WriteNewObject(Name, in NameId, Value);
+            }
+        }
+
+
+        private bool TryWriteExistingObject<T>(string Name, in uint NameId, Type Type, in T Value)
+        {
             if (TypeAssociation.TryGetFormatId(Type, out uint FormatId))
             {
-                var Stream = GetStream(Name, in NameId, in FormatId);
                 var Format = FormatRegistry[FormatId];
-                WriteExistingObject(Name, in NameId, in FormatId, in Format, Stream, Value);
 
+                if (Format.IsDeferred)
+                {
+                    return false;
+                }
+
+                var Stream = GetStream(Name, in NameId, in FormatId);
                 var ParameterType = typeof(T);
-                var ParameterFormatId = ParameterType == Type ? FormatId : TypeAssociation[ParameterType];
-                OnWrited(Name, in NameId, in ParameterFormatId);
+                
+                //TODO: Сравнивать не типы, а целевые типы
+                //То есть если ожидается A, а пишется Write<B>(C), [C : B : A]
+                if (ParameterType != Type)
+                {
+                    WriteExistingObject(in FormatId, in Format, Stream, Value);
+                    OnWrited(Name, in NameId, in FormatId);
+                }
+                else
+                {
+                    var ParameterFormatId = TypeAssociation[ParameterType];
+
+                    WriteCompressedUInt(Stream, FormatId);
+                    WriteExistingObject(in FormatId, in Format, Stream, Value);
+                    OnWrited(Name, in NameId, in ParameterFormatId);
+                }
+
+                return true;
             }
-            else
-            {
-                WriteNewObject(Name, in NameId, Value);
-                //TODO
-            }
+            return false;
         }
 
 
@@ -486,28 +515,69 @@ namespace Zion.Serialization.ADF
             );
         }
 
-        private void WriteExistingObject<T>(string Name, in uint NameId, in uint FormatId, in DataFormat Format, ArenaStream Stream, T Value)
+        private void WriteExistingObject<T>(in uint FormatId, in DataFormat Format, ArenaStream Stream, T Value)
         {
             var Type = Value!.GetType();
 
-            if (Type != typeof(T))
-            {
-                //Уточнить тип (абстракция)
-            }
+            WriteGenerics(Stream, Type);
 
             if (IsRootType(Type))
             {
-                
+                if (Value is IADFWritable Writable)
+                {
+                    var Writer = new ADFCheckingObjectWriter(this, Stream, Format);
+                    Writable.Write(Writer);
+                }
+                else if (ADFSerializer.TryGetSerializer<T>(Value, out var Serializer))
+                {
+                    var Writer = new ADFCheckingObjectWriter(this, Stream, Format);
+                    Serializer.Write(Writer, Value);
+                }
+                else
+                {
+                    var AutoSerializer = AutoADFSerializer.GetWriter<T>(Type);
+                    AutoSerializer.Write(Stream, Value);
+                }
             }
             else
             {
-                //Писать по уровням
+                //TODO: Писать последовательно каждый слой абстракции
             }
         }
 
         private void WriteNewObject<T>(string Name, in uint NameId, T Value)
         {
             //TODO: WriteNewStruct
+        }
+
+
+        private void WriteGenerics(ArenaStream Stream, Type Type)
+        {
+            if (Type.IsGenericType)
+            {
+                bool Compression = Options.Compression;
+
+                void Write(uint Id)
+                {
+                    if (Compression)
+                    {
+                        Stream.Write7BitEncodedUInt(Id);
+                    }
+                    else
+                    {
+                        Stream.Write(Id);
+                    }
+                }
+
+                foreach (var Generic in Type.GetGenericArguments())
+                {
+                    if (!TypeAssociation.TryGetFormatId(Generic, out uint GenericFormatId))
+                    {
+                        GenericFormatId = FormatRegistry.AddDeferred();
+                    }
+                    Write(GenericFormatId);
+                }
+            }
         }
 
         #endregion
@@ -544,6 +614,18 @@ namespace Zion.Serialization.ADF
             var Stream = Context.Arena.GetStream(0);            
             Stream.Write(Value);
             AddChild(Stream);
+        }
+
+        private void WriteCompressedUInt(ArenaStream Stream, uint Value)
+        {
+            if (Options.Compression)
+            {
+                Stream.Write7BitEncodedUInt(Value);
+            }
+            else
+            {
+                Stream.Write(Value);
+            }
         }
 
         private static bool IsRootType(Type Type)

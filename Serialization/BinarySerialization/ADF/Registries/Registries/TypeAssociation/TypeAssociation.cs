@@ -23,5 +23,13 @@
         {
             return Formats.TryAdd(Type, FormatId);
         }
+
+        public uint GetOrAdd(Type Type)
+        {
+            if (Formats.TryGetValue(Type, out uint FormatId))
+            {
+                return FormatId;
+            }
+        }
     }
 }

@@ -57,6 +57,11 @@ namespace Zion.Serialization.ADF
             }
         }
 
+        public uint AddDeferred()
+        {
+            return Add(DataFormat.Deferred);
+        }
+
 
         private static int GetIndex(uint Id)
         {

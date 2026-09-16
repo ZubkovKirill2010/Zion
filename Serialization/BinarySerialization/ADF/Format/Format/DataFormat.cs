@@ -5,6 +5,11 @@ namespace Zion.Serialization.ADF
 {
     public readonly struct DataFormat : IEnumerable<Parameter>
     {
+        #region Constants
+        public static readonly DataFormat Deferred = new([], FormatFlags.IsDeferred);
+
+        #endregion
+
         #region Data
         private readonly Parameter[] Parameters;
         private readonly uint[] Generics = [];
@@ -21,6 +26,7 @@ namespace Zion.Serialization.ADF
         public bool IsNullable  => Flags.HasFlag(FormatFlags.IsNullable);
         public bool IsEnum      => Flags.HasFlag(FormatFlags.IsEnum);
         public bool IsGenerated => Flags.HasFlag(FormatFlags.IsGenerated);
+        public bool IsDeferred  => Flags.HasFlag(FormatFlags.IsDeferred);
 
         public bool IsGeneric   => Generics.Length > 0;
 
