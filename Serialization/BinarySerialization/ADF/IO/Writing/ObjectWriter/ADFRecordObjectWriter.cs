@@ -5,6 +5,8 @@
         private readonly FormatFlags Flags;
         private readonly List<Parameter> Parameters;
 
+        private bool IsDeferred;
+
         public DataFormat Format { get; private set; }
 
 
@@ -26,6 +28,20 @@
                 }
             }
             Parameters.Add(new Parameter(NameId, FormatId));
+        }
+
+        protected override void OnNullWrited(string Name, in uint NameId)
+        {
+            IsDeferred = true;
+
+            foreach (var Parameter in Parameters)
+            {
+                if (Parameter.NameId == NameId)
+                {
+                    throw new ADFRepeatedNameException(Name);
+                }
+            }
+            Parameters.Add(new Parameter(NameId, 0u));
         }
 
         protected override void OnDisposed()

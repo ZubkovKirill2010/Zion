@@ -432,6 +432,11 @@ namespace Zion.Serialization.ADF
 
             if (Value is null)
             {
+                if (!Options.CanHasNull)
+                {
+                    throw new ADFObjectIsNullException(Name);
+                }
+
                 var Stream = GetStreamForNull(Name, in NameId);
                 if (Options.Compression)
                 {
@@ -441,6 +446,7 @@ namespace Zion.Serialization.ADF
                 {
                     Stream.Write(0u);
                 }
+                OnNullWrited(Name, in NameId);
             }
 
             var Type = Value!.GetType();
@@ -453,7 +459,6 @@ namespace Zion.Serialization.ADF
 
             if (!TryWriteExistingObject(Name, in NameId, Type, in Value))
             {
-                //TODO
                 WriteNewObject(Name, in NameId, Value);
             }
         }
@@ -473,8 +478,6 @@ namespace Zion.Serialization.ADF
                 var Stream = GetStream(Name, in NameId, in FormatId);
                 var ParameterType = typeof(T);
                 
-                //TODO: Сравнивать не типы, а целевые типы
-                //То есть если ожидается A, а пишется Write<B>(C), [C : B : A]
                 if (ParameterType != Type)
                 {
                     WriteExistingObject(in FormatId, in Format, Stream, Value);
@@ -525,12 +528,12 @@ namespace Zion.Serialization.ADF
             {
                 if (Value is IADFWritable Writable)
                 {
-                    var Writer = new ADFCheckingObjectWriter(this, Stream, Format);
+                    using var Writer = new ADFCheckingObjectWriter(this, Stream, Format);
                     Writable.Write(Writer);
                 }
                 else if (ADFSerializer.TryGetSerializer<T>(Value, out var Serializer))
                 {
-                    var Writer = new ADFCheckingObjectWriter(this, Stream, Format);
+                    using var Writer = new ADFCheckingObjectWriter(this, Stream, Format);
                     Serializer.Write(Writer, Value);
                 }
                 else
@@ -541,13 +544,25 @@ namespace Zion.Serialization.ADF
             }
             else
             {
-                //TODO: Писать последовательно каждый слой абстракции
+                foreach (var LayerFormat in FormatRegistry.EnumerateHierarchy(Format))
+                {
+                    //TODO
+                }
             }
         }
 
         private void WriteNewObject<T>(string Name, in uint NameId, T Value)
         {
-            //TODO: WriteNewStruct
+            var Type = Value!.GetType();
+
+            if (IsRootType(Type))
+            {
+                
+            }
+            else
+            {
+                //TODO
+            }
         }
 
 
@@ -593,10 +608,12 @@ namespace Zion.Serialization.ADF
 
         protected virtual ArenaStream GetStreamForNull(string Name, in uint NameId) => Data.BaseStream;
 
+        protected virtual void OnWrited(string Name, in uint NameId, in uint FormatId) { }
+
+        protected virtual void OnNullWrited(string Name, in uint NameId) { }
+
         protected virtual void OnDisposed() { }
 
-        protected abstract void OnWrited(string Name, in uint NameId, in uint FormatId);
-        
         #endregion
 
         #region IDisposable
@@ -636,6 +653,19 @@ namespace Zion.Serialization.ADF
             }
             var BaseType = Type.BaseType;
             return BaseType is null || BaseType == typeof(object);
+        }
+
+        private static IEnumerable<Type> EnumerateHierarchy(Type Type)
+        {
+            if (!IsRootType(Type))
+            {
+                foreach (var Hierarchy in EnumerateHierarchy(Type.BaseType))
+                {
+                    yield return Hierarchy;
+                }
+            }
+
+            yield return Type;
         }
 
         #endregion

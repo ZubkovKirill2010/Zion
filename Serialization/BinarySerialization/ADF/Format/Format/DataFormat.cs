@@ -7,6 +7,7 @@ namespace Zion.Serialization.ADF
     {
         #region Constants
         public static readonly DataFormat Deferred = new([], FormatFlags.IsDeferred);
+        public const uint DeferredId = uint.MaxValue;
 
         #endregion
 

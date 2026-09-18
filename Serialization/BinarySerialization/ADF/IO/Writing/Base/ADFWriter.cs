@@ -41,14 +41,23 @@
         #endregion
 
         #region OverrideMethods
+        protected override ArenaStream GetStream(string Name, in uint NameId, in uint FormatId)
+        {
+            return DataRegistry.Contains(NameId)
+                ? throw new ADFRepeatedNameException(Name)
+                : base.GetStream(Name, in NameId, in FormatId);
+        }
+
+        protected override ArenaStream GetStreamForNull(string Name, in uint NameId)
+        {
+            return DataRegistry.Contains(NameId)
+                ? throw new ADFRepeatedNameException(Name)
+                : base.GetStreamForNull(Name, in NameId);
+        }
+
         protected override void OnWrited(string Name, in uint NameId, in uint FormatId)
         {
-            if (DataRegistry.Contains(NameId))
-            {
-                throw new ADFRepeatedNameException(Name);
-            }
-
-            DataDefinition Definition = new DataDefinition
+            var Definition = new DataDefinition
             (
                 FormatId,
                 CurrentPage,
@@ -56,6 +65,11 @@
             );
             LastPosition = CurrentPosition;
             DataRegistry.Add(Name, NameId, Definition);
+        }
+
+        protected override void OnNullWrited(string Name, in uint NameId)
+        {
+            OnWrited(Name, in NameId, 0u);
         }
 
         protected override void OnDisposed()

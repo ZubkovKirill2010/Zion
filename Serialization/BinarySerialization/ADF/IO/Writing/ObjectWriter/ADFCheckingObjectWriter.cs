@@ -22,39 +22,37 @@
 
         protected override ArenaStream GetStream(string Name, in uint NameId, in uint FormatId)
         {
-            var Format = this.Format;
+            CheckRanges(Name, in NameId, out int ParameterIndex);
 
-            if (Current >= Format.ParametersCount)
+            var Target = Format[ParameterIndex];
+
+            if (!FormatRegistry.IsAssignableFrom(Target.FormatId, FormatId))
             {
-                throw new ADFTooManyParametersException(Current, Format.ParametersCount);
+                throw new ADFFormatMismatchException(FormatId, Target.FormatId);
             }
 
-            int Index = Format.IndexOf(NameId, Current);
-
-            if (Index == -1)
+            if (ParameterIndex == Current)
             {
-                throw new ADFParameterNotExistsException(StringRegistry.GetString(in NameId));
-            }
-
-            if (Index == Current)
-            {
-                var Parameter = Format[Current];
-
-                if (NameId != Parameter.NameId || !Format.Contains(NameId))
-                {
-                    throw new ADFNameMismatchException(Name, StringRegistry.GetString(in NameId));
-                }
-
-                if (!FormatRegistry.IsAssignableFrom(Parameter.FormatId, FormatId))
-                {
-                    throw new ADFFormatMismatchException(FormatId, Parameter.FormatId);
-                }
-
                 return GetBaseStream();
             }
 
             var PostponedStream = GetNewStream(32);
-            PostponedItems.Add(new(Index, PostponedStream));
+            PostponedItems.Add(new(ParameterIndex, PostponedStream));
+
+            return PostponedStream;
+        }
+
+        protected override ArenaStream GetStreamForNull(string Name, in uint NameId)
+        {
+            CheckRanges(Name, in NameId, out int ParameterIndex);
+
+            if (ParameterIndex == Current)
+            {
+                return GetBaseStream();
+            }
+
+            var PostponedStream = GetNewStream(32);
+            PostponedItems.Add(new(ParameterIndex, PostponedStream));
 
             return PostponedStream;
         }
@@ -83,6 +81,34 @@
             }
 
             Current = Index;
+        }
+
+
+        private void CheckRanges(string Name, in uint NameId, out int ParameterIndex)
+        {
+            var Format = this.Format;
+
+            if (Current >= Format.ParametersCount)
+            {
+                throw new ADFTooManyParametersException(Current, Format.ParametersCount);
+            }
+
+            ParameterIndex = Format.IndexOf(NameId, Current);
+
+            if (ParameterIndex == -1)
+            {
+                throw new ADFParameterNotExistsException(StringRegistry.GetString(in NameId));
+            }
+
+            if (ParameterIndex == Current)
+            {
+                var Parameter = Format[Current];
+
+                if (NameId != Parameter.NameId || !Format.Contains(NameId))
+                {
+                    throw new ADFNameMismatchException(Name, StringRegistry.GetString(in NameId));
+                }
+            }
         }
     }
 }

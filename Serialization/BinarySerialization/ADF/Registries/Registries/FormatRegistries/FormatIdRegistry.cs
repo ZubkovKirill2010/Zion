@@ -63,6 +63,26 @@ namespace Zion.Serialization.ADF
         }
 
 
+        public IEnumerable<DataFormat> EnumerateHierarchy(DataFormat Low)
+        {
+            if (!IsRootFormat(Low))
+            {
+                foreach (var Hierarchy in EnumerateHierarchy(this[Low.BaseFormat]))
+                {
+                    yield return Hierarchy;
+                }
+            }
+
+            yield return Low;
+        }
+
+
+        public static bool IsRootFormat(in DataFormat Format)
+        {
+            return Format.BaseFormat == 0;
+        }
+
+
         private static int GetIndex(uint Id)
         {
             if (Id < ADFPrimitives.PrimitiveCount)
