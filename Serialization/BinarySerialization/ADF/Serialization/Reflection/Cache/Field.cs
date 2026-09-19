@@ -2,7 +2,7 @@
 
 namespace Zion.Serialization.ADF
 {
-    public readonly struct Field
+    internal readonly struct Field
     {
         private readonly FieldGetter Getter;
 

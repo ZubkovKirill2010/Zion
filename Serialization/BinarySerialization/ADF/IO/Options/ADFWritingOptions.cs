@@ -4,9 +4,9 @@
     {
         public static readonly ADFWritingOptions Default = new();
 
-        public int  MinPageSize { get; init; } = 2048;
-        public bool WriteHeader { get; init; } = true;
-        public bool Compression { get; init; } = false;
-        public bool CanHasNull  { get; init; } = true;
+        public int  MinPageSize   { get; init; } = 2048;
+        public bool WriteHeader   { get; init; } = true;
+        public bool Compression   { get; init; } = false;
+        public bool CanWriteNull  { get; init; } = true;
     }
 }

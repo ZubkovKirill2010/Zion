@@ -28,7 +28,6 @@
   <ItemGroup>
     <Folder Include="Serialization\BinarySerialization\ADF\IO\Reading\" />
     <Folder Include="Serialization\BinarySerialization\ADF\IO\Writing\Base\" />
-    <Folder Include="Serialization\BinarySerialization\ADF\Registries\Registries\FormatRegistries\" />
     <Folder Include="Serialization\BinarySerialization\Serializers\Object\" />
     <Folder Include="STP\Parser\Static\" />
     <Folder Include="STP\Parser\Dynamic\" />

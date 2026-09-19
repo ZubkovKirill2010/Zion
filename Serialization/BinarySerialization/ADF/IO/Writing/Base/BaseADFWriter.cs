@@ -1,6 +1,5 @@
 ﻿using System.Numerics;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using Zion.Vectors;
 using Vector2 = Zion.Vectors.Vector2;
 using Vector3 = Zion.Vectors.Vector3;
@@ -15,7 +14,7 @@ namespace Zion.Serialization.ADF
         #endregion
 
         #region Data
-        protected readonly ADFWritingContext Context;
+        internal protected readonly ADFWritingContext Context;
 
         private StreamGroup Data;
 
@@ -25,14 +24,15 @@ namespace Zion.Serialization.ADF
 
         #region Properties
 
-        protected ADFWritingOptions     Options => Context.Options;
-        protected WritableRegistries Registries => Context.Registries;
+        protected ADFWritingOptions       Options => Context.Options;
+        protected WritableRegistries   Registries => Context.Registries;
+        protected TypeAssociation TypeAssociation => Context.TypeAssociation;
+        protected WriteStrategies WriteStrategies => Context.WriteStrategies;
 
-        protected TypeAssociation TypeAssociation => Registries.TypeAssociation;
         protected ReferenceIdsRegistry References => Registries.References;
         protected DataRegistry       DataRegistry => Registries.DataRegistry;
         protected StringIdRegistry StringRegistry => Registries.StringRegistry;
-        protected FormatIdRegistry FormatRegistry => Registries.FormatRegistry;
+        protected FormatRegistry   FormatRegistry => Registries.FormatRegistry;
 
         public bool IsDisposed { get; private set; }
 
@@ -432,24 +432,39 @@ namespace Zion.Serialization.ADF
 
             if (Value is null)
             {
-                if (!Options.CanHasNull)
+                if (!Options.CanWriteNull)
                 {
                     throw new ADFObjectIsNullException(Name);
                 }
 
-                var Stream = GetStreamForNull(Name, in NameId);
-                if (Options.Compression)
-                {
-                    Stream.Write((byte)0);
-                }
-                else
-                {
-                    Stream.Write(0u);
-                }
+                WriteCompressedZero(GetStreamForNull(Name, in NameId));
                 OnNullWrited(Name, in NameId);
             }
 
             var Type = Value!.GetType();
+
+            if (WriteStrategies.TryGetEntry<T>(Type, out var Entry))
+            {
+                Entry.Deconstruct
+                (
+                    out var FormatId,
+                    out var Strategy
+                );
+
+                var Stream = GetStream(Name, in NameId, FormatId);
+
+                Strategy.Write(Stream, Value);
+                OnWrited(Name, in NameId, in FormatId);
+            }
+            else
+            {
+                WriteNewObject<T>(Name, in NameId, Type, in Value);
+            }
+        }
+
+        private void WriteNewObject<T>(string Name, in uint NameId, Type Type, in T Value)
+        {
+            //TODO: Создать стратегию для написания и добавить её в WriteStrategies
 
             if (Type.IsEnum)
             {
@@ -457,143 +472,142 @@ namespace Zion.Serialization.ADF
                 return;
             }
 
-            if (!TryWriteExistingObject(Name, in NameId, Type, in Value))
-            {
-                WriteNewObject(Name, in NameId, Value);
-            }
+            //...
         }
 
 
-        private bool TryWriteExistingObject<T>(string Name, in uint NameId, Type Type, in T Value)
-        {
-            if (TypeAssociation.TryGetFormatId(Type, out uint FormatId))
-            {
-                var Format = FormatRegistry[FormatId];
+        //TODO: Переписать методы под стратегию
+        //private bool TryWriteExistingObject<T>(string Name, in uint NameId, Type Type, in T Value)
+        //{
+        //    if (TypeAssociation.TryGetFormatId(Type, out uint FormatId))
+        //    {
+        //        var Format = FormatRegistry[FormatId];
 
-                if (Format.IsDeferred)
-                {
-                    return false;
-                }
+        //        if (Format.IsDeferred)
+        //        {
+        //            return false;
+        //        }
 
-                var Stream = GetStream(Name, in NameId, in FormatId);
-                var ParameterType = typeof(T);
+        //        var Stream = GetStream(Name, in NameId, in FormatId);
+        //        var ParameterType = typeof(T);
                 
-                if (ParameterType != Type)
-                {
-                    WriteExistingObject(in FormatId, in Format, Stream, Value);
-                    OnWrited(Name, in NameId, in FormatId);
-                }
-                else
-                {
-                    var ParameterFormatId = TypeAssociation[ParameterType];
+        //        if (ParameterType != Type)
+        //        {
+        //            WriteExistingObject(in FormatId, in Format, Stream, Value);
+        //            OnWrited(Name, in NameId, in FormatId);
+        //        }
+        //        else
+        //        {
+        //            var ParameterFormatId = TypeAssociation[ParameterType];
 
-                    WriteCompressedUInt(Stream, FormatId);
-                    WriteExistingObject(in FormatId, in Format, Stream, Value);
-                    OnWrited(Name, in NameId, in ParameterFormatId);
-                }
+        //            WriteCompressedUInt(Stream, FormatId);
+        //            WriteExistingObject(in FormatId, in Format, Stream, Value);
+        //        }
 
-                return true;
-            }
-            return false;
-        }
+        //        return true;
+        //    }
+        //    return false;
+        //}
 
 
-        private void WriteEnum<T>(string Name, in uint NameId, Type Type, T Value)
-        {
-            if (!TypeAssociation.TryGetFormatId(Type, out uint FormatId))
-            {
-                FormatId = FormatRegistry.Add(DataFormat.GetEnumFormat<T>());
-                TypeAssociation.Add(Type, FormatId);
-            }
+        //private void WriteEnum<T>(string Name, in uint NameId, Type Type, T Value)
+        //{
+        //    if (!TypeAssociation.TryGetFormatId(Type, out uint FormatId))
+        //    {
+        //        FormatId = FormatRegistry.Add(DataFormat.GetEnumFormat<T>());
+        //        TypeAssociation.Add(Type, FormatId);
+        //    }
 
-            var Stream = GetStream(Name, in NameId, in FormatId);
+        //    var Stream = GetStream(Name, in NameId, in FormatId);
 
-            Stream.UseSpan
-            (
-                Unsafe.SizeOf<T>(),
-                Span =>
-                {
-                    Unsafe.WriteUnaligned(ref Span[0], Value);
-                }
-            );
-        }
+        //    Stream.UseSpan
+        //    (
+        //        Unsafe.SizeOf<T>(),
+        //        Span =>
+        //        {
+        //            Unsafe.WriteUnaligned(ref Span[0], Value);
+        //        }
+        //    );
 
-        private void WriteExistingObject<T>(in uint FormatId, in DataFormat Format, ArenaStream Stream, T Value)
-        {
-            var Type = Value!.GetType();
+        //    OnWrited(Name, in NameId, in FormatId);
+        //}
 
-            WriteGenerics(Stream, Type);
+        //private void WriteExistingObject<T>(in uint FormatId, in DataFormat Format, ArenaStream Stream, T Value)
+        //{
+        //    var Type = Value!.GetType();
 
-            if (IsRootType(Type))
-            {
-                if (Value is IADFWritable Writable)
-                {
-                    using var Writer = new ADFCheckingObjectWriter(this, Stream, Format);
-                    Writable.Write(Writer);
-                }
-                else if (ADFSerializer.TryGetSerializer<T>(Value, out var Serializer))
-                {
-                    using var Writer = new ADFCheckingObjectWriter(this, Stream, Format);
-                    Serializer.Write(Writer, Value);
-                }
-                else
-                {
-                    var AutoSerializer = AutoADFSerializer.GetWriter<T>(Type);
-                    AutoSerializer.Write(Stream, Value);
-                }
-            }
-            else
-            {
-                foreach (var LayerFormat in FormatRegistry.EnumerateHierarchy(Format))
-                {
-                    //TODO
-                }
-            }
-        }
+        //    WriteGenerics(Stream, Type);
 
-        private void WriteNewObject<T>(string Name, in uint NameId, T Value)
-        {
-            var Type = Value!.GetType();
+        //    if (IsRootType(Type))
+        //    {
+        //        if (Value is IADFWritable Writable)
+        //        {
+        //            using var Writer = new ADFCheckingObjectWriter(this, Stream, Format);
+        //            Writable.Write(Writer);
+        //        }
+        //        else if (ADFSerializer.TryGetSerializer<T>(Value, out var Serializer))
+        //        {
+        //            using var Writer = new ADFCheckingObjectWriter(this, Stream, Format);
+        //            Serializer.Write(Writer, Value);
+        //        }
+        //        else
+        //        {
+        //            var AutoSerializer = AutoADFSerializer.GetSchema<T>(Type);
+        //            AutoSerializer.Write(Stream, Value);
+        //        }
+        //    }
+        //    else
+        //    {
+        //        foreach (var LayerFormat in FormatRegistry.EnumerateHierarchy(Format))
+        //        {
+        //            //TODO
+        //        }
+        //    }
+        //}
 
-            if (IsRootType(Type))
-            {
+        //private void WriteNewObject<T>(string Name, in uint NameId, T Value)
+        //{
+        //    var Type = Value!.GetType();
+
+        //    if (IsRootType(Type))
+        //    {
                 
-            }
-            else
-            {
-                //TODO
-            }
-        }
+        //    }
+        //    else
+        //    {
+        //        //TODO
+        //    }
+        //}
 
 
-        private void WriteGenerics(ArenaStream Stream, Type Type)
-        {
-            if (Type.IsGenericType)
-            {
-                bool Compression = Options.Compression;
+        //private void WriteGenerics(ArenaStream Stream, Type Type)
+        //{
+        //    if (Type.IsGenericType)
+        //    {
+        //        bool Compression = Options.Compression;
 
-                void Write(uint Id)
-                {
-                    if (Compression)
-                    {
-                        Stream.Write7BitEncodedUInt(Id);
-                    }
-                    else
-                    {
-                        Stream.Write(Id);
-                    }
-                }
+        //        void Write(uint Id)
+        //        {
+        //            if (Compression)
+        //            {
+        //                Stream.Write7BitEncodedUInt(Id);
+        //            }
+        //            else
+        //            {
+        //                Stream.Write(Id);
+        //            }
+        //        }
 
-                foreach (var Generic in Type.GetGenericArguments())
-                {
-                    if (!TypeAssociation.TryGetFormatId(Generic, out uint GenericFormatId))
-                    {
-                        GenericFormatId = FormatRegistry.AddDeferred();
-                    }
-                    Write(GenericFormatId);
-                }
-            }
-        }
+        //        foreach (var Generic in Type.GetGenericArguments()) //Optimize
+        //        {
+        //            if (!TypeAssociation.TryGetFormatId(Generic, out uint GenericFormatId))
+        //            {
+        //                GenericFormatId = FormatRegistry.AddDeferred();
+        //            }
+        //            Write(GenericFormatId);
+        //        }
+        //    }
+        //}
 
         #endregion
 
@@ -631,6 +645,18 @@ namespace Zion.Serialization.ADF
             var Stream = Context.Arena.GetStream(0);            
             Stream.Write(Value);
             AddChild(Stream);
+        }
+
+        private void WriteCompressedZero(ArenaStream Stream)
+        {
+            if (Options.Compression)
+            {
+                Stream.Write((byte)0);
+            }
+            else
+            {
+                Stream.Write(0u);
+            }
         }
 
         private void WriteCompressedUInt(ArenaStream Stream, uint Value)

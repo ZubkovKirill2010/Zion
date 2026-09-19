@@ -38,6 +38,12 @@
             {
                 return Dictionary.TryGetValue(Key, out TValue? Value) ? Converter(Value) : Default;
             }
+
+            public TValue AddAndReturn(TKey Key, TValue Value)
+            {
+                Dictionary.Add(Key, Value);
+                return Value;
+            }
         }        
     }
 }

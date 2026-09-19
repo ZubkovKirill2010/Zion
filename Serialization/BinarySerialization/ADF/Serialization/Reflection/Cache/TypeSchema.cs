@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 
 namespace Zion.Serialization.ADF
 {
-    public readonly struct TypeSchema : IEnumerable<Field>
+    internal readonly struct TypeSchema : IEnumerable<Field>
     {
         #region Data
         private readonly Field[] Fields;
