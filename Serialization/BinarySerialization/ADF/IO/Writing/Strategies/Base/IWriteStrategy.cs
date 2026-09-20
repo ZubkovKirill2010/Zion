@@ -4,6 +4,6 @@
     {
         public Type TargetType { get; }
 
-        public void Write(ArenaStream Stream, object Value);
+        public void Write(StreamGroup Group, object Value);
     }
 }

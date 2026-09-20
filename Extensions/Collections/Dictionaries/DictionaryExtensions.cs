@@ -44,6 +44,17 @@
                 Dictionary.Add(Key, Value);
                 return Value;
             }
+
+            public TValue GetOrAdd(TKey Key, Func<TValue> Fabric)
+            {
+                if (Dictionary.TryGetValue(Key, out var Existing))
+                {
+                    return Existing;
+                }
+                var NewValue = Fabric();
+                Dictionary.Add(Key, NewValue);
+                return NewValue;
+            }
         }        
     }
 }

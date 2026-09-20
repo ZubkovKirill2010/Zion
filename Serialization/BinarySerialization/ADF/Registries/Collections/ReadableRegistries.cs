@@ -6,8 +6,8 @@
         {
             private readonly Dictionary<string, ReadableRegistryInfo> Registries;
 
-            public readonly StringRegistry StringRegistry;
-            public readonly FormatRegistry FormatRegistry;
+            public readonly StringRegistry   StringRegistry;
+            public readonly FormatIdRegistry FormatRegistry;
 
 
             public WritableRegistries()

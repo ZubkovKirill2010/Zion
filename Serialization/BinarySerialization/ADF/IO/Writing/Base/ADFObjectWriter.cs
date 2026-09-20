@@ -2,10 +2,7 @@
 {
     public abstract class ADFObjectWriter : BaseADFWriter
     {
-        internal ADFObjectWriter(BaseADFWriter Base)
-            : base(Base) { }
-
-        internal ADFObjectWriter(BaseADFWriter Base, ArenaStream BaseStream)
-            : base(Base, BaseStream) { }
+        internal ADFObjectWriter(ADFWritingContext Context, ArenaStream BaseStream)
+            : base(Context, BaseStream) { }
     }
 }

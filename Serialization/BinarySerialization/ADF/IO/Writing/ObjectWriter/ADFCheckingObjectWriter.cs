@@ -2,25 +2,36 @@
 {
     public sealed class ADFCheckingObjectWriter : ADFObjectWriter
     {
-        private record struct PostponedParameter(int Index, ArenaStream Stream);
+        #region Types
+        private record struct PostponedParameter(int Index, StreamGroup StreamGroup);
 
+        #endregion
+
+        #region Constants
         private static readonly IComparer<PostponedParameter> PostponedParameterComparer
             = Comparer<PostponedParameter>.Create(static (A, B) => B.Index.CompareTo(A.Index));
 
+        #endregion
+
+        #region Data
         private readonly SortedList<PostponedParameter> PostponedItems;
         private readonly DataFormat Format;
         private int Current;
 
+        #endregion
 
-        public ADFCheckingObjectWriter(BaseADFWriter Base, ArenaStream Stream, DataFormat Format)
-            : base(Base, Stream)
+        #region Constructors
+        public ADFCheckingObjectWriter(ADFWritingContext Context, ArenaStream Stream, DataFormat Format)
+            : base(Context, Stream)
         {
             this.PostponedItems = new(0, PostponedParameterComparer);
             this.Format = Format;
         }
 
+        #endregion
 
-        protected override ArenaStream GetStream(string Name, in uint NameId, in uint FormatId)
+        #region OverrideMethods
+        protected override StreamGroup GetStreamGroup(string Name, in uint NameId, in uint FormatId)
         {
             CheckRanges(Name, in NameId, out int ParameterIndex);
 
@@ -33,13 +44,13 @@
 
             if (ParameterIndex == Current)
             {
-                return GetBaseStream();
+                return base.GetStreamGroup(Name, in NameId, in FormatId);
             }
 
-            var PostponedStream = GetNewStream(32);
-            PostponedItems.Add(new(ParameterIndex, PostponedStream));
+            var PostponedGroup = new StreamGroup(GetNewStream(32));
+            PostponedItems.Add(new(ParameterIndex, PostponedGroup));
 
-            return PostponedStream;
+            return PostponedGroup;
         }
 
         protected override ArenaStream GetStreamForNull(string Name, in uint NameId)
@@ -52,7 +63,7 @@
             }
 
             var PostponedStream = GetNewStream(32);
-            PostponedItems.Add(new(ParameterIndex, PostponedStream));
+            PostponedItems.Add(new(ParameterIndex, new(PostponedStream)));
 
             return PostponedStream;
         }
@@ -72,8 +83,10 @@
 
                 if (Index != Postponed.Index) { break; }
 
-                BaseStream.Write(Postponed.Stream);
-                Postponed.Stream.Dispose();
+                var PostponedStream = Postponed.StreamGroup.BaseStream;
+
+                BaseStream.Write(Postponed.StreamGroup.BaseStream);
+                PostponedStream.Dispose();
 
                 PostponedItems.RemoveAt(LastItem);
 
@@ -83,7 +96,9 @@
             Current = Index;
         }
 
+        #endregion
 
+        #region PrivateMethods
         private void CheckRanges(string Name, in uint NameId, out int ParameterIndex)
         {
             var Format = this.Format;
@@ -110,5 +125,7 @@
                 }
             }
         }
+
+        #endregion
     }
 }

@@ -2,14 +2,14 @@
 
 namespace Zion.Serialization.ADF
 {
-    public struct StreamGroup : IEnumerable<ArenaStream>
+    public readonly struct StreamGroup : IEnumerable<ArenaStream>
     {
-        public  readonly ArenaStream BaseStream;
         private readonly List<StreamGroup> Groups;
-
-        public readonly long Length;
+        public  readonly ArenaStream BaseStream;
+        public  readonly long Length;
 
         public int Count => Groups.Count;
+
 
 
         public StreamGroup(ArenaStream Stream)
@@ -23,6 +23,12 @@ namespace Zion.Serialization.ADF
             this.BaseStream = BaseStream;
             this.Groups = Groups;
             this.Length = Length;
+        }
+
+
+        public StreamGroup With(ArenaStream BaseStream)
+        {
+            return new(BaseStream.NotNull(), Groups, Length);
         }
 
 

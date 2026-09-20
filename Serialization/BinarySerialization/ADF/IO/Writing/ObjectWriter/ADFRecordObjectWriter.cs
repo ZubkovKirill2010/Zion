@@ -1,4 +1,6 @@
-﻿namespace Zion.Serialization.ADF
+﻿using System.Xml.Linq;
+
+namespace Zion.Serialization.ADF
 {
     public sealed class ADFRecordObjectWriter : ADFObjectWriter
     {
@@ -7,33 +9,49 @@
 
         private bool IsDeferred;
 
-        public DataFormat Format { get; private set; }
 
-
-        public ADFRecordObjectWriter(BaseADFWriter Base, ArenaStream Stream, Type Type)
-            : base(Base, Stream)
+        public ADFRecordObjectWriter(ADFWritingContext Context, ArenaStream Stream, Type Type)
+            : base(Context, Stream)
         {
             Flags = FormatFlags.FromType(Type);//TODO: Generics...
             Parameters = new();
         }
 
 
+        protected override StreamGroup GetStreamGroup(string Name, in uint NameId, in uint FormatId)
+        {
+            ThrowIfContains(Name, in NameId);
+            return base.GetStreamGroup(Name, in NameId, in FormatId);
+        }
+
+        protected override ArenaStream GetStreamForNull(string Name, in uint NameId)
+        {
+            ThrowIfContains(Name, in NameId);
+            return base.GetStreamForNull(Name, NameId);
+        }
+
         protected override void OnWrited(string Name, in uint NameId, in uint FormatId)
         {
-            foreach (var Parameter in Parameters)
-            {
-                if (Parameter.NameId == NameId)
-                {
-                    throw new ADFRepeatedNameException(Name);
-                }
-            }
             Parameters.Add(new Parameter(NameId, FormatId));
         }
 
         protected override void OnNullWrited(string Name, in uint NameId)
         {
             IsDeferred = true;
+            Parameters.Add(new Parameter(NameId, 0u));
+        }
 
+
+        public DataFormat BuildFormat()
+        {
+            Dispose();
+            //TODO: ADFRecordWriter.CreateFormat
+            return new DataFormat(Parameters, Flags, 0u);
+        }
+
+        
+        private void ThrowIfContains(string Name, in uint NameId)
+        {
             foreach (var Parameter in Parameters)
             {
                 if (Parameter.NameId == NameId)
@@ -41,19 +59,6 @@
                     throw new ADFRepeatedNameException(Name);
                 }
             }
-            Parameters.Add(new Parameter(NameId, 0u));
-        }
-
-        protected override void OnDisposed()
-        {
-            Format = BuildFormat();
-        }
-
-
-        private DataFormat BuildFormat()
-        {
-            //TODO: Для классов реализовать систему наследования
-            return new DataFormat(Parameters, Flags, 0u);
         }
     }
 }

@@ -3,7 +3,7 @@ using System.Reflection;
 
 namespace Zion.Serialization.ADF
 {
-    public static class FieldGetterExtensions
+    internal static class FieldGetterExtensions
     {
         extension(FieldGetter Getter)
         {

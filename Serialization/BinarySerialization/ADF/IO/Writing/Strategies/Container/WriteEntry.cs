@@ -8,5 +8,10 @@
         {
             return new(Entry.FormatId, (IWriteStrategy<T>)Entry.Strategy);
         }
+
+        public static implicit operator WriteEntry(WriteEntry<T> Entry)
+        {
+            return new(Entry.FormatId, Entry.Strategy);
+        }
     }
 }

@@ -5,12 +5,16 @@
         private readonly Dictionary<Type, WriteEntry> Strategies = new();
 
 
+        internal WriteEntry<T> Add<T>(Type Type, WriteEntry<T> Entry)
+        {
+            ThrowIfNotAssignable<T>(Type);
+            Strategies.Add(Type, Entry);
+            return Entry;
+        }
+
         internal void Add<T>(Type Type, uint FormatId, IWriteStrategy<T> Strategy)
         {
-            if (!Type.IsAssignableTo(typeof(T)))
-            {
-                throw new InvalidCastException();
-            }
+            ThrowIfNotAssignable<T>(Type);
             Strategies.Add(Type, new(FormatId, Strategy));
         }
 
@@ -24,6 +28,15 @@
 
             Entry = default!;
             return false;
+        }
+
+
+        private static void ThrowIfNotAssignable<T>(Type Type)
+        {
+            if (!Type.IsAssignableFrom(typeof(T)))
+            {
+                throw new InvalidCastException($"{Type} is not assignable from {typeof(T)}");
+            }
         }
     }
 }

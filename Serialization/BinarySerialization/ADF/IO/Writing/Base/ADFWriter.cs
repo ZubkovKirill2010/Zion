@@ -41,11 +41,11 @@
         #endregion
 
         #region OverrideMethods
-        protected override ArenaStream GetStream(string Name, in uint NameId, in uint FormatId)
+        protected override StreamGroup GetStreamGroup(string Name, in uint NameId, in uint FormatId)
         {
             return DataRegistry.Contains(NameId)
                 ? throw new ADFRepeatedNameException(Name)
-                : base.GetStream(Name, in NameId, in FormatId);
+                : base.GetStreamGroup(Name, in NameId, in FormatId);
         }
 
         protected override ArenaStream GetStreamForNull(string Name, in uint NameId)

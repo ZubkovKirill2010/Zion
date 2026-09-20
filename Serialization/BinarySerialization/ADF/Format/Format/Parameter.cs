@@ -47,12 +47,12 @@ namespace Zion.Serialization.ADF
         }
 
 
-        public static Parameter Create(Field Field, WritableRegistries Registries)
+        internal static Parameter Create(Field Field, ADFWritingContext Context)
         {
             return new Parameter
             (
-                NameId  : Registries.StringRegistry.GetOrAdd(Field.Name),
-                FormatId: Registries.TypeAssociation[Field.Type]
+                NameId  : Context.Registries.StringRegistry.GetOrAdd(Field.Name),
+                FormatId: Context.TypeAssociation[Field.Type].FormatId
             );
         }
     }
