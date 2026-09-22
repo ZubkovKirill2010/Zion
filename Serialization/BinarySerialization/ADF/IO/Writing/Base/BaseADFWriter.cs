@@ -552,7 +552,6 @@ namespace Zion.Serialization.ADF
         #region IDisposable
         public void Dispose()
         {
-            Data.Dispose();
             if (!IsDisposed)
             {
                 IsDisposed = true;

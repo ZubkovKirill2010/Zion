@@ -83,7 +83,10 @@ namespace Zion
         #region StaticMethods
         public static BitArray Resize(BitArray Source, int NewLength)
         {
-            ArgumentNullException.ThrowIfNull(Source);
+            if (Source is null)
+            {
+                return new BitArray(NewLength);
+            }
 
             if (NewLength <= 0)
             {
