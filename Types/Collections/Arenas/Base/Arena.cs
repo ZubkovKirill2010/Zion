@@ -1,6 +1,9 @@
+using System.Drawing;
+using System.Runtime.CompilerServices;
+
 namespace Zion
 {
-    //TODO: Полностью убрать доступ к арене у Disposed ArenaSpan (чтобы копия структуры также не имела доступ).
+    //TODO: Полностью убрать доступ к арене у Disposed Collection (чтобы копия структуры также не имела доступ).
 
     public sealed class Arena<T>
     {
@@ -67,25 +70,25 @@ namespace Zion
         #region PublicMethods
         public ArenaArray<T> GetArray(int Size)
         {
-            return new(Allocate(Size));
+            return Allocate<ArenaArray<T>>(Size, static Span => new(Span));
         }
 
         public ArenaBuffer<T> GetBuffer(int Size)
         {
-            return new(Allocate(RoundToGroup(Size)));
+            return Allocate<ArenaBuffer<T>>(RoundToGroup(Size), static Span => new(Span));
         }
 
         public ArenaList<T> GetList(int Size)
         {
-            return new(Allocate(RoundToGroup(Size)));
+            return Allocate<ArenaList<T>>(RoundToGroup(Size), static Span => new(Span));
         }
 
         public ArenaQueue<T> GetQueue(int Size)
         {
-            return new(Allocate(RoundToGroup(Size)));
+            return Allocate<ArenaQueue<T>>(RoundToGroup(Size), static Span => new(Span));
         }
 
-        public ArenaSpan<T> Allocate(int Size)
+        public A Allocate<A>(int Size, Func<ArenaSpan<T>, A> Fabric) where A : ArenaCollection<T>
         {
             ArgumentOutOfRangeException.ThrowIfNegative(Size);
 
@@ -94,7 +97,9 @@ namespace Zion
             MarkArea(Start, Size, true);
             UpdateCount(Start + Size);
 
-            return new ArenaSpan<T>(this, Start, Size);
+            var Span = new ArenaSpan<T>(this, Start, Size);
+
+            return Fabric(Span);
         }
 
 
@@ -111,68 +116,73 @@ namespace Zion
         #endregion
 
         #region InternalMethods
-        internal Span<T> AsSpan(ArenaSpan<T> ArenaSpan)
+        internal Span<T> AsSpan(ArenaCollection<T> Collection)
         {
-            CheckSpan(ArenaSpan);
-            return Data.AsSpan(ArenaSpan.Start, ArenaSpan.Count);
+            CheckCollection(Collection);
+            return Data.AsSpan(Collection.Start, Collection.Length);
         }
 
-        internal Span<T> AsSpan(ArenaSpan<T> ArenaSpan, int Start, int Count)
+        internal Span<T> AsSpan(ArenaCollection<T> Collection, int Start, int Count)
         {
-            CheckSpan(ArenaSpan);
+            CheckCollection(Collection);
 
-            int ArenaLength = ArenaSpan.Count;
+            int ArenaLength = Collection.Length;
 
             ArgumentOutOfRangeException.ThrowIfWithout(Start, ArenaLength);
             ArgumentOutOfRangeException.ThrowIfWithout(Start + Count, ArenaLength);
 
-            return Data.AsSpan(ArenaSpan.Start + Start, Count);
+            return Data.AsSpan(Collection.Start + Start, Count);
         }
 
-        internal Memory<T> AsMemory(ArenaSpan<T> ArenaSpan)
+        internal Memory<T> AsMemory(ArenaCollection<T> Collection)
         {
-            CheckSpan(ArenaSpan);
-            return Data.AsMemory(ArenaSpan.Start, ArenaSpan.Count);
+            CheckCollection(Collection);
+            return Data.AsMemory(Collection.Start, Collection.Length);
         }
 
-        internal void Release(ArenaSpan<T> Span)
+        internal void Release(ArenaCollection<T> Collection)
         {
-            CheckSpan(Span);
-            MarkArea(Span.Start, Span.Count, false);
+            CheckCollection(Collection);
+            MarkArea(Collection.Start, Collection.Length, false);
 
-            if (IsLastSpan(Span))
+            if (IsLastCollection(Collection))
             {
-                Count = Span.Start;
+                Count = Collection.Start;
             }
+
+            Collection.ResetToZero();
         }
 
-        internal ArenaSpan<T> Expand(ArenaSpan<T> Span, int Count)
+        internal Segment Expand(ArenaCollection<T> Collection, int Additional)
         {
-            if (TryExpand(Span, Count, out ArenaSpan<T> Expanded))
+            if (TryExpand(Collection, Additional, out var Expanded))
             {
                 return Expanded;
             }
 
-            ArenaSpan<T> Allocated = Allocate(Count);
-            CopyTo(Span, Allocated);
+            int Start = GetFreeArea(Additional);
 
-            MarkArea(Span, false);
+            MarkArea(Start, Additional, true);
+            UpdateCount(Start + Additional);
 
-            return Allocated;
+            CopyTo(Collection, Start);
+            MarkArea(Collection, false);
+
+            return new Segment(Start, Additional);
         }
 
         #endregion
 
         #region PrivateMethods
-        private void CheckSpan(ArenaSpan<T> Span)
+        private void CheckCollection(ArenaCollection<T> Collection)
         {
-            if (!ReferenceEquals(this, Span.Source))
+            if (!ReferenceEquals(this, Collection.Source))
             {
                 throw new InvalidOperationException("Arena not contains this ArenaSpan");
             }
-            if (Span.IsDisposed)
+            if (Collection.IsDisposed)
             {
-                throw new ObjectDisposedException(nameof(Span));
+                throw new ObjectDisposedException(nameof(Collection));
             }
         }
 
@@ -184,9 +194,9 @@ namespace Zion
             }
         }
 
-        private void MarkArea(ArenaSpan<T> Span, bool Busy)
+        private void MarkArea(ArenaCollection<T> Area, bool Busy)
         {
-            MarkArea(Span.Start, Span.Count, Busy);
+            MarkArea(Area.Start, Area.Length, Busy);
         }
 
         private void MarkArea(int Start, int Count, bool Busy)
@@ -194,30 +204,32 @@ namespace Zion
             BitMap.Fill(FloorToGroup(Start), RoundToGroup(Count), Busy);
         }
 
-        private void CopyTo(ArenaSpan<T> Source, ArenaSpan<T> Destination)
+        private void CopyTo(ArenaCollection<T> Source, int Destination)
         {
-            Data.AsSpan(Source.Start, Source.Count)
-                .CopyTo(Data.AsSpan(Destination.Start, Source.Count));
+            var SourceSpan = Data.AsSpan(Source.Start, Source.Length);
+            var DestinationSpan = Data.AsSpan(Destination, Source.Length);
+
+            SourceSpan.CopyTo(DestinationSpan);
         }
 
-        private bool IsLastSpan(ArenaSpan<T> Span)
+        private bool IsLastCollection(ArenaCollection<T> Collection)
         {
-            return Span.Start + Span.Count == Count;
+            return Collection.Start + Collection.Length == Count;
         }
 
-        private bool TryExpand(ArenaSpan<T> Span, int Additional, out ArenaSpan<T> Expanded)
+        private bool TryExpand(ArenaCollection<T> Collection, int Additional, out Segment Expanded)
         {
-            int SpanEnd = Span.Start + Span.Count;
+            int SpanEnd = Collection.Start + Collection.Length;
             int Start = RoundToGroup(SpanEnd);
             int End = RoundToGroup(SpanEnd + Additional);
               
             if (Start == End || !BitMap.Contains(Start, End - Start, true))
             {
-                Expanded = new ArenaSpan<T>(this, Span.Start, SpanEnd + Additional);
+                Expanded = new(Collection.Start, SpanEnd + Additional - Collection.Start);
                 return true;
             }
 
-            Expanded = default!;
+            Expanded = default;
             return false;
         }
 

@@ -8,30 +8,26 @@ namespace Zion
             private set
             {
                 field = value;
-                Data.Modify();
+                Modify();
             }
         }
 
-        public int Capacity => Data.Count;
+        public int Capacity => Count;
 
 
         public ArenaBuffer(ArenaSpan<T> Data) : base(Data) { }
         
         
-        public T this[int Index]
+        public new T this[int Index]
         {
-            get => Data[Index];
-            set
-            {
-                var Span = Data;
-                Span[Index] = value;
-            }
+            get => base[Index];
+            set => base[Index] = value;
         }
 
-        public T this[Index Index]
+        public new T this[Index Index]
         {
-            get => this[Index.GetOffset(Count)];
-            set => this[Index.GetOffset(Count)] = value;
+            get => base[Index];
+            set => base[Index] = value;
         }
 
 
@@ -51,8 +47,8 @@ namespace Zion
             if (Items.TryGetNonEnumeratedCount(out int ItemsCount))
             {
                 int TotalCount = Count + ItemsCount;
-                Data.Expand(TotalCount);
-                Data.UseSpan
+                Expand(TotalCount);
+                UseSpan
                 (
                     Count, ItemsCount, Span =>
                     {
@@ -78,8 +74,8 @@ namespace Zion
             int ItemsCount = Items.Length;
             int TotalCount = Count + Items.Length;
 
-            Data.Expand(TotalCount);
-            Data.UseSpan
+            Expand(TotalCount);
+            UseSpan
             (
                 Count, ItemsCount, Items,
                 (Span, Other) =>
@@ -111,7 +107,7 @@ namespace Zion
         {
             ArgumentOutOfRangeException.ThrowIfWithout(Index, Count);
 
-            Data.Move(Index + 1, Index, Count - Index - 1);
+            Move(Index + 1, Index, Count - Index - 1);
             Count--;
         }
 
@@ -120,35 +116,35 @@ namespace Zion
             ArgumentOutOfRangeException.ThrowIfWithout(Index, this.Count);
             ArgumentOutOfRangeException.ThrowIfWithout(Index + Count, this.Count);
 
-            Data.Move(Index + Count, Index, this.Count - Count - Index);
+            Move(Index + Count, Index, this.Count - Count - Index);
             this.Count -= Count;
         }
 
         public void Clear()
         {
-            Data.UseSpan(Count, static Span => Span.Clear());
+            UseSpan(Count, static Span => Span.Clear());
         }
 
 
         public T First()
         {
-            return Data[0];
+            return this[0];
         }
 
         public T Last()
         {
-            return Data[Count - 1];
+            return this[Count - 1];
         }
 
 
         public int IndexOf(T Item, IEqualityComparer<T>? Comparer = null)
         {
-            return Data.UseReadOnlySpan(Count, Span => Span.IndexOf(Item, Comparer));
+            return UseReadOnlySpan(Count, Span => Span.IndexOf(Item, Comparer));
         }
 
         public bool Contains(T Item, IEqualityComparer<T>? Comparer = null)
         {
-            return Data.UseReadOnlySpan(Count, Span => Span.Contains(Item, Comparer));
+            return UseReadOnlySpan(Count, Span => Span.Contains(Item, Comparer));
         }
 
 
@@ -156,7 +152,7 @@ namespace Zion
         {
             ArgumentOutOfRangeException.ThrowIfBeyond(Index, Count);
 
-            Data.Move(Index, Index + 1, Count - Index);
+            Move(Index, Index + 1, Count - Index);
             this[Index] = Item;
             Count++;
         }
@@ -174,14 +170,14 @@ namespace Zion
                 }
 
                 int TotalCount = Count + ItemsCount;
-                Data.Expand(TotalCount);
+                Expand(TotalCount);
 
                 if (Index < Count)
                 {
-                    Data.Move(Index, Index + ItemsCount, Count - Index);
+                    Move(Index, Index + ItemsCount, Count - Index);
                 }
 
-                Data.UseSpan
+                UseSpan
                 (
                     Index, ItemsCount, Span =>
                     {
@@ -198,17 +194,17 @@ namespace Zion
             else
             {
                 int TailLength = Count - Index;
-                using var Tail = Data.Source.GetArray(TailLength);
+                using var Tail = Source.GetArray(TailLength);
 
                 if (TailLength > 0)
                 {
-                    Tail.UseSpan(Span => Data.CopyTo(Index, Count - Index, Span));
+                    Tail.UseSpan(Span => CopyTo(Index, Count - Index, Span));
                 }
 
                 InsertItems(Index, Items, out int TotalCount);
 
-                Data.Expand(TotalCount + TailLength);
-                Data.UseSpan(TotalCount, TailLength, Tail.CopyTo);
+                Expand(TotalCount + TailLength);
+                UseSpan(TotalCount, TailLength, Tail.CopyTo);
 
                 Count = TotalCount + TailLength;
             }
@@ -216,28 +212,28 @@ namespace Zion
 
         public void Reverse()
         {
-            Data.UseSpan(static Span => Span.Reverse());
+            UseSpan(static Span => Span.Reverse());
         }
 
         public void Sort()
         {
-            Data.UseSpan(static Span => Span.Sort());
+            UseSpan(static Span => Span.Sort());
         }
 
 
-        public void UseSpan(Action<Span<T>> Action)
+        public new void UseSpan(Action<Span<T>> Action)
         {
-            Data.UseSpan(Action);
+            UseSpan(Action);
         }
 
-        public void UseReadOnlySpan(Action<ReadOnlySpan<T>> Action)
+        public new void UseReadOnlySpan(Action<ReadOnlySpan<T>> Action)
         {
-            Data.UseReadOnlySpan(Action);
+            UseReadOnlySpan(Action);
         }
 
         public T[] ToArray()
         {
-            return Data.ToArray(0, Count);
+            return ToArray(0, Count);
         }
 
 
@@ -248,18 +244,18 @@ namespace Zion
 
         public void CopyTo(ArenaBuffer<T> Destination)
         {
-            Destination.UseSpan(Data.CopyTo);
+            Destination.UseSpan(CopyTo);
         }
 
-        public void CopyTo(Span<T> Destination)
+        public new void CopyTo(Span<T> Destination)
         {
-            Data.CopyTo(Destination);
+            CopyTo(Destination);
         }
 
 
         public void EnsurceCapacity(int Capacity)
         {
-            Data.Expand(Capacity);
+            Expand(Capacity);
         }
 
         public void Resize(int NewSize)
@@ -293,8 +289,8 @@ namespace Zion
                     return;
                 }
 
-                Data.Expand(TotalIndex + LocalIndex);
-                Data.UseSpan
+                Expand(TotalIndex + LocalIndex);
+                UseSpan
                 (
                     TotalIndex, LocalIndex, Span =>
                     {

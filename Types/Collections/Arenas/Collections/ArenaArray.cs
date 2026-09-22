@@ -7,95 +7,87 @@ namespace Zion
 
         public ArenaArray(ArenaSpan<T> Data) : base(Data)
         {
-            Length = Data.Count;
+            Length = base.Length;
         }
 
 
-        public T this[int Index]
+        public new T this[int Index]
         {
-            get => Data[Index];
-            set
-            {
-                var Span = Data;
-                Span[Index] = value;
-            }
+            get => base[Index];
+            set => base[Index] = value;
         }
 
-        public T this[Index Index]
+        public new T this[Index Index]
         {
-            get => this[Index.GetOffset(Length)];
-            set => this[Index.GetOffset(Length)] = value;
+            get => this[Index];
+            set => this[Index] = value;
         }
 
 
         public T First()
         {
-            return Data[0];
+            return this[0];
         }
 
         public T Last()
         {
-            return Data[Length - 1];
+            return this[Length - 1];
         }
 
 
         public int IndexOf(T Item, IEqualityComparer<T>? Comparer = null)
         {
-            return Data.UseReadOnlySpan(Span => Span.IndexOf(Item, Comparer));
+            return UseReadOnlySpan(Span => Span.IndexOf(Item, Comparer));
         }
 
         public bool Contains(T Item, IEqualityComparer<T>? Comparer = null)
         {
-            return Data.UseReadOnlySpan(Span => Span.Contains(Item, Comparer));
+            return UseReadOnlySpan(Span => Span.Contains(Item, Comparer));
         }
 
 
         public void Clear()
         {
-            Data.UseSpan(static Span => Span.Clear());
+            UseSpan(static Span => Span.Clear());
         }
 
 
         public void Reverse()
         {
-            Data.UseSpan(static Span => Span.Reverse());
+            UseSpan(static Span => Span.Reverse());
         }
 
         public void Sort()
         {
-            Data.UseSpan(static Span => Span.Sort());
+            UseSpan(static Span => Span.Sort());
         }
 
 
-        public void UseSpan(Action<Span<T>> Action)
+        public new void Expand(int Additional)
         {
-            Data.UseSpan(Action);
+            Expand(Additional);
         }
 
-        public void UseReadOnlySpan(Action<ReadOnlySpan<T>> Action)
-        {
-            Data.UseReadOnlySpan(Action);
-        }
 
         public T[] ToArray()
         {
-            return Data.UseReadOnlySpan(static Span => Span.ToArray());
+            return UseReadOnlySpan(static Span => Span.ToArray());
         }
 
 
         public void CopyTo(T[] Array, int ArrayIndex)
         {
-            Data.CopyTo(Array.AsSpan(ArrayIndex));
+            CopyTo(Array.AsSpan(ArrayIndex));
         }
 
         public void CopyTo(ArenaArray<T> Destination)
         {
-            Destination.Data.UseSpan(Data.CopyTo);
+            Destination.UseSpan(CopyTo);
         }
 
-        public void CopyTo(Span<T> Destination)
+        public new void CopyTo(Span<T> Destination)
         {
-            Data.CopyTo(Destination);
+            base.CopyTo(Destination);
         }
 
 

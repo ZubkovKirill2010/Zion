@@ -15,7 +15,7 @@ namespace Zion
             get;
             private set
             {
-                Data.Modify();
+                Modify();
                 field = value;
             }
         }
@@ -27,7 +27,7 @@ namespace Zion
             set
             {
                 ArgumentOutOfRangeException.ThrowIfNegative(value);
-                Data.Modify();
+                Modify();
                 _Position = value;
             }
         }
@@ -36,24 +36,16 @@ namespace Zion
         public ArenaStream(ArenaSpan<byte> Data) : base(Data) { }
 
 
-        public byte this[int Index]
+        public new byte this[int Index]
         {
-            get => Data[Index];
-            set
-            {
-                var Data = this.Data;
-                Data[Index] = value;
-                if (Index >= Length)
-                {
-                    Length = Index + 1;
-                }
-            }
+            get => base[Index];
+            set => base[Index] = value;
         }
 
-        public byte this[Index Index]
+        public new byte this[Index Index]
         {
-            get => this[Index.GetOffset(Length)];
-            set => this[Index.GetOffset(Length)] = value;
+            get => base[Index];
+            set => base[Index] = value;
         }
 
 
@@ -82,7 +74,7 @@ namespace Zion
         public void Write(decimal Value)
         {
             Reserve(sizeof(decimal));
-            Data.UseSpan
+            UseSpan
             (
                 _Position,
                 Span =>
@@ -143,7 +135,7 @@ namespace Zion
             Write7BitEncodedInt(Length);
             Reserve(Length);
 
-            Data.UseSpan
+            UseSpan
             (
                 _Position,
                 Span => Encoding.UTF8.GetBytes(Value, Span)
@@ -177,7 +169,7 @@ namespace Zion
             int Length = Value.GetByteCount();
 
             Reserve(Length + 4);
-            Data.UseSpan
+            UseSpan
             (
                 _Position,
                 Span =>
@@ -193,7 +185,7 @@ namespace Zion
         public void Write(RGBColor Value)
         {
             Reserve(3);
-            Data.UseSpan
+            UseSpan
             (
                 _Position,
                 Span =>
@@ -209,7 +201,7 @@ namespace Zion
         public void Write(RGBAColor Value)
         {
             Reserve(4);
-            Data.UseSpan
+            UseSpan
             (
                 _Position,
                 Span =>
@@ -227,7 +219,7 @@ namespace Zion
         public void Write(Vector2 Value)
         {
             Reserve(8);
-            Data.UseSpan
+            UseSpan
             (
                 _Position,
                 Span =>
@@ -242,7 +234,7 @@ namespace Zion
         public void Write(Vector2Int Value)
         {
             Reserve(8);
-            Data.UseSpan
+            UseSpan
             (
                 _Position,
                 Span =>
@@ -257,7 +249,7 @@ namespace Zion
         public void Write(Vector3 Value)
         {
             Reserve(12);
-            Data.UseSpan
+            UseSpan
             (
                 _Position,
                 Span =>
@@ -273,7 +265,7 @@ namespace Zion
         public void Write(Vector3Int Value)
         {
             Reserve(12);
-            Data.UseSpan
+            UseSpan
             (
                 _Position,
                 Span =>
@@ -292,7 +284,7 @@ namespace Zion
             int Length = Value.Length;
             Reserve(Length);
 
-            Data.UseSpan(_Position, Value.CopyTo);
+            UseSpan(_Position, Value.CopyTo);
             
             UpdateLengthFromPosition(_Position + Length);
         }
@@ -313,7 +305,7 @@ namespace Zion
             Reserve(5);
             var Index = 0;
 
-            Data.UseSpan
+            UseSpan
             (
                 _Position,
                 Span =>
@@ -335,7 +327,7 @@ namespace Zion
             Reserve(10);
             var Index = 0;
 
-            Data.UseSpan
+            UseSpan
             (
                 _Position,
                 Span =>
@@ -359,7 +351,7 @@ namespace Zion
             Reserve(5);
             var Index = 0;
 
-            Data.UseSpan
+            UseSpan
             (
                 _Position,
                 Span =>
@@ -402,7 +394,7 @@ namespace Zion
         private void Write<T>(T Value, int Size, Action<Span<byte>, T> Write)
         {
             Reserve(Size);
-            Data.UseSpan
+            UseSpan
             (
                 _Position,
                 Span =>
@@ -420,28 +412,28 @@ namespace Zion
         }
 
 
-        public void UseSpan(int Size, Action<Span<byte>> Action)
+        public new void UseSpan(int Size, Action<Span<byte>> Action)
         {
             Reserve(Size);
-            Data.UseSpan(_Position, Size, Action);
+            UseSpan(_Position, Size, Action);
         }
 
 
         public byte[] ToArray()
         {
-            return Data.ToArray(0, Length);
+            return ToArray(0, Length);
         }
 
 
-        public void CopyTo(Span<byte> Destination)
+        public new void CopyTo(Span<byte> Destination)
         {
-            Data.CopyTo(0, Length, Destination);
+            CopyTo(0, Length, Destination);
         }
 
         public void CopyTo(Stream Stream)
         {
             ArgumentNullException.ThrowIfNull(Stream);
-            Data.UseReadOnlySpan(Span => Stream.Write(Span.Slice(0, Length)));
+            UseReadOnlySpan(Span => Stream.Write(Span.Slice(0, Length)));
         }
 
 
@@ -449,11 +441,11 @@ namespace Zion
         {
             int Required = _Position + Size;
 
-            if (Required > Data.Count)
+            if (Required > base.Length)
             {
-                int NewSize = Data.Count < 256
-                    ? Math.Max(Data.Count * 2, Required)
-                    : Math.Max(Data.Count + 256, Required);
+                int NewSize = base.Length < 256
+                    ? Math.Max(base.Length * 2, Required)
+                    : Math.Max(base.Length + 256, Required);
 
                 Expand(NewSize);
             }

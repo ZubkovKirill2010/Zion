@@ -10,7 +10,7 @@
             get;
             private set
             {
-                Data.Modify();
+                Modify();
                 field = value;
             }
         }

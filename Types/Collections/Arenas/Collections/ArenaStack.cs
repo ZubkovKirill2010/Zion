@@ -12,7 +12,7 @@ namespace Zion
             private set
             {
                 ArgumentOutOfRangeException.ThrowIfNegative(value);
-                Data.Modify();
+                Modify();
                 Expand(value);
                 field = value;
             }
@@ -24,18 +24,17 @@ namespace Zion
 
         public void Push(T Item)
         {
-            var Data = this.Data;
-            Data[Count++] = Item;
+            this[Count++] = Item;
         }
 
         public T Pop()
         {
-            return Data[--Count];
+            return this[--Count];
         }
 
         public T Peek()
         {
-            return Data[Count - 1];
+            return this[Count - 1];
         }
 
 
@@ -69,7 +68,7 @@ namespace Zion
 
         public bool Contains(T Item)
         {
-            return Data.UseReadOnlySpan
+            return UseReadOnlySpan
             (
                 Span =>
                 {
@@ -90,7 +89,7 @@ namespace Zion
 
         public void CopyTo(T[] Array, int ArrayIndex)
         {
-            Data.UseReadOnlySpan
+            UseReadOnlySpan
             (
                 Count,
                 Span =>
@@ -103,7 +102,7 @@ namespace Zion
 
         public bool Remove(T Item)
         {
-            return Data.UseReadOnlySpan
+            return UseReadOnlySpan
             (
                 Count,
                 Span =>
@@ -115,7 +114,7 @@ namespace Zion
                     {
                         if (Comparer.Equals(Span[i], Item))
                         {
-                            Data.Move(i + 1, i, Count - i - 1);
+                            Move(i + 1, i, Count - i - 1);
                             this.Count--;
                             return true;
                         }
@@ -141,7 +140,7 @@ namespace Zion
 
         public Stack<T> ToStack()
         {
-            return Data.UseReadOnlySpan
+            return UseReadOnlySpan
             (
                 Count,
                 Span =>
@@ -166,7 +165,7 @@ namespace Zion
                 return new List<T>();
             }
 
-            return Data.UseReadOnlySpan
+            return UseReadOnlySpan
             (
                 Count,
                 Span =>

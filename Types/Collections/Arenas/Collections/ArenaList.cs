@@ -10,7 +10,7 @@ namespace Zion
             get;
             private set
             {
-                Data.Modify();
+                Modify();
                 field = value;
             }
         }
@@ -21,25 +21,16 @@ namespace Zion
         public ArenaList(ArenaSpan<T> Data) : base(Data) { }
 
 
-        public T this[int Index]
+        public new T this[int Index]
         {
-            get
-            {
-                ThrowIfWithout(Index);
-                return Data[Index];
-            }
-            set
-            {
-                ThrowIfWithout(Index);
-                var Data = this.Data;
-                Data[Index] = value;
-            }
+            get => base[Index];
+            set => base[Index] = value;
         }
 
-        public T this[Index Index]
+        public new T this[Index Index]
         {
-            get => this[Index.GetOffset(Count)];
-            set => this[Index.GetOffset(Count)] = value;
+            get => base[Index];
+            set => base[Index] = value;
         }
 
 
@@ -59,8 +50,8 @@ namespace Zion
             if (Items.TryGetNonEnumeratedCount(out int ItemsCount))
             {
                 int TotalCount = Count + ItemsCount;
-                Data.Expand(TotalCount);
-                Data.UseSpan
+                Expand(TotalCount);
+                UseSpan
                 (
                     Count, ItemsCount, Span =>
                     {
@@ -86,8 +77,8 @@ namespace Zion
             int ItemsCount = Items.Length;
             int TotalCount = Count + Items.Length;
 
-            Data.Expand(TotalCount);
-            Data.UseSpan
+            Expand(TotalCount);
+            UseSpan
             (
                 Count, ItemsCount, Items,
                 (Span, Other) =>
@@ -104,7 +95,7 @@ namespace Zion
         public void Insert(int Index, T Item)
         {
             ThrowIfWithout(Index);
-            Data.Move(Index, Index + 1, Count - Index);
+            Move(Index, Index + 1, Count - Index);
             this[Index] = Item;
             Count++;
         }
@@ -122,14 +113,14 @@ namespace Zion
                 }
 
                 int TotalCount = Count + ItemsCount;
-                Data.Expand(TotalCount);
+                Expand(TotalCount);
 
                 if (Index < Count)
                 {
-                    Data.Move(Index, Index + ItemsCount, Count - Index);
+                    Move(Index, Index + ItemsCount, Count - Index);
                 }
 
-                Data.UseSpan
+                UseSpan
                 (
                     Index, ItemsCount, Span =>
                     {
@@ -146,17 +137,17 @@ namespace Zion
             else
             {
                 int TailLength = Count - Index;
-                using var Tail = Data.Source.GetArray(TailLength);
+                using var Tail = Source.GetArray(TailLength);
 
                 if (TailLength > 0)
                 {
-                    Tail.UseSpan(Span => Data.CopyTo(Index, Count - Index, Span));
+                    Tail.UseSpan(Span => CopyTo(Index, Count - Index, Span));
                 }
 
                 InsertItems(Index, Items, out int TotalCount);
 
-                Data.Expand(TotalCount + TailLength);
-                Data.UseSpan(TotalCount, TailLength, Tail.CopyTo);
+                Expand(TotalCount + TailLength);
+                UseSpan(TotalCount, TailLength, Tail.CopyTo);
 
                 Count = TotalCount + TailLength;
             }
@@ -170,18 +161,18 @@ namespace Zion
 
         public int IndexOf(T Item, IEqualityComparer<T>? Comparer = null)
         {
-            return Data.UseReadOnlySpan(Count, Span => Span.IndexOf(Item, Comparer));
+            return UseReadOnlySpan(Count, Span => Span.IndexOf(Item, Comparer));
         }
 
         public int IndexOf(T Item, int Index, IEqualityComparer<T>? Comparer = null)
         {
-            return Data.UseReadOnlySpan(Index, Count, Span => Span.IndexOf(Item, Comparer));
+            return UseReadOnlySpan(Index, Count, Span => Span.IndexOf(Item, Comparer));
         }
 
         public int IndexOf(T Item, int Index, int Count, IEqualityComparer<T>? Comparer = null)
         {
             ThrowIfWithout(Index, Count);
-            return Data.UseReadOnlySpan(Index, Count, Span => Span.IndexOf(Item, Comparer));
+            return UseReadOnlySpan(Index, Count, Span => Span.IndexOf(Item, Comparer));
         }
 
 
@@ -198,7 +189,7 @@ namespace Zion
         public int FindIndex(int Index, int Count, Predicate<T> Match)
         {
             ThrowIfWithout(Index, Count);
-            return Data.UseReadOnlySpan
+            return UseReadOnlySpan
             (
                 Count, Span =>
                 {
@@ -218,7 +209,7 @@ namespace Zion
 
         public T? Find(Predicate<T> Match)
         {
-            return Data.UseReadOnlySpan
+            return UseReadOnlySpan
             (
                 Count, Span =>
                 {
@@ -238,7 +229,7 @@ namespace Zion
 
         public T? FindLast(Predicate<T> Match)
         {
-            return Data.UseReadOnlySpan
+            return UseReadOnlySpan
             (
                 Count, Span =>
                 {
@@ -257,7 +248,7 @@ namespace Zion
 
         public List<T> FindAll(Predicate<T> Match)
         {
-            return Data.UseReadOnlySpan
+            return UseReadOnlySpan
             (
                 Count, Span =>
                 {
@@ -281,18 +272,18 @@ namespace Zion
 
         public int LastIndexOf(T Item, IEqualityComparer<T>? Comparer = null)
         {
-            return Data.UseReadOnlySpan(Count, Span => Span.LastIndexOf(Item, Comparer));
+            return UseReadOnlySpan(Count, Span => Span.LastIndexOf(Item, Comparer));
         }
 
         public int LastIndexOf(T Item, int Index, IEqualityComparer<T>? Comparer = null)
         {
-            return Data.UseReadOnlySpan(Index, Count, Span => Span.LastIndexOf(Item, Comparer));
+            return UseReadOnlySpan(Index, Count, Span => Span.LastIndexOf(Item, Comparer));
         }
 
         public int LastIndexOf(T Item, int Index, int Count, IEqualityComparer<T>? Comparer = null)
         {
             ThrowIfWithout(Index, Count);
-            return Data.UseReadOnlySpan(Index, Count, Span => Span.LastIndexOf(Item, Comparer));
+            return UseReadOnlySpan(Index, Count, Span => Span.LastIndexOf(Item, Comparer));
         }
 
 
@@ -309,7 +300,7 @@ namespace Zion
         public int FindLastIndex(int Index, int Count, Predicate<T> Match)
         {
             ThrowIfWithout(Index, Count);
-            return Data.UseReadOnlySpan
+            return UseReadOnlySpan
             (
                 Count, Span =>
                 {
@@ -344,18 +335,18 @@ namespace Zion
 
         public void CopyTo(T[] Array)
         {
-            Data.CopyTo(Array);
+            CopyTo(Array);
         }
 
         public void CopyTo(T[] Array, int ArrayIndex)
         {
-            Data.CopyTo(Array.AsSpan(ArrayIndex));
+            CopyTo(Array.AsSpan(ArrayIndex));
         }
 
         public void CopyTo(int Index, T[] Array, int ArrayIndex, int Count)
         {
             ThrowIfWithout(Index, Count);
-            Data.UseReadOnlySpan
+            UseReadOnlySpan
             (
                 Index, Count, Span =>
                 {
@@ -368,14 +359,14 @@ namespace Zion
         public void RemoveAt(int Index)
         {
             ThrowIfWithout(Index);
-            Data.Move(Index + 1, Index, Count - Index - 1);
+            Move(Index + 1, Index, Count - Index - 1);
             Count --;
         }
 
         public void RemoveRange(int Index, int Count)
         {
             ThrowIfWithout(Index, Count);
-            Data.Move(Index + Count, Index, Count);
+            Move(Index + Count, Index, Count);
             this.Count -= Count;
         }
 
@@ -432,40 +423,40 @@ namespace Zion
 
         public void Reverse(int Index, int Count)
         {
-            Data.UseSpan(Index, Count, static Span => Span.Reverse());
+            UseSpan(Index, Count, static Span => Span.Reverse());
         }
 
         public void Reverse()
         {
-            Data.UseSpan(Count, static Span => Span.Reverse());
+            UseSpan(Count, static Span => Span.Reverse());
         }
 
 
         public void Sort()
         {
-            Data.UseSpan(Count, static Span => Span.Sort());
+            UseSpan(Count, static Span => Span.Sort());
         }
 
         public void Sort(IComparer<T>? Comparer)
         {
-            Data.UseSpan(Count, Span => Span.Sort(Comparer));
+            UseSpan(Count, Span => Span.Sort(Comparer));
         }
 
         public void Sort(Comparison<T> Comparison)
         {
-            Data.UseSpan(Count, Span => Span.Sort(Comparison));
+            UseSpan(Count, Span => Span.Sort(Comparison));
         }
 
         public void Sort(int Index, int Count, IComparer<T>? Comparer = null)
         {
             ThrowIfWithout(Index, Count);
-            Data.UseSpan(Index, Count, Span => Span.Sort(Comparer));
+            UseSpan(Index, Count, Span => Span.Sort(Comparer));
         }
 
 
         public int BinarySearch(T Item, IComparer<T>? Comparer = null)
         {
-            return Data.UseReadOnlySpan
+            return UseReadOnlySpan
             (
                 Count, Span => Span.BinarySearch(Item, Comparer ?? Comparer<T>.Default)
             );
@@ -474,7 +465,7 @@ namespace Zion
         public int BinarySearch(int Index, int Count, T Item, IComparer<T> Comparer)
         {
             ThrowIfWithout(Index, Count);
-            return Data.UseReadOnlySpan
+            return UseReadOnlySpan
             (
                 Index, Count, Span => Span.BinarySearch(Item, Comparer ?? Comparer<T>.Default)
             );
@@ -484,7 +475,7 @@ namespace Zion
         public List<T> GetRange(int Index, int Count)
         {
             ThrowIfWithout(Index, Count);
-            return Data.UseReadOnlySpan
+            return UseReadOnlySpan
             (
                 Index, Count, Span =>
                 {
@@ -498,7 +489,7 @@ namespace Zion
 
         public void ForEach(Action<T> Action)
         {
-            Data.UseReadOnlySpan
+            UseReadOnlySpan
             (
                 Span =>
                 {
@@ -513,7 +504,7 @@ namespace Zion
 
         public bool TrueForAll(Predicate<T> Match)
         {
-            return Data.UseReadOnlySpan
+            return UseReadOnlySpan
             (
                 Span =>
                 {
@@ -532,7 +523,7 @@ namespace Zion
 
         public List<TOut> ConvertAll<TOut>(Converter<T, TOut> Converter)
         {
-            return Data.UseReadOnlySpan
+            return UseReadOnlySpan
             (
                 Count, Span =>
                 {
@@ -554,12 +545,12 @@ namespace Zion
 
         public T[] ToArray()
         {
-            return Data.UseReadOnlySpan(Count, static Span => Span.ToArray());
+            return UseReadOnlySpan(Count, static Span => Span.ToArray());
         }
 
         public List<T> ToList()
         {
-            return Data.UseReadOnlySpan
+            return UseReadOnlySpan
             (
                 Count,
                 Span =>
@@ -610,8 +601,8 @@ namespace Zion
                     return;
                 }
 
-                Data.Expand(TotalIndex + LocalIndex);
-                Data.UseSpan
+                Expand(TotalIndex + LocalIndex);
+                UseSpan
                 (
                     TotalIndex, LocalIndex, Span =>
                     {

@@ -6,12 +6,10 @@
         {
             public ArenaStream GetStream(int Size)
             {
-                return new ArenaStream
+                return Arena.Allocate<ArenaStream>
                 (
-                    Arena.Allocate
-                    (
-                        Arena<byte>.RoundToGroup(Size)
-                    )
+                    Arena<byte>.RoundToGroup(Size),
+                    static Span => new ArenaStream(Span)
                 );
             }
         }
