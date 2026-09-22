@@ -2,7 +2,7 @@
 {
     public sealed class ArenaQueue<T> : ArenaCollection<T>, ICollection<T>
     {
-        private int Start;
+        private new int Start;
         private int End;
 
         public int Count

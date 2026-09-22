@@ -1,16 +1,16 @@
 ﻿using System.Numerics;
-using System.Text;
 using System.Runtime.InteropServices;
+using System.Text;
 using Zion.Vectors;
+using static System.Buffers.Binary.BinaryPrimitives;
 using Vector2 = Zion.Vectors.Vector2;
 using Vector3 = Zion.Vectors.Vector3;
-using static System.Buffers.Binary.BinaryPrimitives;
 
 namespace Zion
 {
     public sealed class ArenaStream : ArenaCollection<byte>
     {
-        public int Length
+        public new int Length
         {
             get;
             private set
@@ -412,16 +412,98 @@ namespace Zion
         }
 
 
-        public new void UseSpan(int Size, Action<Span<byte>> Action)
-        {
-            Reserve(Size);
-            UseSpan(_Position, Size, Action);
-        }
-
-
         public byte[] ToArray()
         {
             return ToArray(0, Length);
+        }
+
+
+        public new void UseSpan(Action<Span<byte>> Action)
+        {
+            base.UseSpan(Action);
+        }
+
+        public new void UseSpan(int Count, Action<Span<byte>> Action)
+        {
+            base.UseSpan(Count, Action);
+        }
+
+        public new void UseSpan(int Start, int Count, Action<Span<byte>> Action)
+        {
+            base.UseSpan(Start, Count, Action);
+        }
+
+        public new void UseSpan(int Start, int Count, Span<byte> Other, Action<Span<byte>, Span<byte>> Action)
+        {
+            base.UseSpan(Start, Count, Other, Action);
+        }
+
+        public new void UseSpan(int Start, int Count, ReadOnlySpan<byte> Other, Action<Span<byte>, ReadOnlySpan<byte>> Action)
+        {
+            base.UseSpan(Start, Count, Other, Action);
+        }
+
+
+        public new void UseReadOnlySpan(Action<ReadOnlySpan<byte>> Action)
+        {
+            base.UseReadOnlySpan(Action);
+        }
+
+        public new void UseReadOnlySpan(int Count, Action<ReadOnlySpan<byte>> Action)
+        {
+            base.UseReadOnlySpan(Count, Action);
+        }
+
+        public new void UseReadOnlySpan(int Start, int Count, Action<ReadOnlySpan<byte>> Action)
+        {
+            base.UseReadOnlySpan(Start, Count, Action);
+        }
+
+        public new void UseReadOnlySpan(int Start, int Count, ReadOnlySpan<byte> Other, Action<ReadOnlySpan<byte>, ReadOnlySpan<byte>> Action)
+        {
+            base.UseReadOnlySpan(Start, Count, Other, Action);
+        }
+
+
+        public new I UseSpan<I>(Func<Span<byte>, I> Function)
+        {
+            return base.UseSpan(Function);
+        }
+
+        public new I UseSpan<I>(int Count, Func<Span<byte>, I> Function)
+        {
+            return base.UseSpan(Count, Function);
+        }
+
+        public new I UseSpan<I>(int Start, int Count, Span<byte> Other, Func<Span<byte>, Span<byte>, I> Function)
+        {
+            return base.UseSpan(Start, Count, Other, Function);
+        }
+
+        public new I UseSpan<I>(int Start, int Count, ReadOnlySpan<byte> Other, Func<Span<byte>, ReadOnlySpan<byte>, I> Function)
+        {
+            return base.UseSpan(Start, Count, Other, Function);
+        }
+
+
+        public new I UseReadOnlySpan<I>(Func<ReadOnlySpan<byte>, I> Function)
+        {
+            return base.UseReadOnlySpan(Function);
+        }
+
+        public new I UseReadOnlySpan<I>(int Count, Func<ReadOnlySpan<byte>, I> Function)
+        {
+            return base.UseReadOnlySpan(Count, Function);
+        }
+
+        public new I UseReadOnlySpan<I>(int Start, int Count, Func<ReadOnlySpan<byte>, I> Function)
+        {
+            return base.UseReadOnlySpan(Start, Count, Function);
+        }
+
+        public new I UseReadOnlySpan<I>(int Start, int Count, ReadOnlySpan<byte> Other, Func<ReadOnlySpan<byte>, ReadOnlySpan<byte>, I> Function)
+        {
+            return base.UseReadOnlySpan(Start, Count, Other, Function);
         }
 
 

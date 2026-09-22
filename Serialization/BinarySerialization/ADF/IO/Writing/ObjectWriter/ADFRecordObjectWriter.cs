@@ -1,6 +1,4 @@
-﻿using System.Xml.Linq;
-
-namespace Zion.Serialization.ADF
+﻿namespace Zion.Serialization.ADF
 {
     public sealed class ADFRecordObjectWriter : ADFObjectWriter
     {

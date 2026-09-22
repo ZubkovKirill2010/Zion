@@ -1,6 +1,3 @@
-using System.Drawing;
-using System.Runtime.CompilerServices;
-
 namespace Zion
 {
     //TODO: Полностью убрать доступ к арене у Disposed Collection (чтобы копия структуры также не имела доступ).

@@ -2,7 +2,7 @@ namespace Zion
 {
     public sealed class ArenaArray<T> : ArenaCollection<T>
     {
-        public readonly int Length;
+        public readonly new int Length;
 
 
         public ArenaArray(ArenaSpan<T> Data) : base(Data)
@@ -72,6 +72,95 @@ namespace Zion
         public T[] ToArray()
         {
             return UseReadOnlySpan(static Span => Span.ToArray());
+        }
+
+
+        public new void UseSpan(Action<Span<T>> Action)
+        {
+            base.UseSpan(Action);
+        }
+
+        public new void UseSpan(int Count, Action<Span<T>> Action)
+        {
+            base.UseSpan(Count, Action);
+        }
+
+        public new void UseSpan(int Start, int Count, Action<Span<T>> Action)
+        {
+            base.UseSpan(Start, Count, Action);
+        }
+
+        public new void UseSpan(int Start, int Count, Span<T> Other, Action<Span<T>, Span<T>> Action)
+        {
+            base.UseSpan(Start, Count, Other, Action);
+        }
+
+        public new void UseSpan(int Start, int Count, ReadOnlySpan<T> Other, Action<Span<T>, ReadOnlySpan<T>> Action)
+        {
+            base.UseSpan(Start, Count, Other, Action);
+        }
+
+
+        public new void UseReadOnlySpan(Action<ReadOnlySpan<T>> Action)
+        {
+            base.UseReadOnlySpan(Action);
+        }
+
+        public new void UseReadOnlySpan(int Count, Action<ReadOnlySpan<T>> Action)
+        {
+            base.UseReadOnlySpan(Count, Action);
+        }
+
+        public new void UseReadOnlySpan(int Start, int Count, Action<ReadOnlySpan<T>> Action)
+        {
+            base.UseReadOnlySpan(Start, Count, Action);
+        }
+
+        public new void UseReadOnlySpan(int Start, int Count, ReadOnlySpan<T> Other, Action<ReadOnlySpan<T>, ReadOnlySpan<T>> Action)
+        {
+            base.UseReadOnlySpan(Start, Count, Other, Action);
+        }
+
+
+        public new I UseSpan<I>(Func<Span<T>, I> Function)
+        {
+            return base.UseSpan(Function);
+        }
+
+        public new I UseSpan<I>(int Count, Func<Span<T>, I> Function)
+        {
+            return base.UseSpan(Count,  Function);
+        }
+
+        public new I UseSpan<I>(int Start, int Count, Span<T> Other, Func<Span<T>, Span<T>, I> Function)
+        {
+            return base.UseSpan(Start, Count, Other, Function);
+        }
+
+        public new I UseSpan<I>(int Start, int Count, ReadOnlySpan<T> Other, Func<Span<T>, ReadOnlySpan<T>, I> Function)
+        {
+            return base.UseSpan(Start, Count, Other, Function);
+        }
+
+
+        public new I UseReadOnlySpan<I>(Func<ReadOnlySpan<T>, I> Function)
+        {
+            return base.UseReadOnlySpan( Function);
+        }
+
+        public new I UseReadOnlySpan<I>(int Count, Func<ReadOnlySpan<T>, I> Function)
+        {
+            return base.UseReadOnlySpan(Count, Function);
+        }
+
+        public new I UseReadOnlySpan<I>(int Start, int Count, Func<ReadOnlySpan<T>, I> Function)
+        {
+            return base.UseReadOnlySpan(Start, Count, Function);
+        }
+
+        public new I UseReadOnlySpan<I>(int Start, int Count, ReadOnlySpan<T> Other, Func<ReadOnlySpan<T>, ReadOnlySpan<T>, I> Function)
+        {
+            return base.UseReadOnlySpan(Start, Count, Other, Function);
         }
 
 
