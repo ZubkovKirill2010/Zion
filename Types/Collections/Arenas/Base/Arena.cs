@@ -1,18 +1,26 @@
 namespace Zion
 {
+    //TODO: Полностью убрать доступ к арене у Disposed ArenaSpan (чтобы копия структуры также не имела доступ).
+
     public sealed class Arena<T>
     {
+        #region Constants
         internal const int BinaryGroupSize = 4;
         internal const int GroupSize = 1 << BinaryGroupSize;
 
         internal const int BinaryBufferAccuracry = 9;
         internal const int BufferAccuracry = 1 << BinaryBufferAccuracry;
 
+        #endregion
 
+        #region Data
         private T[] Data;
         private BitArray BitMap;
         private int Count;
 
+        #endregion
+
+        #region Properties
         public int Capacity
         {
             get => Data.Length;
@@ -27,7 +35,9 @@ namespace Zion
             }
         }
 
+        #endregion
 
+        #region Constructors
         public Arena() : this(1024) { }
 
         public Arena(int Capacity)
@@ -37,7 +47,9 @@ namespace Zion
             this.BitMap   = new (RoundToGroup(Capacity));
         }
 
+        #endregion
 
+        #region Indexers
         internal T this[int Index]
         {
             get => Data[Index];
@@ -50,7 +62,9 @@ namespace Zion
             set => Data[Index] = value;
         }
 
+        #endregion
 
+        #region PublicMethods
         public ArenaArray<T> GetArray(int Size)
         {
             return new(Allocate(Size));
@@ -94,7 +108,9 @@ namespace Zion
             return ZArray.GetSubArray(Data, Start, Length);
         }
 
+        #endregion
 
+        #region InternalMethods
         internal Span<T> AsSpan(ArenaSpan<T> ArenaSpan)
         {
             CheckSpan(ArenaSpan);
@@ -145,7 +161,9 @@ namespace Zion
             return Allocated;
         }
 
+        #endregion
 
+        #region PrivateMethods
         private void CheckSpan(ArenaSpan<T> Span)
         {
             if (!ReferenceEquals(this, Span.Source))
@@ -220,7 +238,9 @@ namespace Zion
             return Count;
         }
 
+        #endregion
 
+        #region PublicStaticMethods
         public static int RoundToGroup(int Count)
         {
             return (Count + GroupSize - 1) >> BinaryGroupSize;
@@ -235,5 +255,7 @@ namespace Zion
         {
             return (Count + BufferAccuracry - 1) & ~(BufferAccuracry - 1);
         }
+
+        #endregion
     }
 }

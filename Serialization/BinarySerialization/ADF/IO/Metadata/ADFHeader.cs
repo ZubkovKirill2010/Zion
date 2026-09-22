@@ -2,14 +2,20 @@
 {
     public readonly struct ADFHeader : IBinarySerializable<ADFHeader>
     {
+        public bool Compression { get; init; }
+
+
         public void Write(BinaryWriter Writer)
         {
-            throw new NotImplementedException();
+            Writer.Write(Compression);
         }
 
         public static ADFHeader Read(BinaryReader Reader)
         {
-            throw new NotImplementedException();
+            return new()
+            {
+                Compression = Reader.ReadBoolean()
+            };
         }
     }
 }

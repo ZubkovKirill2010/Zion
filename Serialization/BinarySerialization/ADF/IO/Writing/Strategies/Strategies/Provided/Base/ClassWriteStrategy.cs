@@ -8,7 +8,9 @@
 
         protected sealed override ArenaStream GetStreamForData(StreamGroup BaseGroup)
         {
-            return BaseGroup.Add(new()).BaseStream;
+            var NewGroup = new StreamGroup(Context.Arena.GetStream(1));
+            BaseGroup.Add(NewGroup);
+            return NewGroup.BaseStream;
         }
 
 

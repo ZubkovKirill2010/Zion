@@ -535,6 +535,11 @@ namespace Zion
             Lock.Dispose();
         }
 
+        internal void DisposeWithoutReleased()
+        {
+            IsDisposed = true;
+        }
+
         #endregion
 
         #region PrivateMethods

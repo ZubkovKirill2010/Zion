@@ -290,6 +290,11 @@ namespace Zion
         }
 
 
+        public void Fill(bool Value)
+        {
+            Fill(0, Count, Value);
+        }
+
         public void Fill(int Start, int Count, bool Value)
         {
             int Length = this.Count;

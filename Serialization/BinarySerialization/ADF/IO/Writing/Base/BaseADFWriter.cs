@@ -46,7 +46,7 @@ namespace Zion.Serialization.ADF
 
         internal BaseADFWriter(BaseADFWriter Base, ArenaStream BaseStream) : this(Base.Context, BaseStream) { }
 
-        internal BaseADFWriter(ADFWritingContext Context) : this(Context, Context?.Arena?.GetStream(64)!) { }
+        internal BaseADFWriter(ADFWritingContext Context) : this(Context, Context?.Arena?.GetStream(1)!) { }
 
         internal BaseADFWriter(ADFWritingContext Context, ArenaStream BaseStream)
         {
@@ -85,13 +85,13 @@ namespace Zion.Serialization.ADF
 
         protected void AddChild(ArenaStream Stream)
         {
-            Data = Data.Add(new(Stream));
+            Data.Add(new(Stream));
             ChildPosition += Stream.Length;
         }
 
         protected void AddChild(StreamGroup Group)
         {
-            Data = Data.Add(Group);
+            Data.Add(Group);
         }
 
         protected void ThrowIfDisposed()
@@ -552,6 +552,7 @@ namespace Zion.Serialization.ADF
         #region IDisposable
         public void Dispose()
         {
+            Data.Dispose();
             if (!IsDisposed)
             {
                 IsDisposed = true;

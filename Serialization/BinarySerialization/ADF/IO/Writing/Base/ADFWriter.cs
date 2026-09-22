@@ -63,8 +63,14 @@
                 CurrentPage,
                 LastPosition
             );
+
             LastPosition = CurrentPosition;
             DataRegistry.Add(Name, NameId, Definition);
+
+            if (TotalLength >= Options.MinPageSize)
+            {
+                Flush();
+            }
         }
 
         protected override void OnNullWrited(string Name, in uint NameId)
@@ -85,26 +91,40 @@
         {
             if (!Options.WriteHeader) { return; }
 
-            //TODO: WritePrimitive header
+            var Header = new ADFHeader()
+            {
+                Compression = Options.Compression
+                //TODO: Other parameters in header
+            };
+
+            Header.Write(Writer);
         }
 
         private void WritePage()
         {
             Writer.Write(true);
 
-            foreach (var Registry in Registries)
+            foreach (var Info in Registries)
             {
-                if (Registry.Registry.NewItemsCount > 0)
+                var Registry = Info.Registry;
+
+                if (Registry.NewItemsCount > 0)
                 {
-                    Writer.Write(Registry.Id);
-                    //TODO: WritePrimitive registry
+                    Writer.Write(Info.Id);
+                    
+                    var Entry = WriteStrategies.GetEntry<IWritableRegistry>(Registry.GetType());
+                    var Group = new StreamGroup(Context.Arena);
+
+                    Entry.Strategy.Write(Group, Registry);
                 }
             }
 
             Writer.Write((ushort)0);
-            Writer.Write(TotalLength);//TODO: Пишется общая позиция а не длина страницы
+            Writer.Write(TotalLength);
 
             Flush(BaseStream);
+
+            Context.Arena.DisposeAll();
         }
 
         #endregion

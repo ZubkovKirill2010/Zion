@@ -30,6 +30,11 @@
             return false;
         }
 
+        internal WriteEntry<T> GetEntry<T>(Type Type)
+        {
+            return (WriteEntry<T>)Strategies[Type];
+        }
+
 
         private static void ThrowIfNotAssignable<T>(Type Type)
         {

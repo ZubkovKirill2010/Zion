@@ -1,6 +1,6 @@
 ﻿namespace Zion.Serialization.ADF
 {
-    public interface IWritableRegistry
+    public interface IWritableRegistry : IADFWritable
     {
         public int NewItemsCount { get; }
     }

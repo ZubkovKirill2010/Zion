@@ -52,7 +52,7 @@ namespace Zion.Serialization.ADF
             return new Parameter
             (
                 NameId  : Context.Registries.StringRegistry.GetOrAdd(Field.Name),
-                FormatId: Context.TypeAssociation[Field.Type].FormatId
+                FormatId: Context.TypeAssociation[Field.Type]
             );
         }
     }

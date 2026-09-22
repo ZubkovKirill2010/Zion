@@ -47,7 +47,7 @@
                 return base.GetStreamGroup(Name, in NameId, in FormatId);
             }
 
-            var PostponedGroup = new StreamGroup(GetNewStream(32));
+            var PostponedGroup = new StreamGroup(Context.Arena);
             PostponedItems.Add(new(ParameterIndex, PostponedGroup));
 
             return PostponedGroup;
@@ -62,7 +62,7 @@
                 return GetBaseStream();
             }
 
-            var PostponedStream = GetNewStream(32);
+            var PostponedStream = GetNewStream(1);
             PostponedItems.Add(new(ParameterIndex, new(PostponedStream)));
 
             return PostponedStream;

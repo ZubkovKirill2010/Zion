@@ -2,43 +2,75 @@
 
 namespace Zion.Serialization.ADF
 {
-    public readonly struct StreamGroup : IEnumerable<ArenaStream>
+    public readonly struct StreamGroup : IDisposable, IEnumerable<ArenaStream>
     {
+        #region Data
+        private readonly Reference<long>  _Length;
         private readonly List<StreamGroup> Groups;
-        public  readonly ArenaStream BaseStream;
-        public  readonly long Length;
+
+        public readonly ArenaStream BaseStream;
+
+        #endregion
+
+        #region Properties
+        public bool IsDisposed => BaseStream.IsDisposed;
 
         public int Count => Groups.Count;
 
+        public long Length
+        {
+            get => _Length.Value;
+            set => _Length.Value = value;
+        }
 
+        #endregion
+
+        #region Constructors
+        public StreamGroup(Arena<byte> Arena)
+            : this(Arena.NotNull().GetStream(1)) { }
 
         public StreamGroup(ArenaStream Stream)
         {
             BaseStream = Stream.NotNull();
-            Groups = new(0);
+            Groups     = new(0);
+            _Length    = new();
         }
 
-        private StreamGroup(ArenaStream BaseStream, List<StreamGroup> Groups, long Length)
+        private StreamGroup(ArenaStream BaseStream, List<StreamGroup> Groups, Reference<long> Length)
         {
             this.BaseStream = BaseStream;
-            this.Groups = Groups;
-            this.Length = Length;
+            this.Groups     = Groups;
+            this._Length    = Length;
         }
 
+        #endregion
 
+        #region PublicMethods
         public StreamGroup With(ArenaStream BaseStream)
         {
-            return new(BaseStream.NotNull(), Groups, Length);
+            return new(BaseStream.NotNull(), Groups, _Length);
         }
 
-
-        public StreamGroup Add(StreamGroup Group)
+        public void Add(StreamGroup Group)
         {
             Groups.Add(Group);
-            return new(BaseStream, Groups, Length + Group.Length);
+            Length += Group.Length;
         }
 
+        #endregion
 
+        #region IDisposable
+        public void Dispose()
+        {
+            foreach (var Stream in this)
+            {
+                Stream.Dispose();
+            }
+        }
+
+        #endregion
+
+        #region IEnumerable
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
         
         public IEnumerator<ArenaStream> GetEnumerator()
@@ -55,5 +87,7 @@ namespace Zion.Serialization.ADF
                 }
             }
         }
+
+        #endregion
     }
 }
