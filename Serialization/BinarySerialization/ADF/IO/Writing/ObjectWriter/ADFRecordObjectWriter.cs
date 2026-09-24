@@ -8,8 +8,8 @@
         private bool IsDeferred;
 
 
-        public ADFRecordObjectWriter(ADFWritingContext Context, ArenaStream Stream, Type Type)
-            : base(Context, Stream)
+        public ADFRecordObjectWriter(ADFWritingContext Context, StreamGroup Target, Type Type)
+            : base(Context, Target)
         {
             Flags = FormatFlags.FromType(Type);//TODO: Generics...
             Parameters = new();

@@ -5,11 +5,18 @@
         private readonly Dictionary<string, uint> Data;
         private uint LastId = 1;
 
-        public int NewItemsCount { get; private set; }
+        public bool IsChanged { get; private set; }
+
 
         public StringIdRegistry()
         {
             Data = new();
+        }
+
+
+        public void Write(ADFObjectWriter Writer)
+        {
+            //TODO: IWritableRegistry.Write
         }
 
 

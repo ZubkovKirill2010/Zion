@@ -2,6 +2,6 @@
 {
     public interface IWritableRegistry : IADFWritable
     {
-        public int NewItemsCount { get; }
+        public bool IsChanged { get; }
     }
 }

@@ -6,9 +6,9 @@
             : base(Context) { }
 
 
-        protected sealed override ArenaStream GetStreamForData(StreamGroup BaseGroup)
+        protected sealed override StreamGroup GetGroupForData(StreamGroup BaseGroup)
         {
-            return BaseGroup.BaseStream;
+            return BaseGroup;
         }
     }
 }

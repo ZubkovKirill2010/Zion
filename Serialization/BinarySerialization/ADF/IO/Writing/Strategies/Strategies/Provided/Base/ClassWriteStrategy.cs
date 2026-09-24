@@ -1,4 +1,6 @@
-﻿namespace Zion.Serialization.ADF
+﻿using System.Text.RegularExpressions;
+
+namespace Zion.Serialization.ADF
 {
     internal abstract class ClassWriteStrategy<T> : ProvidedWriteStrategy<T>
     {
@@ -6,24 +8,30 @@
             : base(Context) { }
 
 
-        protected sealed override ArenaStream GetStreamForData(StreamGroup BaseGroup)
+        protected sealed override StreamGroup GetGroupForData(StreamGroup BaseGroup)
         {
             var NewGroup = new StreamGroup(Context.Arena.GetStream(1));
             BaseGroup.Add(NewGroup);
-            return NewGroup.BaseStream;
+            return NewGroup;
         }
 
-
-        public override void Write(StreamGroup Group, T Value)
+        protected sealed override bool TryWriteReference(ArenaStream BaseStream, T Value)
         {
             if (Context.Registries.References.TryGetReference(Value, out Reference Reference))
             {
-                Group.BaseStream.Write(Reference.Id);
+                if (Context.Options.Compression)
+                {
+                    BaseStream.Write7BitEncodedUInt(Reference.Id);
+                }
+                else
+                {
+                    BaseStream.Write(Reference.Id);
+                }
+                return true;
             }
-            else
-            {
-                base.Write(Group, Value);
-            }
+            return false;
         }
+
+        //TODO: Реализовать запись ссылок (чтобы писалась не нулевая позиция)
     }
 }

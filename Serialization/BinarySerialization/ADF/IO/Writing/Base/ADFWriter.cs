@@ -94,7 +94,7 @@
             var Header = new ADFHeader()
             {
                 Compression = Options.Compression
-                //TODO: Other parameters in header
+                //Other parameters in header
             };
 
             Header.Write(Writer);
@@ -108,7 +108,7 @@
             {
                 var Registry = Info.Registry;
 
-                if (Registry.NewItemsCount > 0)
+                if (Registry.IsChanged)
                 {
                     Writer.Write(Info.Id);
                     

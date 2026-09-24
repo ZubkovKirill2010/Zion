@@ -6,9 +6,10 @@
 
         private readonly Dictionary<object, Reference> References;
 
-        public int NewItemsCount { get; private set; }
-
         private uint LastId = 1u << 31;
+
+        public bool IsChanged { get; private set; }
+
 
         public ReferenceIdsRegistry()
         {
@@ -16,8 +17,19 @@
         }
 
 
-        public bool TryGetReference(object Value, out Reference Reference)
+        public void Write(ADFObjectWriter Writer)
         {
+            //TODO: IWritableRegistry.Write
+        }
+
+
+        public bool TryGetReference(object? Value, out Reference Reference)
+        {
+            if (Value is null)
+            {
+                Reference = Null;
+                return true;
+            }
             return References.TryGetValue(Value, out Reference);
         }
     }

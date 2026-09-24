@@ -6,7 +6,7 @@
         private readonly Dictionary<uint, DataDefinition> Parameters;
         private readonly List<(uint, DataDefinition)> NewItems;
 
-        public int NewItemsCount { get; private set; }
+        public bool IsChanged { get; private set; }
 
 
         public DataRegistry(StringIdRegistry StringRegistry)
@@ -14,6 +14,12 @@
             this.StringRegistry = StringRegistry.NotNull();
             Parameters = new();
             NewItems   = new();
+        }
+
+
+        public void Write(ADFObjectWriter Writer)
+        {
+            //TODO: IWritableRegistry.Write
         }
 
 

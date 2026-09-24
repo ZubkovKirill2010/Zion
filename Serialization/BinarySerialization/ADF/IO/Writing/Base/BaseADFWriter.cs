@@ -44,14 +44,14 @@ namespace Zion.Serialization.ADF
         #region Constructors
         internal BaseADFWriter(BaseADFWriter Base) : this(Base.Context) { }
 
-        internal BaseADFWriter(BaseADFWriter Base, ArenaStream BaseStream) : this(Base.Context, BaseStream) { }
+        internal BaseADFWriter(BaseADFWriter Base, StreamGroup Target) : this(Base.Context, Target) { }
 
-        internal BaseADFWriter(ADFWritingContext Context) : this(Context, Context?.Arena?.GetStream(1)!) { }
+        internal BaseADFWriter(ADFWritingContext Context) : this(Context, new(Context?.Arena?.GetStream(1)!)) { }
 
-        internal BaseADFWriter(ADFWritingContext Context, ArenaStream BaseStream)
+        internal BaseADFWriter(ADFWritingContext Context, StreamGroup Target)
         {
             this.Context = Context.NotNull();
-            this.Data = new(BaseStream.NotNull());
+            this.Data = Target;
         }
 
         #endregion
@@ -217,7 +217,6 @@ namespace Zion.Serialization.ADF
             (
                 Name, ADFPrimitives.Double, in Value,
                 static (S, V) => S.Write(V)
-                //Update: WriteConcise double
             );
         }
 
@@ -227,7 +226,6 @@ namespace Zion.Serialization.ADF
             (
                 Name, ADFPrimitives.Decimal, in Value,
                 static (S, V) => S.Write(V)
-                //Update: WriteConcise double
             );
         }
 
@@ -319,7 +317,6 @@ namespace Zion.Serialization.ADF
             (
                 Name, ADFPrimitives.Vector2, in Value,
                 static (S, V) => S.Write(V)
-                //Update: WriteConcise Vector2
             );
         }
 
@@ -342,8 +339,7 @@ namespace Zion.Serialization.ADF
             WritePrimitive
             (
                 Name, ADFPrimitives.Vector3, in Value,
-                static (S, V) => S.Write(V)
-                //Update: WriteConcise Vector3        
+                static (S, V) => S.Write(V)     
             );
         }
 

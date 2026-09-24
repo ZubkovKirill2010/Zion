@@ -12,7 +12,7 @@
         }
 
 
-        protected override void Write(ArenaStream BaseStream, ADFObjectWriter Writer, T Value)
+        protected override void Write(ADFObjectWriter Writer, T Value)
         {
             Serializer.Write(Writer, Value);
         }

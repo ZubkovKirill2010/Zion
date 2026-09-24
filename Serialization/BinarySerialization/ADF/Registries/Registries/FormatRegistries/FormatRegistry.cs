@@ -3,8 +3,9 @@ namespace Zion.Serialization.ADF
     public sealed class FormatRegistry : IWritableRegistry
     {
         private readonly List<DataFormat> Formats;
+        private int Added;
 
-        public int NewItemsCount { get; private set; }
+        public bool IsChanged => Added > 0;
 
         public int Count => Formats.Count;
 
@@ -18,11 +19,17 @@ namespace Zion.Serialization.ADF
         public DataFormat this[uint Id] => Formats[GetIndex(Id)];
 
 
+        public void Write(ADFObjectWriter Writer)
+        {
+            //TODO: IWritableRegistry.Write
+        }
+
+
         public uint Add(DataFormat Format)
         {
             uint Id = (uint)Formats.Count;
             Formats.Add(Format);
-            NewItemsCount++;
+            Added++;
             return Id;
         }        
 

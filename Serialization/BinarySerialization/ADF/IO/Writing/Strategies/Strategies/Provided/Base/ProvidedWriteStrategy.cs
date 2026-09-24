@@ -29,25 +29,32 @@
         }
 
 
-        protected abstract ArenaStream GetStreamForData(StreamGroup BaseGroup);
+        protected abstract StreamGroup GetGroupForData(StreamGroup BaseGroup);
 
-        protected abstract void Write(ArenaStream BaseStream, ADFObjectWriter Writer, T Value);
+        protected abstract void Write(ADFObjectWriter Writer, T Value);
+
+        protected virtual bool TryWriteReference(ArenaStream BaseStream, T Value) => false;
 
 
-        public virtual void Write(StreamGroup Group, T Value)
+        public void Write(StreamGroup Group, T Value)
         {
-            var Stream = GetStreamForData(Group);
-            
+            if (TryWriteReference(Group.BaseStream, Value))
+            {
+                return;
+            }
+
+            var Target = GetGroupForData(Group);
+
             if (HasFormat)
             {
-                using var Writer = new ADFCheckingObjectWriter(Context, Stream, Format);
-                Write(Group.BaseStream, Writer, Value);
+                using var Writer = new ADFCheckingObjectWriter(Context, Target, Format);
+                Write(Writer, Value);
             }
             else
             {
-                using var Writer = new ADFRecordObjectWriter(Context, Stream, typeof(T));
+                using var Writer = new ADFRecordObjectWriter(Context, Target, typeof(T));
+                Write(Writer, Value);
 
-                Write(Group.BaseStream, Writer, Value);
                 Format = Writer.BuildFormat();
                 Context.Registries.FormatRegistry.Add(Format);
 
