@@ -2,16 +2,14 @@
 {
     public sealed class ADFRecordObjectWriter : ADFObjectWriter
     {
-        private readonly FormatFlags Flags;
+        private readonly Type Type;
         private readonly List<Parameter> Parameters;
-
-        private bool IsDeferred;
 
 
         public ADFRecordObjectWriter(ADFWritingContext Context, StreamGroup Target, Type Type)
             : base(Context, Target)
         {
-            Flags = FormatFlags.FromType(Type);//TODO: Generics...
+            this.Type = Type;
             Parameters = new();
         }
 
@@ -35,7 +33,6 @@
 
         protected override void OnNullWrited(string Name, in uint NameId)
         {
-            IsDeferred = true;
             Parameters.Add(new Parameter(NameId, 0u));
         }
 
@@ -43,8 +40,60 @@
         public DataFormat BuildFormat()
         {
             Dispose();
-            //TODO: ADFRecordWriter.CreateFormat
-            return new DataFormat(Parameters, Flags, 0u);
+
+            return new DataFormat
+            (
+                Parameters.ToArray(),
+                GetGenerics(),
+                GetFlags(),
+                GetBaseFormatId()
+            );
+        }
+
+
+        private uint[] GetGenerics()
+        {
+            if (!Type.IsGenericType)
+            {
+                return [];
+            }
+
+            var Association = TypeAssociation;
+
+            return Array.ConvertAll
+            (
+                Type.GetGenericArguments(),
+                Association.GetOrAddDeferred
+            );
+        }
+
+        private FormatFlags GetFlags()
+        {
+            var Type = this.Type;
+            var Flags = FormatFlags.None;
+
+            if (!Type.IsValueType)
+            {
+                Flags |= FormatFlags.IsReference;
+            }
+            if (Type.IsAbstract)
+            {
+                Flags |= FormatFlags.IsAbstract;
+            }
+            if (Type.IsNullable)
+            {
+                Flags |= FormatFlags.IsNullable;
+            }
+
+            return Flags;
+        }
+
+        private uint GetBaseFormatId()
+        {
+            var Base = Type.BaseType;
+            return DataFormat.HasBase(Type)
+                ? 0u
+                : TypeAssociation.GetOrAddDeferred(Base);
         }
 
         

@@ -55,6 +55,16 @@
                 Dictionary.Add(Key, NewValue);
                 return NewValue;
             }
+
+            public TValue GetOrAdd(TKey Key, TValue NewValue)
+            {
+                if (Dictionary.TryGetValue(Key, out var Existing))
+                {
+                    return Existing;
+                }
+                Dictionary.Add(Key, NewValue);
+                return NewValue;
+            }
         }        
     }
 }

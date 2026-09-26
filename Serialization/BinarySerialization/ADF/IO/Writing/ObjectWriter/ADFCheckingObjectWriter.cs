@@ -31,6 +31,8 @@
         #endregion
 
         #region OverrideMethods
+        //TODO: Если встречается Deferred параметр, то изменить формат
+
         protected override StreamGroup GetStreamGroup(string Name, in uint NameId, in uint FormatId)
         {
             CheckRanges(Name, in NameId, out int ParameterIndex);

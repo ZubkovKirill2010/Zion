@@ -9,7 +9,7 @@
         public readonly WriteStrategies    WriteStrategies;
 
         public uint CurrentPage;
-        public long CurrentPosition;//TODO: Сделать обновление позиции
+        public long CurrentPosition;
 
         public ADFWritingContext(ADFWritingOptions? WritingOptions)
         {

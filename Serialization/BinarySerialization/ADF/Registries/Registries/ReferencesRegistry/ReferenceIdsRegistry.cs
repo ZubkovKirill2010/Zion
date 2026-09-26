@@ -4,7 +4,7 @@
     {
         private static readonly Reference Null = new Reference(0, new(0u, 0u, -1u));
 
-        private readonly Dictionary<object, Reference> References; //TODO: Заменить на слабую ссылку
+        private readonly Dictionary<object, Reference> References; //Optimize: Заменить на слабую ссылку
 
         private uint LastId = 1u << 31;
 

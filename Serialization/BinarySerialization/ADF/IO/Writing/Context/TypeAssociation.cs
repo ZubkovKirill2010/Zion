@@ -25,5 +25,10 @@
         {
             return Data.TryAdd(Type, FormatId);
         }
+
+        public uint GetOrAddDeferred(Type Type)
+        {
+            return Data.GetOrAdd(Type, DataFormat.DeferredId);
+        }
     }
 }

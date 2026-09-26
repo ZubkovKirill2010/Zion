@@ -37,22 +37,22 @@ namespace Zion.Serialization.ADF
         #endregion
 
         #region Constructors
-        public DataFormat(IEnumerable<Parameter> Parameters, FormatFlags Flags)
+        public DataFormat(Parameter[] Parameters, FormatFlags Flags)
         {
-            this.Parameters = Parameters.NotNull().ToArray();
+            this.Parameters = Parameters.NotNull();
             this.Flags = Flags;
         }
 
-        public DataFormat(IEnumerable<Parameter> Parameters, FormatFlags Flags, uint BaseFormat)
+        public DataFormat(Parameter[] Parameters, FormatFlags Flags, uint BaseFormat)
             : this(Parameters, Flags)
         {
             this.BaseFormat = BaseFormat;
         }
 
-        public DataFormat(IEnumerable<Parameter> Parameters, IEnumerable<uint> Generics, FormatFlags Flags, uint BaseFormat)
+        public DataFormat(Parameter[] Parameters, uint[] Generics, FormatFlags Flags, uint BaseFormat)
             : this(Parameters, Flags, BaseFormat)
         {
-            this.Generics = Generics.NotNull().ToArray();
+            this.Generics = Generics.NotNull();
         }
 
         #endregion
@@ -65,6 +65,13 @@ namespace Zion.Serialization.ADF
         #endregion
 
         #region PublicMethods
+        public static bool HasBase(Type Type)
+        {
+            var Base = Type.BaseType;
+            return Base is not null && Base != typeof(object) && Base != typeof(ValueType);
+        }
+
+
         public static DataFormat GetEnumFormat<T>()
         {
             if (!typeof(T).IsEnum)
