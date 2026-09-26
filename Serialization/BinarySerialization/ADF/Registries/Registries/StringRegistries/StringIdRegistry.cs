@@ -2,6 +2,8 @@
 {
     public sealed class StringIdRegistry : IWritableRegistry
     {
+        public const uint Null = 0u;
+
         private readonly Dictionary<string, uint> Data;
         private uint LastId = 1;
 
@@ -24,7 +26,7 @@
         {
             if (String is null)
             {
-                return 0u;
+                return Null;
             }
             if (Data.TryGetValue(String, out uint Id))
             {
@@ -38,7 +40,7 @@
         {
             if (String is null)
             {
-                Id = 0u;
+                Id = Null;
                 return true;
             }
             return Data.TryGetValue(String, out Id);
@@ -47,7 +49,10 @@
 
         public string? GetString(in uint Id)
         {
-            if (Id == 0u) { return null; }
+            if (Id == Null)
+            {
+                return null;
+            }
 
             if (Id >= LastId)
             {

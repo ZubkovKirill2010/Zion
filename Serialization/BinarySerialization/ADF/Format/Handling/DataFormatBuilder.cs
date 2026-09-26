@@ -75,7 +75,7 @@
             var Base = Type.BaseType;
             return DataFormat.HasBase(Type)
                 ? TypeAssociation.GetOrAddDeferred(Base!, FormatRegistry)
-                : 0u;
+                : ADFPrimitives.Object;
         }
     }
 }

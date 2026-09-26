@@ -7,11 +7,11 @@ namespace Zion.Serialization.ADF
     public readonly struct DataFormat : IEnumerable<Parameter>
     {
         #region Data
-        private readonly Parameter[] Parameters;
-        private readonly uint[] Generics = [];
+        private readonly Parameter[] Parameters = [];
+        private readonly uint[]        Generics = [];
 
-        public readonly FormatFlags Flags;
-        public readonly uint BaseFormat;
+        public readonly FormatFlags Flags = FormatFlags.None;
+        public readonly uint   BaseFormat = ADFPrimitives.Object;
 
         #endregion
 
@@ -63,7 +63,10 @@ namespace Zion.Serialization.ADF
         public static bool HasBase([NotNullWhen(true)]Type Type)
         {
             var Base = Type.BaseType;
-            return Base is not null && Base != typeof(object) && Base != typeof(ValueType);
+            return Base is not null
+                && Base != typeof(object)
+                && Base != typeof(ValueType)
+                && Base != typeof(Enum);
         }
 
 
@@ -95,7 +98,26 @@ namespace Zion.Serialization.ADF
 
         public static int GetEnumSize(FormatFlags Flags)
         {
-            return ((int)Flags & 0b11000000) << 3;
+            var SizeBits = ((int)Flags >> 6) & 0b11;
+            return 1 << SizeBits;
+        }
+
+
+        public DataFormat Clarify(Parameter[] Parameters)
+        {
+            ArgumentNullException.ThrowIfNull(Parameters);
+            if (!IsDeferred)
+            {
+                throw new InvalidOperationException("Format is not Deferred");
+            }
+
+            return new DataFormat
+            (
+                Parameters,
+                Generics,
+                Flags & ~FormatFlags.IsDeferred,
+                BaseFormat
+            );
         }
 
 

@@ -35,7 +35,7 @@
 
             var Base = DataFormat.HasBase(Type) 
                 ? GetOrAddDeferred(Type, FormatRegistry)
-                : 0u;
+                : ADFPrimitives.Object;
 
             return Data.AddAndReturn(Type, FormatRegistry.AddDeferred(Base));
         }

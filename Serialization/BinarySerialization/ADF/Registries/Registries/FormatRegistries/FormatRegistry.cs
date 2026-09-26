@@ -3,16 +3,18 @@ namespace Zion.Serialization.ADF
     public sealed class FormatRegistry : IWritableRegistry
     {
         private readonly List<DataFormat> Formats;
-        private int Added;
+        private readonly List<FormatCorrection> Corrections;
+        private int Writed;
 
-        public bool IsChanged => Added > 0;
+        public bool IsChanged => Writed < Formats.Count;
 
         public int Count => Formats.Count;
 
 
         public FormatRegistry()
         {
-            Formats = new(32);
+            Formats = new(64);
+            Corrections = new(16);
         }
 
 
@@ -27,9 +29,8 @@ namespace Zion.Serialization.ADF
 
         public uint Add(DataFormat Format)
         {
-            uint Id = (uint)Formats.Count;
+            var Id = ADFPrimitives.Count + (uint)Formats.Count;
             Formats.Add(Format);
-            Added++;
             return Id;
         }
 
@@ -38,36 +39,47 @@ namespace Zion.Serialization.ADF
             return Add(DataFormat.GetDeferredFormat(Base));
         }
 
-        public void Clarify(uint FormatId, DataFormat Format)
+        public void Clarify(uint FormatId, Parameter[] Parameters)
         {
-            //TODO: Clarify
+            int Index = GetIndex(FormatId);
+
+            Formats[Index] = Formats[Index].Clarify(Parameters);
+            
+            if (Index < Writed)
+            {
+                Corrections.Add(new(Index, Parameters));
+            }
         }
 
         public bool IsAssignableFrom(in uint FormatId, in uint TargetFormatId)
         {
-            if (TargetFormatId == 0u)
+            if (FormatId == TargetFormatId || TargetFormatId == ADFPrimitives.Object)
             {
                 return true;
             }
 
+            if (IsPrimitive(FormatId))
+            {
+                return false;
+            }
+
             int BaseFormat = GetIndex(FormatId);
             int Target = GetIndex(TargetFormatId);
-            
-            if (BaseFormat < ADFPrimitives.Count || BaseFormat >= Count
-                || Target < ADFPrimitives.Count || Target >= Count)
+
+            if (BaseFormat < 0 || BaseFormat >= Count || Target < 0 || Target >= Count)
             {
                 return false;
             }
 
             while (true)
             {
-                if (BaseFormat == 0)
-                {
-                    return false;
-                }
                 if (BaseFormat == Target)
                 {
                     return true;
+                }
+                if (BaseFormat == 0)
+                {
+                    return false;
                 }
 
                 BaseFormat = (int)Formats[BaseFormat].BaseFormat;
@@ -76,7 +88,7 @@ namespace Zion.Serialization.ADF
 
         public bool TryGetFormat(uint FormatId, out DataFormat Format)
         {
-            int Index = GetIndex(FormatId);
+            int Index = (int)FormatId - ADFPrimitives.Count;
 
             if (Index < 0 || Index >= Count)
             {
@@ -108,6 +120,11 @@ namespace Zion.Serialization.ADF
             return Format.BaseFormat == 0;
         }
 
+
+        private static bool IsPrimitive(uint Id)
+        {
+            return Id < ADFPrimitives.Count;
+        }
 
         private static int GetIndex(uint Id)
         {

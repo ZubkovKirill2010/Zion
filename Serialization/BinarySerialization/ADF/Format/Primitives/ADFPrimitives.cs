@@ -75,6 +75,8 @@ namespace Zion.Serialization.ADF
         public const Id Vector3    = 22;
         public const Id Vector3Int = 23;
 
+        public const Id Object = 127;
+
         #endregion
 
         #region PublicMethods
