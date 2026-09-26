@@ -2,7 +2,7 @@
 
 namespace Zion.STP.Dynamic
 {
-    //TODO: RowColumnTokenContainer realization
+    //Do: RowColumnTokenContainer realization
     public sealed class RowColumnTokenContainer : ITokenContainer<RowColumnPointer>
     {
         private readonly List<Line> Lines;

@@ -31,17 +31,17 @@
         #endregion
 
         #region OverrideMethods
-        //TODO: Если встречается Deferred параметр, то изменить формат
-
         protected override StreamGroup GetStreamGroup(string Name, in uint NameId, in uint FormatId)
         {
             CheckRanges(Name, in NameId, out int ParameterIndex);
 
-            var Target = Format[ParameterIndex];
+            var TargetFormatId = Format[ParameterIndex].FormatId;
+            var TargetFormat   = FormatRegistry[TargetFormatId];
 
-            if (!FormatRegistry.IsAssignableFrom(Target.FormatId, FormatId))
+            if (!TargetFormat.IsDeferred
+                && !FormatRegistry.IsAssignableFrom(TargetFormatId, FormatId))
             {
-                throw new ADFFormatMismatchException(FormatId, Target.FormatId);
+                throw new ADFFormatMismatchException(FormatId, TargetFormatId);
             }
 
             if (ParameterIndex == Current)
@@ -49,25 +49,10 @@
                 return base.GetStreamGroup(Name, in NameId, in FormatId);
             }
 
-            var PostponedGroup = new StreamGroup(Context.Arena);
+            var PostponedGroup = base.GetStreamGroup(Name, in NameId, in FormatId).With(GetNewStream());
             PostponedItems.Add(new(ParameterIndex, PostponedGroup));
 
             return PostponedGroup;
-        }
-
-        protected override ArenaStream GetStreamForNull(string Name, in uint NameId)
-        {
-            CheckRanges(Name, in NameId, out int ParameterIndex);
-
-            if (ParameterIndex == Current)
-            {
-                return GetBaseStream();
-            }
-
-            var PostponedStream = GetNewStream(1);
-            PostponedItems.Add(new(ParameterIndex, new(PostponedStream)));
-
-            return PostponedStream;
         }
 
         protected override void OnWrited(string Name, in uint NameId, in uint FormatId)

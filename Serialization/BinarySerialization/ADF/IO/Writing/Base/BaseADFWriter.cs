@@ -73,9 +73,9 @@ namespace Zion.Serialization.ADF
             return GetStreamGroup(Name, in NameId, in FormatId).BaseStream;
         }
 
-        protected ArenaStream GetNewStream(int Size)
+        protected ArenaStream GetNewStream()
         {
-            return Context.Arena.GetStream(Size);
+            return Context.Arena.GetStream(1);
         }
 
         protected ArenaStream GetBaseStream()
@@ -83,15 +83,15 @@ namespace Zion.Serialization.ADF
             return Data.BaseStream;
         }
 
+        protected uint GetOrAddDeferred(Type Type)
+        {
+            return TypeAssociation.GetOrAddDeferred(Type, FormatRegistry);
+        }
+
         protected void AddChild(ArenaStream Stream)
         {
             Data.Add(new(Stream));
             ChildPosition += Stream.Length;
-        }
-
-        protected void AddChild(StreamGroup Group)
-        {
-            Data.Add(Group);
         }
 
         protected void ThrowIfDisposed()
@@ -361,7 +361,10 @@ namespace Zion.Serialization.ADF
 
         private bool TryWritePrimitive<T>(string Name, T Value)
         {
-            if (Value is null) { return false; }
+            if (Value is null)
+            {
+                return false;
+            }
 
             switch (Value)
             {
@@ -437,8 +440,10 @@ namespace Zion.Serialization.ADF
                     throw new ADFObjectIsNullException(Name);
                 }
 
-                GetStreamForNull(Name, in NameId).WriteCompressedZero(Context);
-                OnNullWrited(Name, in NameId);
+                var NullFormatId = GetOrAddDeferred(typeof(T));
+
+                GetStreamGroup(Name, in NameId, NullFormatId).BaseStream.WriteCompressedZero(Context);
+                OnWrited(Name, in NameId, NullFormatId);
                 return;
             }
 
@@ -448,7 +453,6 @@ namespace Zion.Serialization.ADF
             {
                 return;
             };
-
             
             GetEntry(Name, in NameId, Type, in Value).Deconstruct
             (
@@ -456,7 +460,7 @@ namespace Zion.Serialization.ADF
                 out var Strategy
             );
 
-            var StreamGroup = GetStreamGroup(Name, in NameId, FormatId);
+            var StreamGroup = GetStreamGroup(Name, in NameId, in FormatId);
 
             Strategy.Write(StreamGroup, Value);
             OnWrited(Name, in NameId, in FormatId);
@@ -476,7 +480,7 @@ namespace Zion.Serialization.ADF
             {
                 return new
                 (
-                    FormatRegistry.AddDeferred(),
+                    GetOrAddDeferred(Type),
                     ProvidedWriteStrategy<T>.GetStrategy(Context)
                 );
             }
@@ -485,7 +489,7 @@ namespace Zion.Serialization.ADF
             {
                 return new
                 (
-                    FormatRegistry.AddDeferred(),
+                    GetOrAddDeferred(Type),
                     ProvidedWriteStrategy<T>.GetStrategy(Context, Serializer)
                 );
             }
@@ -535,11 +539,7 @@ namespace Zion.Serialization.ADF
         #region AbstractMethods
         protected virtual StreamGroup GetStreamGroup(string Name, in uint NameId, in uint FormatId) => Data;
 
-        protected virtual ArenaStream GetStreamForNull(string Name, in uint NameId) => Data.BaseStream;
-
         protected virtual void OnWrited(string Name, in uint NameId, in uint FormatId) { }
-
-        protected virtual void OnNullWrited(string Name, in uint NameId) { }
 
         protected virtual void OnDisposed() { }
 
@@ -561,7 +561,7 @@ namespace Zion.Serialization.ADF
         #region PrivateMethods
         private void WriteBigIntegerValue(BigInteger Value)
         {
-            var Stream = Context.Arena.GetStream(0);            
+            var Stream = Context.Arena.GetStream(1);            
             Stream.Write(Value);
             AddChild(Stream);
         }

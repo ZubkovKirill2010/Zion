@@ -31,7 +31,17 @@ namespace Zion.Serialization.ADF
             Formats.Add(Format);
             Added++;
             return Id;
-        }        
+        }
+
+        public uint AddDeferred(uint Base)
+        {
+            return Add(DataFormat.GetDeferredFormat(Base));
+        }
+
+        public void Clarify(uint FormatId, DataFormat Format)
+        {
+            //TODO: Clarify
+        }
 
         public bool IsAssignableFrom(in uint FormatId, in uint TargetFormatId)
         {
@@ -43,8 +53,8 @@ namespace Zion.Serialization.ADF
             int BaseFormat = GetIndex(FormatId);
             int Target = GetIndex(TargetFormatId);
             
-            if (BaseFormat < ADFPrimitives.PrimitiveCount || BaseFormat >= Count
-                || Target < ADFPrimitives.PrimitiveCount || Target >= Count)
+            if (BaseFormat < ADFPrimitives.Count || BaseFormat >= Count
+                || Target < ADFPrimitives.Count || Target >= Count)
             {
                 return false;
             }
@@ -64,9 +74,18 @@ namespace Zion.Serialization.ADF
             }
         }
 
-        public uint AddDeferred()
+        public bool TryGetFormat(uint FormatId, out DataFormat Format)
         {
-            return Add(DataFormat.Deferred);
+            int Index = GetIndex(FormatId);
+
+            if (Index < 0 || Index >= Count)
+            {
+                Format = default;
+                return false;
+            }
+
+            Format = Formats[Index];
+            return true;
         }
 
 
@@ -92,11 +111,11 @@ namespace Zion.Serialization.ADF
 
         private static int GetIndex(uint Id)
         {
-            if (Id < ADFPrimitives.PrimitiveCount)
+            if (Id < ADFPrimitives.Count)
             {
-                throw new ArgumentOutOfRangeException(nameof(Id), $"Id(={Id}) out of range [{ADFPrimitives.PrimitiveCount}..)");
+                throw new ArgumentOutOfRangeException(nameof(Id), $"Id(={Id}) out of range [{ADFPrimitives.Count}..)");
             }
-            return (int)Id - ADFPrimitives.PrimitiveCount;
+            return (int)Id - ADFPrimitives.Count;
         }
     }
 }

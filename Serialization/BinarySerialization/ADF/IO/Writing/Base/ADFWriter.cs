@@ -40,13 +40,6 @@
                 : base.GetStreamGroup(Name, in NameId, in FormatId);
         }
 
-        protected override ArenaStream GetStreamForNull(string Name, in uint NameId)
-        {
-            return DataRegistry.Contains(NameId)
-                ? throw new ADFRepeatedNameException(Name)
-                : base.GetStreamForNull(Name, in NameId);
-        }
-
         protected override void OnWrited(string Name, in uint NameId, in uint FormatId)
         {
             var Definition = new DataDefinition
@@ -63,11 +56,6 @@
             {
                 Flush();
             }
-        }
-
-        protected override void OnNullWrited(string Name, in uint NameId)
-        {
-            OnWrited(Name, in NameId, 0u);
         }
 
         protected override void OnDisposed()

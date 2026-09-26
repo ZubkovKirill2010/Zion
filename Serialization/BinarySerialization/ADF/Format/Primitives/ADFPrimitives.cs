@@ -43,7 +43,7 @@ namespace Zion.Serialization.ADF
         #endregion
 
         #region Ids
-        public const int PrimitiveCount = 128;
+        public const int Count = 128;
 
         public const Id Boolean = 0;
         public const Id Byte    = 1;
@@ -75,14 +75,12 @@ namespace Zion.Serialization.ADF
         public const Id Vector3    = 22;
         public const Id Vector3Int = 23;
 
-        public const Id Reference = 24;
-
         #endregion
 
         #region PublicMethods
         public static bool IsPrimitive(Id Id)
         {
-            return Id < PrimitiveCount;
+            return Id < Count;
         }
 
         public static int SizeOf(Id PrimitiveId)

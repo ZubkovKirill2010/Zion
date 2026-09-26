@@ -26,9 +26,18 @@
             return Data.TryAdd(Type, FormatId);
         }
 
-        public uint GetOrAddDeferred(Type Type)
+        public uint GetOrAddDeferred(Type Type, FormatRegistry FormatRegistry)
         {
-            return Data.GetOrAdd(Type, DataFormat.DeferredId);
+            if (Data.TryGetValue(Type, out var Existing))
+            {
+                return Existing;
+            }
+
+            var Base = DataFormat.HasBase(Type) 
+                ? GetOrAddDeferred(Type, FormatRegistry)
+                : 0u;
+
+            return Data.AddAndReturn(Type, FormatRegistry.AddDeferred(Base));
         }
     }
 }

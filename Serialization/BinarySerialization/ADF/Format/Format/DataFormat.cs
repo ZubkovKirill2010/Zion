@@ -1,16 +1,11 @@
 ﻿using System.Collections;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
 namespace Zion.Serialization.ADF
 {
     public readonly struct DataFormat : IEnumerable<Parameter>
     {
-        #region Constants
-        public static readonly DataFormat Deferred = new([], FormatFlags.IsDeferred);
-        public const uint DeferredId = uint.MaxValue;
-
-        #endregion
-
         #region Data
         private readonly Parameter[] Parameters;
         private readonly uint[] Generics = [];
@@ -65,12 +60,17 @@ namespace Zion.Serialization.ADF
         #endregion
 
         #region PublicMethods
-        public static bool HasBase(Type Type)
+        public static bool HasBase([NotNullWhen(true)]Type Type)
         {
             var Base = Type.BaseType;
             return Base is not null && Base != typeof(object) && Base != typeof(ValueType);
         }
 
+
+        public static DataFormat GetDeferredFormat(uint BaseFormat)
+        {
+            return new DataFormat([], FormatFlags.IsDeferred, BaseFormat);
+        }
 
         public static DataFormat GetEnumFormat<T>()
         {

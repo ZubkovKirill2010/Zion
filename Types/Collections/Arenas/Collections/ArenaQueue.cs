@@ -37,7 +37,7 @@
 
         public T Dequeue()
         {
-            throw new NotImplementedException(); //TODO
+            throw new NotImplementedException(); //Do
         }
 
 
@@ -49,12 +49,12 @@
                 Item = default!;
                 return false;
             }
-            throw new NotImplementedException(); //TODO
+            throw new NotImplementedException(); //Do
         }
 
         public bool TryDequeue(out T Item)
         {
-            throw new NotImplementedException(); //TODO
+            throw new NotImplementedException(); //Do
         }
 
 
@@ -65,17 +65,17 @@
 
         public bool Contains(T Item)
         {
-            throw new NotImplementedException(); //TODO
+            throw new NotImplementedException(); //Do
         }
 
         public void CopyTo(T[] Array, int ArrayIndex)
         {
-            throw new NotImplementedException(); //TODO
+            throw new NotImplementedException(); //Do
         }
 
         public bool Remove(T Item)
         {
-            throw new NotImplementedException(); //TODO
+            throw new NotImplementedException(); //Do
         }
 
         public void Clear()
@@ -87,18 +87,18 @@
 
         public T[] ToArray()
         {
-            throw new NotImplementedException(); //TODO
+            throw new NotImplementedException(); //Do
         }
 
         public Queue<T> ToQueue()
         {
-            throw new NotImplementedException(); //TODO
+            throw new NotImplementedException(); //Do
         }
 
 
         protected override IEnumerator<int> GetIndexEnumerator()
         {
-            throw new NotImplementedException(); //TODO
+            throw new NotImplementedException(); //Do
         }
     }
 }
