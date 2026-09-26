@@ -1,6 +1,4 @@
-﻿using System.Text.RegularExpressions;
-
-namespace Zion.Serialization.ADF
+﻿namespace Zion.Serialization.ADF
 {
     internal abstract class ClassWriteStrategy<T> : ProvidedWriteStrategy<T>
     {
@@ -19,19 +17,31 @@ namespace Zion.Serialization.ADF
         {
             if (Context.Registries.References.TryGetReference(Value, out Reference Reference))
             {
-                if (Context.Options.Compression)
-                {
-                    BaseStream.Write7BitEncodedUInt(Reference.Id);
-                }
-                else
-                {
-                    BaseStream.Write(Reference.Id);
-                }
+                BaseStream.WriteCompressed(Context, Reference.Id);
                 return true;
             }
             return false;
         }
 
-        //TODO: Реализовать запись ссылок (чтобы писалась не нулевая позиция)
+        protected sealed override void Write(StreamGroup Base, ADFObjectWriter Writer, T Value)
+        {
+            Base.BaseStream.WriteCompressed(Context, Base.Length + 1L);
+            WriteValue(Writer, Value);
+        }
+
+        protected sealed override void OnWrited(uint FormatId, T Value)
+        {
+            var Definition = new DataDefinition
+            (
+                FormatId,
+                Context.CurrentPage,
+                Context.CurrentPosition
+            );
+
+            Context.Registries.References.Add(Value!, Definition);
+        }
+
+
+        protected abstract void WriteValue(ADFObjectWriter Writer, T Value);
     }
 }

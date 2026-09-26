@@ -12,7 +12,7 @@
         }
 
 
-        protected override void Write(ADFObjectWriter Writer, T Value)
+        protected override void WriteValue(ADFObjectWriter Writer, T Value)
         {
             Serializer.Write(Writer, Value);
         }

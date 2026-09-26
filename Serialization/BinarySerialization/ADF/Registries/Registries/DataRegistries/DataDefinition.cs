@@ -4,9 +4,9 @@
     {
         public readonly uint FormatId;
         public readonly uint Page;
-        public readonly int  Position;
+        public readonly long  Position;
 
-        public DataDefinition(uint FormatId, uint Page, int Position)
+        public DataDefinition(uint FormatId, uint Page, long Position)
         {
             this.FormatId = FormatId;
             this.Page     = Page;

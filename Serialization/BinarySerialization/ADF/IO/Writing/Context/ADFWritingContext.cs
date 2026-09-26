@@ -8,6 +8,9 @@
         public readonly WritableRegistries Registries;
         public readonly WriteStrategies    WriteStrategies;
 
+        public uint CurrentPage;
+        public long CurrentPosition;//TODO: Сделать обновление позиции
+
         public ADFWritingContext(ADFWritingOptions? WritingOptions)
         {
             Arena           = new();

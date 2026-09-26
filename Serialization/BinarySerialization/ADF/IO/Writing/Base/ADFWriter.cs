@@ -6,9 +6,6 @@
         public  readonly Stream BaseStream;
         private readonly BinaryWriter Writer;
 
-        private bool IsFirstPage;
-
-        private uint CurrentPage = 0;
         private int LastPosition = 0;
 
         #endregion
@@ -22,7 +19,6 @@
             }
             BaseStream = Stream;
             Writer = new(Stream);
-            IsFirstPage = true;
         }
 
         #endregion
@@ -30,11 +26,7 @@
         #region PublicMethods
         public void Flush()
         {
-            if (IsFirstPage)
-            {
-                WriteHeader();
-                IsFirstPage = false;
-            }
+            WriteHeader();
             WritePage();
         }
 
@@ -60,7 +52,7 @@
             var Definition = new DataDefinition
             (
                 FormatId,
-                CurrentPage,
+                Context.CurrentPage,
                 LastPosition
             );
 
@@ -89,12 +81,15 @@
         #region PrivateMethods
         private void WriteHeader()
         {
-            if (!Options.WriteHeader) { return; }
+            if (!Options.WriteHeader || Context.CurrentPage != 0)
+            {
+                return;
+            }
 
             var Header = new ADFHeader()
             {
                 Compression = Options.Compression
-                //Other parameters in header
+                //Other parameters
             };
 
             Header.Write(Writer);
@@ -104,20 +99,7 @@
         {
             Writer.Write(true);
 
-            foreach (var Info in Registries)
-            {
-                var Registry = Info.Registry;
-
-                if (Registry.IsChanged)
-                {
-                    Writer.Write(Info.Id);
-                    
-                    var Entry = WriteStrategies.GetEntry<IWritableRegistry>(Registry.GetType());
-                    var Group = new StreamGroup(Context.Arena);
-
-                    Entry.Strategy.Write(Group, Registry);
-                }
-            }
+            WriteRegistries();
 
             Writer.Write((ushort)0);
             Writer.Write(TotalLength);
@@ -125,6 +107,26 @@
             Flush(BaseStream);
 
             Context.Arena.DisposeAll();
+            Context.CurrentPage++;
+            Context.CurrentPosition = 0;
+        }
+
+        private void WriteRegistries()
+        {
+            foreach (var Info in Registries)
+            {
+                var Registry = Info.Registry;
+
+                if (Registry.IsChanged)
+                {
+                    Writer.Write(Info.Id);
+
+                    var Entry = WriteStrategies.GetEntry<IWritableRegistry>(Registry.GetType());
+                    var Group = new StreamGroup(Context.Arena);
+
+                    Entry.Strategy.Write(Group, Registry);
+                }
+            }
         }
 
         #endregion

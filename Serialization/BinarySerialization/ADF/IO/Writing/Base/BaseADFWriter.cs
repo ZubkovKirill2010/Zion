@@ -437,7 +437,7 @@ namespace Zion.Serialization.ADF
                     throw new ADFObjectIsNullException(Name);
                 }
 
-                WriteCompressedZero(GetStreamForNull(Name, in NameId));
+                GetStreamForNull(Name, in NameId).WriteCompressedZero(Context);
                 OnNullWrited(Name, in NameId);
                 return;
             }
@@ -551,6 +551,7 @@ namespace Zion.Serialization.ADF
             if (!IsDisposed)
             {
                 IsDisposed = true;
+                Context.CurrentPosition += Data.Length;
                 OnDisposed();
             }
         }
@@ -563,30 +564,6 @@ namespace Zion.Serialization.ADF
             var Stream = Context.Arena.GetStream(0);            
             Stream.Write(Value);
             AddChild(Stream);
-        }
-
-        private void WriteCompressedZero(ArenaStream Stream)
-        {
-            if (Options.Compression)
-            {
-                Stream.Write((byte)0);
-            }
-            else
-            {
-                Stream.Write(0u);
-            }
-        }
-
-        private void WriteCompressedUInt(ArenaStream Stream, uint Value)
-        {
-            if (Options.Compression)
-            {
-                Stream.Write7BitEncodedUInt(Value);
-            }
-            else
-            {
-                Stream.Write(Value);
-            }
         }
 
         private static bool IsRootType(Type Type)

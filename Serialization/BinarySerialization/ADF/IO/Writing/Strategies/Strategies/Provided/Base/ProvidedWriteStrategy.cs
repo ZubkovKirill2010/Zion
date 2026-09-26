@@ -5,6 +5,7 @@
         protected readonly ADFWritingContext Context;
 
         private bool HasFormat;
+        private uint FormatId;
         private DataFormat Format;
 
 
@@ -31,7 +32,9 @@
 
         protected abstract StreamGroup GetGroupForData(StreamGroup BaseGroup);
 
-        protected abstract void Write(ADFObjectWriter Writer, T Value);
+        protected abstract void Write(StreamGroup Base, ADFObjectWriter Writer, T Value);
+
+        protected virtual void OnWrited(uint FormatId, T Value) { }
 
         protected virtual bool TryWriteReference(ArenaStream BaseStream, T Value) => false;
 
@@ -48,17 +51,19 @@
             if (HasFormat)
             {
                 using var Writer = new ADFCheckingObjectWriter(Context, Target, Format);
-                Write(Writer, Value);
+                Write(Group, Writer, Value);
+                OnWrited(FormatId, Value);
             }
             else
             {
                 using var Writer = new ADFRecordObjectWriter(Context, Target, typeof(T));
-                Write(Writer, Value);
-
-                Format = Writer.BuildFormat();
-                Context.Registries.FormatRegistry.Add(Format);
+                Write(Group, Writer, Value);
 
                 HasFormat = true;
+                Format = Writer.BuildFormat();
+                FormatId = Context.Registries.FormatRegistry.Add(Format);
+
+                OnWrited(FormatId, Value);
             }
         }
     }

@@ -2,9 +2,9 @@
 {
     public sealed class ReferenceIdsRegistry : IWritableRegistry
     {
-        private static readonly Reference Null = new Reference(0, new(0, 0, -1));
+        private static readonly Reference Null = new Reference(0, new(0u, 0u, -1u));
 
-        private readonly Dictionary<object, Reference> References;
+        private readonly Dictionary<object, Reference> References; //TODO: Заменить на слабую ссылку
 
         private uint LastId = 1u << 31;
 
@@ -22,6 +22,11 @@
             //TODO: IWritableRegistry.Write
         }
 
+
+        public void Add(object Value, DataDefinition Definition)
+        {
+            References.Add(Value, new(LastId++, Definition));
+        }
 
         public bool TryGetReference(object? Value, out Reference Reference)
         {

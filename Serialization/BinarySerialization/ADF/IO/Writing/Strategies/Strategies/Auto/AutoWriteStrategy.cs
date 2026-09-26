@@ -11,7 +11,7 @@
         }
 
 
-        public void Write(StreamGroup Group, T Value)
+        public void Write(StreamGroup Target, T Value)
         {
 
         }
