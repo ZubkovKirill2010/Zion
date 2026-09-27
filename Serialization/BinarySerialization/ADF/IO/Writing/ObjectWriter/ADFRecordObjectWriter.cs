@@ -26,11 +26,10 @@
         }
 
 
-        public DataFormat BuildFormat()
+        public Parameter[] GetParameters()
         {
             Dispose();
-
-            return DataFormatBuilder.Build(Parameters.ToArray(), Type, FormatRegistry, TypeAssociation);
+            return Parameters.ToArray();
         }
 
         

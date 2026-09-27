@@ -2,8 +2,8 @@
 {
     internal sealed class SerializableStructWriteStrategy<T> : StructWriteStrategy<T>
     {
-        public SerializableStructWriteStrategy(ADFWritingContext Context)
-            : base(Context)
+        public SerializableStructWriteStrategy(ADFWritingContext Context, uint FormatId)
+            : base(Context, FormatId)
         {
             if (!typeof(T).IsAssignableFrom(typeof(IADFWritable)))
             {

@@ -39,16 +39,19 @@ namespace Zion.Serialization.ADF
             return Add(DataFormat.GetDeferredFormat(Base));
         }
 
-        public void Clarify(uint FormatId, Parameter[] Parameters)
+        public DataFormat Clarify(uint FormatId, Parameter[] Parameters)
         {
-            int Index = GetIndex(FormatId);
+            var Index = GetIndex(FormatId);
+            var Updated = Formats[Index].Clarify(Parameters);
 
-            Formats[Index] = Formats[Index].Clarify(Parameters);
-            
+            Formats[Index] = Updated;
+
             if (Index < Writed)
             {
                 Corrections.Add(new(Index, Parameters));
             }
+
+            return Updated;
         }
 
         public bool IsAssignableFrom(in uint FormatId, in uint TargetFormatId)

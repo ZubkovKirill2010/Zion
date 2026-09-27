@@ -2,8 +2,8 @@
 {
     internal abstract class ClassWriteStrategy<T> : ProvidedWriteStrategy<T>
     {
-        public ClassWriteStrategy(ADFWritingContext Context)
-            : base(Context) { }
+        public ClassWriteStrategy(ADFWritingContext Context, uint FormatId)
+            : base(Context, FormatId) { }
 
 
         protected sealed override StreamGroup GetGroupForData(StreamGroup BaseGroup)

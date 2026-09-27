@@ -5,8 +5,8 @@
         private readonly IADFSerializer<T> Serializer;
 
 
-        public StructSerializerWriteStrategy(ADFWritingContext Context, IADFSerializer<T> Serializer)
-            : base(Context)
+        public StructSerializerWriteStrategy(ADFWritingContext Context, uint FormatId, IADFSerializer<T> Serializer)
+            : base(Context, FormatId)
         {
             this.Serializer = Serializer.NotNull();
         }

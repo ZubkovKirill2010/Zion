@@ -33,18 +33,7 @@
 
             for (int i = 0; i < Generics.Length; i++)
             {
-                var GenericType = GenericTypes[i];
-
-                if (TypeAssociation.TryGetFormatId(GenericType, out var Existing))
-                {
-                    Generics[i] = Existing;
-                }
-                else
-                {
-                    var Id = Formats.AddDeferred();
-                    TypeAssociation.Add(Type, Id);
-                    Generics[i] = Id;
-                }
+                Generics[i] = TypeAssociation.GetOrAddDeferred(GenericTypes[i], FormatRegistry);
             }
 
             return Generics;

@@ -2,8 +2,8 @@
 {
     internal sealed class SerializableClassWriteStrategy<T> : ClassWriteStrategy<T>
     {
-        public SerializableClassWriteStrategy(ADFWritingContext Context)
-            : base(Context)
+        public SerializableClassWriteStrategy(ADFWritingContext Context, uint FormatId)
+            : base(Context, FormatId)
         {
             if (!typeof(T).IsAssignableFrom(typeof(IADFWritable)))
             {

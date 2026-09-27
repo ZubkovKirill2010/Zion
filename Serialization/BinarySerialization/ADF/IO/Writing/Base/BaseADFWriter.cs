@@ -1,5 +1,6 @@
 ﻿using System.Numerics;
 using System.Runtime.CompilerServices;
+using System.Runtime.ExceptionServices;
 using Zion.Vectors;
 using Vector2 = Zion.Vectors.Vector2;
 using Vector3 = Zion.Vectors.Vector3;
@@ -478,19 +479,21 @@ namespace Zion.Serialization.ADF
         {
             if (Value is IADFWritable)
             {
+                var WritableFormatId = GetOrAddDeferred(Type);
                 return new
                 (
-                    GetOrAddDeferred(Type),
-                    ProvidedWriteStrategy<T>.GetStrategy(Context)
+                    WritableFormatId,
+                    ProvidedWriteStrategy<T>.GetStrategy(Context, WritableFormatId)
                 );
             }
 
             if (ADFSerializers.TryGetSerializer<T>(Type, out var Serializer))
             {
+                var SerializableFormatId = GetOrAddDeferred(Type);
                 return new
                 (
-                    GetOrAddDeferred(Type),
-                    ProvidedWriteStrategy<T>.GetStrategy(Context, Serializer)
+                    SerializableFormatId,
+                    ProvidedWriteStrategy<T>.GetStrategy(Context, SerializableFormatId, Serializer)
                 );
             }
 

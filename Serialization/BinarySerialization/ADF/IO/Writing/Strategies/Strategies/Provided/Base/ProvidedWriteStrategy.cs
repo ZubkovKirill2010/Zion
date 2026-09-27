@@ -4,29 +4,30 @@
     {
         protected readonly ADFWritingContext Context;
 
+        private readonly uint FormatId;
         private bool HasFormat;
-        private uint FormatId;
         private DataFormat Format;
 
 
-        public ProvidedWriteStrategy(ADFWritingContext Context)
+        public ProvidedWriteStrategy(ADFWritingContext Context, uint FormatId)
         {
             this.Context = Context.NotNull();
+            this.FormatId = FormatId;
         }
 
 
-        public static ProvidedWriteStrategy<T> GetStrategy(ADFWritingContext Context)
+        public static ProvidedWriteStrategy<T> GetStrategy(ADFWritingContext Context, uint FormatId)
         {
             return typeof(T).IsValueType
-                ? new SerializableStructWriteStrategy<T>(Context)
-                : new SerializableClassWriteStrategy<T>(Context);
+                ? new SerializableStructWriteStrategy<T>(Context, FormatId)
+                : new SerializableClassWriteStrategy<T>(Context, FormatId);
         }
 
-        public static ProvidedWriteStrategy<T> GetStrategy(ADFWritingContext Context, IADFSerializer<T> Serializer)
+        public static ProvidedWriteStrategy<T> GetStrategy(ADFWritingContext Context, uint FormatId, IADFSerializer<T> Serializer)
         {
             return typeof(T).IsValueType
-                ? new StructSerializerWriteStrategy<T>(Context, Serializer)
-                : new ClassSerializerWriteStrategy<T>(Context, Serializer);
+                ? new StructSerializerWriteStrategy<T>(Context, FormatId, Serializer)
+                : new ClassSerializerWriteStrategy<T>(Context, FormatId, Serializer);
         }
 
 
@@ -60,8 +61,7 @@
                 Write(Group, Writer, Value);
 
                 HasFormat = true;
-                Format = Writer.BuildFormat();
-                FormatId = Context.Registries.FormatRegistry.Add(Format);
+                Format = Context.Registries.FormatRegistry.Clarify(FormatId, Writer.GetParameters());
 
                 OnWrited(FormatId, Value);
             }
