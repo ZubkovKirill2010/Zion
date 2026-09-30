@@ -477,13 +477,13 @@ namespace Zion.Serialization.ADF
 
         private WriteEntry<T> GetNewEntry<T>(string Name, in uint NameId, Type Type, in T Value)
         {
-            if (Value is IADFWritable)
+            if (LayeredWriteStrategy<T>.TryCreate(Value, out var LayeredStrategy))
             {
-                var WritableFormatId = GetOrAddDeferred(Type);
+                var LayeredFormatId = GetOrAddDeferred(Type);
                 return new
                 (
-                    WritableFormatId,
-                    ProvidedWriteStrategy<T>.GetStrategy(Context, WritableFormatId)
+                    LayeredFormatId,
+                    LayeredStrategy
                 );
             }
 
@@ -494,6 +494,16 @@ namespace Zion.Serialization.ADF
                 (
                     SerializableFormatId,
                     ProvidedWriteStrategy<T>.GetStrategy(Context, SerializableFormatId, Serializer)
+                );
+            }
+
+            if (Value is IADFWritable)
+            {
+                var WritableFormatId = GetOrAddDeferred(Type);
+                return new
+                (
+                    WritableFormatId,
+                    ProvidedWriteStrategy<T>.GetStrategy(Context, WritableFormatId)
                 );
             }
 

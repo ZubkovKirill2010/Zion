@@ -1,6 +1,6 @@
 ﻿namespace Zion.Serialization.ADF
 {
-    public abstract class ProvidedWriteStrategy<T> : IWriteStrategy<T>
+    internal abstract class ProvidedWriteStrategy<T> : IWriteStrategy<T>
     {
         protected readonly ADFWritingContext Context;
 

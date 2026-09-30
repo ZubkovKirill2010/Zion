@@ -60,9 +60,9 @@ namespace Zion.Serialization.ADF
         #endregion
 
         #region PublicMethods
-        public static bool HasBase([NotNullWhen(true)]Type Type)
+        public static bool HasBase([NotNullWhen(true)]Type? Type)
         {
-            var Base = Type.BaseType;
+            var Base = Type?.BaseType;
             return Base is not null
                 && Base != typeof(object)
                 && Base != typeof(ValueType)
