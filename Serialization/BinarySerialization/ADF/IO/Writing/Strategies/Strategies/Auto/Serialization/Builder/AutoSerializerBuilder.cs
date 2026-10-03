@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 
 namespace Zion.Serialization.ADF
 {
-    public static class TypeSchemaBuilder<T>
+    public static class AutoSerializerBuilder<T>
     {
         private static readonly Dictionary<Type, MethodInfo> WriteMethodCache = new();
 
@@ -13,12 +13,12 @@ namespace Zion.Serialization.ADF
                                          | BindingFlags.Instance
                                          | BindingFlags.DeclaredOnly;
 
-        public static TypeSchema<T> Create(ADFWritingContext WritingContext, Type Type)
+        public static AutoType<T> Create(ADFWritingContext WritingContext, Type Type)
         {
             CheckContext(WritingContext, Type);
 
             var Fields = Type.GetFields(Flags);
-            var Context = new TypeSchemaBuilderContext<T>(Fields.Length);
+            var Context = new AutoSerializerBuilderContext<T>(Fields.Length);
             var Writer = Expression.Lambda<AutoWriter<T>>
             (
                 Expression.Block(GetWriters(Fields, Context)),
@@ -26,18 +26,22 @@ namespace Zion.Serialization.ADF
                 Context.ValueParameter
             ).Compile();
 
-            return new(Writer, Context.FieldNames);
+            var Schema = new TypeSchema<T>(Type, Context.GetFields(), Context.UsedNames);
+
+            return new(Writer, Schema);
         }
 
 
-        private static IEnumerable<Expression> GetWriters(FieldInfo[] Fields, TypeSchemaBuilderContext<T> Context)
+        private static IEnumerable<Expression> GetWriters(FieldInfo[] Fields, AutoSerializerBuilderContext<T> Context)
         {
             foreach (var Pair in FilterFields(Fields))
             {
                 var Info = Pair.Item1;
                 var Name = Pair.Item2;
 
-                if (!Context.FieldNames.Add(Name))
+                Context.Fields[Context.UsedNames.Count] = new(Info.FieldType, Name);
+
+                if (!Context.UsedNames.Add(Name))
                 {
                     throw new ADFRepeatedNameException(Name);
                 }
@@ -84,7 +88,7 @@ namespace Zion.Serialization.ADF
         }
 
 
-        private static Expression GetFieldWriter(FieldInfo Info, TypeSchemaBuilderContext<T> Context)
+        private static Expression GetFieldWriter(FieldInfo Info, AutoSerializerBuilderContext<T> Context)
         {
             return Expression.Call
             (

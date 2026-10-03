@@ -1,32 +1,18 @@
 ﻿namespace Zion.Serialization.ADF
 {
-    public readonly struct TypeSchema<T>
+    internal readonly struct TypeSchema<T>
     {
-        #region Cache
-        private static readonly Dictionary<Type, object> Cache = new(64);
+        private readonly Type    Type;
+        private readonly Type[]  Generics;
+        private readonly Field[] Fields;
+        private readonly HashSet<string> UsedNames;//Optimize: Remove?
 
-        #endregion
-
-        #region Data
-
-        #endregion
-
-        #region Constructors
-
-        #endregion
-
-        #region PublicMethods
-        public static TypeSchema<T> GetOrCreate(ADFWritingContext Context, Type Type)
+        internal TypeSchema(Type Type, Field[] Fields, HashSet<string> UsedNames)
         {
-            if (Cache.TryGetValue(Type, out object? Boxed))
-            {
-                return (TypeSchema<T>)Boxed;
-            }
-            var Created = TypeSchemaBuilder<T>.Create(Context, Type);
-            Cache.Add(Type, Created);
-            return Created;
+            this.Type = Type.NotNull();
+            this.Fields = Fields.NotNull();
+            this.UsedNames = UsedNames.NotNull();
+            this.Generics = Type.GetGenericArguments();
         }
-
-        #endregion
     }
 }
