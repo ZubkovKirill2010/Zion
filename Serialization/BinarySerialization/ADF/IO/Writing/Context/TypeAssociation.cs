@@ -26,6 +26,11 @@
             return Data.TryAdd(Type, FormatId);
         }
 
+        public uint GetOrAdd(Type Type, Func<uint> Fabric)
+        {
+            return Data.GetOrAdd(Type, Fabric);
+        }
+
         public uint GetOrAddDeferred(Type Type, FormatRegistry FormatRegistry)
         {
             if (Data.TryGetValue(Type, out var Existing))

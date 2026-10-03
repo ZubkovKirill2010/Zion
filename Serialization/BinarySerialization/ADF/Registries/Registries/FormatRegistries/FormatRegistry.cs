@@ -1,6 +1,6 @@
 namespace Zion.Serialization.ADF
 {
-    public sealed class FormatRegistry : IWritableRegistry
+    internal sealed class FormatRegistry : IWritableRegistry
     {
         private readonly List<DataFormat> Formats;
         private readonly List<FormatCorrection> Corrections;

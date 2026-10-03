@@ -2,7 +2,7 @@
 
 namespace Zion.Serialization.ADF
 {
-    public readonly struct Parameter
+    internal readonly struct Parameter
     {
         public readonly uint NameId;
         public readonly uint FormatId;

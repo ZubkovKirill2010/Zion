@@ -1,6 +1,6 @@
 ﻿namespace Zion.Serialization.ADF
 {
-    public sealed class StringIdRegistry : IWritableRegistry
+    internal sealed class StringIdRegistry : IWritableRegistry
     {
         public const uint Null = 0u;
 

@@ -103,6 +103,8 @@
 
         private void WriteRegistries()
         {
+            var Context = this.Context;
+
             foreach (var Info in Registries)
             {
                 var Registry = Info.Registry;
@@ -111,7 +113,7 @@
                 {
                     Writer.Write(Info.Id);
 
-                    var Entry = WriteStrategies.GetEntry<IWritableRegistry>(Registry.GetType());
+                    var Entry = WriteStrategies.GetEntry<IWritableRegistry>(Context, Registry.GetType());
                     var Group = new StreamGroup(Context.Arena);
 
                     Entry.Strategy.Write(Context, Group, Registry);

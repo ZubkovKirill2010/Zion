@@ -1,6 +1,6 @@
 ﻿namespace Zion.Serialization.ADF
 {
-    public sealed class ReferenceIdsRegistry : IWritableRegistry
+    internal sealed class ReferenceIdsRegistry : IWritableRegistry
     {
         private static readonly Reference Null = new Reference(0, new(ADFPrimitives.Object, 0u, -1u));
 

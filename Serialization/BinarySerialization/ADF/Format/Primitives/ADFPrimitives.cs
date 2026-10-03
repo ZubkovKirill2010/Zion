@@ -7,7 +7,7 @@ using Vector3 = Zion.Vectors.Vector3;
 
 namespace Zion.Serialization.ADF
 {
-    public static class ADFPrimitives
+    internal static class ADFPrimitives
     {
         #region Info
         public static int UsedCount => PrimitivesInfo.Length;

@@ -1,6 +1,6 @@
 ﻿namespace Zion.Serialization.ADF
 {
-    public readonly struct DataDefinition
+    internal readonly struct DataDefinition
     {
         public readonly uint FormatId;
         public readonly uint Page;

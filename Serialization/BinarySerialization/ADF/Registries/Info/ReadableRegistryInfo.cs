@@ -1,6 +1,6 @@
 ﻿namespace Zion.Serialization.ADF
 {
-    public readonly struct ReadableRegistryInfo
+    internal readonly struct ReadableRegistryInfo
     {
         public readonly ushort Id;
         public readonly IReadableRegistry Registry;

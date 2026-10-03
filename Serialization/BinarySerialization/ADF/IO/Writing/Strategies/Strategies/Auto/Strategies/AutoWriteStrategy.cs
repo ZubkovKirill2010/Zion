@@ -2,25 +2,16 @@
 {
     internal sealed class AutoWriteStrategy<T> : IWriteStrategy<T>
     {
-        public readonly DataFormat Format;
+        private readonly AutoWriter<T> Writer;
 
-
-        public AutoWriteStrategy()
+        public AutoWriteStrategy(AutoWriter<T> Writer)
         {
-            Format = CreateFormat();
+            this.Writer = Writer.NotNull();
         }
-
 
         public void Write(ADFWritingContext Context, StreamGroup Target, T Value)
         {
-
-        }
-
-
-        private DataFormat CreateFormat()
-        {
-            //TODO AutoWriteStrategy.CreateFormat()
-            throw new NotImplementedException();
+            Writer(Context, Target, Value);
         }
     }
 }

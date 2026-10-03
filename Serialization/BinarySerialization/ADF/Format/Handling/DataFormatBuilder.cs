@@ -1,6 +1,6 @@
 ﻿namespace Zion.Serialization.ADF
 {
-    public static class DataFormatBuilder
+    internal static class DataFormatBuilder
     {
         public static DataFormat BuildDeferred(Type Type, FormatRegistry FormatRegistry, TypeAssociation TypeAssociation)
         {
@@ -18,28 +18,24 @@
             );
         }
 
-
-        private static uint[] GetGenerics(Type Type, FormatRegistry FormatRegistry, TypeAssociation TypeAssociation)
+        public static DataFormat Build(TypeSchema Schema, ADFWritingContext Context)
         {
-            if (!Type.IsGenericType)
-            {
-                return [];
-            }
+            var Type = Schema.Type;
+            var FormatRegistry = Context.Registries.FormatRegistry;
+            var StringRegistry = Context.Registries.StringRegistry;
+            var TypeAssociation = Context.TypeAssociation;
 
-            var Association = TypeAssociation;
-            var Formats = FormatRegistry;
-            var GenericTypes = Type.GetGenericArguments();
-            var Generics = new uint[GenericTypes.Length];
-
-            for (int i = 0; i < Generics.Length; i++)
-            {
-                Generics[i] = TypeAssociation.GetOrAddDeferred(GenericTypes[i], FormatRegistry);
-            }
-
-            return Generics;
+            return new DataFormat
+            (
+                GetParameters(Schema.Fields, FormatRegistry, TypeAssociation, StringRegistry),
+                GetGenerics(Schema.Generics, FormatRegistry, TypeAssociation),
+                Schema.Flags,
+                GetBaseFormatId(Type, FormatRegistry, TypeAssociation)
+            );
         }
 
-        private static FormatFlags GetFlags(Type Type)
+
+        public static FormatFlags GetFlags(Type Type)
         {
             var Flags = FormatFlags.None;
 
@@ -57,6 +53,36 @@
             }
 
             return Flags;
+        }
+
+
+        private static Parameter[] GetParameters(Field[] Fields, FormatRegistry FormatRegistry, TypeAssociation TypeAssociation, StringIdRegistry StringRegistry)
+        {
+            Parameter Convert(Field Field)
+            {
+                return new Parameter
+                (
+                    StringRegistry.GetOrAdd(Field.Name),
+                    TypeAssociation.GetOrAddDeferred(Field.Type, FormatRegistry)
+                );
+            }
+
+            return Array.ConvertAll(Fields, Convert);
+        }
+
+        private static uint[] GetGenerics(Type Type, FormatRegistry FormatRegistry, TypeAssociation TypeAssociation)
+        {
+            return Type.IsGenericType
+                ? GetGenerics(Type.GetGenericArguments(), FormatRegistry, TypeAssociation)
+                : [];
+        }
+
+        private static uint[] GetGenerics(Type[] Generics, FormatRegistry FormatRegistry, TypeAssociation TypeAssociation)
+        {
+            return Array.ConvertAll
+            (
+                Generics, Generic => TypeAssociation.GetOrAddDeferred(Generic, FormatRegistry)
+            );
         }
 
         private static uint GetBaseFormatId(Type Type, FormatRegistry FormatRegistry, TypeAssociation TypeAssociation)

@@ -1,6 +1,6 @@
 ﻿namespace Zion.Serialization.ADF
 {
-    public sealed class DataRegistry : IRegistry
+    internal sealed class DataRegistry : IRegistry
     {
         private readonly StringIdRegistry StringRegistry;
         private readonly Dictionary<uint, DataDefinition> Parameters;

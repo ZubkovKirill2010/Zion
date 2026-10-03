@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 
 namespace Zion.Serialization.ADF
 {
-    public static class AutoSerializerBuilder<T>
+    internal static class AutoSerializerBuilder<T>
     {
         private static readonly Dictionary<Type, MethodInfo> WriteMethodCache = new();
 
@@ -26,7 +26,7 @@ namespace Zion.Serialization.ADF
                 Context.ValueParameter
             ).Compile();
 
-            var Schema = new TypeSchema<T>(Type, Context.GetFields(), Context.UsedNames);
+            var Schema = new TypeSchema(Type, Context.GetFields());
 
             return new(Writer, Schema);
         }

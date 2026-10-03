@@ -1,6 +1,6 @@
 namespace Zion.Serialization.ADF
 {
-    public sealed class FormatIdRegistry : IReadableRegistry
+    internal sealed class FormatIdRegistry : IReadableRegistry
     {
         
     }

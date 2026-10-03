@@ -1,7 +1,7 @@
 ﻿namespace Zion.Serialization.ADF
 {
     [Flags]
-    public enum FormatFlags : ushort
+    internal enum FormatFlags : ushort
     {
         None = 0,
 

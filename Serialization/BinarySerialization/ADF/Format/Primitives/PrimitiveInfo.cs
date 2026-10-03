@@ -2,7 +2,7 @@
 
 namespace Zion.Serialization.ADF
 {
-    public readonly struct PrimitiveInfo
+    internal readonly struct PrimitiveInfo
     {
         public readonly int Size;
         public readonly MethodInfo WriteMethod;

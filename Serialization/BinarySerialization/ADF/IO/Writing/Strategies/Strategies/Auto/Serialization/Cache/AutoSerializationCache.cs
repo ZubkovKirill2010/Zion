@@ -1,6 +1,6 @@
 ﻿namespace Zion.Serialization.ADF
 {
-    public static class AutoSerializationCache
+    internal static class AutoSerializationCache
     {
         private static readonly Dictionary<Type, object> Cache = new();
 

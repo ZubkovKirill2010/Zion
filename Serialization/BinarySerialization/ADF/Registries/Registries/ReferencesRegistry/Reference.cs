@@ -1,6 +1,6 @@
 ﻿namespace Zion.Serialization.ADF
 {
-    public readonly struct Reference
+    internal readonly struct Reference
     {
         //B0: 0 - New object, 1 - Object exists
 

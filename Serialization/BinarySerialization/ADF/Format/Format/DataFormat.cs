@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 
 namespace Zion.Serialization.ADF
 {
-    public readonly struct DataFormat : IEnumerable<Parameter>
+    internal readonly struct DataFormat : IEnumerable<Parameter>
     {
         #region Data
         private readonly Parameter[] Parameters = [];

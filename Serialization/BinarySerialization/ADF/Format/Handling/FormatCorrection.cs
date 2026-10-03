@@ -1,6 +1,6 @@
 ﻿namespace Zion.Serialization.ADF
 {
-    public readonly struct FormatCorrection
+    internal readonly struct FormatCorrection
     {
         public readonly int Index;
         public readonly Parameter[] NewParameters;

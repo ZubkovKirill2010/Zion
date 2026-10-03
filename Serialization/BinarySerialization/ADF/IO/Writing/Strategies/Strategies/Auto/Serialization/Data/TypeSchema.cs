@@ -1,18 +1,19 @@
 ﻿namespace Zion.Serialization.ADF
 {
-    internal readonly struct TypeSchema<T>
+    internal readonly struct TypeSchema
     {
-        private readonly Type    Type;
-        private readonly Type[]  Generics;
-        private readonly Field[] Fields;
-        private readonly HashSet<string> UsedNames;//Optimize: Remove?
+        public readonly Type Type;
+        public readonly Type[] Generics;
+        public readonly Field[] Fields;
+        public readonly FormatFlags Flags;
 
-        internal TypeSchema(Type Type, Field[] Fields, HashSet<string> UsedNames)
+        internal TypeSchema(Type Type, Field[] Fields)
         {
             this.Type = Type.NotNull();
             this.Fields = Fields.NotNull();
-            this.UsedNames = UsedNames.NotNull();
-            this.Generics = Type.GetGenericArguments();
+
+            Generics = Type.GetGenericArguments();
+            Flags = DataFormatBuilder.GetFlags(Type);
         }
     }
 }
