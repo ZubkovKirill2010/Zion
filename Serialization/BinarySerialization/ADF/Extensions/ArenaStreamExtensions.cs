@@ -6,7 +6,7 @@
         {
             public void WriteCompressedZero(ADFWritingContext Context)
             {
-                if (Context.Options.Compression)
+                if (Context.Compression)
                 {
                     Stream.Write((byte)0);
                 }
@@ -18,7 +18,7 @@
 
             public void WriteCompressed(ADFWritingContext Context, uint Value)
             {
-                if (Context.Options.Compression)
+                if (Context.Compression)
                 {
                     Stream.Write7BitEncodedUInt(Value);
                 }
@@ -28,11 +28,11 @@
                 }
             }
 
-            public void WriteCompressed(ADFWritingContext Context, long Value)
+            public void WriteCompressed(ADFWritingContext Context, ulong Value)
             {
-                if (Context.Options.Compression)
+                if (Context.Compression)
                 {
-                    Stream.Write7BitEncodedInt64(Value);
+                    Stream.Write7BitEncodedUInt64(Value);
                 }
                 else
                 {

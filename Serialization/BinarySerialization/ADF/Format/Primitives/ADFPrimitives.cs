@@ -1,48 +1,86 @@
-﻿using Id = uint;
+﻿using System.Numerics;
+using System.Runtime.CompilerServices;
+using Zion.Vectors;
+using Id = uint;
+using Vector2 = Zion.Vectors.Vector2;
+using Vector3 = Zion.Vectors.Vector3;
 
 namespace Zion.Serialization.ADF
 {
     public static class ADFPrimitives
     {
         #region Info
+        public static int UsedCount => PrimitivesInfo.Length;
+
+        private static readonly Dictionary<Type, Id> PrimitivesId = new(UsedCount)
+        {
+            { typeof(bool),       Boolean    },
+            { typeof(byte),       Byte       },
+            { typeof(sbyte),      SByte      },
+
+            { typeof(short),      Int16      },
+            { typeof(int),        Int32      },
+            { typeof(long),       Int64      },
+            { typeof(ushort),     UInt16     },
+            { typeof(uint),       UInt32     },
+            { typeof(ulong),      UInt64     },
+
+            { typeof(char),       Char       },
+            { typeof(float),      Single     },
+            { typeof(double),     Double     },
+            { typeof(decimal),    Decimal    },
+            { typeof(string),     String     },
+
+            { typeof(Half),       Half       },
+            { typeof(Index),      Index      },
+            { typeof(Range),      Range      },
+            { typeof(BigInteger), BigInteger },
+
+            { typeof(RGBColor),   RGB        },
+            { typeof(RGBAColor),  RGBA       },
+
+            { typeof(Vector2),    Vector2    },
+            { typeof(Vector2Int), Vector2Int },
+            { typeof(Vector3),    Vector3    },
+            { typeof(Vector3Int), Vector3Int }
+        };
+
         private static readonly PrimitiveInfo[] PrimitivesInfo =
         [
-            new (sizeof(bool)),  //Boolean
-            new (sizeof(byte)),  //Byte
-            new (sizeof(sbyte)), //SByte
+            PrimitiveInfo.Create<bool>(sizeof(bool), WriteBoolean),
+            PrimitiveInfo.Create<byte>(sizeof(byte), WriteByte),
+            PrimitiveInfo.Create<sbyte>(sizeof(sbyte), WriteSByte),
 
-            new (sizeof(short )), //Int16
-            new (sizeof(int )),   //Int32
-            new (sizeof(long)),   //Int64
-            new (sizeof(ushort)), //UInt16
-            new (sizeof(uint)),   //UInt32
-            new (sizeof(ulong)),  //UInt64
+            PrimitiveInfo.Create<short>(sizeof(short ), WriteInt16),
+            PrimitiveInfo.Create<int>(sizeof(int ), WriteInt32),
+            PrimitiveInfo.Create<long>(sizeof(long), WriteInt64),
+            PrimitiveInfo.Create<ushort>(sizeof(ushort), WriteUInt16),
+            PrimitiveInfo.Create<uint>(sizeof(uint), WriteUInt32),
+            PrimitiveInfo.Create<ulong>(sizeof(ulong), WriteUInt64),
 
-            new (sizeof(char)),    //Char
-            new (sizeof(float)),   //Single
-            new (sizeof(double)),  //Double
-            new (sizeof(decimal)), //Decimal
-            new (sizeof(uint)),    //String
+            PrimitiveInfo.Create<char>(sizeof(char), WriteChar),
+            PrimitiveInfo.Create<float>(sizeof(float), WriteSingle),
+            PrimitiveInfo.Create<double>(sizeof(double), WriteDouble),
+            PrimitiveInfo.Create<decimal>(sizeof(decimal), WriteDecimal),
+            PrimitiveInfo.Create<string>(sizeof(uint), WriteString),
 
-            new (2),  //Half
-            new (5),  //Index
-            new (10), //Range
-            new (4),  //BigInteger
+            PrimitiveInfo.Create<Half>(2, WriteHalf),
+            PrimitiveInfo.Create<Index>(5, WriteIndex),
+            PrimitiveInfo.Create<Range>(10, WriteRange),
+            PrimitiveInfo.Create<BigInteger>(4, WriteBigInteger),
 
-            new (3), //RGB
-            new (4), //RGBA
+            PrimitiveInfo.Create<RGBColor>(3, WriteRGB),
+            PrimitiveInfo.Create<RGBAColor>(4, WriteRGBA),
 
-            new (8),  //Vector2
-            new (8),  //Vector2Int
-            new (12), //Vector3
-            new (12), //Vector3Int
-
-            new (4) //Reference;
+            PrimitiveInfo.Create<Vector2>(8, WriteVector2),
+            PrimitiveInfo.Create<Vector2Int>(8, WriteVector2Int),
+            PrimitiveInfo.Create<Vector3>(12, WriteVector3),
+            PrimitiveInfo.Create<Vector3Int>(12, WriteVector3Int),
         ];
 
         #endregion
 
-        #region Ids
+        #region Constants
         public const int Count = 128;
 
         public const Id Boolean = 0;
@@ -85,9 +123,238 @@ namespace Zion.Serialization.ADF
             return Id < Count;
         }
 
-        public static int SizeOf(Id PrimitiveId)
+        public static int SizeOf(Id Id)
         {
-            return PrimitivesInfo[PrimitiveId].Size;
+            return PrimitivesInfo[Id].Size;
+        }
+
+        public static bool TryGetId(Type Type, out Id Id)
+        {
+            return PrimitivesId.TryGetValue(Type, out Id);
+        }
+
+        public static bool TryGetInfo(Type Type, out PrimitiveInfo Info)
+        {
+            if (PrimitivesId.TryGetValue(Type, out Id Id))
+            {
+                Info = PrimitivesInfo[Id];
+                return true;
+            }
+            Info = default;
+            return false;
+        }
+
+        #endregion
+
+        #region WriteMethods
+        public static void WriteBoolean(ADFWritingContext Context, StreamGroup Target, bool Value)
+        {
+            Target.BaseStream.Write(Value);
+        }
+
+        public static void WriteByte(ADFWritingContext Context, StreamGroup Target, byte Value)
+        {
+            Target.BaseStream.Write(Value);
+        }
+
+        public static void WriteSByte(ADFWritingContext Context, StreamGroup Target, sbyte Value)
+        {
+            Target.BaseStream.Write(Value);
+        }
+
+
+        public static void WriteInt16(ADFWritingContext Context, StreamGroup Target, short Value)
+        {
+            Target.BaseStream.Write(Value);
+        }
+
+        public static void WriteInt32(ADFWritingContext Context, StreamGroup Target, int Value)
+        {
+            if (Context.Compression)
+            {
+                Target.BaseStream.Write7BitEncodedInt(Value);
+            }
+            else
+            {
+                Target.BaseStream.Write(Value);
+            }
+        }
+
+        public static void WriteInt64(ADFWritingContext Context, StreamGroup Target, long Value)
+        {
+            if (Context.Compression)
+            {
+                Target.BaseStream.Write7BitEncodedInt64(Value);
+            }
+            else
+            {
+                Target.BaseStream.Write(Value);
+            }
+        }
+
+        public static void WriteUInt16(ADFWritingContext Context, StreamGroup Target, ushort Value)
+        {
+            Target.BaseStream.Write(Value);
+        }
+
+        public static void WriteUInt32(ADFWritingContext Context, StreamGroup Target, uint Value)
+        {
+            if (Context.Compression)
+            {
+                Target.BaseStream.Write7BitEncodedUInt(Value);
+            }
+            else
+            {
+                Target.BaseStream.Write(Value);
+            }
+        }
+
+        public static void WriteUInt64(ADFWritingContext Context, StreamGroup Target, ulong Value)
+        {
+            if (Context.Compression)
+            {
+                Target.BaseStream.Write7BitEncodedUInt64(Value);
+            }
+            else
+            {
+                Target.BaseStream.Write(Value);
+            }
+        }
+
+
+        public static void WriteChar(ADFWritingContext Context, StreamGroup Target, char Value)
+        {
+            Target.BaseStream.Write(Value);
+        }
+
+        public static void WriteSingle(ADFWritingContext Context, StreamGroup Target, float Value)
+        {
+            Target.BaseStream.Write(Value);
+        }
+
+        public static void WriteDouble(ADFWritingContext Context, StreamGroup Target, double Value)
+        {
+            Target.BaseStream.Write(Value);
+        }
+
+        public static void WriteDecimal(ADFWritingContext Context, StreamGroup Target, decimal Value)
+        {
+            Target.BaseStream.Write(Value);
+        }
+
+        public static void WriteString(ADFWritingContext Context, StreamGroup Target, string Value)
+        {
+            var Id = Context.Registries.StringRegistry.GetOrAdd(Value);
+
+            if (Context.Compression)
+            {
+                Target.BaseStream.Write7BitEncodedUInt(Id);
+            }
+            else
+            {
+                Target.BaseStream.Write(Id);
+            }
+        }
+
+
+        public static void WriteHalf(ADFWritingContext Context, StreamGroup Target, Half Value)
+        {
+            Target.BaseStream.Write(Value);
+        }
+
+        public static void WriteIndex(ADFWritingContext Context, StreamGroup Target, Index Value)
+        {
+            if (Context.Compression)
+            {
+                Target.BaseStream.Write7BitEncodedIndex(Value);
+            }
+            else
+            {
+                Target.BaseStream.Write(Value);
+            }
+        }
+
+        public static void WriteRange(ADFWritingContext Context, StreamGroup Target, Range Value)
+        {
+            if (Context.Compression)
+            {
+                Target.BaseStream.Write7BitEncodedIndex(Value.Start);
+                Target.BaseStream.Write7BitEncodedIndex(Value.End);
+            }
+            else
+            {
+                Target.BaseStream.Write(Value);
+            }
+        }
+
+        public static void WriteBigInteger(ADFWritingContext Context, StreamGroup Target, BigInteger Value)
+        {
+            var BaseStream = Target.BaseStream;
+            var Stream = Context.Arena.GetStream(1);
+            var Link = Reference.CreateNewReference(Target.ChildsLength);
+
+            Stream.Write(Value);
+            Target.Add(Stream);
+
+            Target.BaseStream.WriteCompressed(Context, Link);
+        }
+
+
+        public static void WriteRGB(ADFWritingContext Context, StreamGroup Target, RGBColor Value)
+        {
+            Target.BaseStream.Write(Value);
+        }
+
+        public static void WriteRGBA(ADFWritingContext Context, StreamGroup Target, RGBAColor Value)
+        {
+            Target.BaseStream.Write(Value);
+        }
+
+
+        public static void WriteVector2(ADFWritingContext Context, StreamGroup Target, Vector2 Value)
+        {
+            Target.BaseStream.Write(Value);
+        }
+
+        public static void WriteVector2Int(ADFWritingContext Context, StreamGroup Target, Vector2Int Value)
+        {
+            if (Context.Compression)
+            {
+                Target.BaseStream.Write7BitEncodedInt(Value.X);
+                Target.BaseStream.Write7BitEncodedInt(Value.Y);
+            }
+            else
+            {
+                Target.BaseStream.Write(Value);
+            }
+        }
+
+        public static void WriteVector3(ADFWritingContext Context, StreamGroup Target, Vector3 Value)
+        {
+            Target.BaseStream.Write(Value);
+        }
+
+        public static void WriteVector3Int(ADFWritingContext Context, StreamGroup Target, Vector3Int Value)
+        {
+            if (Context.Compression)
+            {
+                Target.BaseStream.Write7BitEncodedInt(Value.X);
+                Target.BaseStream.Write7BitEncodedInt(Value.Y);
+                Target.BaseStream.Write7BitEncodedInt(Value.Z);
+            }
+            else
+            {
+                Target.BaseStream.Write(Value);
+            }
+        }
+
+
+        internal static void WriteEnum<T>(ADFWritingContext Context, StreamGroup Target, T Value)
+        {
+            Target.BaseStream.UseSpan
+            (
+                8, Span => Unsafe.WriteUnaligned(ref Span[0], Value)
+            );
         }
 
         #endregion

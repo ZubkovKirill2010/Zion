@@ -1,6 +1,5 @@
 ﻿using System.Numerics;
 using System.Runtime.CompilerServices;
-using System.Runtime.ExceptionServices;
 using Zion.Vectors;
 using Vector2 = Zion.Vectors.Vector2;
 using Vector3 = Zion.Vectors.Vector3;
@@ -9,17 +8,10 @@ namespace Zion.Serialization.ADF
 {
     public abstract class BaseADFWriter : IDisposable
     {
-        #region Delegates
-        protected delegate void WriteAction<T>(ArenaStream Stream, T Value);
-
-        #endregion
-
         #region Data
         internal protected readonly ADFWritingContext Context;
 
         private StreamGroup Data;
-
-        private int ChildPosition = 0;
 
         #endregion
 
@@ -69,11 +61,6 @@ namespace Zion.Serialization.ADF
         #endregion
 
         #region ProtectedMethods
-        protected ArenaStream GetStream(string Name, in uint NameId, in uint FormatId)
-        {
-            return GetStreamGroup(Name, in NameId, in FormatId).BaseStream;
-        }
-
         protected ArenaStream GetNewStream()
         {
             return Context.Arena.GetStream(1);
@@ -87,12 +74,6 @@ namespace Zion.Serialization.ADF
         protected uint GetOrAddDeferred(Type Type)
         {
             return TypeAssociation.GetOrAddDeferred(Type, FormatRegistry);
-        }
-
-        protected void AddChild(ArenaStream Stream)
-        {
-            Data.Add(new(Stream));
-            ChildPosition += Stream.Length;
         }
 
         protected void ThrowIfDisposed()
@@ -109,254 +90,127 @@ namespace Zion.Serialization.ADF
         #region Primitives
         public void Write(string Name, bool Value)
         {
-            WritePrimitive
-            (
-                Name, ADFPrimitives.Boolean, in Value,
-                static (S, V) => S.Write(V)
-            );
+            WritePrimitive(Name, in Value, ADFPrimitives.Boolean, ADFPrimitives.WriteBoolean);
         }
 
         public void Write(string Name, byte Value)
         {
-            WritePrimitive
-            (
-                Name, ADFPrimitives.Byte, in Value,
-                static (S, V) => S.Write(V)
-            );
+            WritePrimitive(Name, in Value, ADFPrimitives.Byte, ADFPrimitives.WriteByte);
         }
 
         public void Write(string Name, sbyte Value)
         {
-            WritePrimitive
-            (
-                Name, ADFPrimitives.SByte, in Value,
-                static (S, V) => S.Write(V)
-            );
+            WritePrimitive(Name, in Value, ADFPrimitives.SByte, ADFPrimitives.WriteSByte);
         }
 
 
         public void Write(string Name, short Value)
         {
-            WritePrimitive
-            (
-                Name, ADFPrimitives.Int16, in Value,
-                static (S, V) => S.Write(V)
-            );
+            WritePrimitive(Name, in Value, ADFPrimitives.Int16, ADFPrimitives.WriteInt16);
         }
 
         public void Write(string Name, int Value)
         {
-            WritePrimitive
-            (
-                Name, ADFPrimitives.Int32, in Value,
-                static (S, V) => S.Write(V),
-                static (S, V) => S.Write7BitEncodedInt(V)
-            );
+            WritePrimitive(Name, in Value, ADFPrimitives.Int32, ADFPrimitives.WriteInt32);
         }
 
         public void Write(string Name, long Value)
         {
-            WritePrimitive
-            (
-                Name, ADFPrimitives.Int64, in Value,
-                static (S, V) => S.Write(V),
-                static (S, V) => S.Write7BitEncodedInt64(V)
-            );
+            WritePrimitive(Name, in Value, ADFPrimitives.Int64, ADFPrimitives.WriteInt64);
         }
 
         public void Write(string Name, ushort Value)
         {
-            WritePrimitive
-            (
-                Name, ADFPrimitives.UInt16, in Value,
-                static (S, V) => S.Write(V)        
-            );
+            WritePrimitive(Name, in Value, ADFPrimitives.UInt16, ADFPrimitives.WriteUInt16);
         }
 
         public void Write(string Name, uint Value)
         {
-            WritePrimitive
-            (
-                Name, ADFPrimitives.UInt32, in Value,
-                static (S, V) => S.Write(V),
-                static (S, V) => S.Write7BitEncodedUInt(V)        
-            );
+            WritePrimitive(Name, in Value, ADFPrimitives.UInt32, ADFPrimitives.WriteUInt32);
         }
 
         public void Write(string Name, ulong Value)
         {
-            WritePrimitive
-            (
-                Name, ADFPrimitives.UInt64, in Value,
-                static (S, V) => S.Write(V),
-                static (S, V) => S.Write7BitEncodedUInt64(V)       
-            );
+            WritePrimitive(Name, in Value, ADFPrimitives.UInt64, ADFPrimitives.WriteUInt64);
         }
 
 
         public void Write(string Name, char Value)
         {
-            WritePrimitive
-            (
-                Name, ADFPrimitives.Char, in Value,
-                static (S, V) => S.Write(V)        
-            );
+            WritePrimitive(Name, in Value, ADFPrimitives.Char, ADFPrimitives.WriteChar);
         }
 
         public void Write(string Name, float Value)
         {
-            WritePrimitive
-            (
-                Name, ADFPrimitives.Single, in Value,
-                static (S, V) => S.Write(V)    
-            );
+            WritePrimitive(Name, in Value, ADFPrimitives.Single, ADFPrimitives.WriteSingle);
         }
 
         public void Write(string Name, double Value)
         {
-            WritePrimitive
-            (
-                Name, ADFPrimitives.Double, in Value,
-                static (S, V) => S.Write(V)
-            );
+            WritePrimitive(Name, in Value, ADFPrimitives.Double, ADFPrimitives.WriteDouble);
         }
 
         public void Write(string Name, decimal Value)
         {
-            WritePrimitive
-            (
-                Name, ADFPrimitives.Decimal, in Value,
-                static (S, V) => S.Write(V)
-            );
+            WritePrimitive(Name, in Value, ADFPrimitives.Decimal, ADFPrimitives.WriteDecimal);
         }
 
         public void Write(string Name, string Value)
         {
-            WritePrimitive
-            (
-                Name, ADFPrimitives.String, in Value,
-                (S, V) => S.Write(StringRegistry.GetOrAdd(V)),
-                (S, V) => S.Write7BitEncodedUInt(StringRegistry.GetOrAdd(V))
-            );
+            WritePrimitive(Name, in Value, ADFPrimitives.String, ADFPrimitives.WriteString);
         }
 
 
         public void Write(string Name, Half Value)
         {
-            WritePrimitive
-            (
-                Name, ADFPrimitives.Half, in Value,
-                static (S, V) => S.Write(V)
-            );
+            WritePrimitive(Name, in Value, ADFPrimitives.Half, ADFPrimitives.WriteHalf);
         }
 
         public void Write(string Name, Index Value)
         {
-            WritePrimitive
-            (
-                Name, ADFPrimitives.Index, in Value,
-                static (S, V) => S.Write(V),
-                static (S, V) => S.Write7BitEncodedIndex(V)
-            );
+            WritePrimitive(Name, in Value, ADFPrimitives.Index, ADFPrimitives.WriteIndex);
         }
 
         public void Write(string Name, Range Value)
         {
-            WritePrimitive
-            (
-                Name, ADFPrimitives.Range, in Value,
-                static (S, V) => S.Write(V),
-                static (S, V) =>
-                {
-                    S.Write7BitEncodedIndex(V.Start);
-                    S.Write7BitEncodedIndex(V.End);
-                }
-            );
+            WritePrimitive(Name, in Value, ADFPrimitives.Range, ADFPrimitives.WriteRange);
         }
 
         public void Write(string Name, BigInteger Value)
         {
-            WritePrimitive
-            (
-                Name, ADFPrimitives.BigInteger, in Value,
-                (S, V) =>
-                {
-                    S.Write(ChildPosition);
-                    WriteBigIntegerValue(Value);
-                },
-                (S, V) =>
-                {
-                    S.Write7BitEncodedInt(ChildPosition);
-                    WriteBigIntegerValue(Value);
-                }
-            );
+            WritePrimitive(Name, in Value, ADFPrimitives.BigInteger, ADFPrimitives.WriteBigInteger);
         }
 
 
         public void Write(string Name, RGBColor Value)
         {
-            WritePrimitive
-            (
-                Name, ADFPrimitives.RGB, in Value,
-                static (S, V) => S.Write(V)
-            );
+            WritePrimitive(Name, in Value, ADFPrimitives.RGB, ADFPrimitives.WriteRGB);
         }
 
         public void Write(string Name, RGBAColor Value)
         {
-            WritePrimitive
-            (
-                Name, ADFPrimitives.RGBA, in Value,
-                static (S, V) => S.Write(V)
-            );
+            WritePrimitive(Name, in Value, ADFPrimitives.RGBA, ADFPrimitives.WriteRGBA);
         }
 
 
         public void Write(string Name, Vector2 Value)
         {
-            WritePrimitive
-            (
-                Name, ADFPrimitives.Vector2, in Value,
-                static (S, V) => S.Write(V)
-            );
+            WritePrimitive(Name, in Value, ADFPrimitives.Vector2, ADFPrimitives.WriteVector2);
         }
 
         public void Write(string Name, Vector2Int Value)
         {
-            WritePrimitive
-            (
-                Name, ADFPrimitives.Vector2Int, in Value,
-                static (S, V) => S.Write(V),
-                static (S, V) =>
-                {
-                    S.Write7BitEncodedInt(V.X);
-                    S.Write7BitEncodedInt(V.Y);
-                }        
-            );
+            WritePrimitive(Name, in Value, ADFPrimitives.Vector2Int, ADFPrimitives.WriteVector2Int);
         }
 
         public void Write(string Name, Vector3 Value)
         {
-            WritePrimitive
-            (
-                Name, ADFPrimitives.Vector3, in Value,
-                static (S, V) => S.Write(V)     
-            );
+            WritePrimitive(Name, in Value, ADFPrimitives.Vector3, ADFPrimitives.WriteVector3);
         }
 
         public void Write(string Name, Vector3Int Value)
         {
-            WritePrimitive
-            (
-                Name, ADFPrimitives.Vector3Int, in Value,
-                static (S, V) => S.Write(V),
-                static (S, V) =>
-                {
-                    S.Write7BitEncodedInt(V.X);
-                    S.Write7BitEncodedInt(V.Y);
-                    S.Write7BitEncodedInt(V.Z);
-                }
-            );
+            WritePrimitive(Name, in Value, ADFPrimitives.Vector3Int, ADFPrimitives.WriteVector3Int);
         }
 
 
@@ -403,20 +257,14 @@ namespace Zion.Serialization.ADF
             }
         }
 
-        private void WritePrimitive<T>(string Name, uint FormatId, in T Value, WriteAction<T> Write)
-        {
-            WritePrimitive(Name, FormatId, in Value, Write, Write);
-        }
-
-        private void WritePrimitive<T>(string Name, in uint FormatId, in T Value, WriteAction<T> WriteFull, WriteAction<T> WriteConcise)
+        private void WritePrimitive<T>(string Name, in T Value, uint FormatId, AutoWriter<T> Write)
         {
             ThrowIfDisposed();
 
             var NameId = StringRegistry.GetOrAdd(Name.NotNull());
-            var WriteAction = Options.Compression ? WriteConcise : WriteFull;
-            var Stream = GetStream(Name, in NameId, in FormatId);
+            var Target = GetStreamGroup(Name, in NameId, in FormatId);
 
-            WriteAction(Stream, Value);
+            Write(Context, Target, Value);
             OnWrited(Name, in NameId, in FormatId);
         }
 
@@ -448,7 +296,7 @@ namespace Zion.Serialization.ADF
                 return;
             }
 
-            var Type = Value!.GetType();
+            var Type = Value.GetType();
 
             if (TryWriteEnum(Name, in NameId, Type, Value))
             {
@@ -519,7 +367,7 @@ namespace Zion.Serialization.ADF
             if (Type.IsEnum)
             {
                 var FormatId = FormatRegistry.Add(DataFormat.GetEnumFormat<T>());
-                var Stream = GetStream(Name, in NameId, in FormatId);
+                var Stream = GetStreamGroup(Name, in NameId, in FormatId).BaseStream;
 
                 WriteEnum(Stream, Value);
                 OnWrited(Name, in NameId, in FormatId);
@@ -572,13 +420,6 @@ namespace Zion.Serialization.ADF
         #endregion
 
         #region PrivateMethods
-        private void WriteBigIntegerValue(BigInteger Value)
-        {
-            var Stream = Context.Arena.GetStream(1);            
-            Stream.Write(Value);
-            AddChild(Stream);
-        }
-
         private static bool IsRootType(Type Type)
         {
             if (Type.IsValueType)

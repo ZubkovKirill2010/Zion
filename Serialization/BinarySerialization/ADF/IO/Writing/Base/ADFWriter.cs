@@ -69,6 +69,8 @@
         #region PrivateMethods
         private void WriteHeader()
         {
+            var Options = this.Options;
+
             if (!Options.WriteHeader || Context.CurrentPage != 0)
             {
                 return;

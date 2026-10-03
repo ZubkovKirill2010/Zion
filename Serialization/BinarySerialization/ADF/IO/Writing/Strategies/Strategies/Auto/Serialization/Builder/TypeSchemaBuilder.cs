@@ -6,6 +6,8 @@ namespace Zion.Serialization.ADF
 {
     public static class TypeSchemaBuilder<T>
     {
+        private static readonly Dictionary<Type, MethodInfo> WriteMethodCache = new();
+
         private const BindingFlags Flags = BindingFlags.Public
                                          | BindingFlags.NonPublic
                                          | BindingFlags.Instance
@@ -82,18 +84,35 @@ namespace Zion.Serialization.ADF
         }
 
 
-        private static Expression GetFieldWriter<T>(FieldInfo Info, TypeSchemaBuilderContext<T> Context)
+        private static Expression GetFieldWriter(FieldInfo Info, TypeSchemaBuilderContext<T> Context)
         {
-            var FieldAccess = Expression.Field(Context.ValueParameter, Info);
-            var BaseStream  = Expression.Property(Context.TargetParameter, nameof(StreamGroup.BaseStream));
-            var WriteMethod = GetWriteMethod(Info.FieldType);
-
-            return Expression.Call(BaseStream, WriteMethod, FieldAccess);
+            return Expression.Call
+            (
+                GetWriteMethod(Info.FieldType),
+                Context.ContextParameter,
+                Context.TargetParameter,
+                Expression.Field(Context.ValueParameter, Info)
+            );
         }
 
         private static MethodInfo GetWriteMethod(Type Type)
         {
-            //TODO: GetWriteMethod
+            if (ADFPrimitives.TryGetInfo(Type, out var Info))
+            {
+                return Info.WriteMethod;
+            }
+
+            return WriteMethodCache.GetOrAdd(Type, GetNewWriteMethod);
+        }
+
+        private static MethodInfo GetNewWriteMethod(Type Type)
+        {
+            if (Type.IsEnum)
+            {
+                return AutoObjectWriter.GetEnumWriter(Type);
+            }
+
+            throw new NotImplementedException(); //TODO
         }
 
 

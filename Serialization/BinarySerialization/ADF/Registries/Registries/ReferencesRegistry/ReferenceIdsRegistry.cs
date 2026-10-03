@@ -6,7 +6,7 @@
 
         private readonly Dictionary<object, Reference> References; //Optimize: Заменить на слабую ссылку
 
-        private uint LastId = 1u << 31;
+        private ulong LastId = 1UL << 63;
 
         public bool IsChanged { get; private set; }
 
@@ -25,7 +25,8 @@
 
         public void Add(object Value, DataDefinition Definition)
         {
-            References.Add(Value, new(LastId++, Definition));
+            References.Add(Value, new(LastId, Definition));
+            LastId += 2;
         }
 
         public bool TryGetReference(object? Value, out Reference Reference)

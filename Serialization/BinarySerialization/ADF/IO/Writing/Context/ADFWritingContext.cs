@@ -8,6 +8,8 @@
         public readonly WritableRegistries Registries;
         public readonly WriteStrategies    WriteStrategies;
 
+        public readonly bool Compression;
+
         public uint CurrentPage;
         public long CurrentPosition;
 
@@ -18,6 +20,7 @@
             TypeAssociation = new();
             WriteStrategies = new();
             Options = WritingOptions ?? ADFWritingOptions.Default;
+            Compression = Options.Compression;
         }
     }
 }

@@ -25,7 +25,8 @@
 
         protected sealed override void Write(StreamGroup Base, ADFObjectWriter Writer, T Value)
         {
-            Base.BaseStream.WriteCompressed(Context, Base.Length + 1L);
+            var Link = Reference.CreateNewReference(Base.ChildsLength);
+            Base.BaseStream.WriteCompressed(Context, Link);
             WriteValue(Writer, Value);
         }
 

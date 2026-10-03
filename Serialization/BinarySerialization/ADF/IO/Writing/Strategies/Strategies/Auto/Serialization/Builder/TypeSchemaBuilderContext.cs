@@ -4,6 +4,7 @@ namespace Zion.Serialization.ADF
 {
     internal readonly struct TypeSchemaBuilderContext<T>
     {
+        public readonly ParameterExpression ContextParameter = Expression.Parameter(typeof(ADFWritingContext), "Context");
         public readonly ParameterExpression TargetParameter = Expression.Parameter(typeof(StreamGroup), "Target");
         public readonly ParameterExpression ValueParameter = Expression.Parameter(typeof(T), "Value");
 

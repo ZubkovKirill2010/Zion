@@ -17,6 +17,8 @@ namespace Zion.Serialization.ADF
 
         public int Count => Groups.Count;
 
+        public long ChildsLength => Length - BaseStream.Length;
+
         public long Length
         {
             get => _Length.Value;
@@ -49,6 +51,11 @@ namespace Zion.Serialization.ADF
         public StreamGroup With(ArenaStream BaseStream)
         {
             return new(BaseStream.NotNull(), Groups, _Length);
+        }
+
+        public void Add(ArenaStream Stream)
+        {
+            Add(new StreamGroup(Stream));
         }
 
         public void Add(StreamGroup Group)
