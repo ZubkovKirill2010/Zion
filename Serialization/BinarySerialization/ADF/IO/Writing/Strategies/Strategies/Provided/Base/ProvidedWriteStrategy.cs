@@ -2,68 +2,65 @@
 {
     internal abstract class ProvidedWriteStrategy<T> : IWriteStrategy<T>
     {
-        protected readonly ADFWritingContext Context;
-
         private readonly uint FormatId;
         private bool HasFormat;
         private DataFormat Format;
 
 
-        public ProvidedWriteStrategy(ADFWritingContext Context, uint FormatId)
+        public ProvidedWriteStrategy(uint FormatId)
         {
-            this.Context = Context.NotNull();
             this.FormatId = FormatId;
         }
 
 
-        public static ProvidedWriteStrategy<T> GetStrategy(ADFWritingContext Context, uint FormatId)
+        public static ProvidedWriteStrategy<T> GetStrategy(uint FormatId)
         {
             return typeof(T).IsValueType
-                ? new SerializableStructWriteStrategy<T>(Context, FormatId)
-                : new SerializableClassWriteStrategy<T>(Context, FormatId);
+                ? new SerializableStructWriteStrategy<T>(FormatId)
+                : new SerializableClassWriteStrategy<T>(FormatId);
         }
 
-        public static ProvidedWriteStrategy<T> GetStrategy(ADFWritingContext Context, uint FormatId, IADFSerializer<T> Serializer)
+        public static ProvidedWriteStrategy<T> GetStrategy(uint FormatId, IADFSerializer<T> Serializer)
         {
             return typeof(T).IsValueType
-                ? new StructSerializerWriteStrategy<T>(Context, FormatId, Serializer)
-                : new ClassSerializerWriteStrategy<T>(Context, FormatId, Serializer);
+                ? new StructSerializerWriteStrategy<T>(FormatId, Serializer)
+                : new ClassSerializerWriteStrategy<T>(FormatId, Serializer);
         }
 
 
-        protected abstract StreamGroup GetGroupForData(StreamGroup BaseGroup);
+        protected abstract StreamGroup GetGroupForData(ADFWritingContext Context, StreamGroup BaseGroup);
 
-        protected abstract void Write(StreamGroup Base, ADFObjectWriter Writer, T Value);
+        protected abstract void Write(ADFWritingContext Context, StreamGroup Base, ADFObjectWriter Writer, T Value);
 
-        protected virtual void OnWrited(uint FormatId, T Value) { }
+        protected virtual void OnWrited(ADFWritingContext Context, uint FormatId, T Value) { }
 
-        protected virtual bool TryWriteReference(ArenaStream BaseStream, T Value) => false;
+        protected virtual bool TryWriteReference(ADFWritingContext Context, ArenaStream BaseStream, T Value) => false;
 
 
-        public void Write(StreamGroup Group, T Value)
+        public void Write(ADFWritingContext Context, StreamGroup Group, T Value)
         {
-            if (TryWriteReference(Group.BaseStream, Value))
+            if (TryWriteReference(Context, Group.BaseStream, Value))
             {
                 return;
             }
 
-            var Target = GetGroupForData(Group);
+            var Target = GetGroupForData(Context, Group);
 
             if (HasFormat)
             {
                 using var Writer = new ADFCheckingObjectWriter(Context, Target, Format);
-                Write(Group, Writer, Value);
-                OnWrited(FormatId, Value);
+                Write(Context, Group, Writer, Value);
+                OnWrited(Context, FormatId, Value);
             }
             else
             {
                 using var Writer = new ADFRecordObjectWriter(Context, Target, typeof(T));
-                Write(Group, Writer, Value);
+                Write(Context, Group, Writer, Value);
 
                 HasFormat = true;
                 Format = Context.Registries.FormatRegistry.Clarify(FormatId, Writer.GetParameters());
 
-                OnWrited(FormatId, Value);
+                OnWrited(Context, FormatId, Value);
             }
         }
     }

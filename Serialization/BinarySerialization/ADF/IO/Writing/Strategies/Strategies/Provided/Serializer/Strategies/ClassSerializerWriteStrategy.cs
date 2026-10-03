@@ -4,13 +4,10 @@
     {
         private readonly IADFSerializer<T> Serializer;
 
-
-        public ClassSerializerWriteStrategy(ADFWritingContext Context, uint FormatId, IADFSerializer<T> Serializer)
-            : base(Context, FormatId)
+        public ClassSerializerWriteStrategy(uint FormatId, IADFSerializer<T> Serializer) : base(FormatId)
         {
             this.Serializer = Serializer;
         }
-
 
         protected override void WriteValue(ADFObjectWriter Writer, T Value)
         {

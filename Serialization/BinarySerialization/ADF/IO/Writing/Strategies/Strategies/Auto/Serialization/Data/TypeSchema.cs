@@ -8,17 +8,10 @@
         #endregion
 
         #region Data
-        private readonly AutoWriter<T> Writer;
-        private readonly HashSet<string> Names;
 
         #endregion
 
         #region Constructors
-        internal TypeSchema(AutoWriter<T> Writer, HashSet<string> Names)
-        {
-            this.Writer = Writer.NotNull();
-            this.Names = Names.NotNull();
-        }
 
         #endregion
 
@@ -29,20 +22,9 @@
             {
                 return (TypeSchema<T>)Boxed;
             }
-            var Created = TypeSchemaBuilder<T>.Create(Context, Type, out var Format);//TODO: Replace Format
+            var Created = TypeSchemaBuilder<T>.Create(Context, Type);
             Cache.Add(Type, Created);
             return Created;
-        }
-
-
-        public void Write(StreamGroup Target, T Value)
-        {
-            Writer.Invoke(Target, Value);
-        }
-
-        public bool ContainsName(string Name)
-        {
-            return Names.Contains(Name);
         }
 
         #endregion

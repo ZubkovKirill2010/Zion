@@ -114,7 +114,7 @@
                     var Entry = WriteStrategies.GetEntry<IWritableRegistry>(Registry.GetType());
                     var Group = new StreamGroup(Context.Arena);
 
-                    Entry.Strategy.Write(Group, Registry);
+                    Entry.Strategy.Write(Context, Group, Registry);
                 }
             }
         }

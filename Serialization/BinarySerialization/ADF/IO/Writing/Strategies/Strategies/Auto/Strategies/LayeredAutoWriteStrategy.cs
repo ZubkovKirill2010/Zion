@@ -2,7 +2,7 @@
 {
     internal sealed class LayeredAutoWriteStrategy<T> : IWriteStrategy<T>
     {
-        public void Write(StreamGroup Target, T Value)
+        public void Write(ADFWritingContext Context, StreamGroup Target, T Value)
         {
             
         }

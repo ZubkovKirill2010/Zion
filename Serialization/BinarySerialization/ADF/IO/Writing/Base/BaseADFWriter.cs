@@ -303,62 +303,16 @@ namespace Zion.Serialization.ADF
                 return;
             };
             
-            GetEntry(Name, in NameId, Type, in Value).Deconstruct
+            WriteStrategies.GetEntry<T>(Type).Deconstruct
             (
                 out var FormatId,
                 out var Strategy
             );
 
-            var StreamGroup = GetStreamGroup(Name, in NameId, in FormatId);
+            var Target = GetStreamGroup(Name, in NameId, in FormatId);
 
-            Strategy.Write(StreamGroup, Value);
+            Strategy.Write(Context, Target, Value);
             OnWrited(Name, in NameId, in FormatId);
-        }
-
-
-        private WriteEntry<T> GetEntry<T>(string Name, in uint NameId, Type Type, in T Value)
-        {
-            return WriteStrategies.TryGetEntry<T>(Type, out var Cached)
-                ? Cached
-                : WriteStrategies.Add(Type, GetNewEntry(Name, in NameId, Type, in Value));
-        }
-
-        private WriteEntry<T> GetNewEntry<T>(string Name, in uint NameId, Type Type, in T Value)
-        {
-            if (LayeredWriteStrategy<T>.TryCreate(Value, out var LayeredStrategy))
-            {
-                var LayeredFormatId = GetOrAddDeferred(Type);
-                return new
-                (
-                    LayeredFormatId,
-                    LayeredStrategy
-                );
-            }
-
-            if (ADFSerializers.TryGetSerializer<T>(Type, out var Serializer))
-            {
-                var SerializableFormatId = GetOrAddDeferred(Type);
-                return new
-                (
-                    SerializableFormatId,
-                    ProvidedWriteStrategy<T>.GetStrategy(Context, SerializableFormatId, Serializer)
-                );
-            }
-
-            if (Value is IADFWritable)
-            {
-                var WritableFormatId = GetOrAddDeferred(Type);
-                return new
-                (
-                    WritableFormatId,
-                    ProvidedWriteStrategy<T>.GetStrategy(Context, WritableFormatId)
-                );
-            }
-
-            var Strategy = new AutoWriteStrategy<T>();
-            var FormatId = FormatRegistry.Add(Strategy.Format);
-
-            return new(FormatId, Strategy);
         }
 
 

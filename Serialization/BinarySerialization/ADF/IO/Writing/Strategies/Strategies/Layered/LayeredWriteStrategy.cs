@@ -16,62 +16,61 @@
         #endregion
 
         #region PublicMethods
-        public static bool TryCreate(T Value, out IWriteStrategy<T> Strategy)
-        {
-            var Type = Value!.GetType();
+        //public static bool TryCreate(T Value, out IWriteStrategy<T> Strategy)
+        //{
+            //var Type = Value!.GetType();
 
-            if (!DataFormat.HasBase(Value!.GetType()))
-            {
-                Strategy = default!;
-                return false;
-            }
+            //if (!DataFormat.HasBase(Value!.GetType()))
+            //{
+            //    Strategy = default!;
+            //    return false;
+            //}
 
-            var Layers = EnumerateHierarchy(Type).Reverse().ToList();
-            var Strategies = new List<IWriteStrategy<T>>(Layers.Count);
-            var AllAuto = true;
+            //var Layers = EnumerateHierarchy(Type).Reverse().ToList();
+            //var Strategies = new List<IWriteStrategy<T>>(Layers.Count);
+            //var AllAuto = true;
 
-            foreach (var Layer in Layers)
-            {
-                IWriteStrategy<T>? LayerStrategy = null;
+            //foreach (var Layer in Layers)
+            //{
+            //    IWriteStrategy<T>? LayerStrategy = null;
 
-                if (ADFSerializers.TryGetSerializer<T>(Layer, out var serializer))
-                {
-                    LayerStrategy = new SerializerLayerStrategy<T>(serializer);
-                    AllAuto = false;
-                }
-                else if (HasOwnInterface(Layer, typeof(IADFWritable)))
-                {
-                    LayerStrategy = new SerializableLayerStrategy<T>(Layer);
-                    AllAuto = false;
-                }
-                else
-                {
-                    LayerStrategy = new AutoWriteStrategy<T>();
-                }
+            //    if (ADFSerializers.TryGetSerializer<T>(Layer, out var serializer))
+            //    {
+            //        LayerStrategy = new SerializerLayerStrategy<T>(serializer);
+            //        AllAuto = false;
+            //    }
+            //    else if (HasOwnInterface(Layer, typeof(IADFWritable)))
+            //    {
+            //        LayerStrategy = new SerializableLayerStrategy<T>(Layer);
+            //        AllAuto = false;
+            //    }
+            //    else
+            //    {
+            //        LayerStrategy = new AutoWriteStrategy<T>();
+            //    }
 
-                Strategies.Add(LayerStrategy);
+            //    Strategies.Add(LayerStrategy);
 
-                if (LayerStrategy.Coverage == Coverage.AllBaseLayers)
-                {
-                    break;
-                }
-            }
+            //    if (LayerStrategy.Coverage == Coverage.AllBaseLayers)
+            //    {
+            //        break;
+            //    }
+            //}
 
-            if (AllAuto)
-            {
-                Strategy = default!;
-                return false;
-            }
+            //if (AllAuto)
+            //{
+            //    Strategy = default!;
+            //    return false;
+            //}
 
-            Strategy = new LayeredWriteStrategy<T>(Strategies.ToReversedArray());
-            return true;
-
-        }
+            //Strategy = new LayeredWriteStrategy<T>(Strategies.ToReversedArray());
+            //return true;
+        //}
 
         #endregion
 
         #region IWriteStrategy
-        public void Write(StreamGroup Target, T Value)
+        public void Write(ADFWritingContext Context, StreamGroup Target, T Value)
         {
 
         }

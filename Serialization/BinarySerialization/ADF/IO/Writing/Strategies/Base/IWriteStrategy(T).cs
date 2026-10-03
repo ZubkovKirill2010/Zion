@@ -4,11 +4,11 @@
     {
         Type IWriteStrategy.TargetType => typeof(T);
 
-        void IWriteStrategy.Write(StreamGroup Target, object Value)
+        void IWriteStrategy.Write(ADFWritingContext Context, StreamGroup Target, object Value)
         {
             if (Value is T Typed)
             {
-                Write(Target, Typed);
+                Write(Context, Target, Typed);
             }
             else
             {
@@ -16,6 +16,6 @@
             }
         }
 
-        public void Write(StreamGroup Target, T Value);
+        public void Write(ADFWritingContext Context, StreamGroup Target, T Value);
     }
 }

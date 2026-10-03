@@ -2,8 +2,7 @@
 {
     internal sealed class SerializableStructWriteStrategy<T> : StructWriteStrategy<T>
     {
-        public SerializableStructWriteStrategy(ADFWritingContext Context, uint FormatId)
-            : base(Context, FormatId)
+        public SerializableStructWriteStrategy(uint FormatId) : base(FormatId)
         {
             if (!typeof(T).IsAssignableFrom(typeof(IADFWritable)))
             {
@@ -12,7 +11,7 @@
         }
 
 
-        protected override void Write(StreamGroup Base, ADFObjectWriter Writer, T Value)
+        protected override void Write(ADFWritingContext Context, StreamGroup Base, ADFObjectWriter Writer, T Value)
         {
             var Writable = ((IADFWritable)Value!).NotNull();
             Writable.Write(Writer);

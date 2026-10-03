@@ -4,15 +4,12 @@
     {
         private readonly IADFSerializer<T> Serializer;
 
-
-        public StructSerializerWriteStrategy(ADFWritingContext Context, uint FormatId, IADFSerializer<T> Serializer)
-            : base(Context, FormatId)
+        public StructSerializerWriteStrategy(uint FormatId, IADFSerializer<T> Serializer) : base(FormatId)
         {
             this.Serializer = Serializer.NotNull();
         }
 
-
-        protected override void Write(StreamGroup Base, ADFObjectWriter Writer, T Value)
+        protected override void Write(ADFWritingContext Context, StreamGroup Base, ADFObjectWriter Writer, T Value)
         {
             Serializer.Write(Writer, Value);
         }
