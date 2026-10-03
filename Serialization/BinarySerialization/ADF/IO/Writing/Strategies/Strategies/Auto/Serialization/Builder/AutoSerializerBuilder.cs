@@ -113,10 +113,10 @@ namespace Zion.Serialization.ADF
         {
             if (Type.IsEnum)
             {
-                return AutoObjectWriter.GetEnumWriter(Type);
+                return AutoSerializerHelper.GetEnumWriter(Type);
             }
 
-            throw new NotImplementedException(); //TODO
+            return AutoSerializerHelper.GetObjectWriter(Type);
         }
 
 

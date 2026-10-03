@@ -4,6 +4,6 @@
     {
         public Type TargetType { get; }
 
-        public void Write(ADFWritingContext Context, StreamGroup Group, object Value);
+        public void Write(ADFWritingContext Context, StreamGroup Target, object Value);
     }
 }
