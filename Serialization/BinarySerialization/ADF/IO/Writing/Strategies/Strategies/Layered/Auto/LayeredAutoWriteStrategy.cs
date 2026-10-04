@@ -26,26 +26,32 @@
         private static AutoWriter<T>[] CheckAndConvert(List<ILayerWriteInfo> Layers)
         {
             var UsedNames = new HashSet<string>(Layers.Count * 6);
-            var Result = new AutoWriter<T>[Layers.Count];
+            var Writers = new AutoWriter<T>[Layers.Count];
 
-            for (int i = 0; i < Layers.Count; i++)
+            var Layer = 0;
+            var Writer = Layers.Count - 1;
+
+            while (Layer < Layers.Count)
             {
-                var Info = (AutoType<T>)Layers[i];
+                var Info = (AutoType<T>)Layers[Layer];
                 var Fields = Info.Schema.Fields;
+
+                Writers[Writer] = Info.Writer;
 
                 for (int j = 0; j < Fields.Length; j++)
                 {
-                    var Name = Fields[i].Name;
+                    var Name = Fields[j].Name;
                     if (!UsedNames.Add(Name))
                     {
                         throw new ADFRepeatedNameException(Name);
                     }
                 }
 
-                Result[i] = Info.Writer;
+                Layer++;
+                Writer--;
             }
 
-            return Result;
+            return Writers;
         }
     }
 }

@@ -25,12 +25,20 @@
 
         private static IADFSerializer<T>[] Cast(List<ILayerWriteInfo> Layers)
         {
-            var Result = new IADFSerializer<T>[Layers.Count];
-            for (int i = 0; i < Layers.Count; i++)
+            var Serializers = new IADFSerializer<T>[Layers.Count];
+
+            var Layer = 0;
+            var Serializer = Layers.Count - 1;
+
+            while (Layer < Layers.Count)
             {
-                Result[i] = (IADFSerializer<T>)Layers[i];
+                Serializers[Serializer] = (IADFSerializer<T>)Layers[Layer];
+
+                Layer++;
+                Serializer--;
             }
-            return Result;
+
+            return Serializers;
         }
     }
 }
