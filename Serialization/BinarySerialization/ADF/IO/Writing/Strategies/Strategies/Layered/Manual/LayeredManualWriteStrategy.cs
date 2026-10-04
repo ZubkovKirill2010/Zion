@@ -2,7 +2,7 @@
 {
     internal sealed class LayeredManualWriteStrategy<T> : IWriteStrategy<T>
     {
-        public LayeredManualWriteStrategy()
+        public LayeredManualWriteStrategy(List<ILayerWriteInfo> Layers)
         {
 
         }

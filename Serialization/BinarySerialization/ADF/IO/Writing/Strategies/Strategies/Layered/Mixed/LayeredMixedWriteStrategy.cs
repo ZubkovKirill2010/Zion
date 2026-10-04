@@ -2,7 +2,7 @@
 {
     internal sealed class LayeredMixedWriteStrategy<T> : IWriteStrategy<T>
     {
-        public LayeredMixedWriteStrategy()
+        public LayeredMixedWriteStrategy(List<ILayerWriteInfo> Layers)
         {
 
         }

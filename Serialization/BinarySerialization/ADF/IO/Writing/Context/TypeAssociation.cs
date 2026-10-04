@@ -4,8 +4,6 @@
     {
         private readonly Dictionary<Type, uint> Data;
 
-        private uint NextId;
-
 
         public TypeAssociation()
         {

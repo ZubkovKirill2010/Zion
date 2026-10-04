@@ -80,34 +80,82 @@
             var Layers = new List<ILayerWriteInfo>(10);
             var Kind = WriteKind.None;
 
+            Type? ChildType = null;
+            uint ParentFormatId = ADFPrimitives.Object;
+
+            void BuildFormat()
+            {
+                if (ChildType is not null)
+                {
+                    ParentFormatId = BuildChildFormat<T>(Context, ChildType, ParentFormatId, Layers[^1]);
+                }
+            }
+
             foreach (var LayerType in EnumerateHierarchy(Type))
             {
-                //TODO: Manual strategies
-                if (ADFSerializers.TryGetSerializer<T>(Type, out var Serializer))
+                if (LayerType.IsDefined(typeof(ADFNonSerializableAttribute), false))
+                {
+                    continue;
+                }
+
+                BuildFormat();
+                ChildType = LayerType;
+
+                ILayerWriteInfo LayerInfo;
+
+                if (ADFSerializers.TryGetSerializer<T>(LayerType, out var Serializer))
                 {
                     Kind |= WriteKind.Manual;
+
+                    LayerInfo = new ManualLayerInfo(LayerType, Serializer);//TODO
                 }
                 else if (HasOwnInterface(LayerType, typeof(IADFWritable)))
                 {
                     Kind |= WriteKind.Manual;
+
+                    LayerInfo = new ManualLayerInfo(LayerType);//TODO
                 }
                 else
                 {
                     Kind |= WriteKind.Auto;
 
-                    var AutoType = AutoSerializationCache.GetOrAdd<T>(Context, Type);
-                    Layers.Add(AutoType);
+                    var AutoType = AutoSerializationCache.GetOrAdd<T>(Context, LayerType);
+                    LayerInfo = AutoType;
                 }
+
+                Layers.Add(LayerInfo);
             }
+
+            BuildFormat();
 
             Strategy = Kind switch
             {
                 WriteKind.Auto   => new LayeredAutoWriteStrategy<T>(Layers),
-                WriteKind.Manual => new LayeredManualWriteStrategy<T>(),
-                WriteKind.Mixed  => new LayeredMixedWriteStrategy<T>(),
+                WriteKind.Manual => new LayeredManualWriteStrategy<T>(Layers),
+                WriteKind.Mixed  => new LayeredMixedWriteStrategy<T>(Layers),
                 _ => throw new Exception()
             };
             return true;
+        }
+
+        private static uint BuildChildFormat<T>(ADFWritingContext Context, Type ChildType, uint BaseFormatId, ILayerWriteInfo LayerInfo)
+        {
+            var FormatRegistry = Context.Registries.FormatRegistry;
+            var TypeAssociation = Context.TypeAssociation;
+
+            if (TypeAssociation.TryGetFormatId(ChildType, out var Existing))
+            {
+                return Existing;
+            }
+
+            var Format = LayerInfo is AutoType<T> Auto
+                ? DataFormatBuilder.Build(Auto.Schema, BaseFormatId, Context)
+                : DataFormatBuilder.BuildDeferred(ChildType, BaseFormatId, FormatRegistry, TypeAssociation);
+            
+            var FormatId = FormatRegistry.Add(Format);
+            TypeAssociation.Add(ChildType, FormatId);
+
+            return FormatId;
         }
 
         #endregion

@@ -13,7 +13,7 @@
             this.Fields = Fields.NotNull();
 
             Generics = Type.GetGenericArguments();
-            Flags = DataFormatBuilder.GetFlags(Type);
+            Flags = DataFormatBuilder.GetFlags(Type) | FormatFlags.IsGenerated;
         }
     }
 }

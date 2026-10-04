@@ -4,7 +4,24 @@
     {
         public static DataFormat BuildDeferred(Type Type, FormatRegistry FormatRegistry, TypeAssociation TypeAssociation)
         {
-            return Build([], Type, FormatRegistry, TypeAssociation);
+            return new DataFormat
+            (
+                [],
+                GetGenerics(Type, FormatRegistry, TypeAssociation),
+                GetFlags(Type) | FormatFlags.IsDeferred,
+                GetBaseFormatId(Type, FormatRegistry, TypeAssociation)
+            );
+        }
+
+        public static DataFormat BuildDeferred(Type Type, uint BaseFormatId, FormatRegistry FormatRegistry, TypeAssociation TypeAssociation)
+        {
+            return new DataFormat
+            (
+                [],
+                GetGenerics(Type, FormatRegistry, TypeAssociation),
+                GetFlags(Type) | FormatFlags.IsDeferred,
+                BaseFormatId
+            );
         }
 
         public static DataFormat Build(Parameter[] Parameters, Type Type, FormatRegistry FormatRegistry, TypeAssociation TypeAssociation)
@@ -20,6 +37,16 @@
 
         public static DataFormat Build(TypeSchema Schema, ADFWritingContext Context)
         {
+            return Build
+            (
+                Schema,
+                GetBaseFormatId(Schema.Type, Context.Registries.FormatRegistry, Context.TypeAssociation),
+                Context
+            );
+        }
+
+        public static DataFormat Build(TypeSchema Schema, uint BaseFormatId, ADFWritingContext Context)
+        {
             var Type = Schema.Type;
             var FormatRegistry = Context.Registries.FormatRegistry;
             var StringRegistry = Context.Registries.StringRegistry;
@@ -30,7 +57,7 @@
                 GetParameters(Schema.Fields, FormatRegistry, TypeAssociation, StringRegistry),
                 GetGenerics(Schema.Generics, FormatRegistry, TypeAssociation),
                 Schema.Flags,
-                GetBaseFormatId(Type, FormatRegistry, TypeAssociation)
+                BaseFormatId
             );
         }
 

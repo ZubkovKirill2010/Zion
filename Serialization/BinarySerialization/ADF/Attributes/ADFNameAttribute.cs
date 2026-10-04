@@ -1,7 +1,7 @@
 ﻿namespace Zion.Serialization.ADF
 {
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, Inherited = true, AllowMultiple = false)]
-    public sealed class ADFNameAttribute : Attribute
+    public sealed class ADFNameAttribute : ADFAttribute
     {
         public readonly string Name;
 
