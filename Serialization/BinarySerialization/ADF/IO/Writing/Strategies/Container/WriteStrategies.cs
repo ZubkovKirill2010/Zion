@@ -77,9 +77,37 @@
                 return false;
             }
 
-            //Вернуть false, при однородной структуре
+            var Layers = new List<ILayerWriteInfo>(10);
+            var Kind = WriteKind.None;
 
-            throw new NotImplementedException(); //TODO
+            foreach (var LayerType in EnumerateHierarchy(Type))
+            {
+                //TODO: Manual strategies
+                if (ADFSerializers.TryGetSerializer<T>(Type, out var Serializer))
+                {
+                    Kind |= WriteKind.Manual;
+                }
+                else if (HasOwnInterface(LayerType, typeof(IADFWritable)))
+                {
+                    Kind |= WriteKind.Manual;
+                }
+                else
+                {
+                    Kind |= WriteKind.Auto;
+
+                    var AutoType = AutoSerializationCache.GetOrAdd<T>(Context, Type);
+                    Layers.Add(AutoType);
+                }
+            }
+
+            Strategy = Kind switch
+            {
+                WriteKind.Auto   => new LayeredAutoWriteStrategy<T>(Layers),
+                WriteKind.Manual => new LayeredManualWriteStrategy<T>(),
+                WriteKind.Mixed  => new LayeredMixedWriteStrategy<T>(),
+                _ => throw new Exception()
+            };
+            return true;
         }
 
         #endregion
@@ -115,22 +143,7 @@
 
         private static bool HasOwnInterface(Type Layer, Type Interface)
         {
-            if (!Interface.IsAssignableFrom(Layer))
-            {
-                return false;
-            }
-
-            var Map = Layer.GetInterfaceMap(Interface);
-
-            foreach (var Method in Map.TargetMethods)
-            {
-                if (Method.DeclaringType == Layer)
-                {
-                    return true;
-                }
-            }
-
-            return false;
+            throw new NotImplementedException(); //TODO: HasOwnInterface
         }
 
 
