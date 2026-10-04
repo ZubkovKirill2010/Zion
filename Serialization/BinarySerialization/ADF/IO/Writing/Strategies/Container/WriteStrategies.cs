@@ -103,24 +103,15 @@
 
                 ILayerWriteInfo LayerInfo;
 
-                if (ADFSerializers.TryGetSerializer<T>(LayerType, out var Serializer))
+                if (TryGetSerializer<T>(LayerType, out var Serializer))
                 {
                     Kind |= WriteKind.Manual;
-
-                    LayerInfo = new ManualLayerInfo(LayerType, Serializer);//TODO
-                }
-                else if (HasOwnInterface(LayerType, typeof(IADFWritable)))
-                {
-                    Kind |= WriteKind.Manual;
-
-                    LayerInfo = new ManualLayerInfo(LayerType);//TODO
+                    LayerInfo = Serializer;
                 }
                 else
                 {
                     Kind |= WriteKind.Auto;
-
-                    var AutoType = AutoSerializationCache.GetOrAdd<T>(Context, LayerType);
-                    LayerInfo = AutoType;
+                    LayerInfo = AutoSerializationCache.GetOrAdd<T>(Context, LayerType);
                 }
 
                 Layers.Add(LayerInfo);
@@ -189,9 +180,10 @@
             }
         }
 
-        private static bool HasOwnInterface(Type Layer, Type Interface)
+        private static bool TryGetSerializer<T>(Type Layer, out IADFSerializer<T> Serializer)
         {
-            throw new NotImplementedException(); //TODO: HasOwnInterface
+            return ADFSerializers.TryGetSerializer(Layer, out Serializer)
+                || WritableLayerWriterCache<T>.TryGetSerializer(Layer, out Serializer);
         }
 
 

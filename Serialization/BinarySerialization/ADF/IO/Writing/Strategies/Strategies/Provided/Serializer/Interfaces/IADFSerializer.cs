@@ -1,6 +1,6 @@
 ﻿namespace Zion.Serialization.ADF
 {
-    public interface IADFSerializer
+    public interface IADFSerializer : ILayerWriteInfo
     {
         public Type TargetType { get; }
 
