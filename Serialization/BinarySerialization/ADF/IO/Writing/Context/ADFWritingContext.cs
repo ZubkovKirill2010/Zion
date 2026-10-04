@@ -1,6 +1,6 @@
 ﻿namespace Zion.Serialization.ADF
 {
-    public sealed class ADFWritingContext
+    internal sealed class ADFWritingContext
     {
         public readonly Arena<byte>        Arena;
         public readonly ADFWritingOptions  Options;

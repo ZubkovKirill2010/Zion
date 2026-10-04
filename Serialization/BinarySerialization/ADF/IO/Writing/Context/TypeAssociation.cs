@@ -1,6 +1,6 @@
 ﻿namespace Zion.Serialization.ADF
 {
-    public sealed class TypeAssociation
+    internal sealed class TypeAssociation
     {
         private readonly Dictionary<Type, uint> Data;
 

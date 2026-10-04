@@ -28,34 +28,28 @@
         }
 
 
-        protected abstract StreamGroup GetGroupForData(ADFWritingContext Context, StreamGroup BaseGroup);
-
         protected abstract void Write(ADFWritingContext Context, StreamGroup Base, ADFObjectWriter Writer, T Value);
 
         protected virtual void OnWrited(ADFWritingContext Context, uint FormatId, T Value) { }
 
-        protected virtual bool TryWriteReference(ADFWritingContext Context, ArenaStream BaseStream, T Value) => false;
 
-
-        public void Write(ADFWritingContext Context, StreamGroup Group, T Value)
+        public void Write(ADFWritingContext Context, StreamGroup Target, T Value)
         {
-            if (TryWriteReference(Context, Group.BaseStream, Value))
+            if (WriteStrategyHelper<T>.Setup(Context, Value, ref Target))
             {
                 return;
             }
 
-            var Target = GetGroupForData(Context, Group);
-
             if (HasFormat)
             {
                 using var Writer = new ADFCheckingObjectWriter(Context, Target, Format);
-                Write(Context, Group, Writer, Value);
+                Write(Context, Target, Writer, Value);
                 OnWrited(Context, FormatId, Value);
             }
             else
             {
                 using var Writer = new ADFRecordObjectWriter(Context, Target, typeof(T));
-                Write(Context, Group, Writer, Value);
+                Write(Context, Target, Writer, Value);
 
                 HasFormat = true;
                 Format = Context.Registries.FormatRegistry.Clarify(FormatId, Writer.GetParameters());

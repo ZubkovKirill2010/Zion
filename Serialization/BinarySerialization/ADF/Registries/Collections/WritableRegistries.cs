@@ -2,7 +2,7 @@
 
 namespace Zion.Serialization.ADF
 {
-    public sealed class WritableRegistries : IEnumerable<WritableRegistryInfo>
+    internal sealed class WritableRegistries : IEnumerable<WritableRegistryInfo>
     {
         private readonly Dictionary<string, WritableRegistryInfo> Registries;
 
@@ -11,7 +11,7 @@ namespace Zion.Serialization.ADF
         public readonly StringIdRegistry     StringRegistry;
         public readonly DataRegistry         DataRegistry;
 
-        private ushort LastRegistryId = 32;
+        public ushort LastRegistryId = 32;
 
 
         public WritableRegistries()

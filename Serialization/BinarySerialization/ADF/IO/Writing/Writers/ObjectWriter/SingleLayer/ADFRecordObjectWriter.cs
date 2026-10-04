@@ -9,7 +9,7 @@
         #endregion
 
         #region Constructors
-        public ADFRecordObjectWriter(ADFWritingContext Context, StreamGroup Target, Type Type)
+        internal ADFRecordObjectWriter(ADFWritingContext Context, StreamGroup Target, Type Type)
             : base(Context, Target)
         {
             this.Type = Type;
@@ -33,7 +33,7 @@
         #endregion
 
         #region PublicMethods
-        public Parameter[] GetParameters()
+        internal Parameter[] GetParameters()
         {
             Dispose();
             return Parameters.ToArray();

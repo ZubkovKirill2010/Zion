@@ -2,9 +2,12 @@
 {
     internal sealed class WriteStrategies
     {
+        #region Data
         private readonly Dictionary<Type, WriteEntry> Strategies = new();
 
+        #endregion
 
+        #region PublicMethods
         public WriteEntry<T> GetEntry<T>(ADFWritingContext Context, Type Type)
         {
             ThrowIfNotAssignable<T>(Type);
@@ -19,9 +22,20 @@
             return Created;
         }
 
+        #endregion
+
+        #region Creation
         private WriteEntry<T> Create<T>(ADFWritingContext Context, Type Type)
         {
-            //TODO: Layred
+            if (TryCreateLayered<T>(Context, Type, out var LayeredStrategy))
+            {
+                var LayeredFormatId = GetOrAddDeferred(Context, Type);
+                return new
+                (
+                    LayeredFormatId,
+                    LayeredStrategy
+                );
+            }
 
             if (ADFSerializers.TryGetSerializer<T>(Type, out var Serializer))
             {
@@ -50,7 +64,27 @@
             return new(FormatId, Strategy);
         }
 
+        private static bool TryCreateLayered<T>(ADFWritingContext Context, Type Type, out IWriteStrategy<T> Strategy)
+        {
+            if (!Type.IsAssignableTo(typeof(T)))
+            {
+                throw new InvalidCastException($"{Type} is not {typeof(T)}");
+            }
 
+            if (!DataFormat.HasBase(Type))
+            {
+                Strategy = default!;
+                return false;
+            }
+
+            //Вернуть false, при однородной структуре
+
+            throw new NotImplementedException(); //TODO
+        }
+
+        #endregion
+
+        #region PrivateMethods
         private static uint GetOrAddDeferred(ADFWritingContext Context, Type Type)
         {
             return Context.TypeAssociation.GetOrAddDeferred(Type, Context.Registries.FormatRegistry);
@@ -69,6 +103,37 @@
             return TypeAssociation.GetOrAdd(Type, Create);
         }
 
+
+        private static IEnumerable<Type> EnumerateHierarchy(Type? Type)
+        {
+            while (DataFormat.HasBase(Type))
+            {
+                yield return Type;
+                Type = Type.BaseType;
+            }
+        }
+
+        private static bool HasOwnInterface(Type Layer, Type Interface)
+        {
+            if (!Interface.IsAssignableFrom(Layer))
+            {
+                return false;
+            }
+
+            var Map = Layer.GetInterfaceMap(Interface);
+
+            foreach (var Method in Map.TargetMethods)
+            {
+                if (Method.DeclaringType == Layer)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+
         private static void ThrowIfNotAssignable<T>(Type Type)
         {
             if (!Type.IsAssignableTo(typeof(T)))
@@ -76,5 +141,7 @@
                 throw new InvalidCastException($"{Type} is not assignable from {typeof(T)}");
             }
         }
+
+        #endregion
     }
 }

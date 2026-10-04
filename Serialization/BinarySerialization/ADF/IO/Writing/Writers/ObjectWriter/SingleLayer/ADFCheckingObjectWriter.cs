@@ -21,7 +21,7 @@
         #endregion
 
         #region Constructors
-        public ADFCheckingObjectWriter(ADFWritingContext Context, StreamGroup Target, DataFormat Format)
+        internal ADFCheckingObjectWriter(ADFWritingContext Context, StreamGroup Target, DataFormat Format)
             : base(Context, Target)
         {
             this.PostponedItems = new(0, PostponedParameterComparer);

@@ -9,7 +9,7 @@ namespace Zion.Serialization.ADF
     public abstract class BaseADFWriter : IDisposable
     {
         #region Data
-        internal protected readonly ADFWritingContext Context;
+        private protected readonly ADFWritingContext Context;
 
         private StreamGroup Data;
 
@@ -17,14 +17,14 @@ namespace Zion.Serialization.ADF
 
         #region Properties
         protected ADFWritingOptions       Options => Context.Options;
-        protected WritableRegistries   Registries => Context.Registries;
-        protected TypeAssociation TypeAssociation => Context.TypeAssociation;
-        protected WriteStrategies WriteStrategies => Context.WriteStrategies;
+        private protected WritableRegistries   Registries => Context.Registries;
+        private protected TypeAssociation TypeAssociation => Context.TypeAssociation;
+        private protected WriteStrategies WriteStrategies => Context.WriteStrategies;
 
-        protected ReferenceIdsRegistry References => Registries.References;
-        protected DataRegistry       DataRegistry => Registries.DataRegistry;
-        protected StringIdRegistry StringRegistry => Registries.StringRegistry;
-        protected FormatRegistry   FormatRegistry => Registries.FormatRegistry;
+        private protected ReferenceIdsRegistry References => Registries.References;
+        private protected DataRegistry       DataRegistry => Registries.DataRegistry;
+        private protected StringIdRegistry StringRegistry => Registries.StringRegistry;
+        private protected FormatRegistry   FormatRegistry => Registries.FormatRegistry;
 
         public bool IsDisposed { get; private set; }
 
@@ -303,7 +303,7 @@ namespace Zion.Serialization.ADF
                 return;
             };
             
-            WriteStrategies.GetEntry<T>(Type).Deconstruct
+            WriteStrategies.GetEntry<T>(Context, Type).Deconstruct
             (
                 out var FormatId,
                 out var Strategy

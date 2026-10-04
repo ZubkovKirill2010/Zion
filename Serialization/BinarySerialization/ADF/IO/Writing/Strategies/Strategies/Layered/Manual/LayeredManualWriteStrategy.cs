@@ -1,13 +1,12 @@
 ﻿namespace Zion.Serialization.ADF
 {
-    internal sealed class AutoWriteStrategy<T> : IWriteStrategy<T>
+    internal sealed class LayeredManualWriteStrategy<T> : IWriteStrategy<T>
     {
-        private readonly AutoWriter<T> Writer;
-
-        public AutoWriteStrategy(AutoWriter<T> Writer)
+        public LayeredManualWriteStrategy()
         {
-            this.Writer = Writer.NotNull();
+
         }
+
 
         public void Write(ADFWritingContext Context, StreamGroup Target, T Value)
         {
@@ -15,7 +14,6 @@
             {
                 return;
             }
-            Writer(Context, Target, Value);
         }
     }
 }
