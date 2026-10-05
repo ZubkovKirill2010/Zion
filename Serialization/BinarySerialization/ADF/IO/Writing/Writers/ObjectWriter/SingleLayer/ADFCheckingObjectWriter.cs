@@ -84,11 +84,24 @@
 
         protected override void OnDisposed()
         {
-            if (Current == Format.ParametersCount)
+            ValidateLayer();
+        }
+
+        #endregion
+
+        #region ProtectedMethods
+        protected void Reset()
+        {
+            Current = 0;
+            PostponedItems.Clear();
+        }
+
+        protected void ValidateLayer()
+        {
+            if (Current != Format.ParametersCount)
             {
-                return;
+                throw new ADFMissingParametersException(Current, Format.ParametersCount);
             }
-            //TODO: Дописать все недостоющие параметры
         }
 
         #endregion

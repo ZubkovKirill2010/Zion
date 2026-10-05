@@ -1,13 +1,13 @@
 ﻿namespace Zion.Serialization.ADF
 {
-    internal sealed class ADFLayeredObjectWriter<T> : ADFCheckingObjectWriter
+    internal sealed class ADFManualLayersWriter<T> : ADFCheckingObjectWriter
     {
         private readonly IADFSerializer<T>[] Serializers;
         private readonly uint FormatId;
         private bool IsFirstWriting;
 
 
-        internal ADFLayeredObjectWriter(ADFWritingContext Context, StreamGroup Target, IADFSerializer<T>[] Serializers, uint FormatId)
+        internal ADFManualLayersWriter(ADFWritingContext Context, StreamGroup Target, IADFSerializer<T>[] Serializers, uint FormatId)
             : base(Context, Target, default)
         {
             var FirstFormat = FormatRegistry[FormatId];
@@ -16,6 +16,9 @@
             this.Serializers = Serializers;
             this.FormatId = FormatId;
         }
+
+
+        protected override void OnDisposed() { }
 
 
         internal void Serialize(T Value)
@@ -57,11 +60,10 @@
                 }
 
                 Serializers[i].Write(Writer, Value);
-                FormatRegistry.Clarify(FormatId, Writer.GetParameters());
+                FormatRegistry.Clarify(FormatId, Writer);
                 Writer.Reset();
 
                 FormatId = Format.BaseFormat;
-                this.Format = Format;
             }
         }
 
@@ -74,9 +76,12 @@
             {
                 var Format = FormatRegistry[FormatId];
                 FormatId = Format.BaseFormat;
-                
+
+                this.Format = Format;
+
+                Reset();
                 Serializers[i].Write(this, Value);
-                OnDisposed();
+                ValidateLayer();
             }
         }
     }

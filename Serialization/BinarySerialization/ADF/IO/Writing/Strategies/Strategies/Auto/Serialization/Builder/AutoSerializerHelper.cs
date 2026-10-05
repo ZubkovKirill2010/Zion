@@ -32,7 +32,7 @@ namespace Zion.Serialization.ADF
         private static void Write<T>(ADFWritingContext Context, StreamGroup Target, T Value)
         {
             var Entry = Context.WriteStrategies.GetEntry<T>(Context, Value!.GetType());
-            Entry.Strategy.Write(Context, Target, Value);
+            Entry.Strategy.WriteData(Context, Target, Value);
         }
     }
 }

@@ -33,13 +33,8 @@
         protected virtual void OnWrited(ADFWritingContext Context, uint FormatId, T Value) { }
 
 
-        public void Write(ADFWritingContext Context, StreamGroup Target, T Value)
+        public void WriteData(ADFWritingContext Context, StreamGroup Target, T Value)
         {
-            if (WriteStrategyHelper<T>.Setup(Context, Value, ref Target))
-            {
-                return;
-            }
-
             if (HasFormat)
             {
                 using var Writer = new ADFCheckingObjectWriter(Context, Target, Format);
@@ -48,11 +43,11 @@
             }
             else
             {
-                using var Writer = new ADFRecordObjectWriter(Context, Target, typeof(T));
+                using var Writer = new ADFRecordObjectWriter(Context, Target);
                 Write(Context, Target, Writer, Value);
 
                 HasFormat = true;
-                Format = Context.Registries.FormatRegistry.Clarify(FormatId, Writer.GetParameters());
+                Format = Context.Registries.FormatRegistry.Clarify(FormatId, Writer);
 
                 OnWrited(Context, FormatId, Value);
             }

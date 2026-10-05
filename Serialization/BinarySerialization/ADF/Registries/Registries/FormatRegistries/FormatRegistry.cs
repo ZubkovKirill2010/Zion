@@ -39,6 +39,11 @@ namespace Zion.Serialization.ADF
             return Add(DataFormat.GetDeferredFormat(Base));
         }
 
+        public DataFormat Clarify(uint FormatId, ADFRecordObjectWriter Writer)
+        {
+            return Clarify(FormatId, Writer);
+        }
+
         public DataFormat Clarify(uint FormatId, Parameter[] Parameters)
         {
             var Index = GetIndex(FormatId);

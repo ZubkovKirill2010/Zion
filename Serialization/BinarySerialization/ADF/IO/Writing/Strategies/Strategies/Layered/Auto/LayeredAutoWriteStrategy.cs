@@ -10,12 +10,8 @@
         }
 
 
-        public void Write(ADFWritingContext Context, StreamGroup Target, T Value)
+        public void WriteData(ADFWritingContext Context, StreamGroup Target, T Value)
         {
-            if (WriteStrategyHelper<T>.Setup(Context, Value, ref Target))
-            {
-                return;
-            }
             for (int i = 0; i < Layers.Length; i++)
             {
                 Layers[i].Invoke(Context, Target, Value);

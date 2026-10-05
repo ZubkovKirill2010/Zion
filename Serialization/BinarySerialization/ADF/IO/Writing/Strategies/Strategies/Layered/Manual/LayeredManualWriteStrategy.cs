@@ -10,14 +10,9 @@
         }
 
 
-        public void Write(ADFWritingContext Context, StreamGroup Target, T Value)
+        public void WriteData(ADFWritingContext Context, StreamGroup Target, T Value)
         {
-            if (WriteStrategyHelper<T>.Setup(Context, Value, ref Target))
-            {
-                return;
-            }
-
-            using var Writer = new ADFLayeredObjectWriter<T>
+            using var Writer = new ADFManualLayersWriter<T>
             (
                 Context,
                 Target,

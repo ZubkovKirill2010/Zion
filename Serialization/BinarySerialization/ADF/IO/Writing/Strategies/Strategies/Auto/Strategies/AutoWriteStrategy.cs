@@ -9,12 +9,9 @@
             this.Writer = Writer.NotNull();
         }
 
-        public void Write(ADFWritingContext Context, StreamGroup Target, T Value)
+
+        public void WriteData(ADFWritingContext Context, StreamGroup Target, T Value)
         {
-            if (WriteStrategyHelper<T>.Setup(Context, Value, ref Target))
-            {
-                return;
-            }
             Writer(Context, Target, Value);
         }
     }
