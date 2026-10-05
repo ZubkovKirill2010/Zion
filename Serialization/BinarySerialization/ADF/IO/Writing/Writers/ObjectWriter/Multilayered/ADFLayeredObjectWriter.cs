@@ -1,36 +1,83 @@
 ﻿namespace Zion.Serialization.ADF
 {
-    //TODO: Realize ADFLayeredObjectWriter
-    public sealed class ADFLayeredObjectWriter<T> : ADFObjectWriter
+    internal sealed class ADFLayeredObjectWriter<T> : ADFCheckingObjectWriter
     {
         private readonly IADFSerializer<T>[] Serializers;
+        private readonly uint FormatId;
+        private bool IsFirstWriting;
 
-        internal ADFLayeredObjectWriter(ADFWritingContext Context, StreamGroup Target, IADFSerializer<T>[] Serializers)
-            : base(Context, Target)
+
+        internal ADFLayeredObjectWriter(ADFWritingContext Context, StreamGroup Target, IADFSerializer<T>[] Serializers, uint FormatId)
+            : base(Context, Target, default)
         {
-            this.Serializers = Serializers; 
+            var FirstFormat = FormatRegistry[FormatId];
+
+            this.IsFirstWriting = FirstFormat.IsDeferred;
+            this.Serializers = Serializers;
+            this.FormatId = FormatId;
         }
 
 
         internal void Serialize(T Value)
         {
-
+            WriteSerializers(Value);
+            Dispose();
         }
 
 
-        protected override StreamGroup GetStreamGroup(string Name, in uint NameId, in uint FormatId)
+        private void WriteSerializers(T Value)
         {
-            return base.GetStreamGroup(Name, NameId, FormatId);
+            if (IsFirstWriting)
+            {
+                WriteToRecord(Value);
+                IsFirstWriting = false;
+            }
+            else
+            {
+                WriteToSelf(Value, FormatId);
+            }
         }
 
-        protected override void OnWrited(string Name, in uint NameId, in uint FormatId)
+        private void WriteToRecord(T Value)
         {
-            base.OnWrited(Name, NameId, FormatId);
+            using var Writer = new ADFRecordObjectWriter(Context, Data);
+
+            var FormatRegistry = this.FormatRegistry;
+            var Serializers    = this.Serializers;
+            var FormatId       = this.FormatId;
+
+            for (int i = 0; i < Serializers.Length; i++)
+            {
+                var Format = FormatRegistry[FormatId];
+
+                if (!Format.IsDeferred)
+                {
+                    WriteToSelf(Value, FormatId, i);
+                    break;
+                }
+
+                Serializers[i].Write(Writer, Value);
+                FormatRegistry.Clarify(FormatId, Writer.GetParameters());
+                Writer.Reset();
+
+                FormatId = Format.BaseFormat;
+                this.Format = Format;
+            }
         }
 
-        protected override void OnDisposed()
+        private void WriteToSelf(T Value, uint FormatId, int Index = 0)
         {
-            base.OnDisposed();
+            var FormatRegistry = this.FormatRegistry;
+            var Serializers = this.Serializers;
+
+            for (int i = Index; i < Serializers.Length; i++)
+            {
+                var Format = FormatRegistry[FormatId];
+                FormatId = Format.BaseFormat;
+                
+                Serializers[i].Write(this, Value);
+                OnDisposed();
+            }
         }
     }
 }

@@ -10,13 +10,13 @@ namespace Zion.Serialization.ADF
     {
         #region Data
         private protected readonly ADFWritingContext Context;
-
-        private StreamGroup Data;
+        private protected readonly StreamGroup Data;
 
         #endregion
 
         #region Properties
-        protected ADFWritingOptions       Options => Context.Options;
+        protected ADFWritingOptions Options => Context.Options;
+
         private protected WritableRegistries   Registries => Context.Registries;
         private protected TypeAssociation TypeAssociation => Context.TypeAssociation;
         private protected WriteStrategies WriteStrategies => Context.WriteStrategies;

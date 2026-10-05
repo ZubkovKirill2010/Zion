@@ -28,7 +28,13 @@
 
         public static bool ResolveWriteTarget(ADFWritingContext Context, T Value, ref StreamGroup Base)
         {
-            if (Value!.GetType().IsValueType)
+            if (Value is null)
+            {
+                Base.BaseStream.WriteCompressedZero(Context);
+                return true;
+            }
+
+            if (Value.GetType().IsValueType)
             {
                 return false;
             }

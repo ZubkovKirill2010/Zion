@@ -1,6 +1,6 @@
 ﻿namespace Zion.Serialization.ADF
 {
-    public sealed class ADFCheckingObjectWriter : ADFObjectWriter
+    public class ADFCheckingObjectWriter : ADFObjectWriter
     {
         #region Types
         private record struct PostponedParameter(int Index, StreamGroup StreamGroup);
@@ -14,10 +14,9 @@
         #endregion
 
         #region Data
-        private readonly SortedList<PostponedParameter> PostponedItems;
-        private readonly DataFormat Format;
+        private readonly  SortedList<PostponedParameter> PostponedItems;
+        private protected DataFormat Format;
         private int Current;
-
         #endregion
 
         #region Constructors
@@ -81,6 +80,15 @@
             }
 
             Current = Index;
+        }
+
+        protected override void OnDisposed()
+        {
+            if (Current == Format.ParametersCount)
+            {
+                return;
+            }
+            //TODO: Дописать все недостоющие параметры
         }
 
         #endregion

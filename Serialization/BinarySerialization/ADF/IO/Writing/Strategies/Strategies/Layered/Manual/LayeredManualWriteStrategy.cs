@@ -16,10 +16,15 @@
             {
                 return;
             }
-            using (var Writer = new ADFLayeredObjectWriter<T>(Context, Target, Serializers))
-            {
-                Writer.Serialize(Value);
-            }
+
+            using var Writer = new ADFLayeredObjectWriter<T>
+            (
+                Context,
+                Target,
+                Serializers,
+                Context.TypeAssociation[Value!.GetType()]
+            );
+            Writer.Serialize(Value);
         }
 
 

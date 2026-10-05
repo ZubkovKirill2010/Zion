@@ -3,16 +3,14 @@
     public sealed class ADFRecordObjectWriter : ADFObjectWriter
     {
         #region Data
-        private readonly Type Type;
         private readonly List<Parameter> Parameters;
 
         #endregion
 
         #region Constructors
-        internal ADFRecordObjectWriter(ADFWritingContext Context, StreamGroup Target, Type Type)
+        internal ADFRecordObjectWriter(ADFWritingContext Context, StreamGroup Target)
             : base(Context, Target)
         {
-            this.Type = Type;
             Parameters = new();
         }
 
@@ -37,6 +35,11 @@
         {
             Dispose();
             return Parameters.ToArray();
+        }
+
+        internal void Reset()
+        {
+            Parameters.Clear();
         }
 
         #endregion
