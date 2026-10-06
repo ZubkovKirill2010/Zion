@@ -1,4 +1,5 @@
 ﻿using System.Numerics;
+using System.Runtime.InteropServices;
 using Zion.Vectors;
 using Vector2 = Zion.Vectors.Vector2;
 using Vector3 = Zion.Vectors.Vector3;
@@ -139,7 +140,42 @@ namespace Zion.Serialization.ADF
                     Collection, Span,
                     static (Stream, Span, Compression) =>
                     {
+                        Stream.UseSpan
+                        (
+                            Span,
+                            (Target, Source) =>
+                            {
+                                int Count = Source.Length;
+                                int ByteCount = (Count + 7) >> 3;
 
+                                int ByteIndex = 0;
+                                int BitIndex = 0;
+
+                                byte Current = 0;
+
+                                for (int i = 0; i < Count; i++)
+                                {
+                                    if (Source[i])
+                                    {
+                                        Current |= (byte)(1 << BitIndex);
+                                    }
+
+                                    BitIndex++;
+
+                                    if (BitIndex == 8)
+                                    {
+                                        Target[ByteIndex++] = Current;
+                                        Current = 0;
+                                        BitIndex = 0;
+                                    }
+                                }
+
+                                if (BitIndex > 0)
+                                {
+                                    Target[ByteIndex] = Current;
+                                }
+                            }
+                        );
                     }
                 )
             );
@@ -155,15 +191,14 @@ namespace Zion.Serialization.ADF
                     Collection, Span,
                     static (Stream, Span, Compression) =>
                     {
-                        if (Compression)
-                        {
-
-                        }
-                        else
-                        {
-
-                        }
-                        //TODO: Write Span<byte>
+                        Stream.UseSpan
+                        (
+                            Span,
+                            static (Target, Source) =>
+                            {
+                                Source.CopyTo(Target);
+                            }
+                        );
                     }
                 )
             );
@@ -179,15 +214,14 @@ namespace Zion.Serialization.ADF
                     Collection, Span,
                     static (Stream, Span, Compression) =>
                     {
-                        if (Compression)
-                        {
-
-                        }
-                        else
-                        {
-
-                        }
-                        //TODO: Write Span<sbyte>
+                        Stream.UseSpan
+                        (
+                            Span,
+                            static (Target, Source) =>
+                            {
+                                MemoryMarshal.Cast<sbyte, byte>(Source).CopyTo(Target);
+                            }
+                        );
                     }
                 )
             );

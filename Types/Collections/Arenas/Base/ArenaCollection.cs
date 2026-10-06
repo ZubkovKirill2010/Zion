@@ -578,13 +578,9 @@ namespace Zion
         {
             int Limit = GetAbsoluteLimit();
 
-            if (Start < 0)
+            if ((uint)Start > (uint)Limit || (uint)Count > (uint)(Limit - Start))
             {
-                throw new IndexOutOfRangeException($"Start(={Start}) is negative");
-            }
-            if (Start + Count > Limit)
-            {
-                throw new IndexOutOfRangeException($"UseSpan: Start(={Start}) + Count(={Count}) > Limit(={Limit})");
+                throw new IndexOutOfRangeException($"Index out of range: Start(={Start}); Count(={Count}); Limit(={Limit})");
             }
 
             return Source.AsSpan(this, Start, Count);

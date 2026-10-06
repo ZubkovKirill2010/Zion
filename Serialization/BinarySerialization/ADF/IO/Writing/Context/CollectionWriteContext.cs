@@ -24,7 +24,7 @@
             this.Writing = Writing.NotNull();
 
             Capacity = ADFPrimitives.TryGetInfo(FormatId, out var PrimitiveInfo)
-                ? Span.Length * PrimitiveInfo.Size
+                ? Span.Length * PrimitiveInfo.Size + 4
                 : Span.Length * 8;
         }
 
@@ -33,6 +33,8 @@
         {
             var Link = Reference.CreateNewReference(Target.ChildsLength);
             var Stream = Context.Arena.GetStream(Capacity);
+
+            Stream.Write(Span.Length);
 
             if (Context.Compression)
             {
