@@ -1,10 +1,11 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using Zion.Serialization;
 
 namespace Zion.Vectors
 {
-    [Serializable]
+    [Serializable, StructLayout(LayoutKind.Sequential)]
     public struct Vector3 : IBinarySerializable<Vector3>, IEquatable<Vector3>, IEqualityComparer<Vector3>,  IRandomizable<Vector3>
     {
         #region Constants

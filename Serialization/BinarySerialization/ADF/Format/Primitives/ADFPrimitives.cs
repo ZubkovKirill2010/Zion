@@ -83,6 +83,8 @@ namespace Zion.Serialization.ADF
         #region Constants
         public const int Count = 128;
 
+        public const Id Sequence = 1u << 31;
+
         public const Id Boolean = 0;
         public const Id Byte    = 1;
         public const Id SByte   = 2;
@@ -131,6 +133,17 @@ namespace Zion.Serialization.ADF
         public static bool TryGetId(Type Type, out Id Id)
         {
             return PrimitivesId.TryGetValue(Type, out Id);
+        }
+
+        public static bool TryGetInfo(Id Id, out PrimitiveInfo Info)
+        {
+            if (IsPrimitive(Id))
+            {
+                Info = PrimitivesInfo[Id];
+                return true;
+            }
+            Info = default!;
+            return false;
         }
 
         public static bool TryGetInfo(Type Type, out PrimitiveInfo Info)

@@ -1,6 +1,6 @@
 ﻿namespace Zion.Serialization.ADF
 {
-    internal interface IWriteStrategy<T> : IWriteStrategy
+    internal interface IWriteStrategy<in T> : IWriteStrategy
     {
         Type IWriteStrategy.TargetType => typeof(T);
 

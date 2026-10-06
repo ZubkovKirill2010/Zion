@@ -190,7 +190,6 @@ namespace Zion
             return Data.AsSpan();
         }
 
-        
 
         public int IndexOf(bool Item)
         {
@@ -288,8 +287,6 @@ namespace Zion
             ulong Last = Data[LastWordIndex] & LastMask;
             return Target ? Last != 0 : Last != LastMask;
         }
-
-
 
 
         public void Fill(bool Value)
@@ -502,7 +499,6 @@ namespace Zion
 
             return false;
         }
-
 
 
         public byte[] ToByteArray()
