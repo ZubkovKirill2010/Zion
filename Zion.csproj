@@ -30,8 +30,9 @@
 
   <ItemGroup>
     <Folder Include="Serialization\BinarySerialization\ADF\IO\Reading\" />
+    <Folder Include="Serialization\BinarySerialization\ADF\IO\Writing\Writers\Base\ADFWriter\" />
+    <Folder Include="Serialization\BinarySerialization\ADF\IO\Writing\Writers\Base\BaseADFWriter\Main\" />
     <Folder Include="Serialization\BinarySerialization\ADF\IO\Writing\Writers\ObjectWriter\Base\" />
-    <Folder Include="Serialization\BinarySerialization\ADF\IO\Writing\Writers\Base\" />
     <Folder Include="Serialization\BinarySerialization\Serializers\Object\" />
     <Folder Include="STP\Parser\Static\" />
     <Folder Include="STP\Parser\Dynamic\" />
