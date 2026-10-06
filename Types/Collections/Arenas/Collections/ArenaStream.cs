@@ -88,7 +88,6 @@ namespace Zion
             Reserve(sizeof(decimal));
             UseSpan
             (
-                _Position,
                 Span =>
                 {
                     var Destination = MemoryMarshal.Cast<byte, int>(Span);
@@ -149,7 +148,6 @@ namespace Zion
 
             UseSpan
             (
-                _Position,
                 Span => Encoding.UTF8.GetBytes(Value, Span)
             );
 
@@ -183,7 +181,6 @@ namespace Zion
             Reserve(Length + 4);
             UseSpan
             (
-                _Position,
                 Span =>
                 {
                     WriteInt32LittleEndian(Span, Length);
@@ -199,7 +196,6 @@ namespace Zion
             Reserve(3);
             UseSpan
             (
-                _Position,
                 Span =>
                 {
                     Span[0] = Value.R;
@@ -215,7 +211,6 @@ namespace Zion
             Reserve(4);
             UseSpan
             (
-                _Position,
                 Span =>
                 {
                     Span[0] = Value.R;
@@ -233,7 +228,6 @@ namespace Zion
             Reserve(8);
             UseSpan
             (
-                _Position,
                 Span =>
                 {
                     WriteSingleLittleEndian(Span, Value.X);
@@ -248,7 +242,6 @@ namespace Zion
             Reserve(8);
             UseSpan
             (
-                _Position,
                 Span =>
                 {
                     WriteInt32LittleEndian(Span, Value.X);
@@ -263,7 +256,6 @@ namespace Zion
             Reserve(12);
             UseSpan
             (
-                _Position,
                 Span =>
                 {
                     WriteSingleLittleEndian(Span, Value.X);
@@ -279,7 +271,6 @@ namespace Zion
             Reserve(12);
             UseSpan
             (
-                _Position,
                 Span =>
                 {
                     WriteInt32LittleEndian(Span, Value.X);
@@ -296,7 +287,7 @@ namespace Zion
             int Length = Value.Length;
             Reserve(Length);
 
-            UseSpan(_Position, Value.CopyTo);
+            UseSpan( Value.CopyTo);
             
             UpdateLengthFromPosition(_Position + Length);
         }
@@ -319,7 +310,6 @@ namespace Zion
 
             UseSpan
             (
-                _Position,
                 Span =>
                 {
                     while (Value >= 0x80)
@@ -341,7 +331,6 @@ namespace Zion
 
             UseSpan
             (
-                _Position,
                 Span =>
                 {
                     while (Value >= 0x80)
@@ -365,7 +354,6 @@ namespace Zion
 
             UseSpan
             (
-                _Position,
                 Span =>
                 {
                     byte FirstByte = (byte)(Encoded & 0x3F);
@@ -408,7 +396,6 @@ namespace Zion
             Reserve(Size);
             UseSpan
             (
-                _Position,
                 Span =>
                 {
                     Write(Span, Value);
@@ -437,7 +424,7 @@ namespace Zion
 
         public new void UseSpan(int Count, Action<Span<byte>> Action)
         {
-            base.UseSpan(Count, Action);
+            base.UseSpan(_Position, Count, Action);
         }
 
         public new void UseSpan(int Start, int Count, Action<Span<byte>> Action)
@@ -453,7 +440,7 @@ namespace Zion
 
         public new void UseSpan<I>(int Count, I Other, Action<Span<byte>, I> Action) where I : allows ref struct
         {
-            base.UseSpan(Count, Other, Action);
+            base.UseSpan(_Position, Count, Other, Action);
         }
 
         public new void UseSpan<I>(int Start, int Count, I Other, Action<Span<byte>, I> Action) where I : allows ref struct
@@ -469,7 +456,7 @@ namespace Zion
 
         public new R UseSpan<R>(int Count, Func<Span<byte>, R> Function)
         {
-            return base.UseSpan(Count, Function);
+            return base.UseSpan(_Position, Count, Function);
         }
 
         public new R UseSpan<R>(int Start, int Count, Func<Span<byte>, R> Function)
@@ -485,7 +472,7 @@ namespace Zion
 
         public new R UseSpan<I, R>(int Count, I Other, Func<Span<byte>, I, R> Action) where I : allows ref struct
         {
-            return base.UseSpan(Count, Other, Action);
+            return base.UseSpan(_Position, Count, Other, Action);
         }
 
         public new R UseSpan<I, R>(int Start, int Count, I Other, Func<Span<byte>, I, R> Action) where I : allows ref struct
@@ -501,7 +488,7 @@ namespace Zion
 
         public new void UseReadOnlySpan(int Count, Action<ReadOnlySpan<byte>> Action)
         {
-            base.UseReadOnlySpan(Count, Action);
+            base.UseReadOnlySpan(_Position, Count, Action);
         }
 
         public new void UseReadOnlySpan(int Start, int Count, Action<ReadOnlySpan<byte>> Action)
@@ -517,7 +504,7 @@ namespace Zion
 
         public new void UseReadOnlySpan<I>(int Count, I Other, Action<ReadOnlySpan<byte>, I> Action) where I : allows ref struct
         {
-            base.UseReadOnlySpan(Count, Other, Action);
+            base.UseReadOnlySpan(_Position, Count, Other, Action);
         }
 
         public new void UseReadOnlySpan<I>(int Start, int Count, I Other, Action<ReadOnlySpan<byte>, I> Action) where I : allows ref struct
@@ -533,7 +520,7 @@ namespace Zion
 
         public new R UseReadOnlySpan<R>(int Count, Func<ReadOnlySpan<byte>, R> Function)
         {
-            return base.UseReadOnlySpan(Count, Function);
+            return base.UseReadOnlySpan(_Position, Count, Function);
         }
 
         public new R UseReadOnlySpan<R>(int Start, int Count, Func<ReadOnlySpan<byte>, R> Function)
@@ -549,7 +536,7 @@ namespace Zion
 
         public new R UseReadOnlySpan<I, R>(int Count, I Other, Func<ReadOnlySpan<byte>, I, R> Action) where I : allows ref struct
         {
-            return base.UseReadOnlySpan(Count, Other, Action);
+            return base.UseReadOnlySpan(_Position, Count, Other, Action);
         }
 
         public new R UseReadOnlySpan<I, R>(int Start, int Count, I Other, Func<ReadOnlySpan<byte>, I, R> Action) where I : allows ref struct
