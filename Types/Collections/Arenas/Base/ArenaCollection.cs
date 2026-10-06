@@ -140,6 +140,8 @@ namespace Zion
         #endregion
 
         #region ProtectedMethods
+        //TODO: Добавить проверку на выход за virtual Count.
+
         protected void UseSpan(Action<Span<T>> Action)
         {
             Lock.EnterReadLock();
@@ -175,7 +177,28 @@ namespace Zion
             }
         }
 
-        protected void UseSpan(int Start, int Count, Span<T> Other, Action<Span<T>, Span<T>> Action)
+
+        protected void UseSpan<I>(I Other, Action<Span<T>, I> Action) where I : allows ref struct
+        {
+            Lock.EnterReadLock();
+            Modify();
+            try
+            {
+                Span<T> Span = Source.AsSpan(this);
+                Action.Invoke(Span, Other);
+            }
+            finally
+            {
+                Lock.ExitReadLock();
+            }
+        }
+
+        protected void UseSpan<I>(int Count, I Other, Action<Span<T>, I> Action) where I : allows ref struct
+        {
+            UseSpan(0, Count, Other, Action);
+        }
+
+        protected void UseSpan<I>(int Start, int Count, I Other, Action<Span<T>, I> Action) where I : allows ref struct
         {
             Lock.EnterReadLock();
             Modify();
@@ -190,14 +213,71 @@ namespace Zion
             }
         }
 
-        protected void UseSpan(int Start, int Count, ReadOnlySpan<T> Other, Action<Span<T>, ReadOnlySpan<T>> Action)
+
+        protected R UseSpan<R>(Func<Span<T>, R> Function)
+        {
+            Lock.EnterReadLock();
+            Modify();
+            try
+            {
+                Span<T> Span = Source.AsSpan(this);
+                return Function.Invoke(Span);
+            }
+            finally
+            {
+                Lock.ExitReadLock();
+            }
+        }
+
+        protected R UseSpan<R>(int Count, Func<Span<T>, R> Function)
+        {
+            return UseSpan(0, Count, Function);
+        }
+
+        protected R UseSpan<R>(int Start, int Count, Func<Span<T>, R> Function)
         {
             Lock.EnterReadLock();
             Modify();
             try
             {
                 Span<T> Span = Source.AsSpan(this, Start, Count);
-                Action.Invoke(Span, Other);
+                return Function.Invoke(Span);
+            }
+            finally
+            {
+                Lock.ExitReadLock();
+            }
+        }
+
+
+        protected R UseSpan<I, R>(I Other, Func<Span<T>, I, R> Action) where I : allows ref struct where R : allows ref struct
+        {
+            Lock.EnterReadLock();
+            Modify();
+            try
+            {
+                Span<T> Span = Source.AsSpan(this);
+                return Action.Invoke(Span, Other);
+            }
+            finally
+            {
+                Lock.ExitReadLock();
+            }
+        }
+
+        protected R UseSpan<I, R>(int Count, I Other, Func<Span<T>, I, R> Action) where I : allows ref struct where R : allows ref struct
+        {
+            return UseSpan(0, Count, Other, Action);
+        }
+
+        protected R UseSpan<I, R>(int Start, int Count, I Other, Func<Span<T>, I, R> Action) where I : allows ref struct where R : allows ref struct
+        {
+            Lock.EnterReadLock();
+            Modify();
+            try
+            {
+                Span<T> Span = Source.AsSpan(this, Start, Count);
+                return Action.Invoke(Span, Other);
             }
             finally
             {
@@ -239,13 +319,33 @@ namespace Zion
             }
         }
 
-        protected void UseReadOnlySpan(int Start, int Count, ReadOnlySpan<T> Other, Action<ReadOnlySpan<T>, ReadOnlySpan<T>> Action)
+
+        protected void UseReadOnlySpan<I>(I Other, Action<ReadOnlySpan<T>, I> Action) where I : allows ref struct
         {
             Lock.EnterReadLock();
             try
             {
-                ReadOnlySpan<T> ReadOnlySpan = Source.AsSpan(this, Start, Count);
-                Action.Invoke(ReadOnlySpan, Other);
+                ReadOnlySpan<T> Span = Source.AsSpan(this);
+                Action.Invoke(Span, Other);
+            }
+            finally
+            {
+                Lock.ExitReadLock();
+            }
+        }
+
+        protected void UseReadOnlySpan<I>(int Count, I Other, Action<ReadOnlySpan<T>, I> Action) where I : allows ref struct
+        {
+            UseReadOnlySpan(0, Count, Other, Action);
+        }
+
+        protected void UseReadOnlySpan<I>(int Start, int Count, I Other, Action<ReadOnlySpan<T>, I> Action) where I : allows ref struct
+        {
+            Lock.EnterReadLock();
+            try
+            {
+                ReadOnlySpan<T> Span = Source.AsSpan(this, Start, Count);
+                Action.Invoke(Span, Other);
             }
             finally
             {
@@ -254,13 +354,12 @@ namespace Zion
         }
 
 
-        protected I UseSpan<I>(Func<Span<T>, I> Function)
+        protected R UseReadOnlySpan<R>(Func<ReadOnlySpan<T>, R> Function)
         {
             Lock.EnterReadLock();
-            Modify();
             try
             {
-                Span<T> Span = Source.AsSpan(this);
+                ReadOnlySpan<T> Span = Source.AsSpan(this);
                 return Function.Invoke(Span);
             }
             finally
@@ -269,83 +368,18 @@ namespace Zion
             }
         }
 
-        protected I UseSpan<I>(int Count, Func<Span<T>, I> Function)
-        {
-            return UseSpan(0, Count, Function);
-        }
-
-        protected I UseSpan<I>(int Start, int Count, Func<Span<T>, I> Function)
-        {
-            Lock.EnterReadLock();
-            Modify();
-            try
-            {
-                Span<T> Span = Source.AsSpan(this, Start, Count);
-                return Function.Invoke(Span);
-            }
-            finally
-            {
-                Lock.ExitReadLock();
-            }
-        }
-
-        protected I UseSpan<I>(int Start, int Count, Span<T> Other, Func<Span<T>, Span<T>, I> Function)
-        {
-            Lock.EnterReadLock();
-            Modify();
-            try
-            {
-                Span<T> Span = Source.AsSpan(this, Start, Count);
-                return Function.Invoke(Span, Other);
-            }
-            finally
-            {
-                Lock.ExitReadLock();
-            }
-        }
-
-        protected I UseSpan<I>(int Start, int Count, ReadOnlySpan<T> Other, Func<Span<T>, ReadOnlySpan<T>, I> Function)
-        {
-            Lock.EnterReadLock();
-            Modify();
-            try
-            {
-                Span<T> Span = Source.AsSpan(this, Start, Count);
-                return Function.Invoke(Span, Other);
-            }
-            finally
-            {
-                Lock.ExitReadLock();
-            }
-        }
-
-
-        protected I UseReadOnlySpan<I>(Func<ReadOnlySpan<T>, I> Function)
-        {
-            Lock.EnterReadLock();
-            try
-            {
-                ReadOnlySpan<T> ReadOnlySpan = Source.AsSpan(this);
-                return Function.Invoke(ReadOnlySpan);
-            }
-            finally
-            {
-                Lock.ExitReadLock();
-            }
-        }
-
-        protected I UseReadOnlySpan<I>(int Count, Func<ReadOnlySpan<T>, I> Function)
+        protected R UseReadOnlySpan<R>(int Count, Func<ReadOnlySpan<T>, R> Function)
         {
             return UseReadOnlySpan(0, Count, Function);
         }
 
-        protected I UseReadOnlySpan<I>(int Start, int Count, Func<ReadOnlySpan<T>, I> Function)
+        protected R UseReadOnlySpan<R>(int Start, int Count, Func<ReadOnlySpan<T>, R> Function)
         {
             Lock.EnterReadLock();
             try
             {
-                ReadOnlySpan<T> ReadOnlySpan = Source.AsSpan(this, Start, Count);
-                return Function.Invoke(ReadOnlySpan);
+                ReadOnlySpan<T> Span = Source.AsSpan(this, Start, Count);
+                return Function.Invoke(Span);
             }
             finally
             {
@@ -353,13 +387,33 @@ namespace Zion
             }
         }
 
-        protected I UseReadOnlySpan<I>(int Start, int Count, ReadOnlySpan<T> Other, Func<ReadOnlySpan<T>, ReadOnlySpan<T>, I> Function)
+
+        protected R UseReadOnlySpan<I, R>(I Other, Func<ReadOnlySpan<T>, I, R> Action) where I : allows ref struct where R : allows ref struct
         {
             Lock.EnterReadLock();
             try
             {
-                ReadOnlySpan<T> ReadOnlySpan = Source.AsSpan(this, Start, Count);
-                return Function.Invoke(ReadOnlySpan, Other);
+                ReadOnlySpan<T> Span = Source.AsSpan(this);
+                return Action.Invoke(Span, Other);
+            }
+            finally
+            {
+                Lock.ExitReadLock();
+            }
+        }
+
+        protected R UseReadOnlySpan<I, R>(int Count, I Other, Func<ReadOnlySpan<T>, I, R> Action) where I : allows ref struct where R : allows ref struct
+        {
+            return UseReadOnlySpan(0, Count, Other, Action);
+        }
+
+        protected R UseReadOnlySpan<I, R>(int Start, int Count, I Other, Func<ReadOnlySpan<T>, I, R> Action) where I : allows ref struct where R : allows ref struct
+        {
+            Lock.EnterReadLock();
+            try
+            {
+                ReadOnlySpan<T> Span = Source.AsSpan(this, Start, Count);
+                return Action.Invoke(Span, Other);
             }
             finally
             {

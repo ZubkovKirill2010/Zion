@@ -1210,15 +1210,7 @@ namespace Zion.Serialization.ADF
                     Collection, Span,
                     static (Stream, Span, Compression) =>
                     {
-                        if (Compression)
-                        {
 
-                        }
-                        else
-                        {
-
-                        }
-                        //TODO: Write Span<bool>
                     }
                 )
             );
