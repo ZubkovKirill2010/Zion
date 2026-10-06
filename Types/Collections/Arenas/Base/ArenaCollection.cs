@@ -128,6 +128,9 @@ namespace Zion
 
         #region AbstractMethods
         protected abstract IEnumerator<int> GetIndexEnumerator();
+
+        protected abstract int GetSpanLimit();
+
         #endregion
 
         #region PublicMethods
@@ -140,15 +143,13 @@ namespace Zion
         #endregion
 
         #region ProtectedMethods
-        //TODO: Добавить проверку на выход за virtual Count.
-
         protected void UseSpan(Action<Span<T>> Action)
         {
             Lock.EnterReadLock();
             Modify();
             try
             {
-                Span<T> Span = Source.AsSpan(this);
+                Span<T> Span = AsSpan();
                 Action.Invoke(Span);
             }
             finally
@@ -168,7 +169,7 @@ namespace Zion
             Modify();
             try
             {
-                Span<T> Span = Source.AsSpan(this, Start, Count);
+                Span<T> Span = AsSpan(Start, Count);
                 Action.Invoke(Span);
             }
             finally
@@ -184,7 +185,7 @@ namespace Zion
             Modify();
             try
             {
-                Span<T> Span = Source.AsSpan(this);
+                Span<T> Span = AsSpan();
                 Action.Invoke(Span, Other);
             }
             finally
@@ -204,7 +205,7 @@ namespace Zion
             Modify();
             try
             {
-                Span<T> Span = Source.AsSpan(this, Start, Count);
+                Span<T> Span = AsSpan(Start, Count);
                 Action.Invoke(Span, Other);
             }
             finally
@@ -220,7 +221,7 @@ namespace Zion
             Modify();
             try
             {
-                Span<T> Span = Source.AsSpan(this);
+                Span<T> Span = AsSpan();
                 return Function.Invoke(Span);
             }
             finally
@@ -240,7 +241,7 @@ namespace Zion
             Modify();
             try
             {
-                Span<T> Span = Source.AsSpan(this, Start, Count);
+                Span<T> Span = AsSpan(Start, Count);
                 return Function.Invoke(Span);
             }
             finally
@@ -256,7 +257,7 @@ namespace Zion
             Modify();
             try
             {
-                Span<T> Span = Source.AsSpan(this);
+                Span<T> Span = AsSpan();
                 return Action.Invoke(Span, Other);
             }
             finally
@@ -276,7 +277,7 @@ namespace Zion
             Modify();
             try
             {
-                Span<T> Span = Source.AsSpan(this, Start, Count);
+                Span<T> Span = AsSpan(Start, Count);
                 return Action.Invoke(Span, Other);
             }
             finally
@@ -291,7 +292,7 @@ namespace Zion
             Lock.EnterReadLock();
             try
             {
-                ReadOnlySpan<T> ReadOnlySpan = Source.AsSpan(this);
+                ReadOnlySpan<T> ReadOnlySpan = AsSpan();
                 Action.Invoke(ReadOnlySpan);
             }
             finally
@@ -310,7 +311,7 @@ namespace Zion
             Lock.EnterReadLock();
             try
             {
-                ReadOnlySpan<T> ReadOnlySpan = Source.AsSpan(this, Start, Count);
+                ReadOnlySpan<T> ReadOnlySpan = AsSpan(Start, Count);
                 Action.Invoke(ReadOnlySpan);
             }
             finally
@@ -325,7 +326,7 @@ namespace Zion
             Lock.EnterReadLock();
             try
             {
-                ReadOnlySpan<T> Span = Source.AsSpan(this);
+                ReadOnlySpan<T> Span = AsSpan();
                 Action.Invoke(Span, Other);
             }
             finally
@@ -344,7 +345,7 @@ namespace Zion
             Lock.EnterReadLock();
             try
             {
-                ReadOnlySpan<T> Span = Source.AsSpan(this, Start, Count);
+                ReadOnlySpan<T> Span = AsSpan(Start, Count);
                 Action.Invoke(Span, Other);
             }
             finally
@@ -359,7 +360,7 @@ namespace Zion
             Lock.EnterReadLock();
             try
             {
-                ReadOnlySpan<T> Span = Source.AsSpan(this);
+                ReadOnlySpan<T> Span = AsSpan();
                 return Function.Invoke(Span);
             }
             finally
@@ -378,7 +379,7 @@ namespace Zion
             Lock.EnterReadLock();
             try
             {
-                ReadOnlySpan<T> Span = Source.AsSpan(this, Start, Count);
+                ReadOnlySpan<T> Span = AsSpan(Start, Count);
                 return Function.Invoke(Span);
             }
             finally
@@ -393,7 +394,7 @@ namespace Zion
             Lock.EnterReadLock();
             try
             {
-                ReadOnlySpan<T> Span = Source.AsSpan(this);
+                ReadOnlySpan<T> Span = AsSpan();
                 return Action.Invoke(Span, Other);
             }
             finally
@@ -412,7 +413,7 @@ namespace Zion
             Lock.EnterReadLock();
             try
             {
-                ReadOnlySpan<T> Span = Source.AsSpan(this, Start, Count);
+                ReadOnlySpan<T> Span = AsSpan(Start, Count);
                 return Action.Invoke(Span, Other);
             }
             finally
@@ -565,6 +566,39 @@ namespace Zion
             {
                 throw new ArgumentOutOfRangeException($"Index(={Index}) out of range [0..{Length})");
             }
+        }
+
+        private Span<T> AsSpan()
+        {
+            int Limit = GetAbsoluteLimit();
+            return Source.AsSpan(this, 0, Limit);
+        }
+
+        private Span<T> AsSpan(int Start, int Count)
+        {
+            int Limit = GetAbsoluteLimit();
+
+            if (Start < 0)
+            {
+                throw new IndexOutOfRangeException($"Start(={Start}) is negative");
+            }
+            if (Start + Count > Limit)
+            {
+                throw new IndexOutOfRangeException($"UseSpan: Start(={Start}) + Count(={Count}) > Limit(={Limit})");
+            }
+
+            return Source.AsSpan(this, Start, Count);
+        }
+
+
+        private int GetAbsoluteLimit()
+        {
+            int Limit  = GetSpanLimit();
+            int Length = this.Length;
+
+            return Limit < 0 || Limit > this.Length
+                ? Length
+                : Limit;
         }
 
         #endregion

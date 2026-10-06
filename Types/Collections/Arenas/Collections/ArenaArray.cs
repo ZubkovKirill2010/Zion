@@ -24,6 +24,18 @@ namespace Zion
         }
 
 
+        protected override int GetSpanLimit() => Length;
+
+        protected override IEnumerator<int> GetIndexEnumerator()
+        {
+            int Count = Length;
+            for (int i = 0; i < Count; i++)
+            {
+                yield return i;
+            }
+        }
+
+
         public T First()
         {
             return this[0];
@@ -216,16 +228,6 @@ namespace Zion
         public new void CopyTo(Span<T> Destination)
         {
             base.CopyTo(Destination);
-        }
-
-
-        protected override IEnumerator<int> GetIndexEnumerator()
-        {
-            int Count = Length;
-            for (int i = 0; i < Count; i++)
-            {
-                yield return i;
-            }
         }
     }
 }

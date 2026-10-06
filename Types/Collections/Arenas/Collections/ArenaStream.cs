@@ -49,6 +49,18 @@ namespace Zion
         }
 
 
+        protected override int GetSpanLimit() => -1;
+
+        protected override IEnumerator<int> GetIndexEnumerator()
+        {
+            int Count = Length;
+            for (int i = 0; i < Count; i++)
+            {
+                yield return i;
+            }
+        }
+
+
         public void Write(bool Value)
         {
             Write(Value ? (byte)1 : (byte)0);
@@ -569,16 +581,6 @@ namespace Zion
                     : Math.Max(base.Length + 256, Required);
 
                 Expand(NewSize);
-            }
-        }
-
-
-        protected override IEnumerator<int> GetIndexEnumerator()
-        {
-            int Count = Length;
-            for (int i = 0; i < Count; i++)
-            {
-                yield return i;
             }
         }
 

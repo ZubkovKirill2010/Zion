@@ -7,12 +7,11 @@ namespace Zion
             get;
             private set
             {
+                //Check: Resize logic
                 field = value;
                 Modify();
             }
         }
-
-        public int Capacity => Count;
 
 
         public ArenaBuffer(ArenaSpan<T> Data) : base(Data) { }
@@ -28,6 +27,18 @@ namespace Zion
         {
             get => base[Index];
             set => base[Index] = value;
+        }
+
+
+        protected override int GetSpanLimit() => Count;
+
+        protected override IEnumerator<int> GetIndexEnumerator()
+        {
+            int Count = this.Count;
+            for (int i = 0; i < Count; i++)
+            {
+                yield return i;
+            }
         }
 
 
@@ -379,16 +390,6 @@ namespace Zion
         public new void CopyTo(Span<T> Destination)
         {
             CopyTo(Destination);
-        }
-
-
-        protected override IEnumerator<int> GetIndexEnumerator()
-        {
-            int Count = this.Count;
-            for (int i = 0; i < Count; i++)
-            {
-                yield return i;
-            }
         }
 
 

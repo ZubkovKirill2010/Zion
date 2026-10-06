@@ -22,6 +22,17 @@ namespace Zion
         public ArenaStack(ArenaSpan<T> Data) : base(Data) { }
 
 
+        protected override int GetSpanLimit() => Count;
+
+        protected override IEnumerator<int> GetIndexEnumerator()
+        {
+            for (int i = Count - 1; i >= 0; i--)
+            {
+                yield return i;
+            }
+        }
+
+
         public void Push(T Item)
         {
             this[Count++] = Item;
@@ -306,15 +317,6 @@ namespace Zion
         public new R UseReadOnlySpan<I, R>(int Start, int Count, I Other, Func<ReadOnlySpan<T>, I, R> Action) where I : allows ref struct
         {
             return base.UseReadOnlySpan(Start, Count, Other, Action);
-        }
-
-
-        protected override IEnumerator<int> GetIndexEnumerator()
-        {
-            for (int i = Count - 1; i >= 0; i--)
-            {
-                yield return i;
-            }
         }
     }
 }

@@ -21,6 +21,14 @@
         public ArenaQueue(ArenaSpan<T> Data) : base(Data) { }
 
 
+        protected override int GetSpanLimit() => -1;
+
+        protected override IEnumerator<int> GetIndexEnumerator()
+        {
+            throw new NotImplementedException(); //Do
+        }
+
+
         public void Enqueue(T Item)
         {
             Add(Item);
@@ -91,12 +99,6 @@
         }
 
         public Queue<T> ToQueue()
-        {
-            throw new NotImplementedException(); //Do
-        }
-
-
-        protected override IEnumerator<int> GetIndexEnumerator()
         {
             throw new NotImplementedException(); //Do
         }

@@ -33,6 +33,18 @@ namespace Zion
         }
 
 
+        protected override int GetSpanLimit() => Count;
+
+        protected override IEnumerator<int> GetIndexEnumerator()
+        {
+            int Count = this.Count;
+            for (int i = 0; i < Count; i++)
+            {
+                yield return i;
+            }
+        }
+
+
         public void Add(T Item)
         {
             int Index = Count++;
@@ -698,16 +710,6 @@ namespace Zion
         public new void EnsureCapacity(int Capacity)
         {
             base.EnsureCapacity(Capacity);
-        }
-
-
-        protected override IEnumerator<int> GetIndexEnumerator()
-        {
-            int Count = this.Count;
-            for (int i = 0; i < Count; i++)
-            {
-                yield return i;
-            }
         }
 
 
