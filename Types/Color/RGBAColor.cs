@@ -1,8 +1,10 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Runtime.InteropServices;
 using Zion.Serialization;
 
 namespace Zion
 {
+    [Serializable, StructLayout(LayoutKind.Sequential)]
     public struct RGBAColor : IRGBColor, IBinarySerializable<RGBAColor>
     {
         public byte R { get; set; }

@@ -1,11 +1,12 @@
 ﻿using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
+using System.Runtime.InteropServices;
 using Zion.Serialization;
 
 namespace Zion
 {
-    [Serializable]
+    [Serializable, StructLayout(LayoutKind.Sequential)]
     public struct RGBColor : IBinarySerializable<RGBColor>, IEnumerable<byte>
     {
         public int BinarySize => 3;

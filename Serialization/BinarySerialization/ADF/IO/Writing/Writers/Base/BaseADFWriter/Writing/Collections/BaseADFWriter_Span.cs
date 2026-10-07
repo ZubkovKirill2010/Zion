@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using System.Buffers.Binary;
+using System.Numerics;
 using System.Runtime.InteropServices;
 using Zion.Vectors;
 using Vector2 = Zion.Vectors.Vector2;
@@ -237,15 +238,25 @@ namespace Zion.Serialization.ADF
                     Collection, Span,
                     static (Stream, Span, Compression) =>
                     {
-                        if (Compression)
-                        {
-
-                        }
-                        else
-                        {
-
-                        }
-                        //TODO: Write Span<short>
+                        Stream.UseSpan
+                        (
+                            Span,
+                            static (Target, Source) =>
+                            {
+                                if (BitConverter.IsLittleEndian)
+                                {
+                                    MemoryMarshal.Cast<short, byte>(Source).CopyTo(Target);
+                                }
+                                else
+                                {
+                                    BinaryPrimitives.ReverseEndianness
+                                    (
+                                        Source,
+                                        MemoryMarshal.Cast<byte, short>(Target)
+                                    );
+                                }
+                            }
+                        );   
                     }
                 )
             );
@@ -263,13 +274,30 @@ namespace Zion.Serialization.ADF
                     {
                         if (Compression)
                         {
-
+                            //TODO: WriteCompressed<int>
                         }
                         else
                         {
-
+                            Stream.UseSpan
+                            (
+                                Span,
+                                static (Target, Source) =>
+                                {
+                                    if (BitConverter.IsLittleEndian)
+                                    {
+                                        MemoryMarshal.Cast<int, byte>(Source).CopyTo(Target);
+                                    }
+                                    else
+                                    {
+                                        BinaryPrimitives.ReverseEndianness
+                                        (
+                                            Source,
+                                            MemoryMarshal.Cast<byte, int>(Target)
+                                        );
+                                    }
+                                }
+                            );
                         }
-                        //TODO: Write Span<int>
                     }
                 )
             );
@@ -287,13 +315,30 @@ namespace Zion.Serialization.ADF
                     {
                         if (Compression)
                         {
-
+                            //TODO: WriteCompressed<long>
                         }
                         else
                         {
-
+                            Stream.UseSpan
+                            (
+                                Span,
+                                static (Target, Source) =>
+                                {
+                                    if (BitConverter.IsLittleEndian)
+                                    {
+                                        MemoryMarshal.Cast<long, byte>(Source).CopyTo(Target);
+                                    }
+                                    else
+                                    {
+                                        BinaryPrimitives.ReverseEndianness
+                                        (
+                                            Source,
+                                            MemoryMarshal.Cast<byte, long>(Target)
+                                        );
+                                    }
+                                }
+                            );
                         }
-                        //TODO: Write Span<long>
                     }
                 )
             );
@@ -309,15 +354,25 @@ namespace Zion.Serialization.ADF
                     Collection, Span,
                     static (Stream, Span, Compression) =>
                     {
-                        if (Compression)
-                        {
-
-                        }
-                        else
-                        {
-
-                        }
-                        //TODO: Write Span<ushort>
+                        Stream.UseSpan
+                        (
+                            Span,
+                            static (Target, Source) =>
+                            {
+                                if (BitConverter.IsLittleEndian)
+                                {
+                                    MemoryMarshal.Cast<ushort, byte>(Source).CopyTo(Target);
+                                }
+                                else
+                                {
+                                    BinaryPrimitives.ReverseEndianness
+                                    (
+                                        Source,
+                                        MemoryMarshal.Cast<byte, ushort>(Target)
+                                    );
+                                }
+                            }
+                        );
                     }
                 )
             );
@@ -335,13 +390,30 @@ namespace Zion.Serialization.ADF
                     {
                         if (Compression)
                         {
-
+                            //TODO: WriteCompressed<uint>
                         }
                         else
                         {
-
+                            Stream.UseSpan
+                            (
+                                Span,
+                                static (Target, Source) =>
+                                {
+                                    if (BitConverter.IsLittleEndian)
+                                    {
+                                        MemoryMarshal.Cast<uint, byte>(Source).CopyTo(Target);
+                                    }
+                                    else
+                                    {
+                                        BinaryPrimitives.ReverseEndianness
+                                        (
+                                            Source,
+                                            MemoryMarshal.Cast<byte, uint>(Target)
+                                        );
+                                    }
+                                }
+                            );
                         }
-                        //TODO: Write Span<uint>
                     }
                 )
             );
@@ -359,13 +431,30 @@ namespace Zion.Serialization.ADF
                     {
                         if (Compression)
                         {
-
+                            //TODO: WriteCompressed<ulong>
                         }
                         else
                         {
-
+                            Stream.UseSpan
+                            (
+                                Span,
+                                static (Target, Source) =>
+                                {
+                                    if (BitConverter.IsLittleEndian)
+                                    {
+                                        MemoryMarshal.Cast<ulong, byte>(Source).CopyTo(Target);
+                                    }
+                                    else
+                                    {
+                                        BinaryPrimitives.ReverseEndianness
+                                        (
+                                            Source,
+                                            MemoryMarshal.Cast<byte, ulong>(Target)
+                                        );
+                                    }
+                                }
+                            );
                         }
-                        //TODO: Write Span<ulong>
                     }
                 )
             );
@@ -381,15 +470,25 @@ namespace Zion.Serialization.ADF
                     Collection, Span,
                     static (Stream, Span, Compression) =>
                     {
-                        if (Compression)
-                        {
-
-                        }
-                        else
-                        {
-
-                        }
-                        //TODO: Write Span<char>
+                        Stream.UseSpan
+                        (
+                            Span,
+                            static (Target, Source) =>
+                            {
+                                if (BitConverter.IsLittleEndian)
+                                {
+                                    MemoryMarshal.Cast<char, byte>(Source).CopyTo(Target);
+                                }
+                                else
+                                {
+                                    BinaryPrimitives.ReverseEndianness
+                                    (
+                                        MemoryMarshal.Cast<char, ushort>(Source),
+                                        MemoryMarshal.Cast<byte, ushort>(Target)
+                                    );
+                                }
+                            }
+                        );
                     }
                 )
             );
@@ -599,13 +698,19 @@ namespace Zion.Serialization.ADF
                     {
                         if (Compression)
                         {
-
+                            //TODO: Write Span<RGBColor>
                         }
                         else
                         {
-
+                            Stream.UseSpan
+                            (
+                                Span,
+                                static (Target, Source) =>
+                                {
+                                    MemoryMarshal.Cast<RGBColor, byte>(Source).CopyTo(Target);
+                                }
+                            );
                         }
-                        //TODO: Write Span<RGBColor>
                     }
                 )
             );
@@ -623,13 +728,19 @@ namespace Zion.Serialization.ADF
                     {
                         if (Compression)
                         {
-
+                            //TODO: Write Span<RGBAColor>
                         }
                         else
                         {
-
+                            Stream.UseSpan
+                            (
+                                Span,
+                                static (Target, Source) =>
+                                {
+                                    MemoryMarshal.Cast<RGBAColor, byte>(Source).CopyTo(Target);
+                                }
+                            );
                         }
-                        //TODO: Write Span<RGBAColor>
                     }
                 )
             );
@@ -647,13 +758,30 @@ namespace Zion.Serialization.ADF
                     {
                         if (Compression)
                         {
-
+                            //TODO: Write Span<Vector2>
                         }
                         else
                         {
-
+                            Stream.UseSpan
+                            (
+                                Span,
+                                static (Target, Source) =>
+                                {
+                                    if (BitConverter.IsLittleEndian)
+                                    {
+                                        MemoryMarshal.Cast<Vector2, byte>(Source).CopyTo(Target);
+                                    }
+                                    else
+                                    {
+                                        BinaryPrimitives.ReverseEndianness
+                                        (
+                                            MemoryMarshal.Cast<Vector2, int>(Source),
+                                            MemoryMarshal.Cast<byte, int>(Target)
+                                        );
+                                    }
+                                }
+                            );
                         }
-                        //TODO: Write Span<Vector2>
                     }
                 )
             );
@@ -671,13 +799,30 @@ namespace Zion.Serialization.ADF
                     {
                         if (Compression)
                         {
-
+                            //TODO: Write Span<Vector2Int>
                         }
                         else
                         {
-
+                            Stream.UseSpan
+                            (
+                                Span,
+                                static (Target, Source) =>
+                                {
+                                    if (BitConverter.IsLittleEndian)
+                                    {
+                                        MemoryMarshal.Cast<Vector2Int, byte>(Source).CopyTo(Target);
+                                    }
+                                    else
+                                    {
+                                        BinaryPrimitives.ReverseEndianness
+                                        (
+                                            MemoryMarshal.Cast<Vector2Int, int>(Source),
+                                            MemoryMarshal.Cast<byte, int>(Target)
+                                        );
+                                    }
+                                }
+                            );
                         }
-                        //TODO: Write Span<Vector2Int>
                     }
                 )
             );
@@ -695,13 +840,30 @@ namespace Zion.Serialization.ADF
                     {
                         if (Compression)
                         {
-
+                            //TODO: Write Span<Vector3>
                         }
                         else
                         {
-
+                            Stream.UseSpan
+                            (
+                                Span,
+                                static (Target, Source) =>
+                                {
+                                    if (BitConverter.IsLittleEndian)
+                                    {
+                                        MemoryMarshal.Cast<Vector3, byte>(Source).CopyTo(Target);
+                                    }
+                                    else
+                                    {
+                                        BinaryPrimitives.ReverseEndianness
+                                        (
+                                            MemoryMarshal.Cast<Vector3, int>(Source),
+                                            MemoryMarshal.Cast<byte, int>(Target)
+                                        );
+                                    }
+                                }
+                            );
                         }
-                        //TODO: Write Span<Vector3>
                     }
                 )
             );
@@ -719,13 +881,30 @@ namespace Zion.Serialization.ADF
                     {
                         if (Compression)
                         {
-
+                            //TODO: Write Span<Vector3Int>
                         }
                         else
                         {
-
+                            Stream.UseSpan
+                            (
+                                Span,
+                                static (Target, Source) =>
+                                {
+                                    if (BitConverter.IsLittleEndian)
+                                    {
+                                        MemoryMarshal.Cast<Vector3Int, byte>(Source).CopyTo(Target);
+                                    }
+                                    else
+                                    {
+                                        BinaryPrimitives.ReverseEndianness
+                                        (
+                                            MemoryMarshal.Cast<Vector3Int, int>(Source),
+                                            MemoryMarshal.Cast<byte, int>(Target)
+                                        );
+                                    }
+                                }
+                            );
                         }
-                        //TODO: Write Span<Vector3Int>
                     }
                 )
             );
