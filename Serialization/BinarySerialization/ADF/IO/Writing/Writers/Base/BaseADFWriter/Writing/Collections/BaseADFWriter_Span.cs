@@ -294,14 +294,30 @@ namespace Zion.Serialization.ADF
 
         private void Write(string Name, object? Collection, ReadOnlySpan<string> Span)
         {
-            WriteSpan<string>
-            (
-                new
-                (
-                    Name, ADFPrimitives.String,
-                    Collection, Span, SequenceWriteHelper.Write
-                )
-            );
+            ThrowIfDisposed();
+
+            var Registry = StringRegistry;
+
+            var NameId = StringRegistry.GetOrAdd(Name);
+            var Target = GetStreamGroup(Name, in NameId, ADFPrimitives.String | ADFPrimitives.Sequence);
+            var Stream = Target.BaseStream;
+
+            if (Context.Compression)
+            {
+                for (int i = 0; i < Span.Length; i++)
+                {
+                    Stream.Write7BitEncodedUInt(Registry.GetOrAdd(Span[i]));
+                }
+            }
+            else
+            {
+                for (int i = 0; i < Span.Length; i++)
+                {
+                    Stream.Write(Registry.GetOrAdd(Span[i]));
+                }
+            }
+
+            OnWrited(Name, in NameId, ADFPrimitives.String | ADFPrimitives.Sequence);
         }
 
         private void Write(string Name, object? Collection, ReadOnlySpan<Half> Span)
@@ -354,15 +370,13 @@ namespace Zion.Serialization.ADF
             }
             else
             {
-                var Base = Target.BaseStream;
+                var Base   = Target.BaseStream;
                 var Stream = Context.Arena.GetStream(Span.Length << 3);
                 var Offset = Target.ChildsLength;
 
                 for (int i = 0; i < Span.Length; i++)
                 {
-                    var Link = Reference.CreateNewReference(Offset + Stream.Length);
-
-                    Base.Write(Link);
+                    Base.Write(Reference.CreateNewReference(Offset + Stream.Length));
                     Stream.Write(Span[i]);
                 }
 

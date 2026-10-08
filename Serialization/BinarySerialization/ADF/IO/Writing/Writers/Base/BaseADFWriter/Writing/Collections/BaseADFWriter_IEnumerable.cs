@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using Microsoft.Win32;
+using System.Numerics;
 using Zion.Vectors;
 using Vector2 = Zion.Vectors.Vector2;
 using Vector3 = Zion.Vectors.Vector3;
@@ -292,15 +293,32 @@ namespace Zion.Serialization.ADF
 
         private void Write(string Name, IEnumerator<string> Enumerator)
         {
-            //TODO: Write IEnumerator<string>
-            //WriteEnumerator<string>
-            //(
-            //    new
-            //    (
-            //        Name, ADFPrimitives.String,
-            //        Enumerator, SequenceWriteHelper.Write
-            //    )
-            //);
+            ThrowIfDisposed();
+
+            var Registry = StringRegistry;
+
+            var NameId = StringRegistry.GetOrAdd(Name);
+            var Target = GetStreamGroup(Name, in NameId, ADFPrimitives.String | ADFPrimitives.Sequence);
+            var Stream = Target.BaseStream;
+
+            if (Context.Compression)
+            {
+                while (Enumerator.MoveNext())
+                {
+                    var Id = Registry.GetOrAdd(Enumerator.Current);
+                    Stream.Write7BitEncodedUInt(Id);
+                }
+            }
+            else
+            {
+                while (Enumerator.MoveNext())
+                {
+                    var Id = Registry.GetOrAdd(Enumerator.Current);
+                    Stream.Write(Id);
+                }
+            }
+
+            OnWrited(Name, in NameId, ADFPrimitives.String | ADFPrimitives.Sequence);
         }
 
         private void Write(string Name, IEnumerator<Half> Enumerator)
@@ -341,7 +359,24 @@ namespace Zion.Serialization.ADF
 
         private void Write(string Name, IEnumerator<BigInteger> Enumerator)
         {
-            //TODO: Write IEnumerator<BigInteger>
+            ThrowIfDisposed();
+
+            var NameId = StringRegistry.GetOrAdd(Name);
+            var Target = GetStreamGroup(Name, in NameId, ADFPrimitives.BigInteger | ADFPrimitives.Sequence);
+
+            var Base   = Target.BaseStream;
+            var Stream = Context.Arena.GetStream(64);
+            var Offset = Target.ChildsLength;
+
+            while (Enumerator.MoveNext())
+            {
+                Base.Write(Reference.CreateNewReference(Offset + Stream.Length));
+                Stream.Write(Enumerator.Current);
+            }
+
+            Target.Add(Stream);
+
+            OnWrited(Name, in NameId, ADFPrimitives.BigInteger | ADFPrimitives.Sequence);
         }
 
         private void Write(string Name, IEnumerator<RGBColor> Enumerator)

@@ -6,8 +6,6 @@ namespace Zion.Serialization.ADF
     {
         extension<T>(List<T> List)
         {
-            //TODO: Check ranges
-
             public Span<T> AsSpan()
             {
                 return CollectionsMarshal.AsSpan(List);
@@ -15,7 +13,24 @@ namespace Zion.Serialization.ADF
 
             public Span<T> AsSpan(int Start, int Count)
             {
-                return CollectionsMarshal.AsSpan(List).Slice(Start, Count);
+                var Span = CollectionsMarshal.AsSpan(List);
+
+                if (Start < 0)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(Start), "Start is negative");
+                }
+
+                if (Count < 0)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(Count), "Count is negative");
+                }
+
+                if (Start > Span.Length - Count)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(Start), "Start + Count exceeds list size");
+                }
+
+                return Span.Slice(Start, Count);
             }
         }
     }

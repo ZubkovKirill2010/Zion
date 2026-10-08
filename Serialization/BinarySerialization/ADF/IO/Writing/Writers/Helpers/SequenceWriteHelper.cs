@@ -100,7 +100,7 @@ namespace Zion.Serialization.ADF
         {
             if (Compression)
             {
-                //TODO: Write Enumerator<int>
+                //TODO: Write Span<int>
             }
             else
             {
@@ -130,7 +130,7 @@ namespace Zion.Serialization.ADF
         {
             if (Compression)
             {
-                //TODO: Write Enumerator<long>
+                //TODO: Write Span<long>
             }
             else
             {
@@ -183,7 +183,7 @@ namespace Zion.Serialization.ADF
         {
             if (Compression)
             {
-                //TODO: Write Enumerator<uint>
+                //TODO: Write Span<uint>
             }
             else
             {
@@ -213,7 +213,7 @@ namespace Zion.Serialization.ADF
         {
             if (Compression)
             {
-                //TODO: Write Enumerator<ulong>
+                //TODO: Write Span<ulong>
             }
             else
             {
@@ -296,7 +296,7 @@ namespace Zion.Serialization.ADF
         {
             if (Compression)
             {
-                //TODO: Write Enumerator<double>
+                //TODO: Write Span<double>
             }
             else
             {
@@ -326,7 +326,7 @@ namespace Zion.Serialization.ADF
         {
             if (Compression)
             {
-                //TODO: Write Enumerator<decimal>
+                //TODO: Write Span<decimal>
             }
             else
             {
@@ -354,34 +354,11 @@ namespace Zion.Serialization.ADF
             }
         }
 
-        public static void Write(ArenaStream Stream, ReadOnlySpan<string> Span, bool Compression)
-        {
-            //Optimize: Write in Enumerator
-            var Registry = StringRegistry;
-
-            if (Compression)
-            {
-                foreach (var String in Span)
-                {
-                    var Id = Registry.GetOrAdd(String);
-                    Stream.Write7BitEncodedUInt(Id);
-                }
-            }
-            else
-            {
-                foreach (var String in Span)
-                {
-                    var Id = Registry.GetOrAdd(String);
-                    Stream.Write7BitEncodedUInt(Id);
-                }
-            }
-        }
-
         public static void Write(ArenaStream Stream, ReadOnlySpan<Half> Span, bool Compression)
         {
             if (Compression)
             {
-                //TODO: Write Enumerator<Half>
+                //TODO: Write Span<Half>
             }
             else
             {
@@ -411,7 +388,7 @@ namespace Zion.Serialization.ADF
         {
             if (Compression)
             {
-                //TODO: Write Enumerator<Index>
+                //TODO: Write Span<Index>
             }
             else
             {
@@ -441,7 +418,7 @@ namespace Zion.Serialization.ADF
         {
             if (Compression)
             {
-                //TODO: Write Enumerator<Range>
+                //TODO: Write Span<Range>
             }
             else
             {
@@ -467,55 +444,35 @@ namespace Zion.Serialization.ADF
             }
         }
 
-        //---------------
-        public static void Write(ArenaStream Stream, ReadOnlySpan<BigInteger> Span, bool Compression)
-        {
-            
-        }
-
         public static void Write(ArenaStream Stream, ReadOnlySpan<RGBColor> Span, bool Compression)
         {
-            if (Compression)
-            {
-                //TODO: Write Enumerator<RGBColor>
-            }
-            else
-            {
-                Stream.UseSpan
-                (
-                    Span,
-                    static (Target, Source) =>
-                    {
-                        MemoryMarshal.AsBytes(Source).CopyTo(Target);
-                    }
-                );
-            }
+            Stream.UseSpan
+            (
+                Span,
+                static (Target, Source) =>
+                {
+                    MemoryMarshal.AsBytes(Source).CopyTo(Target);
+                }
+            );
         }
 
         public static void Write(ArenaStream Stream, ReadOnlySpan<RGBAColor> Span, bool Compression)
         {
-            if (Compression)
-            {
-                //TODO: Write Enumerator<RGBAColor>
-            }
-            else
-            {
-                Stream.UseSpan
-                (
-                    Span,
-                    static (Target, Source) =>
-                    {
-                        MemoryMarshal.AsBytes(Source).CopyTo(Target);
-                    }
-                );
-            }
+            Stream.UseSpan
+            (
+                Span,
+                static (Target, Source) =>
+                {
+                    MemoryMarshal.AsBytes(Source).CopyTo(Target);
+                }
+            );
         }
 
         public static void Write(ArenaStream Stream, ReadOnlySpan<Vector2> Span, bool Compression)
         {
             if (Compression)
             {
-                //TODO: Write Enumerator<Vector2>
+                //TODO: Write Span<Vector2>
             }
             else
             {
@@ -545,7 +502,7 @@ namespace Zion.Serialization.ADF
         {
             if (Compression)
             {
-                //TODO: Write Enumerator<Vector2Int>
+                //TODO: Write Span<Vector2Int>
             }
             else
             {
@@ -605,7 +562,7 @@ namespace Zion.Serialization.ADF
         {
             if (Compression)
             {
-                //TODO: Write Enumerator<Vector3Int>
+                //TODO: Write Span<Vector3Int>
             }
             else
             {
