@@ -15,12 +15,18 @@
 
         public ADFWritingContext(ADFWritingOptions? WritingOptions)
         {
-            Arena           = new();
+            Options = WritingOptions ?? ADFWritingOptions.Default;
+            Compression = Options.Compression;
+            Arena           = new(GetArenaCapacity(Options.MinPageSize));
             Registries      = new();
             TypeAssociation = new();
             WriteStrategies = new();
-            Options = WritingOptions ?? ADFWritingOptions.Default;
-            Compression = Options.Compression;
+        }
+
+
+        private static int GetArenaCapacity(int MinPageSize)
+        {
+            return MinPageSize + (MinPageSize >> 1);
         }
     }
 }

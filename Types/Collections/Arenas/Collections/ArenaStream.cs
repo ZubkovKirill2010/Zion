@@ -1,4 +1,5 @@
 ﻿using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using Zion.Vectors;
@@ -162,8 +163,8 @@ namespace Zion
 
         public void Write(Index Value)
         {
-            Reserve(sizeof(bool) + sizeof(int));
-            WriteIndex(Value);
+            Reserve(4);
+            Write(Unsafe.As<Index, uint>(ref Value));
         }
 
         public void Write(Range Value)
@@ -347,47 +348,7 @@ namespace Zion
 
         public void Write7BitEncodedIndex(Index Value)
         {
-            uint Encoded = (uint)((Value.Value << 1) ^ (Value.Value >> 31));
-
-            Reserve(5);
-            var Index = 0;
-
-            UseSpan
-            (
-                Span =>
-                {
-                    byte FirstByte = (byte)(Encoded & 0x3F);
-                    Encoded >>= 6;
-
-                    if (Value.IsFromEnd)
-                    {
-                        FirstByte |= 0x40;
-                    }
-
-                    if (Encoded > 0)
-                    {
-                        FirstByte |= 0x80;
-                    }
-
-                    Span[Index++] = FirstByte;
-
-                    while (Encoded > 0)
-                    {
-                        if (Encoded >= 0x80)
-                        {
-                            Span[Index++] = (byte)(Encoded | 0x80);
-                            Encoded >>= 7;
-                        }
-                        else
-                        {
-                            Span[Index++] = (byte)Encoded;
-                            break;
-                        }
-                    }
-                }
-            );
-
-            UpdateLengthFromPosition(_Position + Index);
+            Write7BitEncodedUInt(Unsafe.As<Index, uint>(ref Value));
         }
 
 

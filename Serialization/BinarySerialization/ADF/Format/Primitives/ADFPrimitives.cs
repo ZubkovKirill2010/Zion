@@ -65,8 +65,8 @@ namespace Zion.Serialization.ADF
             PrimitiveInfo.Create<string>(sizeof(uint), WriteString),
 
             PrimitiveInfo.Create<Half>(2, WriteHalf),
-            PrimitiveInfo.Create<Index>(5, WriteIndex),
-            PrimitiveInfo.Create<Range>(10, WriteRange),
+            PrimitiveInfo.Create<Index>(4, WriteIndex),
+            PrimitiveInfo.Create<Range>(8, WriteRange),
             PrimitiveInfo.Create<BigInteger>(4, WriteBigInteger),
 
             PrimitiveInfo.Create<RGBColor>(3, WriteRGB),
