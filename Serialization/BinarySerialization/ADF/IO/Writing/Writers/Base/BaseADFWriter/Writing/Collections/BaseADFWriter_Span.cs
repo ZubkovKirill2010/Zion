@@ -778,26 +778,34 @@ namespace Zion.Serialization.ADF
 
         private void Write(string Name, object? Collection, ReadOnlySpan<BigInteger> Span)
         {
-            WritePrimitives<BigInteger>
-            (
-                new
-                (
-                    Name, ADFPrimitives.BigInteger,
-                    Collection, Span,
-                    static (Stream, Span, Compression) =>
-                    {
-                        if (Compression)
-                        {
+            ThrowIfDisposed();
 
-                        }
-                        else
-                        {
+            var NameId = StringRegistry.GetOrAdd(Name);
+            var Target = GetStreamGroup(Name, in NameId, ADFPrimitives.BigInteger | ADFPrimitives.Sequence);
 
-                        }
-                        //TODO: Write Span<BigInteger>
-                    }
-                )
-            );
+            if (Collection is not null
+                && References.TryGetReference(Collection, out var Reference))
+            {
+                Target.BaseStream.WriteCompressed(Context, Reference.Id);
+            }
+            else
+            {
+                var Base = Target.BaseStream;
+                var Stream = Context.Arena.GetStream(Span.Length << 3);
+                var Offset = Target.ChildsLength;
+
+                for (int i = 0; i < Span.Length; i++)
+                {
+                    var Link = Reference.CreateNewReference(Offset + Stream.Length);
+
+                    Base.Write(Link);
+                    Stream.Write(Span[i]);
+                }
+
+                Target.Add(Stream);
+            }
+
+            OnWrited(Name, in NameId, ADFPrimitives.BigInteger | ADFPrimitives.Sequence);
         }
 
         private void Write(string Name, object? Collection, ReadOnlySpan<RGBColor> Span)

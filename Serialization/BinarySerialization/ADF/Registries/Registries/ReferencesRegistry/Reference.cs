@@ -2,7 +2,8 @@
 {
     internal readonly struct Reference
     {
-        //B0: 0 - New object, 1 - Object exists
+        //{ [Offset ][1] } - Writed
+        //{ [CacheUd][0] } - Cached
 
         public readonly ulong Id;
         public readonly DataDefinition Definition;

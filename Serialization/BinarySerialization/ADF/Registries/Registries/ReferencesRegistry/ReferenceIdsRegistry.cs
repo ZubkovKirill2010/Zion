@@ -6,7 +6,7 @@
 
         private readonly Dictionary<object, Reference> References; //Optimize: Заменить на слабую ссылку
 
-        private ulong LastId = 1UL << 63;
+        private ulong LastId = 1UL << 63 | 2;
 
         public bool IsChanged { get; private set; }
 
@@ -19,7 +19,7 @@
 
         public void Write(ADFObjectWriter Writer)
         {
-            //TODO: IWritableRegistry.WriteFull
+            //TODO: IWritableRegistry.Write
         }
 
 
