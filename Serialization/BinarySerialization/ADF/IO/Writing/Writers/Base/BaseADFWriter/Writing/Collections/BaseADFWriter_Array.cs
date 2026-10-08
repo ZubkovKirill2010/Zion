@@ -128,6 +128,11 @@ namespace Zion.Serialization.ADF
             Write(Name, Array, Array.AsSpan());
         }
 
+        public void Write<T>(string Name, T[] Array)
+        {
+            Write(Name, Array, Array.AsSpan());
+        }
+
 
         public void Write(string Name, bool[] Array, int Count)
         {
@@ -249,6 +254,11 @@ namespace Zion.Serialization.ADF
             Write(Name, Array, Array.AsSpan(0, Count));
         }
 
+        public void Write<T>(string Name, T[] Array, int Count)
+        {
+            Write(Name, Array, Array.AsSpan(0, Count));
+        }
+
 
         public void Write(string Name, bool[] Array, int Start, int Count)
         {
@@ -366,6 +376,11 @@ namespace Zion.Serialization.ADF
         }
 
         public void Write(string Name, Vector3Int[] Array, int Start, int Count)
+        {
+            Write(Name, Array, Array.AsSpan(Start, Count));
+        }
+
+        public void Write<T>(string Name, T[] Array, int Start, int Count)
         {
             Write(Name, Array, Array.AsSpan(Start, Count));
         }

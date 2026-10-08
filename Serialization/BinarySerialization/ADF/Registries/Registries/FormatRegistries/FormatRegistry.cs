@@ -23,7 +23,7 @@ namespace Zion.Serialization.ADF
 
         public void Write(ADFObjectWriter Writer)
         {
-            //TODO: IWritableRegistry.WriteFull
+            //TODO: IWritableRegistry.Write
         }
 
 

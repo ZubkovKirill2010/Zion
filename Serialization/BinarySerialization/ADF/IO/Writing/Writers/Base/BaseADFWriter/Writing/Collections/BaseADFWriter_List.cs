@@ -128,6 +128,11 @@ namespace Zion.Serialization.ADF
             Write(Name, List, List.AsSpan());
         }
 
+        public void Write<T>(string Name, List<T> List)
+        {
+            Write(Name, List, List.AsSpan());
+        }
+
 
         public void Write(string Name, List<bool> List, int Count)
         {
@@ -249,6 +254,11 @@ namespace Zion.Serialization.ADF
             Write(Name, List, List.AsSpan(0, Count));
         }
 
+        public void Write<T>(string Name, List<T> List, int Count)
+        {
+            Write(Name, List, List.AsSpan(0, Count));
+        }
+
 
         public void Write(string Name, List<bool> List, int Start, int Count)
         {
@@ -366,6 +376,11 @@ namespace Zion.Serialization.ADF
         }
 
         public void Write(string Name, List<Vector3Int> List, int Start, int Count)
+        {
+            Write(Name, List, List.AsSpan(Start, Count));
+        }
+
+        public void Write<T>(string Name, List<T> List, int Start, int Count)
         {
             Write(Name, List, List.AsSpan(Start, Count));
         }

@@ -1,19 +1,17 @@
 ﻿namespace Zion.Serialization.ADF
 {
-    internal ref struct CollectionWriteContext<T>
+    internal ref struct SpanWriteContext<T>
     {
-        public delegate void WriteAction(ArenaStream Stream, ReadOnlySpan<T> Span, bool Compression);
-
         public readonly string Name;
         public readonly uint   FormatId;
         public readonly object? Collection;
 
         private readonly int Capacity;
         private readonly ReadOnlySpan<T> Span;        
-        private readonly WriteAction Writing;
+        private readonly WriteAction<T> Writing;
 
 
-        public CollectionWriteContext(string Name, uint FormatId, object? Collection, ReadOnlySpan<T> Span, WriteAction Writing)
+        public SpanWriteContext(string Name, uint FormatId, object? Collection, ReadOnlySpan<T> Span, WriteAction<T> Writing)
         {
             this.Name = Name.NotNull();
             this.FormatId = FormatId | ADFPrimitives.Sequence;
