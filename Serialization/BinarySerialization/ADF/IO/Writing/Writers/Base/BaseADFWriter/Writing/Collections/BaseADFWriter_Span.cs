@@ -1,5 +1,5 @@
-﻿using System.Buffers.Binary;
-using System.Numerics;
+﻿using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Zion.Vectors;
 using Vector2 = Zion.Vectors.Vector2;
@@ -460,7 +460,71 @@ namespace Zion.Serialization.ADF
 
         private void Write<T>(string Name, object? Collection, ReadOnlySpan<T> Span)
         {
-            //TODO: WriteVarInt Span<T>
+            ThrowIfDisposed();
+
+            var Type   = typeof(T);
+            var NameId = StringRegistry.GetOrAdd(Name.NotNull());
+
+            if (Type.IsEnum)
+            {
+                WriteEnums(Name, NameId, Span);
+                return;
+            }
+
+            var Context = this.Context;
+
+            var Entry    = Context.WriteStrategies.GetEntry<T>(Context, Type);
+            var FormatId = Entry.FormatId | ADFPrimitives.Sequence;
+            var Strategy = Entry.Strategy;
+
+            var Target = GetStreamGroup(Name, in NameId, in FormatId);
+
+            //Optimize
+            foreach (var Item in Span)
+            {
+                Strategy.Write(Context, Target, Item);
+            }
+
+            OnWrited(Name, in NameId, in FormatId);
+        }
+
+        private void WriteEnums<T>(string Name, in uint NameId, ReadOnlySpan<T> Span)
+        {
+            var FormatId = ADFPrimitives.Sequence | TypeAssociation.GetOrAdd
+            (
+                typeof(T),
+                () => FormatRegistry.Add(DataFormat.GetEnumFormat<T>())
+            );
+
+            var ItemSize = Unsafe.SizeOf<T>();
+            var Target = GetStreamGroup(Name, in NameId, in FormatId);
+            var Stream = Context.Arena.GetStream(ItemSize * Span.Length);
+
+            Stream.Write(Span.Length);
+
+            if (Span.Length > 0)
+            {
+                ref var FirstByte = ref Unsafe.As<T, byte>
+                (
+                    ref MemoryMarshal.GetReference(Span)
+                );
+
+                var Bytes = MemoryMarshal.CreateReadOnlySpan
+                (
+                    ref FirstByte,
+                    ItemSize * Span.Length
+                );
+
+                Stream.UseSpan
+                (
+                    Bytes,
+                    static (Target, Source) => Source.CopyTo(Target)
+                );
+            }
+
+            Target.Add(Stream);
+
+            OnWrited(Name, in NameId, in FormatId);
         }
 
 
