@@ -18,7 +18,7 @@
 
         public void Write(ADFObjectWriter Writer)
         {
-            //TODO: IWritableRegistry.Write
+            //TODO: IWritableRegistry.WriteVarInt
         }
 
 

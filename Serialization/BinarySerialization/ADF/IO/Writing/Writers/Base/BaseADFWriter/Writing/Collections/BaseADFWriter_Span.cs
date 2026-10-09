@@ -460,7 +460,7 @@ namespace Zion.Serialization.ADF
 
         private void Write<T>(string Name, object? Collection, ReadOnlySpan<T> Span)
         {
-            //TODO: Write Span<T>
+            //TODO: WriteVarInt Span<T>
         }
 
 

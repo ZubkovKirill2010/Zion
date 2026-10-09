@@ -175,7 +175,6 @@ namespace Zion.Serialization.ADF
             Target.BaseStream.Write(Value);
         }
 
-
         public static void WriteInt16(ADFWritingContext Context, StreamGroup Target, short Value)
         {
             Target.BaseStream.Write(Value);
@@ -234,7 +233,6 @@ namespace Zion.Serialization.ADF
             }
         }
 
-
         public static void WriteChar(ADFWritingContext Context, StreamGroup Target, char Value)
         {
             Target.BaseStream.Write(Value);
@@ -268,7 +266,6 @@ namespace Zion.Serialization.ADF
                 Target.BaseStream.Write(Id);
             }
         }
-
 
         public static void WriteHalf(ADFWritingContext Context, StreamGroup Target, Half Value)
         {
@@ -312,7 +309,6 @@ namespace Zion.Serialization.ADF
             Target.BaseStream.WriteCompressed(Context, Link);
         }
 
-
         public static void WriteRGB(ADFWritingContext Context, StreamGroup Target, RGBColor Value)
         {
             Target.BaseStream.Write(Value);
@@ -322,7 +318,6 @@ namespace Zion.Serialization.ADF
         {
             Target.BaseStream.Write(Value);
         }
-
 
         public static void WriteVector2(ADFWritingContext Context, StreamGroup Target, Vector2 Value)
         {
@@ -360,7 +355,6 @@ namespace Zion.Serialization.ADF
                 Target.BaseStream.Write(Value);
             }
         }
-
 
         internal static void WriteEnum<T>(ADFWritingContext Context, StreamGroup Target, T Value)
         {

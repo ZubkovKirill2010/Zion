@@ -1,5 +1,5 @@
 ﻿using System.Buffers.Binary;
-using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Zion.Vectors;
 using Vector2 = Zion.Vectors.Vector2;
@@ -100,7 +100,7 @@ namespace Zion.Serialization.ADF
         {
             if (Compression)
             {
-                //TODO: Write Span<int>
+                WriteCompressed(Stream, Span);
             }
             else
             {
@@ -130,7 +130,7 @@ namespace Zion.Serialization.ADF
         {
             if (Compression)
             {
-                //TODO: Write Span<long>
+                WriteCompressed(Stream, Span);
             }
             else
             {
@@ -183,7 +183,7 @@ namespace Zion.Serialization.ADF
         {
             if (Compression)
             {
-                //TODO: Write Span<uint>
+                WriteCompressed(Stream, Span);
             }
             else
             {
@@ -213,7 +213,7 @@ namespace Zion.Serialization.ADF
         {
             if (Compression)
             {
-                //TODO: Write Span<ulong>
+                WriteCompressed(Stream, Span);
             }
             else
             {
@@ -266,7 +266,7 @@ namespace Zion.Serialization.ADF
         {
             if (Compression)
             {
-
+                WriteCompressed(Stream, Span);
             }
             else
             {
@@ -296,7 +296,7 @@ namespace Zion.Serialization.ADF
         {
             if (Compression)
             {
-                //TODO: Write Span<double>
+                WriteCompressed(Stream, Span);
             }
             else
             {
@@ -326,7 +326,7 @@ namespace Zion.Serialization.ADF
         {
             if (Compression)
             {
-                //TODO: Write Span<decimal>
+                //TODO: WriteVarInt Span<decimal>
             }
             else
             {
@@ -356,39 +356,32 @@ namespace Zion.Serialization.ADF
 
         public static void Write(ArenaStream Stream, ReadOnlySpan<Half> Span, bool Compression)
         {
-            if (Compression)
-            {
-                //TODO: Write Span<Half>
-            }
-            else
-            {
-                Stream.UseSpan
-                (
-                    Span,
-                    static (Target, Source) =>
+            Stream.UseSpan
+            (
+                Span,
+                static (Target, Source) =>
+                {
+                    if (BitConverter.IsLittleEndian)
                     {
-                        if (BitConverter.IsLittleEndian)
-                        {
-                            MemoryMarshal.AsBytes(Source).CopyTo(Target);
-                        }
-                        else
-                        {
-                            BinaryPrimitives.ReverseEndianness
-                            (
-                                MemoryMarshal.Cast<Half, short>(Source),
-                                MemoryMarshal.Cast<byte, short>(Target)
-                            );
-                        }
+                        MemoryMarshal.AsBytes(Source).CopyTo(Target);
                     }
-                );
-            }
+                    else
+                    {
+                        BinaryPrimitives.ReverseEndianness
+                        (
+                            MemoryMarshal.Cast<Half, short>(Source),
+                            MemoryMarshal.Cast<byte, short>(Target)
+                        );
+                    }
+                }
+            );
         }
 
         public static void Write(ArenaStream Stream, ReadOnlySpan<Index> Span, bool Compression)
         {
             if (Compression)
             {
-                //TODO: Write Span<Index>
+                WriteCompressed(Stream, MemoryMarshal.Cast<Index, int>(Span));
             }
             else
             {
@@ -418,7 +411,7 @@ namespace Zion.Serialization.ADF
         {
             if (Compression)
             {
-                //TODO: Write Span<Range>
+                WriteCompressed(Stream, MemoryMarshal.Cast<Range, int>(Span));
             }
             else
             {
@@ -472,7 +465,7 @@ namespace Zion.Serialization.ADF
         {
             if (Compression)
             {
-                //TODO: Write Span<Vector2>
+                WriteCompressed(Stream, MemoryMarshal.Cast<Vector2, float>(Span));
             }
             else
             {
@@ -502,7 +495,7 @@ namespace Zion.Serialization.ADF
         {
             if (Compression)
             {
-                //TODO: Write Span<Vector2Int>
+                WriteCompressed(Stream, MemoryMarshal.Cast<Vector2Int, int>(Span));
             }
             else
             {
@@ -532,7 +525,7 @@ namespace Zion.Serialization.ADF
         {
             if (Compression)
             {
-
+                WriteCompressed(Stream, MemoryMarshal.Cast<Vector3, float>(Span));
             }
             else
             {
@@ -562,7 +555,7 @@ namespace Zion.Serialization.ADF
         {
             if (Compression)
             {
-                //TODO: Write Span<Vector3Int>
+                WriteCompressed(Stream, MemoryMarshal.Cast<Vector3Int, int>(Span));
             }
             else
             {
@@ -585,6 +578,174 @@ namespace Zion.Serialization.ADF
                         }
                     }
                 );
+            }
+        }
+
+
+        private static void WriteCompressed(ArenaStream Stream, ReadOnlySpan<int> Span)
+        {
+            var Written = 0;
+
+            Stream.Reserve(Span.Length * 5);
+            Stream.UseSpan
+            (
+                new VarIntSpanState<int>(Span, ref Written),
+                static (Target, State) =>
+                {
+                    ref var Destination = ref MemoryMarshal.GetReference(Target);
+                    var Written = 0;
+
+                    foreach (var Value in State.Source)
+                    {
+                        Written += WriteVarInt(ref Unsafe.Add(ref Destination, Written), Value);
+                    }
+                }
+            );
+
+            Stream.TrimExcess(Written);
+        }
+
+        private static void WriteCompressed(ArenaStream Stream, ReadOnlySpan<uint> Span)
+        {
+            var Written = 0;
+
+            Stream.Reserve(Span.Length * 5);
+            Stream.UseSpan
+            (
+                new VarIntSpanState<uint>(Span, ref Written),
+                static (Target, State) =>
+                {
+                    ref var Destination = ref MemoryMarshal.GetReference(Target);
+                    var Written = 0;
+
+                    foreach (var Value in State.Source)
+                    {
+                        Written += WriteVarInt(ref Unsafe.Add(ref Destination, Written), Value);
+                    }
+                }
+            );
+
+            Stream.TrimExcess(Written);
+        }
+
+        private static void WriteCompressed(ArenaStream Stream, ReadOnlySpan<long> Span)
+        {
+            var Written = 0;
+
+            Stream.Reserve(Span.Length * 5);
+            Stream.UseSpan
+            (
+                new VarIntSpanState<long>(Span, ref Written),
+                static (Target, State) =>
+                {
+                    ref var Destination = ref MemoryMarshal.GetReference(Target);
+                    var Written = 0;
+
+                    foreach (var Value in State.Source)
+                    {
+                        Written += WriteVarInt(ref Unsafe.Add(ref Destination, Written), Value);
+                    }
+                }
+            );
+
+            Stream.TrimExcess(Written);
+        }
+
+        private static void WriteCompressed(ArenaStream Stream, ReadOnlySpan<ulong> Span)
+        {
+            var Written = 0;
+
+            Stream.Reserve(Span.Length * 5);
+            Stream.UseSpan
+            (
+                new VarIntSpanState<ulong>(Span, ref Written),
+                static (Target, State) =>
+                {
+                    ref var Destination = ref MemoryMarshal.GetReference(Target);
+                    var Written = 0;
+
+                    foreach (var Value in State.Source)
+                    {
+                        Written += WriteVarInt(ref Unsafe.Add(ref Destination, Written), Value);
+                    }
+                }
+            );
+
+            Stream.TrimExcess(Written);
+        }
+
+
+        private static void WriteCompressed(ArenaStream Stream, ReadOnlySpan<float> Span)
+        {
+            //TODO
+        }
+
+        private static void WriteCompressed(ArenaStream Stream, ReadOnlySpan<double> Span)
+        {
+            //TODO
+        }
+
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int WriteVarInt(ref byte Destination, int Value)
+        {
+            return WriteVarInt(ref Destination, (uint)((Value << 1) ^ (Value >> 31)));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int WriteVarInt(ref byte Destination, uint value)
+        {
+            if (value < 0x80)
+            {
+                Destination = (byte)value;
+                return 1;
+            }
+
+            int i = 0;
+            while (value >= 0x80)
+            {
+                Unsafe.Add(ref Destination, i++) = (byte)(value | 0x80);
+                value >>= 7;
+            }
+            Unsafe.Add(ref Destination, i++) = (byte)value;
+            return i;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int WriteVarInt(ref byte Destination, ulong Value)
+        {
+            if (Value < 0x80)
+            {
+                Destination = (byte)Value;
+                return 1;
+            }
+
+            int i = 0;
+            while (Value >= 0x80)
+            {
+                Unsafe.Add(ref Destination, i++) = (byte)(Value | 0x80);
+                Value >>= 7;
+            }
+            Unsafe.Add(ref Destination, i++) = (byte)Value;
+            return i;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int WriteVarInt(ref byte Destination, long Value)
+        {
+            return WriteVarInt(ref Destination, (ulong)((Value << 1) ^ (Value >> 63)));
+        }
+
+
+        private ref struct VarIntSpanState<T> where T : unmanaged
+        {
+            public ReadOnlySpan<T> Source;
+            public ref int Written;
+
+            public VarIntSpanState(ReadOnlySpan<T> Source, ref int Written)
+            {
+                this.Source = Source;
+                this.Written = ref Written;
             }
         }
     }

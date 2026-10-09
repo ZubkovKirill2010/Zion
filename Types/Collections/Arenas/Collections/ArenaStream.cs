@@ -386,11 +386,13 @@ namespace Zion
         public new void UseSpan(int Count, Action<Span<byte>> Action)
         {
             base.UseSpan(_Position, Count, Action);
+            UpdateLengthFromPosition(Count);
         }
 
         public new void UseSpan(int Start, int Count, Action<Span<byte>> Action)
         {
             base.UseSpan(Start, Count, Action);
+            UpdateLengthFromPosition(Start + Count);
         }
 
 
@@ -402,11 +404,13 @@ namespace Zion
         public new void UseSpan<I>(int Count, I Other, Action<Span<byte>, I> Action) where I : allows ref struct
         {
             base.UseSpan(_Position, Count, Other, Action);
+            UpdateLengthFromPosition(Count);
         }
 
         public new void UseSpan<I>(int Start, int Count, I Other, Action<Span<byte>, I> Action) where I : allows ref struct
         {
             base.UseSpan(Start, Count, Other, Action);
+            UpdateLengthFromPosition(Start + Count);
         }
 
 
@@ -417,12 +421,16 @@ namespace Zion
 
         public new R UseSpan<R>(int Count, Func<Span<byte>, R> Function)
         {
-            return base.UseSpan(_Position, Count, Function);
+            var Result = base.UseSpan(_Position, Count, Function);
+            UpdateLengthFromPosition(Count);
+            return Result;
         }
 
         public new R UseSpan<R>(int Start, int Count, Func<Span<byte>, R> Function)
         {
-            return base.UseSpan(Start, Count, Function);
+            var Result = base.UseSpan(Start, Count, Function);
+            UpdateLengthFromPosition(Start + Count);
+            return Result;
         }
 
 
@@ -433,12 +441,16 @@ namespace Zion
 
         public new R UseSpan<I, R>(int Count, I Other, Func<Span<byte>, I, R> Action) where I : allows ref struct
         {
-            return base.UseSpan(_Position, Count, Other, Action);
+            var Result = base.UseSpan(_Position, Count, Other, Action);
+            UpdateLengthFromPosition(Count);
+            return Result;
         }
 
         public new R UseSpan<I, R>(int Start, int Count, I Other, Func<Span<byte>, I, R> Action) where I : allows ref struct
         {
-            return base.UseSpan(Start, Count, Other, Action);
+            var Result = base.UseSpan(Start, Count, Other, Action);
+            UpdateLengthFromPosition(Start + Count);
+            return Result;
         }
 
 
@@ -530,6 +542,11 @@ namespace Zion
 
                 Expand(NewSize);
             }
+        }
+
+        public void TrimExcess(int Size)
+        {
+            //TODO: ArenaStraem.TrimExcess
         }
 
 
