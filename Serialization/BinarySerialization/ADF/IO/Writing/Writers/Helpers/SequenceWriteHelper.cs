@@ -326,7 +326,7 @@ namespace Zion.Serialization.ADF
         {
             if (Compression)
             {
-                //TODO: WriteVarInt Span<decimal>
+                WriteCompressed(Stream, Span);
             }
             else
             {
@@ -680,11 +680,10 @@ namespace Zion.Serialization.ADF
             Stream.Reserve(Span.Length * 5);
 
             var Written = 0;
-            var State = new NumberSpanState<float>(Span, ref Written);
 
             Stream.UseSpan
             (
-                State,
+                new NumberSpanState<float>(Span, ref Written),
                 static (Target, Source) =>
                 {
                     ref var Destination = ref MemoryMarshal.GetReference(Target);
@@ -710,11 +709,10 @@ namespace Zion.Serialization.ADF
             Stream.Reserve(Span.Length * 10);
 
             var Written = 0;
-            var State = new NumberSpanState<double>(Span, ref Written);
 
             Stream.UseSpan
             (
-                State,
+                new NumberSpanState<double>(Span, ref Written),
                 static (Target, Source) =>
                 {
                     ref var Destination = ref MemoryMarshal.GetReference(Target);
@@ -729,6 +727,49 @@ namespace Zion.Serialization.ADF
                     }
 
                     Source.Written = Written;
+                }
+            );
+
+            Stream.TrimExcess(Written);
+        }
+
+
+        private static void WriteCompressed(ArenaStream Stream, ReadOnlySpan<decimal> Span)
+        {
+            int Written = 0;
+
+            Stream.UseSpan
+            (
+                new NumberSpanState<decimal>(Span, ref Written),
+                static (Target, Source) =>
+                {
+                    ref var Destination = ref MemoryMarshal.GetReference(Target);
+                    var Total = 0;
+
+                    Span<int> Bits = stackalloc int[4];
+
+                    foreach (var Value in Source.Source)
+                    {
+                        decimal.GetBits(Value, Bits);
+
+                        var Lo    = unchecked((uint)Bits[0]);
+                        var Mid   = unchecked((uint)Bits[1]);
+                        var Hi    = unchecked((uint)Bits[2]);
+                        var Flags = unchecked((uint)Bits[3]);
+
+                        var Sign      = (Flags & 0x80000000u) != 0;
+                        var Scale     = (byte)((Flags >> 16) & 0xFF);
+                        var SignScale = (byte)((Sign ? 0x80 : 0) | (Scale & 0x7F));
+
+                        Unsafe.Add(ref Destination, Total++) = SignScale;
+
+                        var Low64 = Lo | ((ulong)Mid << 32);
+
+                        Total += WriteVarInt(ref Unsafe.Add(ref Destination, Total), Low64);
+                        Total += WriteVarInt(ref Unsafe.Add(ref Destination, Total), Hi);
+                    }
+
+                    Source.Written = Total;
                 }
             );
 
