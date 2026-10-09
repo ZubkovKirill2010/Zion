@@ -134,129 +134,129 @@ namespace Zion.Serialization.ADF
         }
 
 
-        public void Write(string Name, bool[] Array, int Count)
+        public void Write(string Name, bool[] Array, int Start)
         {
-            Write(Name, Array, Array.AsSpan(0, Count));
+            Write(Name, Array, Array.AsSpan(Start));
         }
 
-        public void Write(string Name, byte[] Array, int Count)
+        public void Write(string Name, byte[] Array, int Start)
         {
-            Write(Name, Array, Array.AsSpan(0, Count));
+            Write(Name, Array, Array.AsSpan(Start));
         }
 
-        public void Write(string Name, sbyte[] Array, int Count)
+        public void Write(string Name, sbyte[] Array, int Start)
         {
-            Write(Name, Array, Array.AsSpan(0, Count));
+            Write(Name, Array, Array.AsSpan(Start));
         }
 
-        public void Write(string Name, short[] Array, int Count)
+        public void Write(string Name, short[] Array, int Start)
         {
-            Write(Name, Array, Array.AsSpan(0, Count));
+            Write(Name, Array, Array.AsSpan(Start));
         }
 
-        public void Write(string Name, int[] Array, int Count)
+        public void Write(string Name, int[] Array, int Start)
         {
-            Write(Name, Array, Array.AsSpan(0, Count));
+            Write(Name, Array, Array.AsSpan(Start));
         }
 
-        public void Write(string Name, long[] Array, int Count)
+        public void Write(string Name, long[] Array, int Start)
         {
-            Write(Name, Array, Array.AsSpan(0, Count));
+            Write(Name, Array, Array.AsSpan(Start));
         }
 
-        public void Write(string Name, ushort[] Array, int Count)
+        public void Write(string Name, ushort[] Array, int Start)
         {
-            Write(Name, Array, Array.AsSpan(0, Count));
+            Write(Name, Array, Array.AsSpan(Start));
         }
 
-        public void Write(string Name, uint[] Array, int Count)
+        public void Write(string Name, uint[] Array, int Start)
         {
-            Write(Name, Array, Array.AsSpan(0, Count));
+            Write(Name, Array, Array.AsSpan(Start));
         }
 
-        public void Write(string Name, ulong[] Array, int Count)
+        public void Write(string Name, ulong[] Array, int Start)
         {
-            Write(Name, Array, Array.AsSpan(0, Count));
+            Write(Name, Array, Array.AsSpan(Start));
         }
 
-        public void Write(string Name, char[] Array, int Count)
+        public void Write(string Name, char[] Array, int Start)
         {
-            Write(Name, Array, Array.AsSpan(0, Count));
+            Write(Name, Array, Array.AsSpan(Start));
         }
 
-        public void Write(string Name, float[] Array, int Count)
+        public void Write(string Name, float[] Array, int Start)
         {
-            Write(Name, Array, Array.AsSpan(0, Count));
+            Write(Name, Array, Array.AsSpan(Start));
         }
 
-        public void Write(string Name, double[] Array, int Count)
+        public void Write(string Name, double[] Array, int Start)
         {
-            Write(Name, Array, Array.AsSpan(0, Count));
+            Write(Name, Array, Array.AsSpan(Start));
         }
 
-        public void Write(string Name, decimal[] Array, int Count)
+        public void Write(string Name, decimal[] Array, int Start)
         {
-            Write(Name, Array, Array.AsSpan(0, Count));
+            Write(Name, Array, Array.AsSpan(Start));
         }
 
-        public void Write(string Name, string[] Array, int Count)
+        public void Write(string Name, string[] Array, int Start)
         {
-            Write(Name, Array, Array.AsSpan(0, Count));
+            Write(Name, Array, Array.AsSpan(Start));
         }
 
-        public void Write(string Name, Half[] Array, int Count)
+        public void Write(string Name, Half[] Array, int Start)
         {
-            Write(Name, Array, Array.AsSpan(0, Count));
+            Write(Name, Array, Array.AsSpan(Start));
         }
 
-        public void Write(string Name, Index[] Array, int Count)
+        public void Write(string Name, Index[] Array, int Start)
         {
-            Write(Name, Array, Array.AsSpan(0, Count));
+            Write(Name, Array, Array.AsSpan(Start));
         }
 
-        public void Write(string Name, Range[] Array, int Count)
+        public void Write(string Name, Range[] Array, int Start)
         {
-            Write(Name, Array, Array.AsSpan(0, Count));
+            Write(Name, Array, Array.AsSpan(Start));
         }
 
-        public void Write(string Name, BigInteger[] Array, int Count)
+        public void Write(string Name, BigInteger[] Array, int Start)
         {
-            Write(Name, Array, Array.AsSpan(0, Count));
+            Write(Name, Array, Array.AsSpan(Start));
         }
 
-        public void Write(string Name, RGBColor[] Array, int Count)
+        public void Write(string Name, RGBColor[] Array, int Start)
         {
-            Write(Name, Array, Array.AsSpan(0, Count));
+            Write(Name, Array, Array.AsSpan(Start));
         }
 
-        public void Write(string Name, RGBAColor[] Array, int Count)
+        public void Write(string Name, RGBAColor[] Array, int Start)
         {
-            Write(Name, Array, Array.AsSpan(0, Count));
+            Write(Name, Array, Array.AsSpan(Start));
         }
 
-        public void Write(string Name, Vector2[] Array, int Count)
+        public void Write(string Name, Vector2[] Array, int Start)
         {
-            Write(Name, Array, Array.AsSpan(0, Count));
+            Write(Name, Array, Array.AsSpan(Start));
         }
 
-        public void Write(string Name, Vector2Int[] Array, int Count)
+        public void Write(string Name, Vector2Int[] Array, int Start)
         {
-            Write(Name, Array, Array.AsSpan(0, Count));
+            Write(Name, Array, Array.AsSpan(Start));
         }
 
-        public void Write(string Name, Vector3[] Array, int Count)
+        public void Write(string Name, Vector3[] Array, int Start)
         {
-            Write(Name, Array, Array.AsSpan(0, Count));
+            Write(Name, Array, Array.AsSpan(Start));
         }
 
-        public void Write(string Name, Vector3Int[] Array, int Count)
+        public void Write(string Name, Vector3Int[] Array, int Start)
         {
-            Write(Name, Array, Array.AsSpan(0, Count));
+            Write(Name, Array, Array.AsSpan(Start));
         }
 
-        public void Write<T>(string Name, T[] Array, int Count)
+        public void Write<T>(string Name, T[] Array, int Start)
         {
-            Write(Name, Array, Array.AsSpan(0, Count));
+            Write(Name, Array, Array.AsSpan(Start));
         }
 
 

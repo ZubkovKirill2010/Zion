@@ -134,129 +134,129 @@ namespace Zion.Serialization.ADF
         }
 
 
-        public void Write(string Name, List<bool> List, int Count)
+        public void Write(string Name, List<bool> List, int Start)
         {
-            Write(Name, List, List.AsSpan(0, Count));
+            Write(Name, List, List.AsSpan(Start));
         }
 
-        public void Write(string Name, List<byte> List, int Count)
+        public void Write(string Name, List<byte> List, int Start)
         {
-            Write(Name, List, List.AsSpan(0, Count));
+            Write(Name, List, List.AsSpan(Start));
         }
 
-        public void Write(string Name, List<sbyte> List, int Count)
+        public void Write(string Name, List<sbyte> List, int Start)
         {
-            Write(Name, List, List.AsSpan(0, Count));
+            Write(Name, List, List.AsSpan(Start));
         }
 
-        public void Write(string Name, List<short> List, int Count)
+        public void Write(string Name, List<short> List, int Start)
         {
-            Write(Name, List, List.AsSpan(0, Count));
+            Write(Name, List, List.AsSpan(Start));
         }
 
-        public void Write(string Name, List<int> List, int Count)
+        public void Write(string Name, List<int> List, int Start)
         {
-            Write(Name, List, List.AsSpan(0, Count));
+            Write(Name, List, List.AsSpan(Start));
         }
 
-        public void Write(string Name, List<long> List, int Count)
+        public void Write(string Name, List<long> List, int Start)
         {
-            Write(Name, List, List.AsSpan(0, Count));
+            Write(Name, List, List.AsSpan(Start));
         }
 
-        public void Write(string Name, List<ushort> List, int Count)
+        public void Write(string Name, List<ushort> List, int Start)
         {
-            Write(Name, List, List.AsSpan(0, Count));
+            Write(Name, List, List.AsSpan(Start));
         }
 
-        public void Write(string Name, List<uint> List, int Count)
+        public void Write(string Name, List<uint> List, int Start)
         {
-            Write(Name, List, List.AsSpan(0, Count));
+            Write(Name, List, List.AsSpan(Start));
         }
 
-        public void Write(string Name, List<ulong> List, int Count)
+        public void Write(string Name, List<ulong> List, int Start)
         {
-            Write(Name, List, List.AsSpan(0, Count));
+            Write(Name, List, List.AsSpan(Start));
         }
 
-        public void Write(string Name, List<char> List, int Count)
+        public void Write(string Name, List<char> List, int Start)
         {
-            Write(Name, List, List.AsSpan(0, Count));
+            Write(Name, List, List.AsSpan(Start));
         }
 
-        public void Write(string Name, List<float> List, int Count)
+        public void Write(string Name, List<float> List, int Start)
         {
-            Write(Name, List, List.AsSpan(0, Count));
+            Write(Name, List, List.AsSpan(Start));
         }
 
-        public void Write(string Name, List<double> List, int Count)
+        public void Write(string Name, List<double> List, int Start)
         {
-            Write(Name, List, List.AsSpan(0, Count));
+            Write(Name, List, List.AsSpan(Start));
         }
 
-        public void Write(string Name, List<decimal> List, int Count)
+        public void Write(string Name, List<decimal> List, int Start)
         {
-            Write(Name, List, List.AsSpan(0, Count));
+            Write(Name, List, List.AsSpan(Start));
         }
 
-        public void Write(string Name, List<string> List, int Count)
+        public void Write(string Name, List<string> List, int Start)
         {
-            Write(Name, List, List.AsSpan(0, Count));
+            Write(Name, List, List.AsSpan(Start));
         }
 
-        public void Write(string Name, List<Half> List, int Count)
+        public void Write(string Name, List<Half> List, int Start)
         {
-            Write(Name, List, List.AsSpan(0, Count));
+            Write(Name, List, List.AsSpan(Start));
         }
 
-        public void Write(string Name, List<Index> List, int Count)
+        public void Write(string Name, List<Index> List, int Start)
         {
-            Write(Name, List, List.AsSpan(0, Count));
+            Write(Name, List, List.AsSpan(Start));
         }
 
-        public void Write(string Name, List<Range> List, int Count)
+        public void Write(string Name, List<Range> List, int Start)
         {
-            Write(Name, List, List.AsSpan(0, Count));
+            Write(Name, List, List.AsSpan(Start));
         }
 
-        public void Write(string Name, List<BigInteger> List, int Count)
+        public void Write(string Name, List<BigInteger> List, int Start)
         {
-            Write(Name, List, List.AsSpan(0, Count));
+            Write(Name, List, List.AsSpan(Start));
         }
 
-        public void Write(string Name, List<RGBColor> List, int Count)
+        public void Write(string Name, List<RGBColor> List, int Start)
         {
-            Write(Name, List, List.AsSpan(0, Count));
+            Write(Name, List, List.AsSpan(Start));
         }
 
-        public void Write(string Name, List<RGBAColor> List, int Count)
+        public void Write(string Name, List<RGBAColor> List, int Start)
         {
-            Write(Name, List, List.AsSpan(0, Count));
+            Write(Name, List, List.AsSpan(Start));
         }
 
-        public void Write(string Name, List<Vector2> List, int Count)
+        public void Write(string Name, List<Vector2> List, int Start)
         {
-            Write(Name, List, List.AsSpan(0, Count));
+            Write(Name, List, List.AsSpan(Start));
         }
 
-        public void Write(string Name, List<Vector2Int> List, int Count)
+        public void Write(string Name, List<Vector2Int> List, int Start)
         {
-            Write(Name, List, List.AsSpan(0, Count));
+            Write(Name, List, List.AsSpan(Start));
         }
 
-        public void Write(string Name, List<Vector3> List, int Count)
+        public void Write(string Name, List<Vector3> List, int Start)
         {
-            Write(Name, List, List.AsSpan(0, Count));
+            Write(Name, List, List.AsSpan(Start));
         }
 
-        public void Write(string Name, List<Vector3Int> List, int Count)
+        public void Write(string Name, List<Vector3Int> List, int Start)
         {
-            Write(Name, List, List.AsSpan(0, Count));
+            Write(Name, List, List.AsSpan(Start));
         }
 
-        public void Write<T>(string Name, List<T> List, int Count)
+        public void Write<T>(string Name, List<T> List, int Start)
         {
-            Write(Name, List, List.AsSpan(0, Count));
+            Write(Name, List, List.AsSpan(Start));
         }
 
 
@@ -383,6 +383,16 @@ namespace Zion.Serialization.ADF
         public void Write<T>(string Name, List<T> List, int Start, int Count)
         {
             Write(Name, List, List.AsSpan(Start, Count));
+        }
+
+
+        internal void WriteStrings(List<string> Strings)
+        {
+            var Stream = GetBaseStream();
+            foreach (var Item in Strings.AsSpan())
+            {
+                Stream.Write(Item);
+            }
         }
     }
 }

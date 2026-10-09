@@ -5,20 +5,24 @@
         public const uint Null = 0u;
 
         private readonly Dictionary<string, uint> Data;
+        private readonly List<string> NewItems;
+
         private uint LastId = 1;
 
-        public bool IsChanged { get; private set; }
+        public bool IsChanged => NewItems.Count > 0;
 
 
         public StringIdRegistry()
         {
             Data = new();
+            NewItems = new();
         }
 
 
         public void Write(ADFObjectWriter Writer)
         {
-            //TODO: IWritableRegistry.Write
+            Writer.WriteStrings(NewItems);
+            NewItems.Clear();
         }
 
 
@@ -33,6 +37,7 @@
                 return Id;
             }
             Data.Add(String, LastId);
+            NewItems.Add(String);
             return LastId++;
         }
 

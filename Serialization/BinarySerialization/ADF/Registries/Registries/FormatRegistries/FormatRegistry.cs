@@ -23,7 +23,10 @@ namespace Zion.Serialization.ADF
 
         public void Write(ADFObjectWriter Writer)
         {
-            //TODO: IWritableRegistry.Write
+            Writer.Write("Items", Formats, Writed);
+            Writer.Write("Corrections", Corrections);
+            Writed = Formats.Count;
+            Corrections.Clear();
         }
 
 

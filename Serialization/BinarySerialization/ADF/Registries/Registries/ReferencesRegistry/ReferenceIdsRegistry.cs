@@ -5,27 +5,33 @@
         private static readonly Reference Null = new Reference(0, new(ADFPrimitives.Object, 0u, -1u));
 
         private readonly Dictionary<object, Reference> References; //Optimize: Заменить на слабую ссылку
+        private readonly List<Reference> NewItems;
 
         private ulong LastId = 1UL << 63 | 2;
 
-        public bool IsChanged { get; private set; }
+        public bool IsChanged => NewItems.Count > 0;
 
 
         public ReferenceIdsRegistry()
         {
             References = new(ReferenceEqualityComparer.Instance);
+            NewItems = new();
         }
 
 
         public void Write(ADFObjectWriter Writer)
         {
-            //TODO: IWritableRegistry.Write
+            Writer.Write("Items", NewItems);
+            NewItems.Clear();
         }
 
 
         public void Add(object Value, DataDefinition Definition)
         {
-            References.Add(Value, new(LastId, Definition));
+            var Reference = new Reference(LastId, Definition);
+
+            References.Add(Value, Reference);
+            NewItems.Add(Reference);
             LastId += 2;
         }
 

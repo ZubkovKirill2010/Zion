@@ -453,7 +453,7 @@ namespace Zion.Serialization.ADF
 
         public void Write<T>(string Name, IEnumerator<T> Enumerator)
         {
-            //TODO: WriteVarInt IEnumerator<T>
+            //TODO: Write IEnumerator<T>
         }
 
 
