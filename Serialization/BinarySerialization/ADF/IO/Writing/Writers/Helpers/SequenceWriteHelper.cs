@@ -589,7 +589,7 @@ namespace Zion.Serialization.ADF
             Stream.Reserve(Span.Length * 5);
             Stream.UseSpan
             (
-                new VarIntSpanState<int>(Span, ref Written),
+                new NumberSpanState<int>(Span, ref Written),
                 static (Target, State) =>
                 {
                     ref var Destination = ref MemoryMarshal.GetReference(Target);
@@ -612,7 +612,7 @@ namespace Zion.Serialization.ADF
             Stream.Reserve(Span.Length * 5);
             Stream.UseSpan
             (
-                new VarIntSpanState<uint>(Span, ref Written),
+                new NumberSpanState<uint>(Span, ref Written),
                 static (Target, State) =>
                 {
                     ref var Destination = ref MemoryMarshal.GetReference(Target);
@@ -632,10 +632,10 @@ namespace Zion.Serialization.ADF
         {
             var Written = 0;
 
-            Stream.Reserve(Span.Length * 5);
+            Stream.Reserve(Span.Length * 10);
             Stream.UseSpan
             (
-                new VarIntSpanState<long>(Span, ref Written),
+                new NumberSpanState<long>(Span, ref Written),
                 static (Target, State) =>
                 {
                     ref var Destination = ref MemoryMarshal.GetReference(Target);
@@ -655,10 +655,10 @@ namespace Zion.Serialization.ADF
         {
             var Written = 0;
 
-            Stream.Reserve(Span.Length * 5);
+            Stream.Reserve(Span.Length * 10);
             Stream.UseSpan
             (
-                new VarIntSpanState<ulong>(Span, ref Written),
+                new NumberSpanState<ulong>(Span, ref Written),
                 static (Target, State) =>
                 {
                     ref var Destination = ref MemoryMarshal.GetReference(Target);
@@ -677,12 +677,62 @@ namespace Zion.Serialization.ADF
 
         private static void WriteCompressed(ArenaStream Stream, ReadOnlySpan<float> Span)
         {
-            //TODO
+            Stream.Reserve(Span.Length * 5);
+
+            var Written = 0;
+            var State = new NumberSpanState<float>(Span, ref Written);
+
+            Stream.UseSpan
+            (
+                State,
+                static (Target, Source) =>
+                {
+                    ref var Destination = ref MemoryMarshal.GetReference(Target);
+                    var Written  = 0;
+                    var Previous = 0u;
+
+                    foreach (var Value in Source.Source)
+                    {
+                        var Raw  = Unsafe.As<float, uint>(ref Unsafe.AsRef(in Value));
+                        Written += WriteVarInt(ref Unsafe.Add(ref Destination, Written), Raw ^ Previous);
+                        Previous = Raw;
+                    }
+
+                    Source.Written = Written;
+                }
+            );
+
+            Stream.TrimExcess(Written);
         }
 
         private static void WriteCompressed(ArenaStream Stream, ReadOnlySpan<double> Span)
         {
-            //TODO
+            Stream.Reserve(Span.Length * 10);
+
+            var Written = 0;
+            var State = new NumberSpanState<double>(Span, ref Written);
+
+            Stream.UseSpan
+            (
+                State,
+                static (Target, Source) =>
+                {
+                    ref var Destination = ref MemoryMarshal.GetReference(Target);
+                    var Written = 0;
+                    var Previous = 0UL;
+
+                    foreach (var Value in Source.Source)
+                    {
+                        var Raw  = Unsafe.As<double, ulong>(ref Unsafe.AsRef(in Value));
+                        Written += WriteVarInt(ref Unsafe.Add(ref Destination, Written), Raw ^ Previous);
+                        Previous = Raw;
+                    }
+
+                    Source.Written = Written;
+                }
+            );
+
+            Stream.TrimExcess(Written);
         }
 
 
@@ -737,12 +787,12 @@ namespace Zion.Serialization.ADF
         }
 
 
-        private ref struct VarIntSpanState<T> where T : unmanaged
+        private ref struct NumberSpanState<T> where T : unmanaged
         {
             public ReadOnlySpan<T> Source;
             public ref int Written;
 
-            public VarIntSpanState(ReadOnlySpan<T> Source, ref int Written)
+            public NumberSpanState(ReadOnlySpan<T> Source, ref int Written)
             {
                 this.Source = Source;
                 this.Written = ref Written;
