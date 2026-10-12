@@ -299,7 +299,7 @@ namespace Zion.Serialization.ADF
             var Registry = StringRegistry;
 
             var NameId = StringRegistry.GetOrAdd(Name);
-            var Target = GetStreamGroup(Name, in NameId, ADFPrimitives.String | ADFPrimitives.Sequence);
+            var Target = GetWriteTarget(Name, in NameId, ADFPrimitives.String | ADFPrimitives.Sequence);
             var Stream = Target.BaseStream;
 
             if (Context.Compression)
@@ -361,7 +361,7 @@ namespace Zion.Serialization.ADF
             ThrowIfDisposed();
 
             var NameId = StringRegistry.GetOrAdd(Name);
-            var Target = GetStreamGroup(Name, in NameId, ADFPrimitives.BigInteger | ADFPrimitives.Sequence);
+            var Target = GetWriteTarget(Name, in NameId, ADFPrimitives.BigInteger | ADFPrimitives.Sequence);
 
             if (Collection is not null
                 && References.TryGetReference(Collection, out var Reference))
@@ -477,9 +477,7 @@ namespace Zion.Serialization.ADF
             var FormatId = Entry.FormatId | ADFPrimitives.Sequence;
             var Strategy = Entry.Strategy;
 
-            var Target = GetStreamGroup(Name, in NameId, in FormatId);
-
-            //TODO: Направить в новую группу
+            var Target = GetWriteTarget(Name, in NameId, in FormatId);
 
             //Optimize
             foreach (var Item in Span)
@@ -499,7 +497,7 @@ namespace Zion.Serialization.ADF
             );
 
             var ItemSize = Unsafe.SizeOf<T>();
-            var Target = GetStreamGroup(Name, in NameId, in FormatId);
+            var Target = GetWriteTarget(Name, in NameId, in FormatId);
             var Stream = Context.Arena.GetStream(ItemSize * Span.Length);
 
             Stream.Write(Span.Length);
@@ -535,7 +533,7 @@ namespace Zion.Serialization.ADF
             ThrowIfDisposed();
 
             var NameId = StringRegistry.GetOrAdd(WriteContext.Name);
-            var Target = GetStreamGroup(WriteContext.Name, in NameId, in WriteContext.FormatId);
+            var Target = GetWriteTarget(WriteContext.Name, in NameId, in WriteContext.FormatId);
 
             if (WriteContext.Collection is not null
                 && References.TryGetReference(WriteContext.Collection, out var Reference))

@@ -139,7 +139,7 @@ namespace Zion.Serialization.ADF
             ThrowIfDisposed();
 
             var NameId = StringRegistry.GetOrAdd(Name.NotNull());
-            var Target = GetStreamGroup(Name, in NameId, in FormatId);
+            var Target = GetWriteTarget(Name, in NameId, in FormatId);
 
             Strategy.Write(Context, Target, Value);
             OnWrited(Name, in NameId, in FormatId);

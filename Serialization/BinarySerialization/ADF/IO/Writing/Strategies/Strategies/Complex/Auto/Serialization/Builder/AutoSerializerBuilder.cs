@@ -106,12 +106,7 @@ namespace Zion.Serialization.ADF
 
         private static MethodInfo GetNewWriteMethod(Type Type)
         {
-            if (Type.IsEnum)
-            {
-                return AutoSerializerHelper.GetEnumWriter(Type);
-            }
-
-            return AutoSerializerHelper.GetObjectWriter(Type);
+            return AutoSerializerHelper.GetWriter(Type);
         }
 
 

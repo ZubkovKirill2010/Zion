@@ -30,7 +30,7 @@
         #endregion
 
         #region OverrideMethods
-        protected override StreamGroup GetStreamGroup(string Name, in uint NameId, in uint FormatId)
+        protected override StreamGroup GetWriteTarget(string Name, in uint NameId, in uint FormatId)
         {
             CheckRanges(Name, in NameId, out int ParameterIndex);
 
@@ -45,10 +45,10 @@
 
             if (ParameterIndex == Current)
             {
-                return base.GetStreamGroup(Name, in NameId, in FormatId);
+                return base.GetWriteTarget(Name, in NameId, in FormatId);
             }
 
-            var PostponedGroup = base.GetStreamGroup(Name, in NameId, in FormatId).With(GetNewStream());
+            var PostponedGroup = base.GetWriteTarget(Name, in NameId, in FormatId).With(GetNewStream());
             PostponedItems.Add(new(ParameterIndex, PostponedGroup));
 
             return PostponedGroup;

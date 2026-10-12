@@ -297,7 +297,7 @@ namespace Zion.Serialization.ADF
             var Registry = StringRegistry;
 
             var NameId = StringRegistry.GetOrAdd(Name);
-            var Target = GetStreamGroup(Name, in NameId, ADFPrimitives.String | ADFPrimitives.Sequence);
+            var Target = GetWriteTarget(Name, in NameId, ADFPrimitives.String | ADFPrimitives.Sequence);
             var Stream = Target.BaseStream;
 
             if (Context.Compression)
@@ -361,7 +361,7 @@ namespace Zion.Serialization.ADF
             ThrowIfDisposed();
 
             var NameId = StringRegistry.GetOrAdd(Name);
-            var Target = GetStreamGroup(Name, in NameId, ADFPrimitives.BigInteger | ADFPrimitives.Sequence);
+            var Target = GetWriteTarget(Name, in NameId, ADFPrimitives.BigInteger | ADFPrimitives.Sequence);
 
             var Base   = Target.BaseStream;
             var Stream = Context.Arena.GetStream(64);
@@ -461,7 +461,7 @@ namespace Zion.Serialization.ADF
             ThrowIfDisposed();
 
             var NameId = StringRegistry.GetOrAdd(WriteContext.Name);
-            var Target = GetStreamGroup(WriteContext.Name, in NameId, in WriteContext.FormatId);
+            var Target = GetWriteTarget(WriteContext.Name, in NameId, in WriteContext.FormatId);
 
             WriteContext.Write(Context, Target);
 

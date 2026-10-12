@@ -9,6 +9,13 @@ namespace Zion.Serialization.ADF
         private static readonly MethodInfo WriteObjectMethod = typeof(AutoSerializerHelper).GetMethod(nameof(Write))!;
 
 
+        public static MethodInfo GetWriter(Type Type)
+        {
+            return Type.IsEnum
+                ? GetEnumWriter(Type)
+                : GetObjectWriter(Type);
+        }
+
         public static MethodInfo GetEnumWriter(Type Type)
         {
             return WriteEnumMethod.MakeGenericMethod(Type);

@@ -36,6 +36,19 @@
         #region Creation
         private WriteEntry<T> Create<T>(ADFWritingContext Context, Type Type)
         {
+            if (Type.IsEnum)
+            {
+                return new
+                (
+                    Context.TypeAssociation.GetOrAdd
+                    (
+                        Type,
+                        () => Context.Registries.FormatRegistry.Add(DataFormat.GetEnumFormat<T>())
+                    ),
+                    new EnumWriteStrategy<T>()
+                );
+            }
+
             if (TryCreateLayered<T>(Context, Type, out var LayeredStrategy))
             {
                 var LayeredFormatId = GetOrAddDeferred(Context, Type);

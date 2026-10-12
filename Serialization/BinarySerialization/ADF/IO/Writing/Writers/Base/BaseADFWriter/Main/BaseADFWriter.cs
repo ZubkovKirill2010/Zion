@@ -46,7 +46,7 @@ namespace Zion.Serialization.ADF
         #endregion
 
         #region AbstractMethods
-        protected virtual StreamGroup GetStreamGroup(string Name, in uint NameId, in uint FormatId) => Data;
+        protected virtual StreamGroup GetWriteTarget(string Name, in uint NameId, in uint FormatId) => Data;
 
         protected virtual void OnWrited(string Name, in uint NameId, in uint FormatId) { }
 
@@ -106,56 +106,23 @@ namespace Zion.Serialization.ADF
                 }
 
                 var NullFormatId = GetOrAddDeferred(typeof(T));
-
-                GetStreamGroup(Name, in NameId, NullFormatId).BaseStream.WriteCompressedZero(Context);
+                var NullTarget = GetWriteTarget(Name, in NameId, NullFormatId);
+                
+                NullTarget.BaseStream.WriteCompressedZero(Context);
                 OnWrited(Name, in NameId, NullFormatId);
                 return;
             }
 
-            var Type = Value.GetType();
-
-            if (TryWriteEnum(Name, in NameId, Type, Value))
-            {
-                return;
-            };
-            
-            WriteStrategies.GetEntry<T>(Context, Type).Deconstruct
+            WriteStrategies.GetEntry<T>(Context, Value.GetType()).Deconstruct
             (
                 out var FormatId,
                 out var Strategy
             );
 
-            var Target = GetStreamGroup(Name, in NameId, in FormatId);
+            var Target = GetWriteTarget(Name, in NameId, in FormatId);
 
             Strategy.Write(Context, Target, Value);
             OnWrited(Name, in NameId, in FormatId);
-        }
-
-        private bool TryWriteEnum<T>(string Name, in uint NameId, Type Type, T Value)
-        {
-            if (Type.IsEnum)
-            {
-                var FormatId = FormatRegistry.Add(DataFormat.GetEnumFormat<T>());
-                var Stream = GetStreamGroup(Name, in NameId, in FormatId).BaseStream;
-
-                WriteEnum(Stream, Value);
-                OnWrited(Name, in NameId, in FormatId);
-
-                return true;
-            }
-            return false;
-        }
-
-        private void WriteEnum<T>(ArenaStream Stream, T Value)
-        {
-            Stream.UseSpan
-            (
-                Unsafe.SizeOf<T>(),
-                Span =>
-                {
-                    Unsafe.WriteUnaligned(ref Span[0], Value);
-                }
-            );
         }
 
         #endregion

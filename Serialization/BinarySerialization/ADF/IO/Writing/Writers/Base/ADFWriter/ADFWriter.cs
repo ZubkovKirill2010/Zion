@@ -33,11 +33,11 @@
         #endregion
 
         #region OverrideMethods
-        protected override StreamGroup GetStreamGroup(string Name, in uint NameId, in uint FormatId)
+        protected override StreamGroup GetWriteTarget(string Name, in uint NameId, in uint FormatId)
         {
             return DataRegistry.Contains(NameId)
                 ? throw new ADFRepeatedNameException(Name)
-                : base.GetStreamGroup(Name, in NameId, in FormatId);
+                : base.GetWriteTarget(Name, in NameId, in FormatId);
         }
 
         protected override void OnWrited(string Name, in uint NameId, in uint FormatId)

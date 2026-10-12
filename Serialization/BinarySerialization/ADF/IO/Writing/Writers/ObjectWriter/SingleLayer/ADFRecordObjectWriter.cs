@@ -17,10 +17,10 @@
         #endregion
 
         #region OverrideMethods
-        protected override StreamGroup GetStreamGroup(string Name, in uint NameId, in uint FormatId)
+        protected override StreamGroup GetWriteTarget(string Name, in uint NameId, in uint FormatId)
         {
             ThrowIfContains(Name, in NameId);
-            return base.GetStreamGroup(Name, in NameId, in FormatId);
+            return base.GetWriteTarget(Name, in NameId, in FormatId);
         }
 
         protected override void OnWrited(string Name, in uint NameId, in uint FormatId)
