@@ -101,11 +101,6 @@ namespace Zion.Serialization.ADF
 
         private static MethodInfo GetWriteMethod(Type Type)
         {
-            if (ADFPrimitives.TryGetInfo(Type, out var Info))
-            {
-                return Info.WriteMethod;
-            }
-
             return WriteMethodCache.GetOrAdd(Type, GetNewWriteMethod);
         }
 

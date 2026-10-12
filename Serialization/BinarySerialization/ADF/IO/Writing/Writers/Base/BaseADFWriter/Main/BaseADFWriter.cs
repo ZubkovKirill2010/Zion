@@ -96,11 +96,6 @@ namespace Zion.Serialization.ADF
         {
             ThrowIfDisposed();
 
-            if (TryWritePrimitive(Name, Value))
-            {
-                return;
-            }
-
             var NameId = StringRegistry.GetOrAdd(Name.NotNull());
 
             if (Value is null)

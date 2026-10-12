@@ -10,181 +10,138 @@ namespace Zion.Serialization.ADF
     {
         public void Write(string Name, bool Value)
         {
-            WritePrimitive(Name, in Value, ADFPrimitives.Boolean, ADFPrimitives.WriteBoolean);
+            WritePrimitive(Name, in Value, ADFPrimitives.Boolean, BooleanWriteStrategy.Instance);
         }
 
         public void Write(string Name, byte Value)
         {
-            WritePrimitive(Name, in Value, ADFPrimitives.Byte, ADFPrimitives.WriteByte);
+            WritePrimitive(Name, in Value, ADFPrimitives.Byte, ByteWriteStrategy.Instance);
         }
 
         public void Write(string Name, sbyte Value)
         {
-            WritePrimitive(Name, in Value, ADFPrimitives.SByte, ADFPrimitives.WriteSByte);
+            WritePrimitive(Name, in Value, ADFPrimitives.SByte, SByteWriteStrategy.Instance);
         }
 
 
         public void Write(string Name, short Value)
         {
-            WritePrimitive(Name, in Value, ADFPrimitives.Int16, ADFPrimitives.WriteInt16);
+            WritePrimitive(Name, in Value, ADFPrimitives.Int16, Int16WriteStrategy.Instance);
         }
 
         public void Write(string Name, int Value)
         {
-            WritePrimitive(Name, in Value, ADFPrimitives.Int32, ADFPrimitives.WriteInt32);
+            WritePrimitive(Name, in Value, ADFPrimitives.Int32, Int32WriteStrategy.Instance);
         }
 
         public void Write(string Name, long Value)
         {
-            WritePrimitive(Name, in Value, ADFPrimitives.Int64, ADFPrimitives.WriteInt64);
+            WritePrimitive(Name, in Value, ADFPrimitives.Int64, Int64WriteStrategy.Instance);
         }
 
         public void Write(string Name, ushort Value)
         {
-            WritePrimitive(Name, in Value, ADFPrimitives.UInt16, ADFPrimitives.WriteUInt16);
+            WritePrimitive(Name, in Value, ADFPrimitives.UInt16, UInt16WriteStrategy.Instance);
         }
 
         public void Write(string Name, uint Value)
         {
-            WritePrimitive(Name, in Value, ADFPrimitives.UInt32, ADFPrimitives.WriteUInt32);
+            WritePrimitive(Name, in Value, ADFPrimitives.UInt32, UInt32WriteStrategy.Instance);
         }
 
         public void Write(string Name, ulong Value)
         {
-            WritePrimitive(Name, in Value, ADFPrimitives.UInt64, ADFPrimitives.WriteUInt64);
+            WritePrimitive(Name, in Value, ADFPrimitives.UInt64, UInt64WriteStrategy.Instance);
         }
 
 
         public void Write(string Name, char Value)
         {
-            WritePrimitive(Name, in Value, ADFPrimitives.Char, ADFPrimitives.WriteChar);
+            WritePrimitive(Name, in Value, ADFPrimitives.Char, CharWriteStrategy.Instance);
         }
 
         public void Write(string Name, float Value)
         {
-            WritePrimitive(Name, in Value, ADFPrimitives.Single, ADFPrimitives.WriteSingle);
+            WritePrimitive(Name, in Value, ADFPrimitives.Single, SingleWriteStrategy.Instance);
         }
 
         public void Write(string Name, double Value)
         {
-            WritePrimitive(Name, in Value, ADFPrimitives.Double, ADFPrimitives.WriteDouble);
+            WritePrimitive(Name, in Value, ADFPrimitives.Double, DoubleWriteStrategy.Instance);
         }
 
         public void Write(string Name, decimal Value)
         {
-            WritePrimitive(Name, in Value, ADFPrimitives.Decimal, ADFPrimitives.WriteDecimal);
+            WritePrimitive(Name, in Value, ADFPrimitives.Decimal, DecimalWriteStrategy.Instance);
         }
 
         public void Write(string Name, string Value)
         {
-            WritePrimitive(Name, in Value, ADFPrimitives.String, ADFPrimitives.WriteString);
+            WritePrimitive(Name, in Value, ADFPrimitives.String, StringWriteStrategy.Instance);
         }
 
 
         public void Write(string Name, Half Value)
         {
-            WritePrimitive(Name, in Value, ADFPrimitives.Half, ADFPrimitives.WriteHalf);
+            WritePrimitive(Name, in Value, ADFPrimitives.Half, HalfWriteStrategy.Instance);
         }
 
         public void Write(string Name, Index Value)
         {
-            WritePrimitive(Name, in Value, ADFPrimitives.Index, ADFPrimitives.WriteIndex);
+            WritePrimitive(Name, in Value, ADFPrimitives.Index, IndexWriteStrategy.Instance);
         }
 
         public void Write(string Name, Range Value)
         {
-            WritePrimitive(Name, in Value, ADFPrimitives.Range, ADFPrimitives.WriteRange);
+            WritePrimitive(Name, in Value, ADFPrimitives.Range, RangeWriteStrategy.Instance);
         }
 
         public void Write(string Name, BigInteger Value)
         {
-            WritePrimitive(Name, in Value, ADFPrimitives.BigInteger, ADFPrimitives.WriteBigInteger);
+            WritePrimitive<BigInteger>(Name, in Value, ADFPrimitives.BigInteger, BigIntegerWriteStrategy.Instance);
         }
 
 
         public void Write(string Name, RGBColor Value)
         {
-            WritePrimitive(Name, in Value, ADFPrimitives.RGB, ADFPrimitives.WriteRGB);
+            WritePrimitive(Name, in Value, ADFPrimitives.RGB, RGBColorWriteStrategy.Instance);
         }
 
         public void Write(string Name, RGBAColor Value)
         {
-            WritePrimitive(Name, in Value, ADFPrimitives.RGBA, ADFPrimitives.WriteRGBA);
+            WritePrimitive(Name, in Value, ADFPrimitives.RGBA, RGBAColorWriteStrategy.Instance);
         }
 
 
         public void Write(string Name, Vector2 Value)
         {
-            WritePrimitive(Name, in Value, ADFPrimitives.Vector2, ADFPrimitives.WriteVector2);
+            WritePrimitive(Name, in Value, ADFPrimitives.Vector2, Vector2WriteStrategy.Instance);
         }
 
         public void Write(string Name, Vector2Int Value)
         {
-            WritePrimitive(Name, in Value, ADFPrimitives.Vector2Int, ADFPrimitives.WriteVector2Int);
+            WritePrimitive(Name, in Value, ADFPrimitives.Vector2Int, Vector2IntWriteStrategy.Instance);
         }
 
         public void Write(string Name, Vector3 Value)
         {
-            WritePrimitive(Name, in Value, ADFPrimitives.Vector3, ADFPrimitives.WriteVector3);
+            WritePrimitive(Name, in Value, ADFPrimitives.Vector3, Vector3WriteStrategy.Instance);
         }
 
         public void Write(string Name, Vector3Int Value)
         {
-            WritePrimitive(Name, in Value, ADFPrimitives.Vector3Int, ADFPrimitives.WriteVector3Int);
+            WritePrimitive(Name, in Value, ADFPrimitives.Vector3Int, Vector3IntWriteStrategy.Instance);
         }
 
 
-        private bool TryWritePrimitive<T>(string Name, T Value)
-        {
-            if (Value is null)
-            {
-                return false;
-            }
-
-            switch (Value)
-            {
-                case bool V: Write(Name, V); return true;
-                case byte V: Write(Name, V); return true;
-                case sbyte V: Write(Name, V); return true;
-
-                case short V: Write(Name, V); return true;
-                case ushort V: Write(Name, V); return true;
-                case int V: Write(Name, V); return true;
-                case uint V: Write(Name, V); return true;
-                case long V: Write(Name, V); return true;
-                case ulong V: Write(Name, V); return true;
-
-                case char V: Write(Name, V); return true;
-                case float V: Write(Name, V); return true;
-                case double V: Write(Name, V); return true;
-                case decimal V: Write(Name, V); return true;
-                case string V: Write(Name, V); return true;
-
-                case Half V: Write(Name, V); return true;
-                case Index V: Write(Name, V); return true;
-                case Range V: Write(Name, V); return true;
-                case BigInteger V: Write(Name, V); return true;
-
-                case RGBColor V: Write(Name, V); return true;
-                case RGBAColor V: Write(Name, V); return true;
-
-                case Vector2 V: Write(Name, V); return true;
-                case Vector3 V: Write(Name, V); return true;
-                case Vector2Int V: Write(Name, V); return true;
-                case Vector3Int V: Write(Name, V); return true;
-
-                default: return false;
-            }
-        }
-
-        private void WritePrimitive<T>(string Name, in T Value, uint FormatId, AutoWriter<T> Write)
+        private void WritePrimitive<T>(string Name, in T Value, uint FormatId, IWriteStrategy<T> Strategy)
         {
             ThrowIfDisposed();
 
             var NameId = StringRegistry.GetOrAdd(Name.NotNull());
             var Target = GetStreamGroup(Name, in NameId, in FormatId);
 
-            Write(Context, Target, Value);
+            Strategy.Write(Context, Target, Value);
             OnWrited(Name, in NameId, in FormatId);
         }
     }

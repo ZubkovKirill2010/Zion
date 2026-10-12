@@ -2,6 +2,7 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
+using Zion.Serialization.ADF;
 using Zion.Vectors;
 using static System.Buffers.Binary.BinaryPrimitives;
 using Vector2 = Zion.Vectors.Vector2;
@@ -280,6 +281,34 @@ namespace Zion
                 }
             );
             UpdateLengthFromPosition(_Position + 12);
+        }
+
+        public void Write(System.Numerics.Vector2 Value)
+        {
+            Reserve(8);
+            UseSpan
+            (
+                Span =>
+                {
+                    WriteSingleLittleEndian(Span, Value.X);
+                    WriteSingleLittleEndian(Span.Slice(4), Value.Y);
+                }
+            );
+            UpdateLengthFromPosition(_Position + 8);
+        }
+
+        public void Write(System.Numerics.Vector3 Value)
+        {
+            Reserve(8);
+            UseSpan
+            (
+                Span =>
+                {
+                    WriteSingleLittleEndian(Span, Value.X);
+                    WriteSingleLittleEndian(Span.Slice(4), Value.Y);
+                }
+            );
+            UpdateLengthFromPosition(_Position + 8);
         }
 
 
