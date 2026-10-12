@@ -479,6 +479,8 @@ namespace Zion.Serialization.ADF
 
             var Target = GetStreamGroup(Name, in NameId, in FormatId);
 
+            //TODO: Направить в новую группу
+
             //Optimize
             foreach (var Item in Span)
             {
