@@ -1,5 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 using Zion.Vectors;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 using BigInteger = System.Numerics.BigInteger;
 
 namespace Zion.Serialization.ADF
@@ -91,6 +92,23 @@ namespace Zion.Serialization.ADF
             }
             Info = default;
             return false;
+        }
+
+        public static ReadOnlySpan<PrimitiveInfo> GetPrimitivesInfo()
+        {
+            return PrimitivesInfo;
+        }
+
+        public static void AddTo(Dictionary<Type, WriteEntry> Strategies)
+        {
+            var Primitives = GetPrimitivesInfo();
+            var Strategy = PrimitivesWriteStrategy.Instance;
+
+            for (int i = 0; i < Primitives.Length; i++)
+            {
+                var Info = Primitives[i];
+                Strategies.Add(Info.Type, new((uint)i, Strategy));
+            }
         }
 
         #endregion

@@ -32,7 +32,6 @@ namespace Zion.Serialization.ADF
           IWriteStrategy<System.Numerics.Vector3>
     {
         public static readonly PrimitivesWriteStrategy Instance = new();
-        //TODO: Регестрировать стратегию в WriteStrategies
 
 
         public void WriteData(ADFWritingContext Context, StreamGroup Target, bool Value)

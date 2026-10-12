@@ -3,7 +3,16 @@
     internal sealed class WriteStrategies
     {
         #region Data
-        private readonly Dictionary<Type, WriteEntry> Strategies = new();
+        private readonly Dictionary<Type, WriteEntry> Strategies;
+
+        #endregion
+
+        #region Constructors
+        public WriteStrategies()
+        {
+            Strategies = new(256);
+            ADFPrimitives.AddTo(Strategies);
+        }
 
         #endregion
 
