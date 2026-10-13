@@ -1,6 +1,6 @@
 ﻿namespace Zion.Serialization.ADF
 {
-    internal sealed class TypeAssociation
+    internal sealed class TypeAssociation//TODO: Do : IRegistry
     {
         private readonly Dictionary<Type, uint> Data;
 

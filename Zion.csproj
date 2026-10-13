@@ -29,13 +29,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Serialization\BinarySerialization\ADF\IO\Reading\" />
+    <Folder Include="Serialization\BinarySerialization\ADF\IO\Reading\Context\" />
     <Folder Include="Serialization\BinarySerialization\ADF\IO\Writing\Strategies\Strategies\Complex\" />
-    <Folder Include="Serialization\BinarySerialization\ADF\IO\Writing\Strategies\Strategies\Sequences\" />
-    <Folder Include="Serialization\BinarySerialization\ADF\IO\Writing\Strategies\Interfaces\" />
-    <Folder Include="Serialization\BinarySerialization\ADF\IO\Writing\Writers\Base\ADFWriter\" />
-    <Folder Include="Serialization\BinarySerialization\ADF\IO\Writing\Writers\Base\BaseADFWriter\Main\" />
-    <Folder Include="Serialization\BinarySerialization\ADF\IO\Writing\Writers\ObjectWriter\Base\" />
+    <Folder Include="Serialization\BinarySerialization\ADF\IO\Writing\Strategies\Management\" />
+    <Folder Include="Serialization\BinarySerialization\ADF\IO\Writing\Helpers\" />
+    <Folder Include="Serialization\BinarySerialization\ADF\Registries\Registries\TypeAssociation\" />
     <Folder Include="Serialization\BinarySerialization\Serializers\Object\" />
     <Folder Include="STP\Parser\Static\" />
     <Folder Include="STP\Parser\Dynamic\" />
