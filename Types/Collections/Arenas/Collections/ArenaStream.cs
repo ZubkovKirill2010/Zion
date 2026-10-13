@@ -2,7 +2,6 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
-using Zion.Serialization.ADF;
 using Zion.Vectors;
 using static System.Buffers.Binary.BinaryPrimitives;
 using Vector2 = Zion.Vectors.Vector2;

@@ -1,4 +1,5 @@
 ﻿using System.Buffers.Binary;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Zion.Vectors;
@@ -9,6 +10,188 @@ namespace Zion.Serialization.ADF
 {
     internal static class SequenceWriteHelper
     {
+        public static void Write(ADFWritingContext Context, StreamGroup Target, object? Collection, ReadOnlySpan<bool> Span)
+        {
+            Write(Context, Target, Collection, Span, Write);
+        }
+
+        public static void Write(ADFWritingContext Context, StreamGroup Target, object? Collection, ReadOnlySpan<byte> Span)
+        {
+            Write(Context, Target, Collection, Span, Write);
+        }
+
+        public static void Write(ADFWritingContext Context, StreamGroup Target, object? Collection, ReadOnlySpan<sbyte> Span)
+        {
+            Write(Context, Target, Collection, Span, Write);
+        }
+
+        public static void Write(ADFWritingContext Context, StreamGroup Target, object? Collection, ReadOnlySpan<short> Span)
+        {
+            Write(Context, Target, Collection, Span, Write);
+        }
+
+        public static void Write(ADFWritingContext Context, StreamGroup Target, object? Collection, ReadOnlySpan<int> Span)
+        {
+            Write(Context, Target, Collection, Span, Write);
+        }
+
+        public static void Write(ADFWritingContext Context, StreamGroup Target, object? Collection, ReadOnlySpan<long> Span)
+        {
+            Write(Context, Target, Collection, Span, Write);
+        }
+
+        public static void Write(ADFWritingContext Context, StreamGroup Target, object? Collection, ReadOnlySpan<ushort> Span)
+        {
+            Write(Context, Target, Collection, Span, Write);
+        }
+
+        public static void Write(ADFWritingContext Context, StreamGroup Target, object? Collection, ReadOnlySpan<uint> Span)
+        {
+            Write(Context, Target, Collection, Span, Write);
+        }
+
+        public static void Write(ADFWritingContext Context, StreamGroup Target, object? Collection, ReadOnlySpan<ulong> Span)
+        {
+            Write(Context, Target, Collection, Span, Write);
+        }
+
+        public static void Write(ADFWritingContext Context, StreamGroup Target, object? Collection, ReadOnlySpan<char> Span)
+        {
+            Write(Context, Target, Collection, Span, Write);
+        }
+
+        public static void Write(ADFWritingContext Context, StreamGroup Target, object? Collection, ReadOnlySpan<float> Span)
+        {
+            Write(Context, Target, Collection, Span, Write);
+        }
+
+        public static void Write(ADFWritingContext Context, StreamGroup Target, object? Collection, ReadOnlySpan<double> Span)
+        {
+            Write(Context, Target, Collection, Span, Write);
+        }
+
+        public static void Write(ADFWritingContext Context, StreamGroup Target, object? Collection, ReadOnlySpan<decimal> Span)
+        {
+            Write(Context, Target, Collection, Span, Write);
+        }
+
+        public static void Write(ADFWritingContext Context, StreamGroup Target, object? Collection, ReadOnlySpan<string> Span)
+        {
+            if (Collection is not null
+                && Context.Registries.References.TryGetReference(Collection, out var Reference))
+            {
+                Target.BaseStream.WriteCompressed(Context, Reference.Id);
+            }
+            else
+            {
+                var Link = Reference.CreateNewReference(Target.ChildsLength);
+                var Stream = Context.Arena.GetStream(Span.Length * sizeof(bool));
+                var Registry = Context.Registries.StringRegistry;
+
+                Stream.Write(Span.Length);
+
+                if (Context.Compression)
+                {
+                    foreach (var Value in Span)
+                    {
+                        Stream.Write(Registry.GetOrAdd(Value));
+                    }
+                }
+                else
+                {
+                    foreach (var Value in Span)
+                    {
+                        Stream.Write(Registry.GetOrAdd(Value));
+                    }
+                }
+
+                Target.Add(Stream);
+            }
+        }
+
+        public static void Write(ADFWritingContext Context, StreamGroup Target, object? Collection, ReadOnlySpan<Half> Span)
+        {
+            Write(Context, Target, Collection, Span, Write);
+        }
+
+        public static void Write(ADFWritingContext Context, StreamGroup Target, object? Collection, ReadOnlySpan<Index> Span)
+        {
+            Write(Context, Target, Collection, Span, Write);
+        }
+
+        public static void Write(ADFWritingContext Context, StreamGroup Target, object? Collection, ReadOnlySpan<Range> Span)
+        {
+            Write(Context, Target, Collection, Span, Write);
+        }
+
+        public static void Write(ADFWritingContext Context, StreamGroup Target, object? Collection, ReadOnlySpan<BigInteger> Span)
+        {
+            if (Collection is not null
+                && Context.Registries.References.TryGetReference(Collection, out var Reference))
+            {
+                Target.BaseStream.WriteCompressed(Context, Reference.Id);
+            }
+            else
+            {
+                var Link = Reference.CreateNewReference(Target.ChildsLength);
+                var Stream = Context.Arena.GetStream(Span.Length * sizeof(bool));
+
+                Stream.Write(Span.Length);
+
+                Target.BaseStream.WriteCompressed(Context, Link);
+
+                foreach (var Value in Span)
+                {
+                    Stream.Write(Value);
+                }
+
+                Target.Add(Stream);
+            }
+        }
+
+        public static void Write(ADFWritingContext Context, StreamGroup Target, object? Collection, ReadOnlySpan<RGBColor> Span)
+        {
+            Write(Context, Target, Collection, Span, Write);
+        }
+
+        public static void Write(ADFWritingContext Context, StreamGroup Target, object? Collection, ReadOnlySpan<RGBAColor> Span)
+        {
+            Write(Context, Target, Collection, Span, Write);
+        }
+
+        public static void Write(ADFWritingContext Context, StreamGroup Target, object? Collection, ReadOnlySpan<Vector2> Span)
+        {
+            Write(Context, Target, Collection, Span, Write);
+        }
+
+        public static void Write(ADFWritingContext Context, StreamGroup Target, object? Collection, ReadOnlySpan<Vector2Int> Span)
+        {
+            Write(Context, Target, Collection, Span, Write);
+        }
+
+        public static void Write(ADFWritingContext Context, StreamGroup Target, object? Collection, ReadOnlySpan<Vector3> Span)
+        {
+            Write(Context, Target, Collection, Span, Write);
+        }
+
+        public static void Write(ADFWritingContext Context, StreamGroup Target, object? Collection, ReadOnlySpan<Vector3Int> Span)
+        {
+            Write(Context, Target, Collection, Span, Write);
+        }
+
+
+        public static void Write(ADFWritingContext Context, StreamGroup Target, object? Collection, ReadOnlySpan<System.Numerics.Vector2> Span)
+        {
+            Write(Context, Target, Collection, Span, Write);
+        }
+
+        public static void Write(ADFWritingContext Context, StreamGroup Target, object? Collection, ReadOnlySpan<System.Numerics.Vector3> Span)
+        {
+            Write(Context, Target, Collection, Span, Write);
+        }
+
+
+
         public static void Write(ArenaStream Stream, ReadOnlySpan<bool> Span, bool Compression)
         {
             Stream.UseSpan
@@ -581,6 +764,96 @@ namespace Zion.Serialization.ADF
             }
         }
 
+        public static void Write(ArenaStream Stream, ReadOnlySpan<System.Numerics.Vector2> Span, bool Compression)
+        {
+            if (Compression)
+            {
+                WriteCompressed(Stream, MemoryMarshal.Cast<System.Numerics.Vector2, float>(Span));
+            }
+            else
+            {
+                Stream.UseSpan
+                (
+                    Span,
+                    static (Target, Source) =>
+                    {
+                        if (BitConverter.IsLittleEndian)
+                        {
+                            MemoryMarshal.AsBytes(Source).CopyTo(Target);
+                        }
+                        else
+                        {
+                            BinaryPrimitives.ReverseEndianness
+                            (
+                                MemoryMarshal.Cast<System.Numerics.Vector2, int>(Source),
+                                MemoryMarshal.Cast<byte, int>(Target)
+                            );
+                        }
+                    }
+                );
+            }
+        }
+
+        public static void Write(ArenaStream Stream, ReadOnlySpan<System.Numerics.Vector3> Span, bool Compression)
+        {
+            if (Compression)
+            {
+                WriteCompressed(Stream, MemoryMarshal.Cast<System.Numerics.Vector3, float>(Span));
+            }
+            else
+            {
+                Stream.UseSpan
+                (
+                    Span,
+                    static (Target, Source) =>
+                    {
+                        if (BitConverter.IsLittleEndian)
+                        {
+                            MemoryMarshal.AsBytes(Source).CopyTo(Target);
+                        }
+                        else
+                        {
+                            BinaryPrimitives.ReverseEndianness
+                            (
+                                MemoryMarshal.Cast<System.Numerics.Vector3, int>(Source),
+                                MemoryMarshal.Cast<byte, int>(Target)
+                            );
+                        }
+                    }
+                );
+            }
+        }
+
+
+        private static void Write<T>(ADFWritingContext Context, StreamGroup Target, object? Collection, ReadOnlySpan<T> Span, WriteAction<T> WriteAction)
+        {
+            if (Collection is not null
+                && Context.Registries.References.TryGetReference(Collection, out var Reference))
+            {
+                Target.BaseStream.WriteCompressed(Context, Reference.Id);
+            }
+            else
+            {
+                var Link = Reference.CreateNewReference(Target.ChildsLength);
+                var Stream = Context.Arena.GetStream(Span.Length * sizeof(bool));
+
+                Stream.Write(Span.Length);
+
+                if (Context.Compression)
+                {
+                    Target.BaseStream.Write7BitEncodedUInt64(Link);
+                    WriteAction(Stream, Span, true);
+                }
+                else
+                {
+                    Target.BaseStream.Write(Link);
+                    WriteAction(Stream, Span, false);
+                }
+
+                Target.Add(Stream);
+            }
+        }
+
 
         private static void WriteCompressed(ArenaStream Stream, ReadOnlySpan<int> Span)
         {
@@ -674,7 +947,6 @@ namespace Zion.Serialization.ADF
             Stream.TrimExcess(Written);
         }
 
-
         private static void WriteCompressed(ArenaStream Stream, ReadOnlySpan<float> Span)
         {
             Stream.Reserve(Span.Length * 5);
@@ -732,7 +1004,6 @@ namespace Zion.Serialization.ADF
 
             Stream.TrimExcess(Written);
         }
-
 
         private static void WriteCompressed(ArenaStream Stream, ReadOnlySpan<decimal> Span)
         {

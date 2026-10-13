@@ -456,6 +456,7 @@ namespace Zion.Serialization.ADF
         }
 
 
+        //TODO: Переделать запись под SequenceWriteHelper.Write(Context, Target...)
         private void WriteEnumerator<T>(EnumeratorWriteContext<T> WriteContext) where T : unmanaged
         {
             ThrowIfDisposed();

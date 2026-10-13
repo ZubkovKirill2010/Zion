@@ -33,6 +33,7 @@
     <Folder Include="Serialization\BinarySerialization\ADF\IO\Writing\Strategies\Strategies\Complex\" />
     <Folder Include="Serialization\BinarySerialization\ADF\IO\Writing\Strategies\Management\" />
     <Folder Include="Serialization\BinarySerialization\ADF\IO\Writing\Helpers\" />
+    <Folder Include="Serialization\BinarySerialization\ADF\Registries\Containers\Containers\" />
     <Folder Include="Serialization\BinarySerialization\ADF\Registries\Registries\TypeAssociation\" />
     <Folder Include="Serialization\BinarySerialization\Serializers\Object\" />
     <Folder Include="STP\Parser\Static\" />

@@ -1,5 +1,5 @@
-﻿using Zion.Vectors;
-using System.Numerics;
+﻿using System.Numerics;
+using Zion.Vectors;
 
 namespace Zion.Serialization.ADF
 {

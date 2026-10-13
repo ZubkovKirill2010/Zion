@@ -1,6 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-
-namespace Zion.Serialization.ADF
+﻿namespace Zion.Serialization.ADF
 {
     public abstract partial class BaseADFWriter : IDisposable
     {

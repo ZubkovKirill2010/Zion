@@ -1,6 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using Zion.Vectors;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using Zion.Vectors;
 using BigInteger = System.Numerics.BigInteger;
 
 namespace Zion.Serialization.ADF

@@ -10,285 +10,343 @@ namespace Zion.Serialization.ADF
     //_Span
     public abstract partial class BaseADFWriter
     {
+        //TODO: Заменить на просутю запись без проверки ссылок
         public void Write(string Name, ReadOnlySpan<bool> Span)
         {
-            Write(Name, null, Span);
+            WriteSpan
+            (
+                Name, ADFPrimitives.Boolean, null,
+                Span, SequenceWriteHelper.Write
+            );
         }
 
         public void Write(string Name, ReadOnlySpan<byte> Span)
         {
-            Write(Name, null, Span);
+            WriteSpan
+            (
+                Name, ADFPrimitives.Byte, null,
+                Span, SequenceWriteHelper.Write
+            );
         }
 
         public void Write(string Name, ReadOnlySpan<sbyte> Span)
         {
-            Write(Name, null, Span);
+            WriteSpan
+            (
+                Name, ADFPrimitives.SByte, null,
+                Span, SequenceWriteHelper.Write
+            );
         }
 
         public void Write(string Name, ReadOnlySpan<short> Span)
         {
-            Write(Name, null, Span);
+            WriteSpan
+            (
+                Name, ADFPrimitives.Int16, null,
+                Span, SequenceWriteHelper.Write
+            );
         }
 
         public void Write(string Name, ReadOnlySpan<int> Span)
         {
-            Write(Name, null, Span);
+            WriteSpan
+            (
+                Name, ADFPrimitives.Int32, null,
+                Span, SequenceWriteHelper.Write
+            );
         }
 
         public void Write(string Name, ReadOnlySpan<long> Span)
         {
-            Write(Name, null, Span);
+            WriteSpan
+            (
+                Name, ADFPrimitives.Int64, null,
+                Span, SequenceWriteHelper.Write
+            );
         }
 
         public void Write(string Name, ReadOnlySpan<ushort> Span)
         {
-            Write(Name, null, Span);
+            WriteSpan
+            (
+                Name, ADFPrimitives.UInt16, null,
+                Span, SequenceWriteHelper.Write
+            );
         }
 
         public void Write(string Name, ReadOnlySpan<uint> Span)
         {
-            Write(Name, null, Span);
+            WriteSpan
+            (
+                Name, ADFPrimitives.UInt32, null,
+                Span, SequenceWriteHelper.Write
+            );
         }
 
         public void Write(string Name, ReadOnlySpan<ulong> Span)
         {
-            Write(Name, null, Span);
+            WriteSpan
+            (
+                Name, ADFPrimitives.UInt64, null,
+                Span, SequenceWriteHelper.Write
+            );
         }
 
         public void Write(string Name, ReadOnlySpan<char> Span)
         {
-            Write(Name, null, Span);
+            WriteSpan
+            (
+                Name, ADFPrimitives.Char, null,
+                Span, SequenceWriteHelper.Write
+            );
         }
 
         public void Write(string Name, ReadOnlySpan<float> Span)
         {
-            Write(Name, null, Span);
+            WriteSpan
+            (
+                Name, ADFPrimitives.Single, null,
+                Span, SequenceWriteHelper.Write
+            );
         }
 
         public void Write(string Name, ReadOnlySpan<double> Span)
         {
-            Write(Name, null, Span);
+            WriteSpan
+            (
+                Name, ADFPrimitives.Double, null,
+                Span, SequenceWriteHelper.Write
+            );
         }
 
         public void Write(string Name, ReadOnlySpan<decimal> Span)
         {
-            Write(Name, null, Span);
+            WriteSpan
+            (
+                Name, ADFPrimitives.Decimal, null,
+                Span, SequenceWriteHelper.Write
+            );
         }
 
         public void Write(string Name, ReadOnlySpan<string> Span)
         {
-            Write(Name, null, Span);
+            WriteSpan
+            (
+                Name, ADFPrimitives.String, null,
+                Span, SequenceWriteHelper.Write
+            );
         }
 
         public void Write(string Name, ReadOnlySpan<Half> Span)
         {
-            Write(Name, null, Span);
+            WriteSpan
+            (
+                Name, ADFPrimitives.Half, null,
+                Span, SequenceWriteHelper.Write
+            );
         }
 
         public void Write(string Name, ReadOnlySpan<Index> Span)
         {
-            Write(Name, null, Span);
+            WriteSpan
+            (
+                Name, ADFPrimitives.Index, null,
+                Span, SequenceWriteHelper.Write
+            );
         }
 
         public void Write(string Name, ReadOnlySpan<Range> Span)
         {
-            Write(Name, null, Span);
+            WriteSpan
+            (
+                Name, ADFPrimitives.Range, null,
+                Span, SequenceWriteHelper.Write
+            );
         }
 
         public void Write(string Name, ReadOnlySpan<BigInteger> Span)
         {
-            Write(Name, null, Span);
+            WriteSpan
+            (
+                Name, ADFPrimitives.BigInteger, null,
+                Span, SequenceWriteHelper.Write
+            );
         }
 
         public void Write(string Name, ReadOnlySpan<RGBColor> Span)
         {
-            Write(Name, null, Span);
+            WriteSpan
+            (
+                Name, ADFPrimitives.RGB, null,
+                Span, SequenceWriteHelper.Write
+            );
         }
 
         public void Write(string Name, ReadOnlySpan<RGBAColor> Span)
         {
-            Write(Name, null, Span);
+            WriteSpan
+            (
+                Name, ADFPrimitives.RGBA, null,
+                Span, SequenceWriteHelper.Write
+            );
         }
 
         public void Write(string Name, ReadOnlySpan<Vector2> Span)
         {
-            Write(Name, null, Span);
+            WriteSpan
+            (
+                Name, ADFPrimitives.Vector2, null,
+                Span, SequenceWriteHelper.Write
+            );
         }
 
         public void Write(string Name, ReadOnlySpan<Vector2Int> Span)
         {
-            Write(Name, null, Span);
+            WriteSpan
+            (
+                Name, ADFPrimitives.Vector2Int, null,
+                Span, SequenceWriteHelper.Write
+            );
         }
 
         public void Write(string Name, ReadOnlySpan<Vector3> Span)
         {
-            Write(Name, null, Span);
+            WriteSpan
+            (
+                Name, ADFPrimitives.Vector3, null,
+                Span, SequenceWriteHelper.Write
+            );
         }
 
         public void Write(string Name, ReadOnlySpan<Vector3Int> Span)
         {
-            Write(Name, null, Span);
+            WriteSpan
+            (
+                Name, ADFPrimitives.Vector3Int, null,
+                Span, SequenceWriteHelper.Write
+            );
         }
 
         public void Write<T>(string Name, ReadOnlySpan<T> Span)
         {
-            Write(Name, null, Span);
+            //TODO
         }
 
 
         private void Write(string Name, object? Collection, ReadOnlySpan<bool> Span)
         {
-            WriteSpan<bool>
+            WriteSpan
             (
-                new
-                (
-                    Name, ADFPrimitives.Boolean,
-                    Collection, Span, SequenceWriteHelper.Write
-                )
+                Name, ADFPrimitives.Boolean, Collection,
+                Span, SequenceWriteHelper.Write
             );
         }
 
         private void Write(string Name, object? Collection, ReadOnlySpan<byte> Span)
         {
-            WriteSpan<byte>
+            WriteSpan
             (
-                new
-                (
-                    Name, ADFPrimitives.Byte,
-                    Collection, Span, SequenceWriteHelper.Write
-                )
+                Name, ADFPrimitives.Byte, Collection,
+                Span, SequenceWriteHelper.Write
             );
         }
 
         private void Write(string Name, object? Collection, ReadOnlySpan<sbyte> Span)
         {
-            WriteSpan<sbyte>
+            WriteSpan
             (
-                new
-                (
-                    Name, ADFPrimitives.SByte,
-                    Collection, Span, SequenceWriteHelper.Write
-                )
+                Name, ADFPrimitives.SByte, Collection,
+                Span, SequenceWriteHelper.Write
             );
         }
 
         private void Write(string Name, object? Collection, ReadOnlySpan<short> Span)
         {
-            WriteSpan<short>
+            WriteSpan
             (
-                new
-                (
-                    Name, ADFPrimitives.Int16,
-                    Collection, Span, SequenceWriteHelper.Write
-                )
+                Name, ADFPrimitives.Int16, Collection,
+                Span, SequenceWriteHelper.Write
             );
         }
 
         private void Write(string Name, object? Collection, ReadOnlySpan<int> Span)
         {
-            WriteSpan<int>
+            WriteSpan
             (
-                new
-                (
-                    Name, ADFPrimitives.Int32,
-                    Collection, Span, SequenceWriteHelper.Write
-                )
+                Name, ADFPrimitives.Int32, Collection,
+                Span, SequenceWriteHelper.Write
             );
         }
 
         private void Write(string Name, object? Collection, ReadOnlySpan<long> Span)
         {
-            WriteSpan<long>
+            WriteSpan
             (
-                new
-                (
-                    Name, ADFPrimitives.Int64,
-                    Collection, Span, SequenceWriteHelper.Write
-                )
+                Name, ADFPrimitives.Int64, Collection,
+                Span, SequenceWriteHelper.Write
             );
         }
 
         private void Write(string Name, object? Collection, ReadOnlySpan<ushort> Span)
         {
-            WriteSpan<ushort>
+            WriteSpan
             (
-                new
-                (
-                    Name, ADFPrimitives.UInt16,
-                    Collection, Span, SequenceWriteHelper.Write
-                )
+                Name, ADFPrimitives.UInt16, Collection,
+                Span, SequenceWriteHelper.Write
             );
         }
 
         private void Write(string Name, object? Collection, ReadOnlySpan<uint> Span)
         {
-            WriteSpan<uint>
+            WriteSpan
             (
-                new
-                (
-                    Name, ADFPrimitives.UInt32,
-                    Collection, Span, SequenceWriteHelper.Write
-                )
+                Name, ADFPrimitives.UInt32, Collection,
+                Span, SequenceWriteHelper.Write
             );
         }
 
         private void Write(string Name, object? Collection, ReadOnlySpan<ulong> Span)
         {
-            WriteSpan<ulong>
+            WriteSpan
             (
-                new
-                (
-                    Name, ADFPrimitives.UInt64,
-                    Collection, Span, SequenceWriteHelper.Write
-                )
+                Name, ADFPrimitives.UInt64, Collection,
+                Span, SequenceWriteHelper.Write
             );
         }
 
         private void Write(string Name, object? Collection, ReadOnlySpan<char> Span)
         {
-            WriteSpan<char>
+            WriteSpan
             (
-                new
-                (
-                    Name, ADFPrimitives.Char,
-                    Collection, Span, SequenceWriteHelper.Write
-                )
+                Name, ADFPrimitives.Char, Collection,
+                Span, SequenceWriteHelper.Write
             );
         }
 
         private void Write(string Name, object? Collection, ReadOnlySpan<float> Span)
         {
-            WriteSpan<float>
+            WriteSpan
             (
-                new
-                (
-                    Name, ADFPrimitives.Single,
-                    Collection, Span, SequenceWriteHelper.Write
-                )
+                Name, ADFPrimitives.Single, Collection,
+                Span, SequenceWriteHelper.Write
             );
         }
 
         private void Write(string Name, object? Collection, ReadOnlySpan<double> Span)
         {
-            WriteSpan<double>
+            WriteSpan
             (
-                new
-                (
-                    Name, ADFPrimitives.Double,
-                    Collection, Span, SequenceWriteHelper.Write
-                )
+                Name, ADFPrimitives.Double, Collection,
+                Span, SequenceWriteHelper.Write
             );
         }
 
         private void Write(string Name, object? Collection, ReadOnlySpan<decimal> Span) 
         {
-            WriteSpan<decimal>
+            WriteSpan
             (
-                new
-                (
-                    Name, ADFPrimitives.Decimal,
-                    Collection, Span, SequenceWriteHelper.Write
-                )
+                Name, ADFPrimitives.Decimal, Collection,
+                Span, SequenceWriteHelper.Write
             );
         }
 
@@ -322,37 +380,28 @@ namespace Zion.Serialization.ADF
 
         private void Write(string Name, object? Collection, ReadOnlySpan<Half> Span)
         {
-            WriteSpan<Half>
+            WriteSpan
             (
-                new
-                (
-                    Name, ADFPrimitives.Half,
-                    Collection, Span, SequenceWriteHelper.Write
-                )
+                Name, ADFPrimitives.Half, Collection,
+                Span, SequenceWriteHelper.Write
             );
         }
 
         private void Write(string Name, object? Collection, ReadOnlySpan<Index> Span)
         {
-            WriteSpan<Index>
+            WriteSpan
             (
-                new
-                (
-                    Name, ADFPrimitives.Index,
-                    Collection, Span, SequenceWriteHelper.Write
-                )
+                Name, ADFPrimitives.Index, Collection,
+                Span, SequenceWriteHelper.Write
             );
         }
 
         private void Write(string Name, object? Collection, ReadOnlySpan<Range> Span)
         {
-            WriteSpan<Range>
+            WriteSpan
             (
-                new
-                (
-                    Name, ADFPrimitives.Range,
-                    Collection, Span, SequenceWriteHelper.Write
-                )
+                Name, ADFPrimitives.Range, Collection,
+                Span, SequenceWriteHelper.Write
             );
         }
 
@@ -388,78 +437,61 @@ namespace Zion.Serialization.ADF
 
         private void Write(string Name, object? Collection, ReadOnlySpan<RGBColor> Span)
         {
-            WriteSpan<RGBColor>
+            WriteSpan
             (
-                new
-                (
-                    Name, ADFPrimitives.RGB,
-                    Collection, Span, SequenceWriteHelper.Write
-                )
+                Name, ADFPrimitives.RGB, Collection,
+                Span, SequenceWriteHelper.Write
             );
         }
 
         private void Write(string Name, object? Collection, ReadOnlySpan<RGBAColor> Span)
         {
-            WriteSpan<RGBAColor>
+            WriteSpan
             (
-                new
-                (
-                    Name, ADFPrimitives.RGBA,
-                    Collection, Span, SequenceWriteHelper.Write
-                )
+                Name, ADFPrimitives.RGBA, Collection,
+                Span, SequenceWriteHelper.Write
             );
         }
 
         private void Write(string Name, object? Collection, ReadOnlySpan<Vector2> Span)
         {
-            WriteSpan<Vector2>
+            WriteSpan
             (
-                new
-                (
-                    Name, ADFPrimitives.Vector2,
-                    Collection, Span, SequenceWriteHelper.Write
-                )
+                Name, ADFPrimitives.Vector2, Collection,
+                Span, SequenceWriteHelper.Write
             );
         }
 
         private void Write(string Name, object? Collection, ReadOnlySpan<Vector2Int> Span)
         {
-            WriteSpan<Vector2Int>
+            WriteSpan
             (
-                new
-                (
-                    Name, ADFPrimitives.Vector2Int,
-                    Collection, Span, SequenceWriteHelper.Write
-                )
+                Name, ADFPrimitives.Vector2Int, Collection,
+                Span, SequenceWriteHelper.Write
             );
         }
 
         private void Write(string Name, object? Collection, ReadOnlySpan<Vector3> Span)
         {
-            WriteSpan<Vector3>
+            WriteSpan
             (
-                new
-                (
-                    Name, ADFPrimitives.Vector3,
-                    Collection, Span, SequenceWriteHelper.Write
-                )
+                Name, ADFPrimitives.Vector3, Collection,
+                Span, SequenceWriteHelper.Write
             );
         }
 
         private void Write(string Name, object? Collection, ReadOnlySpan<Vector3Int> Span)
         {
-            WriteSpan<Vector3Int>
+            WriteSpan
             (
-                new
-                (
-                    Name, ADFPrimitives.Vector3Int,
-                    Collection, Span, SequenceWriteHelper.Write
-                )
+                Name, ADFPrimitives.Vector3Int, Collection,
+                Span, SequenceWriteHelper.Write
             );
         }
 
         private void Write<T>(string Name, object? Collection, ReadOnlySpan<T> Span)
         {
+            //TODO: Проверить
             ThrowIfDisposed();
 
             var Type   = typeof(T);
@@ -487,6 +519,7 @@ namespace Zion.Serialization.ADF
 
             OnWrited(Name, in NameId, in FormatId);
         }
+
 
         private void WriteEnums<T>(string Name, in uint NameId, ReadOnlySpan<T> Span)
         {
@@ -527,25 +560,18 @@ namespace Zion.Serialization.ADF
             OnWrited(Name, in NameId, in FormatId);
         }
 
-
-        private void WriteSpan<T>(SpanWriteContext<T> WriteContext)
+        private void WriteSpan<T>(string Name, uint FormatId, object? Collection, ReadOnlySpan<T> Span, Action<ADFWritingContext, StreamGroup, object?, ReadOnlySpan<T>> WriteAction)
         {
             ThrowIfDisposed();
 
-            var NameId = StringRegistry.GetOrAdd(WriteContext.Name);
-            var Target = GetWriteTarget(WriteContext.Name, in NameId, in WriteContext.FormatId);
+            var Context = this.Context;
 
-            if (WriteContext.Collection is not null
-                && References.TryGetReference(WriteContext.Collection, out var Reference))
-            {
-                Target.BaseStream.WriteCompressed(Context, Reference.Id);
-            }
-            else
-            {
-                WriteContext.Write(Context, Target);
-            }
+            var NameId = Context.Registries.StringRegistry.GetOrAdd(Name);
+            var Target = GetWriteTarget(Name, in NameId, in FormatId);
 
-            OnWrited(WriteContext.Name, in NameId, in WriteContext.FormatId);
+            WriteAction(Context, Target, Collection, Span);
+
+            OnWrited(Name, in NameId, in FormatId);
         }
     }
 }
