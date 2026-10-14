@@ -347,34 +347,13 @@ namespace Zion.Serialization.ADF
             );
         }
 
-        //!!!
         private void Write(string Name, object? Collection, ReadOnlySpan<string> Span)
         {
-            //TODO: Вынести логику
-            ThrowIfDisposed();
-
-            var Registry = StringRegistry;
-
-            var NameId = StringRegistry.GetOrAdd(Name);
-            var Target = GetWriteTarget(Name, in NameId, ADFPrimitives.String | ADFPrimitives.Sequence);
-            var Stream = Target.BaseStream;
-
-            if (Context.Compression)
-            {
-                for (int i = 0; i < Span.Length; i++)
-                {
-                    Stream.Write7BitEncodedUInt(Registry.GetOrAdd(Span[i]));
-                }
-            }
-            else
-            {
-                for (int i = 0; i < Span.Length; i++)
-                {
-                    Stream.Write(Registry.GetOrAdd(Span[i]));
-                }
-            }
-
-            OnWrited(Name, in NameId, ADFPrimitives.String | ADFPrimitives.Sequence);
+            WriteSpan
+            (
+                Name, ADFPrimitives.String, Collection,
+                Span, SequenceWriteHelper.Write
+            );
         }
 
         private void Write(string Name, object? Collection, ReadOnlySpan<Half> Span)
@@ -404,36 +383,13 @@ namespace Zion.Serialization.ADF
             );
         }
 
-        //!!!
         private void Write(string Name, object? Collection, ReadOnlySpan<BigInteger> Span)
         {
-            //TODO: Вынести логику
-            ThrowIfDisposed();
-
-            var NameId = StringRegistry.GetOrAdd(Name);
-            var Target = GetWriteTarget(Name, in NameId, ADFPrimitives.BigInteger | ADFPrimitives.Sequence);
-
-            if (Collection is not null
-                && References.TryGetReference(Collection, out var Reference))
-            {
-                Target.BaseStream.WriteCompressed(Context, Reference.Id);
-            }
-            else
-            {
-                var Base   = Target.BaseStream;
-                var Stream = Context.Arena.GetStream(Span.Length << 3);
-                var Offset = Target.ChildsLength;
-
-                for (int i = 0; i < Span.Length; i++)
-                {
-                    Base.Write(Reference.CreateNewReference(Offset + Stream.Length));
-                    Stream.Write(Span[i]);
-                }
-
-                Target.Add(Stream);
-            }
-
-            OnWrited(Name, in NameId, ADFPrimitives.BigInteger | ADFPrimitives.Sequence);
+            WriteSpan
+            (
+                Name, ADFPrimitives.BigInteger, Collection,
+                Span, SequenceWriteHelper.Write
+            );
         }
 
         private void Write(string Name, object? Collection, ReadOnlySpan<RGBColor> Span)

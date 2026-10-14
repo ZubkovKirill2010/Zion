@@ -77,36 +77,30 @@ namespace Zion.Serialization.ADF
 
         public static void Write(ADFWritingContext Context, StreamGroup Target, object? Collection, ReadOnlySpan<string> Span)
         {
-            if (Collection is not null
-                && Context.Registries.References.TryGetReference(Collection, out var Reference))
+            if (TryWriteReference(Context, Target, Collection))
             {
-                Target.BaseStream.WriteCompressed(Context, Reference.Id);
+                return;
+            }
+
+            var Registry = Context.Registries.StringRegistry;
+            var Stream = GetSubStream(Context, Target, Span.Length, Span.Length * 4);
+
+            if (Context.Compression)
+            {
+                foreach (var Value in Span)
+                {
+                    Stream.Write7BitEncodedUInt(Registry.GetOrAdd(Value));
+                }
             }
             else
             {
-                var Link = Reference.CreateNewReference(Target.ChildsLength);
-                var Stream = Context.Arena.GetStream(Span.Length * sizeof(bool));
-                var Registry = Context.Registries.StringRegistry;
-
-                Stream.Write(Span.Length);
-
-                if (Context.Compression)
+                foreach (var Value in Span)
                 {
-                    foreach (var Value in Span)
-                    {
-                        Stream.Write(Registry.GetOrAdd(Value));
-                    }
+                    Stream.Write(Registry.GetOrAdd(Value));
                 }
-                else
-                {
-                    foreach (var Value in Span)
-                    {
-                        Stream.Write(Registry.GetOrAdd(Value));
-                    }
-                }
-
-                Target.Add(Stream);
             }
+
+            Target.Add(Stream);
         }
 
         public static void Write(ADFWritingContext Context, StreamGroup Target, object? Collection, ReadOnlySpan<Half> Span)
@@ -126,27 +120,19 @@ namespace Zion.Serialization.ADF
 
         public static void Write(ADFWritingContext Context, StreamGroup Target, object? Collection, ReadOnlySpan<BigInteger> Span)
         {
-            if (Collection is not null
-                && Context.Registries.References.TryGetReference(Collection, out var Reference))
+            if (TryWriteReference(Context, Target, Collection))
             {
-                Target.BaseStream.WriteCompressed(Context, Reference.Id);
+                return;
             }
-            else
+
+            var Stream = GetSubStream(Context, Target, Span.Length, Span.Length * 5);
+
+            foreach (var Value in Span)
             {
-                var Link = Reference.CreateNewReference(Target.ChildsLength);
-                var Stream = Context.Arena.GetStream(Span.Length * sizeof(bool));
-
-                Stream.Write(Span.Length);
-
-                Target.BaseStream.WriteCompressed(Context, Link);
-
-                foreach (var Value in Span)
-                {
-                    Stream.Write(Value);
-                }
-
-                Target.Add(Stream);
+                Stream.Write(Value);
             }
+
+            Target.Add(Stream);
         }
 
         public static void Write(ADFWritingContext Context, StreamGroup Target, object? Collection, ReadOnlySpan<RGBColor> Span)
@@ -192,9 +178,12 @@ namespace Zion.Serialization.ADF
 
         public static void Write(ArenaStream Stream, ReadOnlySpan<bool> Span, bool Compression)
         {
-            //TODO: Выделать только нужный размер потока (Count -> ByteCount)
+            var Capacity = (Span.Length + 7) >> 3;
+
+            Stream.Reserve(Capacity);
             Stream.UseSpan
             (
+                Capacity,
                 Span,
                 (Target, Source) =>
                 {
@@ -233,8 +222,10 @@ namespace Zion.Serialization.ADF
 
         public static void Write(ArenaStream Stream, ReadOnlySpan<byte> Span, bool Compression)
         {
+            Stream.Reserve(Span.Length);
             Stream.UseSpan
             (
+                Span.Length,
                 Span,
                 static (Target, Source) =>
                 {
@@ -245,8 +236,10 @@ namespace Zion.Serialization.ADF
 
         public static void Write(ArenaStream Stream, ReadOnlySpan<sbyte> Span, bool Compression)
         {
+            Stream.Reserve(Span.Length);
             Stream.UseSpan
             (
+                Span.Length,
                 Span,
                 static (Target, Source) =>
                 {
@@ -257,8 +250,12 @@ namespace Zion.Serialization.ADF
 
         public static void Write(ArenaStream Stream, ReadOnlySpan<short> Span, bool Compression)
         {
+            int Capacity = Span.Length * sizeof(short);
+
+            Stream.Reserve(Capacity);
             Stream.UseSpan
             (
+                Capacity,
                 Span,
                 static (Target, Source) =>
                 {
@@ -286,8 +283,12 @@ namespace Zion.Serialization.ADF
             }
             else
             {
+                int Capacity = Span.Length * sizeof(int);
+
+                Stream.Reserve(Capacity);
                 Stream.UseSpan
                 (
+                    Capacity,
                     Span,
                     static (Target, Source) =>
                     {
@@ -316,8 +317,12 @@ namespace Zion.Serialization.ADF
             }
             else
             {
+                int Capacity = Span.Length * sizeof(long);
+
+                Stream.Reserve(Capacity);
                 Stream.UseSpan
                 (
+                    Capacity,
                     Span,
                     static (Target, Source) =>
                     {
@@ -340,8 +345,12 @@ namespace Zion.Serialization.ADF
 
         public static void Write(ArenaStream Stream, ReadOnlySpan<ushort> Span, bool Compression)
         {
+            int Capacity = Span.Length * sizeof(ushort);
+
+            Stream.Reserve(Capacity);
             Stream.UseSpan
             (
+                Capacity,
                 Span,
                 static (Target, Source) =>
                 {
@@ -369,8 +378,12 @@ namespace Zion.Serialization.ADF
             }
             else
             {
+                int Capacity = Span.Length * sizeof(uint);
+
+                Stream.Reserve(Capacity);
                 Stream.UseSpan
                 (
+                    Capacity,
                     Span,
                     static (Target, Source) =>
                     {
@@ -399,8 +412,12 @@ namespace Zion.Serialization.ADF
             }
             else
             {
+                int Capacity = Span.Length * sizeof(ulong);
+
+                Stream.Reserve(Capacity);
                 Stream.UseSpan
                 (
+                    Capacity,
                     Span,
                     static (Target, Source) =>
                     {
@@ -423,8 +440,12 @@ namespace Zion.Serialization.ADF
 
         public static void Write(ArenaStream Stream, ReadOnlySpan<char> Span, bool Compression)
         {
+            int Capacity = Span.Length * sizeof(char);
+
+            Stream.Reserve(Capacity);
             Stream.UseSpan
             (
+                Capacity,
                 Span,
                 static (Target, Source) =>
                 {
@@ -452,8 +473,12 @@ namespace Zion.Serialization.ADF
             }
             else
             {
+                int Capacity = Span.Length * sizeof(float);
+
+                Stream.Reserve(Capacity);
                 Stream.UseSpan
                 (
+                    Capacity,
                     Span,
                     static (Target, Source) =>
                     {
@@ -482,8 +507,12 @@ namespace Zion.Serialization.ADF
             }
             else
             {
+                int Capacity = Span.Length * sizeof(double);
+
+                Stream.Reserve(Capacity);
                 Stream.UseSpan
                 (
+                    Capacity,
                     Span,
                     static (Target, Source) =>
                     {
@@ -512,8 +541,12 @@ namespace Zion.Serialization.ADF
             }
             else
             {
+                int Capacity = Span.Length * sizeof(decimal);
+
+                Stream.Reserve(Capacity);
                 Stream.UseSpan
                 (
+                    Capacity,
                     Span,
                     static (Target, Source) =>
                     {
@@ -538,8 +571,12 @@ namespace Zion.Serialization.ADF
 
         public static void Write(ArenaStream Stream, ReadOnlySpan<Half> Span, bool Compression)
         {
+            int Capacity = Span.Length * 2;
+
+            Stream.Reserve(Capacity);
             Stream.UseSpan
             (
+                Capacity,
                 Span,
                 static (Target, Source) =>
                 {
@@ -567,8 +604,12 @@ namespace Zion.Serialization.ADF
             }
             else
             {
+                int Capacity = Span.Length * 4;
+
+                Stream.Reserve(Capacity);
                 Stream.UseSpan
                 (
+                    Capacity,
                     Span,
                     static (Target, Source) =>
                     {
@@ -597,8 +638,12 @@ namespace Zion.Serialization.ADF
             }
             else
             {
+                int Capacity = Span.Length * 8;
+
+                Stream.Reserve(Capacity);
                 Stream.UseSpan
                 (
+                    Capacity,
                     Span,
                     static (Target, Source) =>
                     {
@@ -621,8 +666,12 @@ namespace Zion.Serialization.ADF
 
         public static void Write(ArenaStream Stream, ReadOnlySpan<RGBColor> Span, bool Compression)
         {
+            int Capacity = Span.Length * 3;
+
+            Stream.Reserve(Capacity);
             Stream.UseSpan
             (
+                Capacity,
                 Span,
                 static (Target, Source) =>
                 {
@@ -633,8 +682,12 @@ namespace Zion.Serialization.ADF
 
         public static void Write(ArenaStream Stream, ReadOnlySpan<RGBAColor> Span, bool Compression)
         {
+            int Capacity = Span.Length * 4;
+
+            Stream.Reserve(Capacity);
             Stream.UseSpan
             (
+                Capacity,
                 Span,
                 static (Target, Source) =>
                 {
@@ -651,8 +704,12 @@ namespace Zion.Serialization.ADF
             }
             else
             {
+                int Capacity = Span.Length * 8;
+
+                Stream.Reserve(Capacity);
                 Stream.UseSpan
                 (
+                    Capacity,
                     Span,
                     static (Target, Source) =>
                     {
@@ -681,8 +738,12 @@ namespace Zion.Serialization.ADF
             }
             else
             {
+                int Capacity = Span.Length * 8;
+
+                Stream.Reserve(Capacity);
                 Stream.UseSpan
                 (
+                    Capacity,
                     Span,
                     static (Target, Source) =>
                     {
@@ -711,8 +772,12 @@ namespace Zion.Serialization.ADF
             }
             else
             {
+                int Capacity = Span.Length * 12;
+
+                Stream.Reserve(Capacity);
                 Stream.UseSpan
                 (
+                    Capacity,
                     Span,
                     static (Target, Source) =>
                     {
@@ -741,8 +806,12 @@ namespace Zion.Serialization.ADF
             }
             else
             {
+                int Capacity = Span.Length * 12;
+
+                Stream.Reserve(Capacity);
                 Stream.UseSpan
                 (
+                    Capacity,
                     Span,
                     static (Target, Source) =>
                     {
@@ -771,8 +840,12 @@ namespace Zion.Serialization.ADF
             }
             else
             {
+                int Capacity = Span.Length * 8;
+
+                Stream.Reserve(Capacity);
                 Stream.UseSpan
                 (
+                    Capacity,
                     Span,
                     static (Target, Source) =>
                     {
@@ -801,8 +874,12 @@ namespace Zion.Serialization.ADF
             }
             else
             {
+                int Capacity = Span.Length * 12;
+
+                Stream.Reserve(Capacity);
                 Stream.UseSpan
                 (
+                    Capacity,
                     Span,
                     static (Target, Source) =>
                     {
@@ -826,35 +903,39 @@ namespace Zion.Serialization.ADF
 
         private static void Write<T>(ADFWritingContext Context, StreamGroup Target, object? Collection, ReadOnlySpan<T> Span, WriteAction<T> WriteAction)
         {
+            if (TryWriteReference(Context, Target, Collection))
+            {
+                return;
+            }
+
+            var Stream = GetSubStream(Context, Target, Span.Length, 0);
+            WriteAction(Stream, Span, Context.Compression);
+            Target.Add(Stream);
+        }
+
+        private static bool TryWriteReference(ADFWritingContext Context, StreamGroup Target, object? Collection)
+        {
             if (Collection is not null
                 && Context.Registries.References.TryGetReference(Collection, out var Reference))
             {
                 Target.BaseStream.WriteCompressed(Context, Reference.Id);
+                return true;
             }
-            else
-            {
-                var Link = Reference.CreateNewReference(Target.ChildsLength);
-                var Stream = Context.Arena.GetStream(Span.Length * sizeof(bool));//TODO: Заменить на SizeOf(T)
+            return false;
+        }
 
-                Stream.Write(Span.Length);
+        private static ArenaStream GetSubStream(ADFWritingContext Context, StreamGroup Target, int SpanLength, int Capacity)
+        {
+            var Link = Reference.CreateNewReference(Target.ChildsLength);
+            var Stream = Context.Arena.GetStream(Capacity + 4);
 
-                if (Context.Compression)
-                {
-                    Target.BaseStream.Write7BitEncodedUInt64(Link);
-                    WriteAction(Stream, Span, true);
-                }
-                else
-                {
-                    Target.BaseStream.Write(Link);
-                    WriteAction(Stream, Span, false);
-                }
+            Target.BaseStream.WriteCompressed(Context, Link);
+            Stream.Write(SpanLength);
 
-                Target.Add(Stream);
-            }
+            return Stream;
         }
 
 
-        //TODO: Проверить обновление длин и Written
         private static void WriteCompressed(ArenaStream Stream, ReadOnlySpan<int> Span)
         {
             var Written = 0;
@@ -872,6 +953,8 @@ namespace Zion.Serialization.ADF
                     {
                         Written += WriteVarInt(ref Unsafe.Add(ref Destination, Written), Value);
                     }
+
+                    State.Written = Written;
                 }
             );
 
@@ -895,6 +978,8 @@ namespace Zion.Serialization.ADF
                     {
                         Written += WriteVarInt(ref Unsafe.Add(ref Destination, Written), Value);
                     }
+
+                    State.Written = Written;
                 }
             );
 
@@ -918,6 +1003,8 @@ namespace Zion.Serialization.ADF
                     {
                         Written += WriteVarInt(ref Unsafe.Add(ref Destination, Written), Value);
                     }
+
+                    State.Written = Written;
                 }
             );
 
@@ -941,6 +1028,8 @@ namespace Zion.Serialization.ADF
                     {
                         Written += WriteVarInt(ref Unsafe.Add(ref Destination, Written), Value);
                     }
+
+                    State.Written = Written;
                 }
             );
 
@@ -1007,19 +1096,21 @@ namespace Zion.Serialization.ADF
 
         private static void WriteCompressed(ArenaStream Stream, ReadOnlySpan<decimal> Span)
         {
+            Stream.Reserve(Span.Length * sizeof(decimal));
+
             int Written = 0;
 
             Stream.UseSpan
             (
                 new NumberSpanState<decimal>(Span, ref Written),
-                static (Target, Source) =>
+                static (Target, State) =>
                 {
                     ref var Destination = ref MemoryMarshal.GetReference(Target);
-                    var Total = 0;
+                    var Written = 0;
 
                     Span<int> Bits = stackalloc int[4];
 
-                    foreach (var Value in Source.Source)
+                    foreach (var Value in State.Source)
                     {
                         decimal.GetBits(Value, Bits);
 
@@ -1032,15 +1123,15 @@ namespace Zion.Serialization.ADF
                         var Scale     = (byte)((Flags >> 16) & 0xFF);
                         var SignScale = (byte)((Sign ? 0x80 : 0) | (Scale & 0x7F));
 
-                        Unsafe.Add(ref Destination, Total++) = SignScale;
+                        Unsafe.Add(ref Destination, Written++) = SignScale;
 
                         var Low64 = Lo | ((ulong)Mid << 32);
 
-                        Total += WriteVarInt(ref Unsafe.Add(ref Destination, Total), Low64);
-                        Total += WriteVarInt(ref Unsafe.Add(ref Destination, Total), Hi);
+                        Written += WriteVarInt(ref Unsafe.Add(ref Destination, Written), Low64);
+                        Written += WriteVarInt(ref Unsafe.Add(ref Destination, Written), Hi);
                     }
 
-                    Source.Written = Total;
+                    State.Written = Written;
                 }
             );
 
@@ -1049,13 +1140,13 @@ namespace Zion.Serialization.ADF
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int WriteVarInt(ref byte Destination, int Value)
+        private static int WriteVarInt(ref byte Destination, int Value)
         {
             return WriteVarInt(ref Destination, (uint)((Value << 1) ^ (Value >> 31)));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int WriteVarInt(ref byte Destination, uint value)
+        private static int WriteVarInt(ref byte Destination, uint value)
         {
             if (value < 0x80)
             {
@@ -1074,7 +1165,7 @@ namespace Zion.Serialization.ADF
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int WriteVarInt(ref byte Destination, ulong Value)
+        private static int WriteVarInt(ref byte Destination, ulong Value)
         {
             if (Value < 0x80)
             {
@@ -1093,7 +1184,7 @@ namespace Zion.Serialization.ADF
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int WriteVarInt(ref byte Destination, long Value)
+        private static int WriteVarInt(ref byte Destination, long Value)
         {
             return WriteVarInt(ref Destination, (ulong)((Value << 1) ^ (Value >> 63)));
         }
