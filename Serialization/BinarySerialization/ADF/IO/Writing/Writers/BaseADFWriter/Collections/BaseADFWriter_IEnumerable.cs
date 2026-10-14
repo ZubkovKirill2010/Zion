@@ -290,8 +290,10 @@ namespace Zion.Serialization.ADF
             );
         }
 
+        //!!!
         private void Write(string Name, IEnumerator<string> Enumerator)
         {
+            //TODO: Вынести общую логику
             ThrowIfDisposed();
 
             var Registry = StringRegistry;
@@ -356,8 +358,10 @@ namespace Zion.Serialization.ADF
             );
         }
 
+        //!!!
         private void Write(string Name, IEnumerator<BigInteger> Enumerator)
         {
+            //TODO: Вынести общую логику
             ThrowIfDisposed();
 
             var NameId = StringRegistry.GetOrAdd(Name);

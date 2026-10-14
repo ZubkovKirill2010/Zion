@@ -179,7 +179,6 @@ namespace Zion.Serialization.ADF
             Write(Context, Target, Collection, Span, Write);
         }
 
-
         public static void Write(ADFWritingContext Context, StreamGroup Target, object? Collection, ReadOnlySpan<System.Numerics.Vector2> Span)
         {
             Write(Context, Target, Collection, Span, Write);
@@ -191,9 +190,9 @@ namespace Zion.Serialization.ADF
         }
 
 
-
         public static void Write(ArenaStream Stream, ReadOnlySpan<bool> Span, bool Compression)
         {
+            //TODO: Выделать только нужный размер потока (Count -> ByteCount)
             Stream.UseSpan
             (
                 Span,
@@ -835,7 +834,7 @@ namespace Zion.Serialization.ADF
             else
             {
                 var Link = Reference.CreateNewReference(Target.ChildsLength);
-                var Stream = Context.Arena.GetStream(Span.Length * sizeof(bool));
+                var Stream = Context.Arena.GetStream(Span.Length * sizeof(bool));//TODO: Заменить на SizeOf(T)
 
                 Stream.Write(Span.Length);
 
@@ -855,6 +854,7 @@ namespace Zion.Serialization.ADF
         }
 
 
+        //TODO: Проверить обновление длин и Written
         private static void WriteCompressed(ArenaStream Stream, ReadOnlySpan<int> Span)
         {
             var Written = 0;

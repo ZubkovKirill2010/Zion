@@ -161,7 +161,7 @@
                 return Existing;
             }
 
-            var Format = LayerInfo is AutoType<T> Auto
+            var Format = LayerInfo is AutoType<T> Auto //TODO: Сломается, если Type : T
                 ? DataFormatBuilder.Build(Auto.Schema, BaseFormatId, Context)
                 : DataFormatBuilder.BuildDeferred(ChildType, BaseFormatId, FormatRegistry, TypeAssociation);
             
