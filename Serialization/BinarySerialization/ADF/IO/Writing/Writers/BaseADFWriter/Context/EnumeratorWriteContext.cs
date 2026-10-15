@@ -6,10 +6,10 @@
         public readonly uint FormatId;
 
         private readonly IEnumerator<T> Enumerator;
-        private readonly WriteAction<T> Writing;
+        private readonly StreamWriteAction<T> Writing;
 
 
-        public EnumeratorWriteContext(string Name, uint FormatId, IEnumerator<T> Enumerator, WriteAction<T> Writing)
+        public EnumeratorWriteContext(string Name, uint FormatId, IEnumerator<T> Enumerator, StreamWriteAction<T> Writing)
         {
             this.Name = Name.NotNull();
             this.FormatId = FormatId | ADFPrimitives.Sequence;

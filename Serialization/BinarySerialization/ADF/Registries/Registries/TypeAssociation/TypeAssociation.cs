@@ -1,8 +1,10 @@
 ﻿namespace Zion.Serialization.ADF
 {
-    internal sealed class TypeAssociation//TODO: Do : IRegistry
+    internal sealed class TypeAssociation : IWritableRegistry
     {
         private readonly Dictionary<Type, uint> Data;
+
+        public bool IsChanged => false;
 
 
         public TypeAssociation()
@@ -12,6 +14,13 @@
 
 
         public uint this[Type Type] => Data[Type];
+
+
+        public void Write(ADFObjectWriter Writer)
+        {
+            //TODO: TypeAssociation.Write
+            //Update IsChaned
+        }
 
 
         public bool TryGetFormatId(Type Type, out uint FormatId)

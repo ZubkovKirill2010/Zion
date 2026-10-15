@@ -3,7 +3,8 @@
     internal readonly struct Reference
     {
         //{ [Offset ][1] } - Writed
-        //{ [CacheUd][0] } - Cached
+        //{ [CacheUd][0] } - Cached (>= 2)
+        //{ 0 } - Null
 
         public readonly ulong Id;
         public readonly DataDefinition Definition;

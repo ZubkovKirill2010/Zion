@@ -40,7 +40,7 @@
             {
                 return new
                 (
-                    Context.TypeAssociation.GetOrAdd
+                    Context.Registries.TypeAssociation.GetOrAdd
                     (
                         Type,
                         () => Context.Registries.FormatRegistry.Add(DataFormat.GetEnumFormat<T>())
@@ -154,14 +154,14 @@
         private static uint BuildChildFormat<T>(ADFWritingContext Context, Type ChildType, uint BaseFormatId, ILayerWriteInfo LayerInfo)
         {
             var FormatRegistry = Context.Registries.FormatRegistry;
-            var TypeAssociation = Context.TypeAssociation;
+            var TypeAssociation = Context.Registries.TypeAssociation;
 
             if (TypeAssociation.TryGetFormatId(ChildType, out var Existing))
             {
                 return Existing;
             }
 
-            var Format = LayerInfo is AutoType<T> Auto //TODO: Сломается, если Type : T
+            var Format = LayerInfo is IAutoType<T> Auto
                 ? DataFormatBuilder.Build(Auto.Schema, BaseFormatId, Context)
                 : DataFormatBuilder.BuildDeferred(ChildType, BaseFormatId, FormatRegistry, TypeAssociation);
             
@@ -176,12 +176,12 @@
         #region PrivateMethods
         private static uint GetOrAddDeferred(ADFWritingContext Context, Type Type)
         {
-            return Context.TypeAssociation.GetOrAddDeferred(Type, Context.Registries.FormatRegistry);
+            return Context.Registries.TypeAssociation.GetOrAddDeferred(Type, Context.Registries.FormatRegistry);
         }
 
         private static uint GetFormatId(ADFWritingContext Context, TypeSchema Schema, Type Type)
         {
-            var TypeAssociation = Context.TypeAssociation;
+            var TypeAssociation = Context.Registries.TypeAssociation;
 
             uint Create()
             {

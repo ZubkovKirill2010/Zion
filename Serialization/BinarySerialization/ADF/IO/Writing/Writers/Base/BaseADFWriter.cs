@@ -12,9 +12,9 @@
         protected ADFWritingOptions Options => Context.Options;
 
         private protected WritableRegistries   Registries => Context.Registries;
-        private protected TypeAssociation TypeAssociation => Context.TypeAssociation;
         private protected WriteStrategies WriteStrategies => Context.WriteStrategies;
 
+        private protected TypeAssociation TypeAssociation => Registries.TypeAssociation;
         private protected ReferenceIdsRegistry References => Registries.References;
         private protected DataRegistry       DataRegistry => Registries.DataRegistry;
         private protected StringIdRegistry StringRegistry => Registries.StringRegistry;
@@ -121,6 +121,24 @@
 
             Strategy.Write(Context, Target, Value);
             OnWrited(Name, in NameId, in FormatId);
+        }
+
+        internal void WriteStrings(string Name, List<string> Strings)
+        {
+            var Span = Strings.AsSpan();
+
+            var NameId = StringRegistry.GetOrAdd(Name);
+            var Target = GetWriteTarget(Name, in NameId, ADFPrimitives.RawString | ADFPrimitives.Sequence);
+            var Stream = SequenceWriteHelper.GetSubStream(Context, Target, Span.Length, Span.Length * 64);
+
+            foreach (var String in Span)
+            {
+                Stream.Write(String);
+            }
+
+            Stream.TrimExcess();
+
+            Target.Add(Stream);
         }
 
         #endregion

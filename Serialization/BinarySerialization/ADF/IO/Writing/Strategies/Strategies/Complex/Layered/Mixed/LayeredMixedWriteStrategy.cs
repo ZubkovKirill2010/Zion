@@ -18,7 +18,7 @@
                 Context,
                 Target,
                 Layers,
-                Context.TypeAssociation[Value!.GetType()]
+                Context.Registries.TypeAssociation[Value!.GetType()]
             );
             Writer.Serialize(Value);
         }

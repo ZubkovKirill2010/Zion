@@ -4,7 +4,6 @@
     {
         public readonly Arena<byte>        Arena;
         public readonly ADFWritingOptions  Options;
-        public readonly TypeAssociation    TypeAssociation;
         public readonly WritableRegistries Registries;
         public readonly WriteStrategies    WriteStrategies;
 
@@ -19,7 +18,6 @@
             Compression = Options.Compression;
             Arena           = new(GetArenaCapacity(Options.MinPageSize));
             Registries      = new();
-            TypeAssociation = new();
             WriteStrategies = new();
         }
 

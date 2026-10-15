@@ -577,6 +577,11 @@ namespace Zion
             //TODO: ArenaStraem.TrimExcess
         }
 
+        public void TrimExcess()
+        {
+            TrimExcess(Length);
+        }
+
 
         private void UpdateLengthFromPosition(int Position)
         {

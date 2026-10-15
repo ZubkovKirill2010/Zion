@@ -71,6 +71,8 @@ namespace Zion.Serialization.ADF
         public const uint Vector3    = 22;
         public const uint Vector3Int = 23;
 
+        public const uint RawString = 24;
+
         public const uint Object = 127;
 
         #endregion

@@ -30,7 +30,6 @@
 
   <ItemGroup>
     <Folder Include="Serialization\BinarySerialization\ADF\IO\Reading\Context\" />
-    <Folder Include="Serialization\BinarySerialization\ADF\IO\Writing\Strategies\Strategies\Complex\" />
     <Folder Include="Serialization\BinarySerialization\ADF\IO\Writing\Strategies\Management\" />
     <Folder Include="Serialization\BinarySerialization\ADF\IO\Writing\Helpers\" />
     <Folder Include="Serialization\BinarySerialization\ADF\Registries\Containers\Containers\" />

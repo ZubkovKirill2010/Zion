@@ -175,6 +175,20 @@ namespace Zion.Serialization.ADF
             Write(Context, Target, Collection, Span, Write);
         }
 
+        public static void Write<T>(ADFWritingContext Context, StreamGroup Target, object? Collection, ReadOnlySpan<T> Span)
+        {
+            if (TryWriteReference(Context, Target, Collection))
+            {
+                return;
+            }
+
+            var Stream = GetSubStream(Context, Target, Span.Length, Span.Length * 5);
+
+            //TODO: SequenceWriteHelper.Write<T>
+
+            Target.Add(Stream);
+        }
+
 
         public static void Write(ArenaStream Stream, ReadOnlySpan<bool> Span, bool Compression)
         {
@@ -901,7 +915,7 @@ namespace Zion.Serialization.ADF
         }
 
 
-        private static void Write<T>(ADFWritingContext Context, StreamGroup Target, object? Collection, ReadOnlySpan<T> Span, WriteAction<T> WriteAction)
+        public static void Write<T>(ADFWritingContext Context, StreamGroup Target, object? Collection, ReadOnlySpan<T> Span, StreamWriteAction<T> WriteAction)
         {
             if (TryWriteReference(Context, Target, Collection))
             {
@@ -913,7 +927,7 @@ namespace Zion.Serialization.ADF
             Target.Add(Stream);
         }
 
-        private static bool TryWriteReference(ADFWritingContext Context, StreamGroup Target, object? Collection)
+        public static bool TryWriteReference(ADFWritingContext Context, StreamGroup Target, object? Collection)
         {
             if (Collection is not null
                 && Context.Registries.References.TryGetReference(Collection, out var Reference))
@@ -924,7 +938,7 @@ namespace Zion.Serialization.ADF
             return false;
         }
 
-        private static ArenaStream GetSubStream(ADFWritingContext Context, StreamGroup Target, int SpanLength, int Capacity)
+        public static ArenaStream GetSubStream(ADFWritingContext Context, StreamGroup Target, int SpanLength, int Capacity)
         {
             var Link = Reference.CreateNewReference(Target.ChildsLength);
             var Stream = Context.Arena.GetStream(Capacity + 4);

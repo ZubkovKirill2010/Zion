@@ -21,7 +21,7 @@
                 Target.WriteCompressed
                 (
                     Context,
-                    Context.TypeAssociation.GetOrAddDeferred(ObjectType, Context.Registries.FormatRegistry)
+                    Context.Registries.TypeAssociation.GetOrAddDeferred(ObjectType, Context.Registries.FormatRegistry)
                 );
             }
         }

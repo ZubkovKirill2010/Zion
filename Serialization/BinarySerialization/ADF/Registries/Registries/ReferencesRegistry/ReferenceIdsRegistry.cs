@@ -7,7 +7,7 @@
         private readonly Dictionary<object, Reference> References; //Optimize: Заменить на слабую ссылку
         private readonly List<Reference> NewItems;
 
-        private ulong LastId = 1UL << 63 | 2; //TODO: Исправить начальный Id
+        private ulong LastId = 2;
 
         public bool IsChanged => NewItems.Count > 0;
 

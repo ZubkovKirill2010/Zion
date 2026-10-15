@@ -1,4 +1,5 @@
 ﻿using System.Numerics;
+using System.Xml.Linq;
 using Zion.Vectors;
 using Vector2 = Zion.Vectors.Vector2;
 using Vector3 = Zion.Vectors.Vector3;
@@ -448,51 +449,23 @@ namespace Zion.Serialization.ADF
 
         private void Write<T>(string Name, object? Collection, ReadOnlySpan<T> Span)
         {
-            ThrowIfDisposed();
+            var FormatId = TypeAssociation.GetOrAddDeferred(typeof(T), FormatRegistry);
 
-            var Context = this.Context;
-
-            var Type   = typeof(T);
-            var NameId = StringRegistry.GetOrAdd(Name.NotNull());
-
-            if (Collection is not null
-                && Context.Registries.References.TryGetReference(Collection, out var Reference))
-            {
-                var FormatId = Context.TypeAssociation[Collection.GetType()];
-                var Target = GetWriteTarget(Name, in NameId, in FormatId);
-
-                Target.BaseStream.WriteCompressed(Context, Reference.Id);
-                
-                OnWrited(Name, in NameId, in FormatId);
-            }
-            else
-            {
-                //TODO: Cache reference
-
-                var Entry = Context.WriteStrategies.GetEntry<T>(Context, Type);
-                var FormatId = Entry.FormatId | ADFPrimitives.Sequence;
-                var Strategy = Entry.Strategy;
-
-                var Target = GetWriteTarget(Name, in NameId, in FormatId);
-
-                foreach (var Item in Span)
-                {
-                    Strategy.Write(Context, Target, Item);
-                }
-
-                OnWrited(Name, in NameId, in FormatId);
-            }
+            WriteSpan
+            (
+                Name, FormatId, Collection,
+                Span, SequenceWriteHelper.Write
+            );
         }
 
 
-        private void WriteSpan<T>(string Name, uint FormatId, object? Collection, ReadOnlySpan<T> Span, Action<ADFWritingContext, StreamGroup, object?, ReadOnlySpan<T>> WriteAction)
+        private void WriteSpan<T>(string Name, uint FormatId, object? Collection, ReadOnlySpan<T> Span, SequenceWriteAction<T> WriteAction)
         {
             ThrowIfDisposed();
 
             var Context = this.Context;
-
-            var NameId = Context.Registries.StringRegistry.GetOrAdd(Name);
-            var Target = GetWriteTarget(Name, in NameId, in FormatId);
+            var NameId  = Context.Registries.StringRegistry.GetOrAdd(Name);
+            var Target  = GetWriteTarget(Name, in NameId, in FormatId);
 
             WriteAction(Context, Target, Collection, Span);
 

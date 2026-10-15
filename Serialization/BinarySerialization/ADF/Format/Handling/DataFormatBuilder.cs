@@ -40,7 +40,7 @@
             return Build
             (
                 Schema,
-                GetBaseFormatId(Schema.Type, Context.Registries.FormatRegistry, Context.TypeAssociation),
+                GetBaseFormatId(Schema.Type, Context.Registries.FormatRegistry, Context.Registries.TypeAssociation),
                 Context
             );
         }
@@ -48,9 +48,10 @@
         public static DataFormat Build(TypeSchema Schema, uint BaseFormatId, ADFWritingContext Context)
         {
             var Type = Schema.Type;
-            var FormatRegistry = Context.Registries.FormatRegistry;
-            var StringRegistry = Context.Registries.StringRegistry;
-            var TypeAssociation = Context.TypeAssociation;
+            var Registries = Context.Registries;
+            var FormatRegistry = Registries.FormatRegistry;
+            var StringRegistry = Registries.StringRegistry;
+            var TypeAssociation = Registries.TypeAssociation;
 
             return new DataFormat
             (
