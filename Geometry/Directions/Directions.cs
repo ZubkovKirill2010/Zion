@@ -1,4 +1,4 @@
-﻿namespace Zion.Vectors
+﻿namespace Zion.Geometry
 {
     public enum HorizontalDirection
     {

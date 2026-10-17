@@ -2,17 +2,17 @@
 using Zion.Serialization;
 using Zion.Serialization.NSD;
 
-namespace Zion.Vectors
+namespace Zion.Geometry
 {
     [Serializable]
-    public readonly struct Vector2IntRange : INSDSizable<Vector2IntRange>, IRange<Vector2Int>, IEqualityComparer<Vector2IntRange>
+    public readonly struct Vector3Range : INSDSizable<Vector3Range>, IRange<Vector3>, IEqualityComparer<Vector3Range>
     {
-        public int BinarySize => 16;
+        public int BinarySize => 24;
 
-        public Vector2Int Start { get; }
-        public Vector2Int End { get; }
+        public Vector3 Start { get; }
+        public Vector3 End { get; }
 
-        public Vector2IntRange(Vector2Int Start, Vector2Int End)
+        public Vector3Range(Vector3 Start, Vector3 End)
         {
             ArgumentOutOfRangeException.ThrowIf(!(Start < End), nameof(Start), $"(Start={Start}) can not >= End(={End})");
 
@@ -33,43 +33,43 @@ namespace Zion.Vectors
 
         public override bool Equals([NotNullWhen(true)] object? Object)
         {
-            return Object is Vector2IntRange Range && this == Range;
+            return Object is Vector3Range Range && this == Range;
         }
 
 
-        public static bool operator ==(Vector2IntRange A, Vector2IntRange B)
+        public static bool operator ==(Vector3Range A, Vector3Range B)
         {
             return A.Start == B.Start && A.End == B.End;
         }
 
-        public static bool operator !=(Vector2IntRange A, Vector2IntRange B)
+        public static bool operator !=(Vector3Range A, Vector3Range B)
         {
             return A.Start != B.Start || A.End != B.End;
         }
 
 
-        public bool Equals(Vector2IntRange A, Vector2IntRange B)
+        public bool Equals(Vector3Range A, Vector3Range B)
         {
             return A == B;
         }
 
-        public int GetHashCode(Vector2IntRange Object)
+        public int GetHashCode(Vector3Range Object)
         {
             return Object.GetHashCode();
         }
 
 
-        public bool IsInside(Vector2Int Value)
+        public bool IsInside(Vector3 Value)
         {
             return Value >= Start && Value < End;
         }
 
-        public bool IsInside<R>(R Range) where R : IRange<Vector2Int>
+        public bool IsInside<R>(R Range) where R : IRange<Vector3>
         {
             return IsInside(Range.Start) && Range.End <= End;
         }
 
-        public bool Overlap<R>(R Range) where R : IRange<Vector2Int>
+        public bool Overlap<R>(R Range) where R : IRange<Vector3>
         {
             return Range.End > Start && Range.Start < End;
         }
@@ -81,12 +81,12 @@ namespace Zion.Vectors
             Writer.Write(End);
         }
 
-        public static Vector2IntRange Read(BinaryReader Reader)
+        public static Vector3Range Read(BinaryReader Reader)
         {
-            return new Vector2IntRange
+            return new Vector3Range
             (
-                Reader.Read<Vector2Int>(),
-                Reader.Read<Vector2Int>()
+                Reader.Read<Vector3>(),
+                Reader.Read<Vector3>()
             );
         }
     }

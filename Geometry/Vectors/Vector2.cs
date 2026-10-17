@@ -2,7 +2,7 @@
 using System.Runtime.Serialization;
 using Zion.Serialization.NSD;
 
-namespace Zion.Vectors
+namespace Zion.Geometry
 {
     [Serializable]
     public struct Vector2 : INSDSizable<Vector2>, IEquatable<Vector2>, IEqualityComparer<Vector2>, ISerializable, IRandomizable<Vector2>
@@ -44,10 +44,10 @@ namespace Zion.Vectors
         #endregion
 
         #region Constructors
-        public Vector2(float Axis)
+        public Vector2(float Axes)
         {
-            X = Axis;
-            Y = Axis;
+            X = Axes;
+            Y = Axes;
         }
 
         public Vector2(float X, float Y)

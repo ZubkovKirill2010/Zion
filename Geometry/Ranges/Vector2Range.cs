@@ -2,7 +2,7 @@
 using Zion.Serialization;
 using Zion.Serialization.NSD;
 
-namespace Zion.Vectors
+namespace Zion.Geometry
 {
     [Serializable]
     public readonly struct Vector2Range : INSDSizable<Vector2Range>, IRange<Vector2>, IEqualityComparer<Vector2Range>

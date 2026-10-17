@@ -1,4 +1,4 @@
-﻿using Zion.Vectors;
+﻿using Zion.Geometry;
 
 namespace Zion.STP.Dynamic
 {

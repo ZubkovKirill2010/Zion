@@ -23,6 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Geometry\Extensions\" />
     <Folder Include="STP\Dynamic\Tokens\Container\Base\" />
     <Folder Include="Extensions\Collections\Linear\" />
     <Folder Include="Extensions\Collections\Dictionaries\" />
